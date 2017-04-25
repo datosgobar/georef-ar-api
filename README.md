@@ -33,9 +33,11 @@ Salida: JSON con el siguiente formato.
             "provincia": "Capital Federal",
             "tipo_resultado": "puerta"
         },
-        ...
-    ]
-    "error": null	// Sólo presente cuando el estado != OK.
+        {
+            "..."
+        },
+    ],
+    "error": "null"
 }
 ```
 
@@ -51,7 +53,7 @@ Entrada:
         "Av. Roque Sáenz Peña 788, Buenos Aires",
         "Calle Principal 123, 1425 CABA",
         "Esmeralda 1000, Capital Federal",
-        ...
+        "..."
     ]
 }
 ```
@@ -65,8 +67,10 @@ Salida: JSON con el siguiente formato (provisorio)
             "id": 1,
             "nombre": "Roque Sáenz Peña",
         },
-        ...
-    ]
+        {
+            "..."
+        }
+    ],
     "direcciones": [
         {
             "id_original": "1",
@@ -80,14 +84,16 @@ Salida: JSON con el siguiente formato (provisorio)
             "provincia": "Capital Federal",
             "tipo_resultado": "puerta"
         },
-        ...
-    ]
-    "error": null	// Sólo presente cuando el estado != OK.
+        {
+            "..."
+        },
+    ],
+    "error": "null"
 }
 ```
 
 ### Geocodificar dirección
-**GET** /api/geocodificar?
+**GET** /api/geocodificar
 
 
 ## Contacto
