@@ -15,3 +15,18 @@ class HouseNumberTest(TestCase):
     def test_normalize_when_number_not_present(self):
         """La calle no tiene numeración en la base de datos."""
         pass
+
+
+class RequestStatusTest(TestCase):
+    """Pruebas de los distintos estados de respuesta para un request."""
+    def test_valid_request_with_results(self):
+        """Request válido con resultados. Retorna OK."""
+        pass
+
+    def test_valid_request_with_no_results(self):
+        """Request válido sin resultados. Retorna SIN_RESULTADOS."""
+        pass
+
+    def test_invalid_request(self):
+        """Request inválido. Retorna INVALIDO."""
+        pass
