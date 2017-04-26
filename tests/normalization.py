@@ -17,6 +17,17 @@ class HouseNumberTest(TestCase):
         pass
 
 
+class MatchResultsTest(TestCase):
+    """Pruebas para casos de normalización con uno o más resultados."""
+    def test_input_matches_single_address(self):
+        """La dirección recibida coincide con una única dirección."""
+        pass
+
+    def test_input_matches_many_addresses(self):
+        """La dirección recibida puede ser una de varias al normalizar."""
+        pass
+
+
 class RequestStatusTest(TestCase):
     """Pruebas de los distintos estados de respuesta para un request."""
     def test_valid_request_with_results(self):
