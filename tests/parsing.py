@@ -35,3 +35,30 @@ class InputParsingTest(TestCase):
     def test_query_with_fields_not_provided(self):
         """El parámetro 'campos' no está en el request."""
         pass
+
+
+class ResultsParsingTest(TestCase):
+    """Pruebas de filtrado de resultados según parámetos de entrada."""
+    def test_result_filtered_by_locality_only(self):
+        """Devuelve todas las direcciones para una localidad dada."""
+        pass
+
+    def test_result_filtered_by_locality_with_address(self):
+        """Busca y normaliza una dirección para una localidad dada."""
+        pass
+
+    def test_result_filtered_by_state_only(self):
+        """Devuelve todas las direcciones para una provincia dada."""
+        pass
+
+    def test_result_filtered_by_state_with_address(self):
+        """Busca y normaliza una dirección para una provincia dada."""
+        pass
+
+    def test_result_has_fields_requested(self):
+        """Devuelve resultado con los 'campos' especificados en el request."""
+        pass
+
+    def test_result_has_max_requested_or_less(self):
+        """Devuelve resultados hasta la cantidad especificada en 'max'."""
+        pass
