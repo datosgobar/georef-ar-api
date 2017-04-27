@@ -8,7 +8,7 @@ API del servicio de normalización y geocodificación para direcciones de Argent
 ## Uso de georef-api
 
 ### Normalizar dirección
-**GET**	/api/normalizar?direccion={una_direccion}
+**GET**	/api/buscar?direccion={una_direccion}
 
 Entrada:
 - **direccion**: la dirección que se quiere normalizar; debería seguir cierto formato.
@@ -23,7 +23,7 @@ Salida: JSON con el siguiente formato.
     "estado": "OK|SIN_RESULTADOS|INVALIDO",
     "direcciones": [
         {
-            "direccion": "dirección completa normalizada",
+            "descripcion": "dirección completa normalizada",
             "tipo": "Avenida",
             "nombre": "Presidente Roque Sáenz Peña",
             "altura": 250,
@@ -40,6 +40,70 @@ Salida: JSON con el siguiente formato.
     "error": "null"
 }
 ```
+
+### Ejemplos
+
+Un cliente quiere saber a qué localidad corresponde una dirección dada.
+En este caso, consumiría la API de búsqueda pasando los parámetros `dirección` y `provincia`.
+Si la dirección existe, debería recibir uno o más resultados.
+
+**GET** `/api/buscar?direccion=Echeverria 4497&provincia=Buenos Aires`
+
+```json
+{
+    "estado": "OK",
+    "direcciones": [
+        {
+            "descripcion": "Esteban Echeverría 4497, 1757 Gregorio Laferrere, Buenos Aires",
+            "tipo": "Calle",
+            "nombre": "Esteban Echeverría",
+            "altura": 4497,
+            "codigo_postal": 1757,
+            "localidad": "Gregorio Laferrere",
+            "partido": "La Matanza",
+            "provincia": "Buenos Aires",
+            "tipo_resultado": "puerta"
+        },
+        {
+            "descripcion": "Esteban Echeverría 4497, 1706 Villa Sarmiento, Buenos Aires",
+            "tipo": "Calle",
+            "nombre": "Esteban Echeverría",
+            "altura": 4497,
+            "codigo_postal": 1706,
+            "localidad": "Villa Sarmiento",
+            "partido": "Morón",
+            "provincia": "Buenos Aires",
+            "tipo_resultado": "puerta"
+        },
+        {
+            "..."
+        },
+    ],
+}
+```
+
+Un cliente desea obtener todas las calles (normalizadas) de una localidad, sin importarle el resto de los campos.
+En este caso, consumiría la API de búsqueda pasando los parámetros `localidad` y `campos`.
+
+**GET** `/api/buscar?direccion=""&localidad=Bariloche&campos=direccion,tipo_resultado`
+
+```json
+{
+    "estado": "OK",
+    "direcciones": [
+        {
+            "descripcion": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+        },
+        {
+            "descripcion": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
+        },
+        {
+            "..."
+        },
+    ],
+}
+```
+
 
 ### Normalizar lote de direcciones
 **POST** /api/normalizar
@@ -74,7 +138,7 @@ Salida: JSON con el siguiente formato (provisorio)
     "direcciones": [
         {
             "id_original": "1",
-            "direccion": "dirección completa normalizada",
+            "descripcion": "dirección completa normalizada",
             "tipo": "Avenida",
             "nombre": "Presidente Roque Sáenz Peña",
             "altura": 250,
