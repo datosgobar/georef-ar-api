@@ -85,7 +85,7 @@ Si la dirección existe, debería recibir uno o más resultados.
 Un cliente desea obtener todas las calles (normalizadas) de una localidad, sin importarle el resto de los campos.
 En este caso, consumiría la API de búsqueda pasando los parámetros `localidad` y `campos`.
 
-**GET** `/api/buscar?direccion=""&localidad=Bariloche&campos=direccion,tipo_resultado`
+**GET** `/api/buscar?direccion=""&localidad=Bariloche&campos=descripcion`
 
 ```json
 {
@@ -114,7 +114,7 @@ Entrada:
 ```json
 {
     "direcciones": [
-        "Av. Roque Sáenz Peña 788, Buenos Aires",
+        "Roque Sáenz Peña 788, Buenos Aires",
         "Calle Principal 123, 1425 CABA",
         "Esmeralda 1000, Capital Federal",
         "..."
@@ -129,7 +129,7 @@ Salida: JSON con el siguiente formato (provisorio)
     "orginales": [
         {
             "id": 1,
-            "nombre": "Roque Sáenz Peña",
+            "nombre": "Roque Sáenz Peña 788, Buenos Aires",
         },
         {
             "..."
@@ -138,11 +138,11 @@ Salida: JSON con el siguiente formato (provisorio)
     "direcciones": [
         {
             "id_original": "1",
-            "descripcion": "dirección completa normalizada",
+            "descripcion": "Av. Presidente Roque Sáenz Peña 788, 1035 Ciudad Autónoma ...",
             "tipo": "Avenida",
             "nombre": "Presidente Roque Sáenz Peña",
-            "altura": 250,
-            "codigo_postal": 1425,
+            "altura": 788,
+            "codigo_postal": 1035,
             "localidad": "Ciudad Autónoma de Buenos Aires",
             "partido": "Ciudad Autónoma de Buenos Aires",
             "provincia": "Capital Federal",
