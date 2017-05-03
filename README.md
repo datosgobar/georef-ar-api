@@ -7,11 +7,10 @@ API del servicio de normalización y geocodificación para direcciones de Argent
 
 ## Uso de georef-api
 
-### Normalizar dirección
-**GET**	/api/v1.0/normalizador?direccion={una_direccion}
+### Normalizador `/api/v1.0/normalizador`
 
 Entrada:
-- **direccion**: la dirección que se quiere normalizar; debería seguir cierto formato.
+- **direccion**: la dirección que se quiere normalizar (campo obligatorio).
 - localidad: para filtrar por localidad.
 - provincia: para filtrar por provincia.
 - campos: qué campos devolver.
@@ -23,7 +22,7 @@ Salida: JSON con el siguiente formato.
     "estado": "OK|SIN_RESULTADOS|INVALIDO",
     "direcciones": [
         {
-            "descripcion": "dirección completa normalizada",
+            "descripcion": "Avenida Presidente Roque Sáenz Peña 250, 1425 Ciudad ...",
             "tipo": "Avenida",
             "nombre": "Presidente Roque Sáenz Peña",
             "altura": 250,
@@ -47,7 +46,7 @@ Un cliente quiere saber a qué localidad corresponde una dirección dada.
 En este caso, consumiría la API de búsqueda pasando los parámetros `dirección` y `provincia`.
 Si la dirección existe, debería recibir uno o más resultados.
 
-**GET** `/api/v1.0/normalizador?direccion=Echeverria 4497&provincia=Buenos Aires`
+**GET** `/api/v1.0/normalizador?direccion=Echeverria%204497&provincia=Buenos%20Aires`
 
 ```json
 {
@@ -82,35 +81,9 @@ Si la dirección existe, debería recibir uno o más resultados.
 }
 ```
 
+Normalizar lote de direcciones
 
-### Calles
-Retorna todas las calles (normalizadas) de una localidad o provincia.
-Ejemplo: obtener todas las calles de Bariloche.
-
-**GET** `/api/v1.0/calles?localidad=Bariloche`
-
-```json
-{
-    "estado": "OK",
-    "direcciones": [
-        {
-            "descripcion": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
-            "tipo": "Avenida",
-        },
-        {
-            "descripcion": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
-            "tipo": "Calle",
-        },
-        {
-            "..."
-        },
-    ],
-}
-```
-
-
-### Normalizar lote de direcciones
-**POST** /api/v1.0/normalizador
+**POST** `/api/v1.0/normalizador`
 
 Entrada:
 - campos: qué campos devolver.
@@ -126,7 +99,7 @@ Entrada:
 }
 ```
 
-Salida: JSON con el siguiente formato (provisorio)
+Salida: JSON con el siguiente formato
 ```json
 {
     "estado": "OK|SIN_RESULTADOS|INVALIDO",
@@ -160,8 +133,62 @@ Salida: JSON con el siguiente formato (provisorio)
 }
 ```
 
-### Geocodificar dirección
-**GET** /api/v1.0/geocodificador
+### Calles `/api/v1.0/calles`
+Retorna calles (normalizadas) de una localidad o provincia.
+
+Entrada:
+- localidad: para filtrar por localidad.
+- provincia: para filtrar por provincia.
+- tipo: para filtrar por tipo de camino.
+
+Ejemplo: obtener todas las calles de Bariloche.
+
+**GET** `/api/v1.0/calles?localidad=Bariloche`
+
+Salida: JSON con el siguiente formato
+```json
+{
+    "estado": "OK",
+    "calles": [
+        {
+            "id": 1,
+            "descripcion": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+            "tipo": "Avenida",
+        },
+        {
+            "id": 2,
+            "descripcion": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
+            "tipo": "Calle",
+        },
+        {
+            "..."
+        },
+    ],
+}
+```
+
+**GET** `/api/v1.0/calles/{id}`
+
+Retorna detalles de una calle particular.
+
+```json
+{
+    "estado": "OK",
+    "id": 1,
+    "descripcion": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+    "nombre": "12 de Octubre",
+    "tipo": "Avenida",
+    "altura": {
+        "inicial": 1,
+        "final": 99
+    },
+    "localidad": "San Carlos de Bariloche",
+    "provincia": "Río Negro",
+    "geom": "Ax0BF543E..."
+}
+```
+
+### Geocodificador `/api/v1.0/geocodificador`
 
 
 ## Contacto
