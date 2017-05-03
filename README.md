@@ -8,7 +8,7 @@ API del servicio de normalización y geocodificación para direcciones de Argent
 ## Uso de georef-api
 
 ### Normalizar dirección
-**GET**	/api/buscar?direccion={una_direccion}
+**GET**	/api/v1.0/normalizador?direccion={una_direccion}
 
 Entrada:
 - **direccion**: la dirección que se quiere normalizar; debería seguir cierto formato.
@@ -47,7 +47,7 @@ Un cliente quiere saber a qué localidad corresponde una dirección dada.
 En este caso, consumiría la API de búsqueda pasando los parámetros `dirección` y `provincia`.
 Si la dirección existe, debería recibir uno o más resultados.
 
-**GET** `/api/buscar?direccion=Echeverria 4497&provincia=Buenos Aires`
+**GET** `/api/v1.0/normalizador?direccion=Echeverria 4497&provincia=Buenos Aires`
 
 ```json
 {
@@ -82,10 +82,12 @@ Si la dirección existe, debería recibir uno o más resultados.
 }
 ```
 
-Un cliente desea obtener todas las calles (normalizadas) de una localidad, sin importarle el resto de los campos.
-En este caso, consumiría la API de búsqueda pasando los parámetros `localidad` y `campos`.
 
-**GET** `/api/buscar?direccion=""&localidad=Bariloche&campos=descripcion`
+### Calles
+Retorna todas las calles (normalizadas) de una localidad o provincia.
+Ejemplo: obtener todas las calles de Bariloche.
+
+**GET** `/api/v1.0/calles?localidad=Bariloche`
 
 ```json
 {
@@ -93,9 +95,11 @@ En este caso, consumiría la API de búsqueda pasando los parámetros `localidad
     "direcciones": [
         {
             "descripcion": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+            "tipo": "Avenida",
         },
         {
             "descripcion": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
+            "tipo": "Calle",
         },
         {
             "..."
@@ -106,7 +110,7 @@ En este caso, consumiría la API de búsqueda pasando los parámetros `localidad
 
 
 ### Normalizar lote de direcciones
-**POST** /api/normalizar
+**POST** /api/v1.0/normalizador
 
 Entrada:
 - campos: qué campos devolver.
@@ -157,7 +161,7 @@ Salida: JSON con el siguiente formato (provisorio)
 ```
 
 ### Geocodificar dirección
-**GET** /api/geocodificar
+**GET** /api/v1.0/geocodificador
 
 
 ## Contacto
