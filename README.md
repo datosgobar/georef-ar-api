@@ -151,14 +151,14 @@ Salida: JSON con el siguiente formato
     "estado": "OK",
     "calles": [
         {
-            "id": 1,
             "descripcion": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
             "tipo": "Avenida",
+            "uri": ".../api/v1.0/calles/1"
         },
         {
-            "id": 2,
             "descripcion": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
             "tipo": "Calle",
+            "uri": ".../api/v1.0/calles/2"
         },
         {
             "..."
