@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
+import service
 
 
 class HouseNumberTest(TestCase):
@@ -19,9 +20,13 @@ class HouseNumberTest(TestCase):
 
 class MatchResultsTest(TestCase):
     """Pruebas para casos de normalización con uno o más resultados."""
+    def setUp(self):
+        self.app = service.app.test_client()
+
     def test_input_matches_single_address(self):
         """La dirección recibida coincide con una única dirección."""
-        pass
+        result = self.app.get('/api/v1.0/normalizador')
+        assert b'estado' in result.data
 
     def test_input_matches_many_addresses(self):
         """La dirección recibida puede ser una de varias al normalizar."""
