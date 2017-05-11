@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 from service import app, normalizer
-from flask import jsonify, make_response, request
+from flask import request
 
 
-@app.route('/api/v1.0/normalizador', methods=['GET'])
+@app.route('/api/v1.0/normalizador', methods=['GET', 'POST'])
 def get_normalized_data():
-    if 'direccion' not in request.args:
-        return make_response(jsonify(normalizer.REQUEST_INVALID), 400)
-    result = normalizer.process(request)
-    return jsonify(result)
+    return normalizer.process(request)
