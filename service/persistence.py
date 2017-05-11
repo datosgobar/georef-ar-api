@@ -9,9 +9,8 @@ def get_db_connection():
         password='postgres')
 
 
-def query(request):
+def query(address):
     connection = get_db_connection()
-    address = request.args.get('direccion')
     parts = address.split(',')
     with connection.cursor() as cursor:
         query = "SELECT tipo_camino || ' ' || nombre_completo || ', ' \
@@ -28,4 +27,5 @@ def query(request):
         cursor.execute(query)
         results = cursor.fetchall()
         results_list = [{'descripcion': row[0]} for row in results]
+    
     return results_list

@@ -18,7 +18,11 @@ def build_results_from(addresses):
 
 
 def process_get(request):
-    matches = persistence.query(request)
+    if 'direccion' not in request.args:
+        return parser.get_response_for_invalid(request,
+        message='El parámetro direccion es obligatorio')
+    address = request.args.get('direccion')
+    matches = persistence.query(address)#(request)
     results = build_results_from(matches)
     return parser.get_response(results)
 
