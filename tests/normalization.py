@@ -33,9 +33,15 @@ class MatchResultsTest(TestCase):
 
     def test_input_matches_many_addresses(self):
         """La dirección recibida puede ser una de varias al normalizar."""
-        # Prueba provisoria para POST.
-        response = self.app.post('/api/v1.0/normalizador?direccion=TEST')
-        assert 'originales' in json.loads(response.data)
+        addresses = {'direcciones':[
+            'AUSTRIA, BUENOS AIRES',
+            'DIAGONAL NORTE, BUENOS AIRES']}
+        response = self.app.post(
+            '/api/v1.0/normalizador',
+            data=json.dumps(addresses),
+            content_type='application/json')
+        results = json.loads(response.data)
+        assert len(results['direcciones']) == len(results['originales'])
 
 
 class RequestStatusTest(TestCase):
