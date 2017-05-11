@@ -26,9 +26,10 @@ class MatchResultsTest(TestCase):
 
     def test_input_matches_single_address(self):
         """La dirección recibida coincide con una única dirección."""
-        # Prueba provisoria para GET.
-        response = self.app.get('/api/v1.0/normalizador?direccion=TEST')
-        assert 'estado' in json.loads(response.data)
+        endpoint = '/api/v1.0/normalizador?direccion=Austria,Buenos%20Aires'
+        response = self.app.get(endpoint)
+        results = json.loads(response.data)
+        assert results['estado'] == 'OK' and len(results['direcciones']) == 1
 
     def test_input_matches_many_addresses(self):
         """La dirección recibida puede ser una de varias al normalizar."""
