@@ -18,7 +18,12 @@ def query(address, params=None):
     with connection.cursor() as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
-        results_list = [{'descripcion': row[0]} for row in results]
+        results_list = [{
+            'descripcion': row[0],
+            'nombre': row[1],
+            'tipo': row[2],
+            'localidad': row[3],
+            'provincia': row[4]} for row in results]
     return results_list
 
 
@@ -27,7 +32,8 @@ def build_query_for(params):
     localidad = params.get('localidad')
     provincia = params.get('provincia')
     query = "SELECT tipo_camino || ' ' || nombre_completo || ', ' \
-                || localidad || ', ' || provincia AS addr \
+                || localidad || ', ' || provincia AS addr, nombre_completo, \
+                tipo_camino, localidad, provincia \
                 FROM nombre_calles \
                 WHERE nombre_completo ILIKE '%s%%'" % (address)
     if localidad:
@@ -41,8 +47,9 @@ def build_query_for(params):
 def build_query_for_search(address):
     parts = address.split(',')
     query = "SELECT tipo_camino || ' ' || nombre_completo || ', ' \
-                    || localidad || ', ' || provincia AS addr \
-                    FROM nombre_calles "
+                || localidad || ', ' || provincia AS addr, nombre_completo, \
+                tipo_camino, localidad, provincia \
+                FROM nombre_calles "
     if len(parts) > 1:
         query += "WHERE nombre_completo ILIKE '%(road)s%%' \
                 AND localidad ILIKE '%%%(locality)s%%'" % {
