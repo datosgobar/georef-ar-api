@@ -9,23 +9,46 @@ def get_db_connection():
         password='postgres')
 
 
-def query(address):
+def query(address, params=None):
+    if params and (len(params)) > 1:
+        query = build_query_for(params)
+    else:
+        query = build_query_for_search(address)
     connection = get_db_connection()
-    parts = address.split(',')
     with connection.cursor() as cursor:
-        query = "SELECT tipo_camino || ' ' || nombre_completo || ', ' \
-                    || localidad || ', ' || provincia AS addr \
-                    FROM nombre_calles "
-        if len(parts) > 1:
-            query += "WHERE nombre_completo ILIKE '%(road)s%%' \
-                    AND localidad ILIKE '%%%(locality)s%%'" % {
-                        'road': parts[0].strip(),
-                        'locality': parts[1].strip()}
-        else:
-            query += "WHERE nombre_completo ILIKE '%s%%'" % (address)
-        query += " LIMIT 10"
         cursor.execute(query)
         results = cursor.fetchall()
         results_list = [{'descripcion': row[0]} for row in results]
-    
     return results_list
+
+
+def build_query_for(params):
+    address = params.get('direccion')
+    localidad = params.get('localidad')
+    provincia = params.get('provincia')
+    query = "SELECT tipo_camino || ' ' || nombre_completo || ', ' \
+                || localidad || ', ' || provincia AS addr \
+                FROM nombre_calles \
+                WHERE nombre_completo ILIKE '%s%%'" % (address)
+    if localidad:
+        query += " AND localidad ILIKE '%%%s%%'" % (localidad)
+    if provincia:
+        query += " AND provincia ILIKE '%%%s%%'" % (provincia)
+    query += " LIMIT 10"
+    return query
+
+
+def build_query_for_search(address):
+    parts = address.split(',')
+    query = "SELECT tipo_camino || ' ' || nombre_completo || ', ' \
+                    || localidad || ', ' || provincia AS addr \
+                    FROM nombre_calles "
+    if len(parts) > 1:
+        query += "WHERE nombre_completo ILIKE '%(road)s%%' \
+                AND localidad ILIKE '%%%(locality)s%%'" % {
+                    'road': parts[0].strip(),
+                    'locality': parts[1].strip()}
+    else:
+        query += "WHERE nombre_completo ILIKE '%s%%'" % (address)
+    query += " LIMIT 10"
+    return query
