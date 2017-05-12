@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
+import json
+import service
 
 
 class InputParsingTest(TestCase):
@@ -39,13 +41,19 @@ class InputParsingTest(TestCase):
 
 class ResultsParsingTest(TestCase):
     """Pruebas de filtrado de resultados según parámetos de entrada."""
+    def setUp(self):
+        self.app = service.app.test_client()
+
     def test_result_filtered_by_locality_only(self):
         """Devuelve todas las direcciones para una localidad dada."""
         pass
 
     def test_result_filtered_by_locality_with_address(self):
         """Busca y normaliza una dirección para una localidad dada."""
-        pass
+        endpoint = '/api/v1.0/normalizador?direccion=Austria&localidad=Buenos'
+        response = self.app.get(endpoint)
+        results = json.loads(response.data)
+        assert len(results['direcciones']) == 1
 
     def test_result_filtered_by_state_only(self):
         """Devuelve todas las direcciones para una provincia dada."""
@@ -53,7 +61,10 @@ class ResultsParsingTest(TestCase):
 
     def test_result_filtered_by_state_with_address(self):
         """Busca y normaliza una dirección para una provincia dada."""
-        pass
+        endpoint = '/api/v1.0/normalizador?direccion=Austria&provincia=Buenos'
+        response = self.app.get(endpoint)
+        results = json.loads(response.data)
+        assert len(results['direcciones']) > 1
 
     def test_result_has_fields_requested(self):
         """Devuelve resultado con los 'campos' especificados en el request."""
