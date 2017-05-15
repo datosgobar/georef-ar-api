@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+import os
 import psycopg2
 
 
 def get_db_connection():
     return psycopg2.connect(
-        dbname='georef',
-        user='postgres',
-        password='postgres')
+        dbname=os.environ.get('POSTGRES_DBNAME'),
+        user=os.environ.get('POSTGRES_USER'),
+        password=os.environ.get('POSTGRES_PASSWORD'))
 
 
 def query(address, params=None):
