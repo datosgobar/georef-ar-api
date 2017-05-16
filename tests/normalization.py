@@ -6,9 +6,15 @@ import service
 
 class HouseNumberTest(TestCase):
     """Pruebas relacionadas con la altura de una calle."""
+    def setUp(self):
+        self.app = service.app.test_client()
+
     def test_normalize_when_number_in_range(self):
         """La altura está en el rango de la calle en la base de datos."""
-        pass
+        endpoint = '/api/v1.0/normalizador?direccion=Austria%209,Buenos%20Aires'
+        response = self.app.get(endpoint)
+        results = json.loads(response.data)
+        assert len(results['direcciones']) == 1
 
     def test_normalize_when_number_out_of_range(self):
         """La altura no está en el rango de la calle en la base de datos."""
