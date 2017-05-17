@@ -20,14 +20,7 @@ def query(address, params=None):
     with connection.cursor() as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
-        results_list = [{
-            'descripcion': row[0],
-            'nombre': row[1],
-            'tipo': row[2],
-            'altura_inicial': row[3],
-            'altura_final': row[4],
-            'localidad': row[5],
-            'provincia': row[6]} for row in results]
+        results_list = [build_dict_from(row) for row in results]
     return results_list
 
 
@@ -36,10 +29,8 @@ def build_query_for(params):
     road, number = get_parts_from(address)
     locality = params.get('localidad')
     state = params.get('provincia')
-    query = "SELECT tipo_camino || ' ' || nombre_completo || ', ' \
-                || localidad || ', ' || provincia AS addr, nombre_completo, \
-                tipo_camino, altura_inicial, altura_final, \
-                localidad, provincia \
+    query = "SELECT tipo_camino, nombre_completo, \
+                altura_inicial, altura_final, localidad, provincia \
                 FROM nombre_calles \
                 WHERE nombre_completo ILIKE '%s%%'" % (road)
     if locality:
@@ -52,23 +43,34 @@ def build_query_for(params):
 
 def build_query_for_search(address):
     parts = address.split(',')
-    query = "SELECT tipo_camino || ' ' || nombre_completo || ', ' \
-                || localidad || ', ' || provincia AS addr, nombre_completo, \
-                tipo_camino, altura_inicial, altura_final, \
-                localidad, provincia \
+    query = "SELECT tipo_camino, nombre_completo, \
+                altura_inicial, altura_final, localidad, provincia \
                 FROM nombre_calles "
     if len(parts) > 1:
         road, number = get_parts_from(parts[0].strip())
         locality = parts[1].strip()
         query += "WHERE nombre_completo ILIKE '%(road)s%%' \
                 AND localidad ILIKE '%%%(locality)s%%'" % {
-                    'road': road,#parts[0].strip(),
-                    'locality': locality }#parts[1].strip()}
+                    'road': road,
+                    'locality': locality }
     else:
         road, number = get_parts_from(address)
         query += "WHERE nombre_completo ILIKE '%s%%'" % (road)
     query += " LIMIT 10"
     return query
+
+
+def build_dict_from(row):
+    full_address = ' '.join(row[:2]) + ', ' + ', '.join(row[4:])
+    return {
+        'descripcion': full_address,
+        'tipo': row[0],
+        'nombre': row[1],
+        'altura_inicial': row[2],
+        'altura_final': row[3],
+        'localidad': row[4],
+        'provincia': row[5]
+    }
 
 
 def get_parts_from(address):
