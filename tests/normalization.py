@@ -54,7 +54,7 @@ class MatchResultsTest(TestCase):
             data=json.dumps(addresses),
             content_type='application/json')
         results = json.loads(response.data)
-        assert len(results['direcciones']) == len(results['originales'])
+        assert len(results['direcciones']) == 2
 
 
 class RequestStatusTest(TestCase):
