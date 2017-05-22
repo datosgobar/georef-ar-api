@@ -20,8 +20,7 @@ def query(address, params=None):
     with connection.cursor() as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
-        results_list = [build_dict_from(row) for row in results]
-    return results_list
+    return results
 
 
 def build_query_for(params):
@@ -58,19 +57,6 @@ def build_query_for_search(address):
         query += "WHERE nombre_completo ILIKE '%s%%'" % (road)
     query += " LIMIT 10"
     return query
-
-
-def build_dict_from(row):
-    full_address = ' '.join(row[:2]) + ', ' + ', '.join(row[4:])
-    return {
-        'descripcion': full_address,
-        'tipo': row[0],
-        'nombre': row[1],
-        'altura_inicial': row[2],
-        'altura_final': row[3],
-        'localidad': row[4],
-        'provincia': row[5]
-    }
 
 
 def get_parts_from(address):

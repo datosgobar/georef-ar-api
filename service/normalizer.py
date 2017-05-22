@@ -2,10 +2,23 @@
 from service import parser, persistence
 
 
+def build_dict_from(row):
+    full_address = ' '.join(row[:2]) + ', ' + ', '.join(row[4:])
+    return {
+        'descripcion': full_address,
+        'tipo': row[0],
+        'nombre': row[1],
+        'altura_inicial': row[2],
+        'altura_final': row[3],
+        'localidad': row[4],
+        'provincia': row[5]
+    }
+
+
 def build_results_from(matched_addresses, addresses=None):
     results = {
         'estado': 'OK' if matched_addresses else 'SIN_RESULTADOS',
-        'direcciones': matched_addresses
+        'direcciones': [build_dict_from(row) for row in matched_addresses]
         }
     if addresses:
         results.update(originales=[{'nombre': addr} for addr in addresses])
