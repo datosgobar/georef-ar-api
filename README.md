@@ -22,7 +22,7 @@ Salida: JSON con el siguiente formato.
     "estado": "OK|SIN_RESULTADOS|INVALIDO",
     "direcciones": [
         {
-            "descripcion": "Avenida Presidente Roque Sáenz Peña 250, 1425 Ciudad ...",
+            "nomenclatura": "Avenida Presidente Roque Sáenz Peña 250, 1425 Ciudad ...",
             "tipo": "Avenida",
             "nombre": "Presidente Roque Sáenz Peña",
             "altura": 250,
@@ -53,7 +53,7 @@ Si la dirección existe, debería recibir uno o más resultados.
     "estado": "OK",
     "direcciones": [
         {
-            "descripcion": "Esteban Echeverría 4497, 1757 Gregorio Laferrere, Buenos Aires",
+            "nomenclatura": "Esteban Echeverría 4497, 1757 Gregorio Laferrere, Buenos Aires",
             "tipo": "Calle",
             "nombre": "Esteban Echeverría",
             "altura": 4497,
@@ -64,7 +64,7 @@ Si la dirección existe, debería recibir uno o más resultados.
             "tipo_resultado": "puerta"
         },
         {
-            "descripcion": "Esteban Echeverría 4497, 1706 Villa Sarmiento, Buenos Aires",
+            "nomenclatura": "Esteban Echeverría 4497, 1706 Villa Sarmiento, Buenos Aires",
             "tipo": "Calle",
             "nombre": "Esteban Echeverría",
             "altura": 4497,
@@ -115,7 +115,7 @@ Salida: JSON con el siguiente formato
     "direcciones": [
         {
             "id_original": "1",
-            "descripcion": "Av. Presidente Roque Sáenz Peña 788, 1035 Ciudad Autónoma ...",
+            "nomenclatura": "Av. Presidente Roque Sáenz Peña 788, 1035 Ciudad Autónoma ...",
             "tipo": "Avenida",
             "nombre": "Presidente Roque Sáenz Peña",
             "altura": 788,
@@ -151,12 +151,12 @@ Salida: JSON con el siguiente formato
     "estado": "OK",
     "calles": [
         {
-            "descripcion": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+            "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
             "tipo": "Avenida",
             "uri": ".../api/v1.0/calles/1"
         },
         {
-            "descripcion": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
+            "nomenclatura": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
             "tipo": "Calle",
             "uri": ".../api/v1.0/calles/2"
         },
@@ -175,7 +175,7 @@ Retorna detalles de una calle particular.
 {
     "estado": "OK",
     "id": 1,
-    "descripcion": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+    "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
     "nombre": "12 de Octubre",
     "tipo": "Avenida",
     "altura": {
