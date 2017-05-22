@@ -62,7 +62,7 @@ def build_query_for_search(address):
 def build_dict_from(row):
     full_address = ' '.join(row[:2]) + ', ' + ', '.join(row[4:])
     return {
-        'descripcion': full_address,
+        'nomenclatura': full_address,
         'tipo': row[0],
         'nombre': row[1],
         'altura_inicial': row[2],
