@@ -102,28 +102,23 @@ Entrada:
 Salida: JSON con el siguiente formato
 ```json
 {
-    "estado": "OK|SIN_RESULTADOS|INVALIDO",
-    "orginales": [
-        {
-            "id": 1,
-            "nombre": "Roque Sáenz Peña 788, Buenos Aires",
-        },
-        {
-            "..."
-        }
-    ],
+    "estado": "OK",
     "direcciones": [
         {
-            "id_original": "1",
-            "nomenclatura": "Av. Presidente Roque Sáenz Peña 788, 1035 Ciudad Autónoma ...",
-            "tipo": "Avenida",
-            "nombre": "Presidente Roque Sáenz Peña",
-            "altura": 788,
-            "codigo_postal": 1035,
-            "localidad": "Ciudad Autónoma de Buenos Aires",
-            "partido": "Ciudad Autónoma de Buenos Aires",
-            "provincia": "Capital Federal",
-            "tipo_resultado": "puerta"
+            "original": "Roque Sáenz Peña 788, Buenos Aires",
+            "normalizadas": [
+                {
+                    "nomenclatura": "Av. Presidente Roque Sáenz Peña 788, 1035 Ciudad Autónoma ...",
+                    "tipo": "Avenida",
+                    "nombre": "Presidente Roque Sáenz Peña",
+                    "altura": 788,
+                    "codigo_postal": 1035,
+                    "localidad": "Ciudad Autónoma de Buenos Aires",
+                    "partido": "Ciudad Autónoma de Buenos Aires",
+                    "provincia": "Capital Federal",
+                    "tipo_resultado": "puerta"
+                },
+            ]
         },
         {
             "..."
