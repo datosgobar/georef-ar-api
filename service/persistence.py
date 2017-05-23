@@ -63,9 +63,14 @@ def build_dict_from(address, row):
     road = ' '.join(row[:2])
     place = ', '.join(row[4:])
     _, number = get_parts_from(address.split(',')[0])
+    obs = 'Se procesó correctamente la dirección buscada.'
     if number and row[2] and row[3]:    # validates door number.
         if row[2] <= number and number <= row[3]:
             road += ' %s' % str(number)
+        else:
+            obs = 'La altura buscada está fuera del rango conocido.'
+    elif number and not (row[2] or row[3]):
+        obs = 'La calle no tiene numeración en la base de datos.'
     full_address = ', '.join([road, place])
     return {
         'nomenclatura': full_address,
@@ -74,7 +79,8 @@ def build_dict_from(address, row):
         'altura_inicial': row[2],
         'altura_final': row[3],
         'localidad': row[4],
-        'provincia': row[5]
+        'provincia': row[5],
+        'observaciones': obs
     }
 
 
