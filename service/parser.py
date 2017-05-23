@@ -5,7 +5,12 @@ from flask import jsonify, make_response, request
 REQUEST_INVALID = {
     'codigo': 400,
     'estado': 'INVALIDO',
-    'error': 'El Request tiene parámetros inválidos o está incompleto.'
+    'error': {
+        'codigo_interno': None,
+        'causa': 'El Request tiene parámetros inválidos o está incompleto.',
+        'mensaje': 'El Request tiene parámetros inválidos o está incompleto.',
+        'info': 'https://github.com/datosgobar/georef-api'
+        }
     }
 
 
@@ -17,5 +22,5 @@ def get_response(result):
 
 def get_response_for_invalid(request, message=None):
     if message is not None:
-        REQUEST_INVALID['error'] = message
+        REQUEST_INVALID['error']['mensaje'] = message
     return make_response(jsonify(REQUEST_INVALID), 400)

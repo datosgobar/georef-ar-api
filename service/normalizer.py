@@ -21,7 +21,7 @@ def process_get(request):
     address = request.args.get('direccion')
     if not address:
         return parser.get_response_for_invalid(request,
-        message='El parámetro direccion es obligatorio')
+        message='El parámetro "direccion" es obligatorio.')
     matches = persistence.query(address, request.args)
     result = build_result_from(matches)
     return parser.get_response(result)
