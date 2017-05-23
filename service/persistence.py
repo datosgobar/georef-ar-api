@@ -20,7 +20,7 @@ def query(address, params=None):
     with connection.cursor() as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
-    return [build_dict_from(row) for row in results]
+    return [build_dict_from(address, row) for row in results]
 
 
 def build_query_for(params):
@@ -59,8 +59,14 @@ def build_query_for_search(address):
     return query
 
 
-def build_dict_from(row):
-    full_address = ' '.join(row[:2]) + ', ' + ', '.join(row[4:])
+def build_dict_from(address, row):
+    road = ' '.join(row[:2])
+    place = ', '.join(row[4:])
+    _, number = get_parts_from(address)
+    if number and row[2] and row[3]:    # validates door number.
+        if row[2] <= number and number <= row[3]:
+            road += ' %s' % str(number)
+    full_address = ', '.join([road, place])
     return {
         'nomenclatura': full_address,
         'tipo': row[0],
