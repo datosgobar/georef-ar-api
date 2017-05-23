@@ -11,18 +11,24 @@ class HouseNumberTest(TestCase):
 
     def test_normalize_when_number_in_range(self):
         """La altura está en el rango de la calle en la base de datos."""
-        endpoint = '/api/v1.0/normalizador?direccion=Austria%209,Buenos%20Aires'
+        endpoint = '/api/v1.0/normalizador?direccion=Austria+123,Buenos+Aires'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
-        assert len(results['direcciones']) == 1
+        assert 'AUSTRIA 123' in results['direcciones'][0]['nomenclatura']
 
     def test_normalize_when_number_out_of_range(self):
         """La altura no está en el rango de la calle en la base de datos."""
-        pass
+        endpoint = '/api/v1.0/normalizador?direccion=Austria+501,Buenos+Aires'
+        response = self.app.get(endpoint)
+        results = json.loads(response.data)
+        assert 'AUSTRIA 501' not in results['direcciones'][0]['nomenclatura']
 
     def test_normalize_when_number_not_present(self):
         """La calle no tiene numeración en la base de datos."""
-        pass
+        endpoint = '/api/v1.0/normalizador?direccion=Austria+123,Avellaneda'
+        response = self.app.get(endpoint)
+        results = json.loads(response.data)
+        assert 'AUSTRIA 123' not in results['direcciones'][0]['nomenclatura']
 
 
 class MatchResultsTest(TestCase):
