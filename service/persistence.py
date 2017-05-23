@@ -62,7 +62,7 @@ def build_query_for_search(address):
 def build_dict_from(address, row):
     road = ' '.join(row[:2])
     place = ', '.join(row[4:])
-    _, number = get_parts_from(address)
+    _, number = get_parts_from(address.split(',')[0])
     if number and row[2] and row[3]:    # validates door number.
         if row[2] <= number and number <= row[3]:
             road += ' %s' % str(number)
