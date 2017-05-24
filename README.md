@@ -30,7 +30,7 @@ Salida: JSON con el siguiente formato.
             "localidad": "Ciudad Autónoma de Buenos Aires",
             "partido": "Ciudad Autónoma de Buenos Aires",
             "provincia": "Capital Federal",
-            "tipo_resultado": "puerta"
+            "observaciones": "Información adicional sobre la dirección."
         },
         {
             "..."
@@ -61,7 +61,7 @@ Si la dirección existe, debería recibir uno o más resultados.
             "localidad": "Gregorio Laferrere",
             "partido": "La Matanza",
             "provincia": "Buenos Aires",
-            "tipo_resultado": "puerta"
+            "observaciones": "Se procesó correctamente la dirección buscada."
         },
         {
             "nomenclatura": "Esteban Echeverría 4497, 1706 Villa Sarmiento, Buenos Aires",
@@ -72,7 +72,7 @@ Si la dirección existe, debería recibir uno o más resultados.
             "localidad": "Villa Sarmiento",
             "partido": "Morón",
             "provincia": "Buenos Aires",
-            "tipo_resultado": "puerta"
+            "observaciones": "Se procesó correctamente la dirección buscada."
         },
         {
             "..."
@@ -116,7 +116,7 @@ Salida: JSON con el siguiente formato
                     "localidad": "Ciudad Autónoma de Buenos Aires",
                     "partido": "Ciudad Autónoma de Buenos Aires",
                     "provincia": "Capital Federal",
-                    "tipo_resultado": "puerta"
+                    "observaciones": "Se procesó correctamente la dirección buscada."
                 },
             ]
         },
