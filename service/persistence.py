@@ -2,6 +2,7 @@
 import os
 import psycopg2
 import re
+from elasticsearch import Elasticsearch
 
 
 def get_db_connection():
@@ -12,15 +13,23 @@ def get_db_connection():
 
 
 def query(address, params=None):
+    es = Elasticsearch()
+    query = {'query': {'bool': {'must': []}}}
+    terms = query['query']['bool']['must']
     if params and (len(params)) > 1:
-        query = build_query_for(params)
+        terms.append(
+            {'match_phrase_prefix': {'nombre': params.get('direccion')}})
+        locality = params.get('localidad')
+        state = params.get('provincia')
+        if locality:
+            terms.append({'match': {'localidad': locality}})
+        if state:
+            terms.append({'match': {'provincia': state}})
     else:
-        query = build_query_for_search(address)
-    connection = get_db_connection()
-    with connection.cursor() as cursor:
-        cursor.execute(query)
-        results = cursor.fetchall()
-    return [build_dict_from(address, row) for row in results]
+        terms.append({'match_phrase_prefix': {'nomenclatura': address}})
+
+    results = es.search(index='sanluis', doc_type='calle', body=query)
+    return [address['_source'] for address in results['hits']['hits']]
 
 
 def build_query_for(params):
