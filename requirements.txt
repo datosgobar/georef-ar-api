@@ -1,5 +1,6 @@
 appdirs==1.4.3
 click==6.7
+elasticsearch==5.4.0
 Flask==0.12.1
 itsdangerous==0.24
 Jinja2==2.9.6
@@ -8,4 +9,5 @@ packaging==16.8
 psycopg2==2.7.1
 pyparsing==2.2.0
 six==1.10.0
+urllib3==1.21.1
 Werkzeug==0.12.1
