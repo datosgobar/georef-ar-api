@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import requests
+import json
 from elasticsearch import Elasticsearch
 
 
@@ -19,7 +21,13 @@ def query(address, params=None):
             terms.append({'match': {'provincia': state}})
 
     results = es.search(body=query)
-    return [address['_source'] for address in results['hits']['hits']]
+    if results['hits']['total'] != 0:
+        return [address['_source'] for address in results['hits']['hits']]
+    else:
+        url = 'http://nominatim.openstreetmap.org/search'
+        params = {'q': address, 'format': 'json', 'countrycodes': 'ar', 'addressdetails': 1, 'limit': 10}
+        results_osm = requests.get(url, params=params).json()
+        return [build_dict_osm(res) for res in results_osm]
 
 
 def build_dict_from(address, row):
@@ -52,3 +60,15 @@ def get_parts_from(address):
     number = int(match.group(1)) if match else None
     address = re.sub(r'(\s[0-9]+?)$', r'', address)
     return address.strip(), number
+
+
+def build_dict_osm(res):
+    address = {
+       'nomenclatura': res['display_name'],
+       'tipo': res['type'],
+       'nombre': res['address']['road'],
+       'localidad': '' if 'city' not in res['address'] else res['address']['city'],
+       'provincia': res['address']['state'],
+       'observaciones': ''
+    }
+    return address
