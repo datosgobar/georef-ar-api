@@ -64,11 +64,12 @@ def get_parts_from(address):
 
 def build_dict_osm(res):
     address = {
+       'altura_inicial': None,
+       'altura_final': None,
        'nomenclatura': res['display_name'],
        'tipo': res['type'],
-       'nombre': res['address']['road'],
-       'localidad': '' if 'city' not in res['address'] else res['address']['city'],
-       'departamento': '' if 'state_district' not in res['address'] else res['address']['state_district'],
+       'nombre': res['address'].get('road'),
+       'localidad': res['address'].get('city'),
        'provincia': res['address']['state'],
     }
     return address
