@@ -6,21 +6,15 @@ from elasticsearch import Elasticsearch
 
 
 def query(address, params=None):
-    road, number = get_parts_from(address.split(',')[0])
-    result = search_es(road, params)
-    if result['hits']['total'] != 0:
-        addresses = [hit['_source'] for hit in result['hits']['hits']]
-        if number:
-            addresses = process_door(number, addresses)
-        return addresses
-    else:
-        return search_osm(address)
+    result = search_es(address, params)
+    return result if result else search_osm(address)
 
 
-def search_es(road, params=None):
+def search_es(address, params):
     es = Elasticsearch()
     terms = []
     query = {'query': {'bool': {'must': terms}}}
+    road, number = get_parts_from(address.split(',')[0])
     terms.append({'match_phrase_prefix': {'nomenclatura': road}})
     if params and (len(params)) > 1:
         locality = params.get('localidad')
@@ -29,8 +23,11 @@ def search_es(road, params=None):
             terms.append({'match': {'localidad': locality}})
         if state:
             terms.append({'match': {'provincia': state}})
-
-    return es.search(body=query)
+    result = es.search(body=query)
+    addresses = [hit['_source'] for hit in result['hits']['hits']]
+    if number:
+        addresses = process_door(number, addresses)
+    return addresses
 
 
 def search_osm(address):
