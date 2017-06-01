@@ -26,7 +26,7 @@ def query(address, params=None):
             addresses = process_door(number, addresses)
         return addresses
     else:
-        url = 'http://nominatim.openstreetmap.org/search'
+        url = os.environ.get('OSM_API_URL')
         params = {
             'q': address,
             'format': 'json',
@@ -40,14 +40,14 @@ def query(address, params=None):
 
 def parse_osm(result):
     return {
-       'altura_inicial': None,
-       'altura_final': None,
-       'nomenclatura': result['display_name'],
-       'tipo': result['type'],
-       'nombre': result['address'].get('road'),
-       'localidad': result['address'].get('city'),
-       'provincia': result['address']['state'],
-    }
+        'nomenclatura': result['display_name'],
+        'nombre': result['address'].get('road'),
+        'tipo': result['type'],
+        'altura_inicial': None,
+        'altura_final': None,
+        'localidad': result['address'].get('city'),
+        'provincia': result['address']['state'],
+        }
 
 
 def get_parts_from(address):
