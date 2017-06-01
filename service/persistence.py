@@ -2,15 +2,14 @@
 import os
 import re
 import requests
-import json
 from elasticsearch import Elasticsearch
 
 
 def query(address, params=None):
     es = Elasticsearch()
-    query = {'query': {'bool': {'must': []}}}
-    terms = query['query']['bool']['must']
-    road, _ = get_parts_from(address.split(',')[0])
+    terms = []
+    query = {'query': {'bool': {'must': terms}}}
+    road, number = get_parts_from(address.split(',')[0])
     terms.append({'match_phrase_prefix': {'nomenclatura': road}})
     if params and (len(params)) > 1:
         locality = params.get('localidad')
@@ -20,38 +19,34 @@ def query(address, params=None):
         if state:
             terms.append({'match': {'provincia': state}})
 
-    results = es.search(body=query)
-    if results['hits']['total'] != 0:
-        return [address['_source'] for address in results['hits']['hits']]
+    result = es.search(body=query)
+    if result['hits']['total'] != 0:
+        addresses = [hit['_source'] for hit in result['hits']['hits']]
+        if number:
+            addresses = process_door(number, addresses)
+        return addresses
     else:
         url = 'http://nominatim.openstreetmap.org/search'
-        params = {'q': address, 'format': 'json', 'countrycodes': 'ar', 'addressdetails': 1, 'limit': 10}
-        results_osm = requests.get(url, params=params).json()
-        return [build_dict_osm(res) for res in results_osm]
+        params = {
+            'q': address,
+            'format': 'json',
+            'countrycodes': 'ar',
+            'addressdetails': 1,
+            'limit': 10
+            }
+        result = requests.get(url, params=params).json()
+        return [parse_osm(match) for match in result]
 
 
-def build_dict_from(address, row):
-    road = ' '.join(row[:2])
-    place = ', '.join(row[4:])
-    _, number = get_parts_from(address.split(',')[0])
-    obs = 'Se procesó correctamente la dirección buscada.'
-    if number and row[2] and row[3]:    # validates door number.
-        if row[2] <= number and number <= row[3]:
-            road += ' %s' % str(number)
-        else:
-            obs = 'La altura buscada está fuera del rango conocido.'
-    elif number and not (row[2] or row[3]):
-        obs = 'La calle no tiene numeración en la base de datos.'
-    full_address = ', '.join([road, place])
+def parse_osm(result):
     return {
-        'nomenclatura': full_address,
-        'tipo': row[0],
-        'nombre': row[1],
-        'altura_inicial': row[2],
-        'altura_final': row[3],
-        'localidad': row[4],
-        'provincia': row[5],
-        'observaciones': obs
+       'altura_inicial': None,
+       'altura_final': None,
+       'nomenclatura': result['display_name'],
+       'tipo': result['type'],
+       'nombre': result['address'].get('road'),
+       'localidad': result['address'].get('city'),
+       'provincia': result['address']['state'],
     }
 
 
@@ -62,14 +57,19 @@ def get_parts_from(address):
     return address.strip(), number
 
 
-def build_dict_osm(res):
-    address = {
-       'altura_inicial': None,
-       'altura_final': None,
-       'nomenclatura': res['display_name'],
-       'tipo': res['type'],
-       'nombre': res['address'].get('road'),
-       'localidad': res['address'].get('city'),
-       'provincia': res['address']['state'],
-    }
-    return address
+def process_door(number, addresses):
+    for address in addresses:
+        obs = 'Se procesó correctamente la dirección buscada.'
+        st_start = address.get('altura_inicial')
+        st_end = address.get('altura_final')
+        if st_start and st_end:
+            if st_start <= number and number <= st_end:
+                parts = address['nomenclatura'].split(',')
+                parts[0] += ' %s' % str(number)
+                address['nomenclatura'] = ', '.join(parts)
+            else:
+                obs = 'La altura buscada está fuera del rango conocido.'
+        else:
+            obs = 'La calle no tiene numeración en la base de datos.'
+        address.update(observaciones=obs)
+    return addresses

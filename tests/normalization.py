@@ -25,7 +25,7 @@ class HouseNumberTest(TestCase):
 
     def test_normalize_when_number_not_present(self):
         """La calle no tiene numeración en la base de datos."""
-        endpoint = '/api/v1.0/normalizador?direccion=Austria+123,Avellaneda'
+        endpoint = '/api/v1.0/normalizador?direccion=Cabral+123,Buenos+Aires'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert 'AUSTRIA 123' not in results['direcciones'][0]['nomenclatura']
@@ -45,7 +45,7 @@ class MatchResultsTest(TestCase):
 
     def test_get_request_with_many_matches(self):
         """La dirección recibida puede ser una de varias al normalizar."""
-        endpoint = '/api/v1.0/normalizador?direccion=Austria'
+        endpoint = '/api/v1.0/normalizador?direccion=Italia'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert len(results['direcciones']) > 1
