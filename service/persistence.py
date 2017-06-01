@@ -6,10 +6,21 @@ from elasticsearch import Elasticsearch
 
 
 def query(address, params=None):
+    road, number = get_parts_from(address.split(',')[0])
+    result = search_es(road, params)
+    if result['hits']['total'] != 0:
+        addresses = [hit['_source'] for hit in result['hits']['hits']]
+        if number:
+            addresses = process_door(number, addresses)
+        return addresses
+    else:
+        return search_osm(address)
+
+
+def search_es(road, params=None):
     es = Elasticsearch()
     terms = []
     query = {'query': {'bool': {'must': terms}}}
-    road, number = get_parts_from(address.split(',')[0])
     terms.append({'match_phrase_prefix': {'nomenclatura': road}})
     if params and (len(params)) > 1:
         locality = params.get('localidad')
@@ -19,23 +30,20 @@ def query(address, params=None):
         if state:
             terms.append({'match': {'provincia': state}})
 
-    result = es.search(body=query)
-    if result['hits']['total'] != 0:
-        addresses = [hit['_source'] for hit in result['hits']['hits']]
-        if number:
-            addresses = process_door(number, addresses)
-        return addresses
-    else:
-        url = os.environ.get('OSM_API_URL')
-        params = {
-            'q': address,
-            'format': 'json',
-            'countrycodes': 'ar',
-            'addressdetails': 1,
-            'limit': 10
-            }
-        result = requests.get(url, params=params).json()
-        return [parse_osm(match) for match in result]
+    return es.search(body=query)
+
+
+def search_osm(address):
+    url = os.environ.get('OSM_API_URL')
+    params = {
+        'q': address,
+        'format': 'json',
+        'countrycodes': 'ar',
+        'addressdetails': 1,
+        'limit': 10
+    }
+    result = requests.get(url, params=params).json()
+    return [parse_osm(match) for match in result]
 
 
 def parse_osm(result):
@@ -46,7 +54,7 @@ def parse_osm(result):
         'altura_inicial': None,
         'altura_final': None,
         'localidad': result['address'].get('city'),
-        'provincia': result['address']['state'],
+        'provincia': result['address'].get('state')
         }
 
 
