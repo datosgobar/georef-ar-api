@@ -25,7 +25,7 @@ def search_es(address, params):
             terms.append({'match': {'provincia': state}})
     result = es.search(body=query)
     addresses = [hit['_source'] for hit in result['hits']['hits']]
-    if number:
+    if addresses and number:
         addresses = process_door(number, addresses)
     return addresses
 
