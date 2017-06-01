@@ -68,7 +68,7 @@ def build_dict_osm(res):
        'tipo': res['type'],
        'nombre': res['address']['road'],
        'localidad': '' if 'city' not in res['address'] else res['address']['city'],
+       'departamento': '' if 'state_district' not in res['address'] else res['address']['state_district'],
        'provincia': res['address']['state'],
-       'observaciones': ''
     }
     return address
