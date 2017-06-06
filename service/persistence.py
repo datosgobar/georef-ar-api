@@ -6,8 +6,8 @@ from elasticsearch import Elasticsearch
 
 
 def query(address, params=None):
-    result = search_es(address, params)
-    return result if result else search_osm(address)
+    matches = search_es(address, params)
+    return matches if matches else search_osm(address)
 
 
 def search_es(address, params):
