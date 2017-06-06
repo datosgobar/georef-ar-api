@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from service import parser, persistence
+from service import data, parser
 
 
 def build_result_from(matched_addresses):
@@ -22,7 +22,7 @@ def process_get(request):
     if not address:
         return parser.get_response_for_invalid(request,
         message='El parámetro "direccion" es obligatorio.')
-    matches = persistence.query(address, request.args)
+    matches = data.query(address, request.args)
     result = build_result_from(matches)
     return parser.get_response(result)
 
@@ -38,7 +38,7 @@ def process_post(request):
         for address in addresses:
             matches.append({
                 'original': address,
-                'normalizadas': persistence.query(address)
+                'normalizadas': data.query(address)
                 })
     result = build_result_from(matches)
     return parser.get_response(result)
