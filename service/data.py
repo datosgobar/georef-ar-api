@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
 import os
-import re
 import requests
 from elasticsearch import Elasticsearch
 
 
 def query(address, params=None):
-    matches = search_es(address, params)
+    matches = search_es(address)#, params)
     return matches if matches else search_osm(address)
 
 
-def search_es(address, params):
+def search_es(address):
     es = Elasticsearch()
     terms = []
     query = {'query': {'bool': {'must': terms}}}
-    road, number = get_parts_from(address.split(',')[0])
+    road = address['road']
+    number = address['number']
     terms.append({'match_phrase_prefix': {'nomenclatura': road}})
-    if params and (len(params)) > 1:
-        locality = params.get('localidad')
-        state = params.get('provincia')
-        if locality:
-            terms.append({'match': {'localidad': locality}})
-        if state:
-            terms.append({'match': {'provincia': state}})
+    locality = address['locality']
+    state = address['state']
+    if locality:
+        terms.append({'match': {'localidad': locality}})
+    if state:
+        terms.append({'match': {'provincia': state}})
     result = es.search(body=query)
     addresses = [parse_es(hit) for hit in result['hits']['hits']]
     if addresses and number:
@@ -32,8 +31,15 @@ def search_es(address, params):
 
 def search_osm(address):
     url = os.environ.get('OSM_API_URL')
+    query = address['road']
+    if address.get('number'):
+        query += ' %s' % address['number']
+    if address.get('locality'):
+        query += ', %s' % address['locality']
+    if address.get('state'):
+        query += ', %s' % address['state']
     params = {
-        'q': address,
+        'q': query,
         'format': 'json',
         'countrycodes': 'ar',
         'addressdetails': 1,
@@ -66,13 +72,6 @@ def parse_osm(result):
             'info': result['type']
             }
         }
-
-
-def get_parts_from(address):
-    match = re.search(r'(\s[0-9]+?)$', address)
-    number = int(match.group(1)) if match else None
-    address = re.sub(r'(\s[0-9]+?)$', r'', address)
-    return address.strip(), number
 
 
 def process_door(number, addresses):
