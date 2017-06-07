@@ -4,8 +4,8 @@ import requests
 from elasticsearch import Elasticsearch
 
 
-def query(address, params=None):
-    matches = search_es(address)#, params)
+def query(address):
+    matches = search_es(address)
     return matches if matches else search_osm(address)
 
 
