@@ -24,7 +24,7 @@ def search_es(address, params):
         if state:
             terms.append({'match': {'provincia': state}})
     result = es.search(body=query)
-    addresses = [hit['_source'] for hit in result['hits']['hits']]
+    addresses = [parse_es(hit) for hit in result['hits']['hits']]
     if addresses and number:
         addresses = process_door(number, addresses)
     return addresses
@@ -43,6 +43,15 @@ def search_osm(address):
     return [parse_osm(match) for match in result]
 
 
+def parse_es(result):
+    obs = {
+        'fuente': 'INDEC',
+        'info': 'Se procesó correctamente la dirección buscada.'
+        }
+    result['_source'].update(observaciones=obs)
+    return result['_source']
+
+
 def parse_osm(result):
     return {
         'nomenclatura': result['display_name'],
@@ -51,7 +60,11 @@ def parse_osm(result):
         'altura_inicial': None,
         'altura_final': None,
         'localidad': result['address'].get('city'),
-        'provincia': result['address'].get('state')
+        'provincia': result['address'].get('state'),
+        'observaciones': {
+            'fuente': 'OSM',
+            'info': result['type']
+            }
         }
 
 
@@ -64,7 +77,7 @@ def get_parts_from(address):
 
 def process_door(number, addresses):
     for address in addresses:
-        obs = 'Se procesó correctamente la dirección buscada.'
+        info = address['observaciones']['info']
         st_start = address.get('altura_inicial')
         st_end = address.get('altura_final')
         if st_start and st_end:
@@ -73,8 +86,8 @@ def process_door(number, addresses):
                 parts[0] += ' %s' % str(number)
                 address['nomenclatura'] = ', '.join(parts)
             else:
-                obs = 'La altura buscada está fuera del rango conocido.'
+                info = 'La altura buscada está fuera del rango conocido.'
         else:
-            obs = 'La calle no tiene numeración en la base de datos.'
-        address.update(observaciones=obs)
+            info = 'La calle no tiene numeración en la base de datos.'
+        address['observaciones']['info'] = info
     return addresses
