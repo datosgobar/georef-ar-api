@@ -18,11 +18,11 @@ def process(request):
 
 
 def process_get(request):
-    address = request.args.get('direccion')
-    if not address:
+    if not request.args.get('direccion'):
         return parser.get_response_for_invalid(request,
         message='El parámetro "direccion" es obligatorio.')
-    matches = data.query(address, request.args)
+    address = parser.get_address_from(request.args)
+    matches = data.query(address)
     result = build_result_from(matches)
     return parser.get_response(result)
 
@@ -36,9 +36,10 @@ def process_post(request):
             return parser.get_response_for_invalid(request,
             message='No hay datos de direcciones para procesar.')
         for address in addresses:
+            parsed_address = parser.get_from_string(address)
             matches.append({
                 'original': address,
-                'normalizadas': data.query(address)
+                'normalizadas': data.query(parsed_address)
                 })
     result = build_result_from(matches)
     return parser.get_response(result)
