@@ -40,7 +40,7 @@ def search_osm(address):
         'limit': 10
     }
     result = requests.get(url, params=params).json()
-    return [parse_osm(match) for match in result]
+    return [parse_osm(match) for match in result if match['class'] == 'highway']
 
 
 def parse_es(result):
