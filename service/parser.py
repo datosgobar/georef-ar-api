@@ -28,13 +28,17 @@ def build_search_from(params):
     road, number = get_road_and_number(address[0].strip())
     locality = params.get('localidad')
     state = params.get('provincia')
+    max = params.get('max')
+    source = params.get('fuente')
     if len(address) > 1:
         locality = address[1].strip()
     return {
         'number': number,
         'road': road,
         'locality': locality,
-        'state': state   
+        'state': state,
+        'max': max,
+        'source': source
     }
 
 

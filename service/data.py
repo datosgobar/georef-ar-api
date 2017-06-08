@@ -6,13 +6,16 @@ from elasticsearch import Elasticsearch
 
 def query(address):
     matches = search_es(address)
-    return matches if matches else search_osm(address)
+    if not matches and address.get('source') == 'osm':
+        matches = search_osm(address)
+    return matches
 
 
 def search_es(address):
     es = Elasticsearch()
     terms = []
-    query = {'query': {'bool': {'must': terms}}}
+    query = {'query': {'bool': {'must': terms}},
+             'size': 10 if not address['max'] else address['max']}
     road = address['road']
     number = address['number']
     terms.append({'match_phrase_prefix': {'nomenclatura': road}})
@@ -43,7 +46,7 @@ def search_osm(address):
         'format': 'json',
         'countrycodes': 'ar',
         'addressdetails': 1,
-        'limit': 10
+        'limit': 15 if not address.get('max') else address.get('max')
     }
     result = requests.get(url, params=params).json()
     return [parse_osm(match) for match in result
