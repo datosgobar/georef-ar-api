@@ -21,8 +21,8 @@ def process_get(request):
     if not request.args.get('direccion'):
         return parser.get_response_for_invalid(request,
         message='El parámetro "direccion" es obligatorio.')
-    address = parser.get_address_from(request.args)
-    matches = data.query(address)
+    search = parser.build_search_from(request.args)
+    matches = data.query(search)
     result = build_result_from(matches)
     return parser.get_response(result)
 

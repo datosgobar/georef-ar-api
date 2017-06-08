@@ -20,10 +20,10 @@ def validate(request):
 
 
 def get_from_string(address_str):
-    return get_address_from({'direccion': address_str})
+    return build_search_from({'direccion': address_str})
 
 
-def get_address_from(params):
+def build_search_from(params):
     address = params.get('direccion').split(',')
     road, number = get_road_and_number(address[0].strip())
     locality = params.get('localidad')
@@ -34,7 +34,7 @@ def get_address_from(params):
         'number': number,
         'road': road,
         'locality': locality,
-        'state': state
+        'state': state   
     }
 
 
