@@ -47,9 +47,8 @@ def search_osm(address):
     }
     result = requests.get(url, params=params).json()
     return [parse_osm(match) for match in result
-            if match['osm_type'] == 'way' and
-            (match['class'] == 'highway' or
-             match['class'] == 'place')]
+            if match['class'] == 'highway' or
+            match['type'] == 'house']
 
 
 def parse_es(result):
