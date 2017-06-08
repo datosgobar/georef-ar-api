@@ -47,8 +47,7 @@ def search_osm(address):
     }
     result = requests.get(url, params=params).json()
     return [parse_osm(match) for match in result
-            if match['class'] == 'highway' or
-            match['type'] == 'house']
+            if match['class'] == 'highway' or match['type'] == 'house']
 
 
 def parse_es(result):
@@ -94,13 +93,13 @@ def process_door(number, addresses):
 
 
 def parse_osm_type(osm_type):
-    result = None
     if osm_type == 'residential':
-        result = 'CALLE'
+        return 'CALLE'
     elif osm_type == 'secondary':
-        result = 'AVENIDA'
+        return 'AVENIDA'
     elif osm_type == 'motorway':
-        result = 'AUTOPISTA'
+        return 'AUTOPISTA'
     elif osm_type == 'house':
-        result = 'CALLE_ALTURA'
-    return result
+        return 'CALLE_ALTURA'
+    else:
+        return 'SIN_CLASIFICAR'
