@@ -46,7 +46,10 @@ def search_osm(address):
         'limit': 10
     }
     result = requests.get(url, params=params).json()
-    return [parse_osm(match) for match in result if match['class'] == 'highway']
+    return [parse_osm(match) for match in result
+            if match['osm_type'] == 'way' and
+            (match['class'] == 'highway' or
+             match['class'] == 'place')]
 
 
 def parse_es(result):
@@ -62,14 +65,13 @@ def parse_osm(result):
     return {
         'nomenclatura': result['display_name'],
         'nombre': result['address'].get('road'),
-        'tipo': result['type'],
+        'tipo': parse_osm_type(result['type']),
         'altura_inicial': None,
         'altura_final': None,
         'localidad': result['address'].get('city'),
         'provincia': result['address'].get('state'),
         'observaciones': {
-            'fuente': 'OSM',
-            'info': result['type']
+            'fuente': 'OSM'
             }
         }
 
@@ -90,3 +92,16 @@ def process_door(number, addresses):
             info = 'La calle no tiene numeración en la base de datos.'
         address['observaciones']['info'] = info
     return addresses
+
+
+def parse_osm_type(osm_type):
+    result = None
+    if osm_type == 'residential':
+        result = 'CALLE'
+    elif osm_type == 'secondary':
+        result = 'AVENIDA'
+    elif osm_type == 'motorway':
+        result = 'AUTOPISTA'
+    elif osm_type == 'house':
+        result = 'CALLE_ALTURA'
+    return result
