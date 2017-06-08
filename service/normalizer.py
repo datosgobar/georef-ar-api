@@ -2,10 +2,10 @@
 from service import data, parser
 
 
-def build_result_from(matched_addresses):
+def build_result_for(entity, matches):
     return {
-        'estado': 'OK' if matched_addresses else 'SIN_RESULTADOS',
-        'direcciones': matched_addresses
+        'estado': 'OK' if matches else 'SIN_RESULTADOS',
+        entity: matches
         }
 
 
@@ -23,7 +23,7 @@ def process_get(request):
         message='El parámetro "direccion" es obligatorio.')
     search = parser.build_search_from(request.args)
     matches = data.query(search)
-    result = build_result_from(matches)
+    result = build_result_for('direcciones', matches)
     return parser.get_response(result)
 
 
@@ -41,5 +41,26 @@ def process_post(request):
                 'original': address,
                 'normalizadas': data.query(parsed_address)
                 })
-    result = build_result_from(matches)
+    result = build_result_for('direcciones', matches)
+    return parser.get_response(result)
+
+
+def process_locality(request):
+    name = request.args.get('nombre')
+    matches = data.query_entity(name, 'localidades')
+    result = build_result_for('localidades', matches)
+    return parser.get_response(result)
+
+
+def process_department(request):
+    name = request.args.get('nombre')
+    matches = data.query_entity(name, 'departamentos')
+    result = build_result_for('departamentos', matches)
+    return parser.get_response(result)
+
+
+def process_state(request):
+    name = request.args.get('nombre')
+    matches = data.query_entity(name, 'provincias')
+    result = build_result_for('provincias', matches)
     return parser.get_response(result)
