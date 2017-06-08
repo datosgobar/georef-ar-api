@@ -6,7 +6,9 @@ from elasticsearch import Elasticsearch
 
 def query(address):
     matches = search_es(address)
-    return matches if matches else search_osm(address)
+    if not matches and address.get('source') == 'osm':
+        matches = search_osm(address)
+    return matches
 
 
 def search_es(address):
