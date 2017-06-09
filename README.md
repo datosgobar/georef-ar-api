@@ -30,13 +30,15 @@ Salida: JSON con el siguiente formato.
             "localidad": "Ciudad Autónoma de Buenos Aires",
             "partido": "Ciudad Autónoma de Buenos Aires",
             "provincia": "Capital Federal",
-            "observaciones": "Información adicional sobre la dirección."
+            "observaciones": {
+                "fuente": "Fuente del resultado.",
+                "info": "Información adicional sobre el resultado."
+                }
         },
         {
             "..."
         },
-    ],
-    "error": "null"
+    ]
 }
 ```
 
@@ -61,7 +63,10 @@ Si la dirección existe, debería recibir uno o más resultados.
             "localidad": "Gregorio Laferrere",
             "partido": "La Matanza",
             "provincia": "Buenos Aires",
-            "observaciones": "Se procesó correctamente la dirección buscada."
+            "observaciones": {
+                "fuente": "INDEC",
+                "info": "Se procesó correctamente la dirección buscada."
+                }
         },
         {
             "nomenclatura": "Esteban Echeverría 4497, 1706 Villa Sarmiento, Buenos Aires",
@@ -72,7 +77,10 @@ Si la dirección existe, debería recibir uno o más resultados.
             "localidad": "Villa Sarmiento",
             "partido": "Morón",
             "provincia": "Buenos Aires",
-            "observaciones": "Se procesó correctamente la dirección buscada."
+            "observaciones": {
+                "fuente": "INDEC",
+                "info": "Se procesó correctamente la dirección buscada."
+                }
         },
         {
             "..."
@@ -116,7 +124,10 @@ Salida: JSON con el siguiente formato
                     "localidad": "Ciudad Autónoma de Buenos Aires",
                     "partido": "Ciudad Autónoma de Buenos Aires",
                     "provincia": "Capital Federal",
-                    "observaciones": "Se procesó correctamente la dirección buscada."
+                    "observaciones": {
+                        "fuente": "INDEC",
+                        "info": "Se procesó correctamente la dirección buscada."
+                        }
                 },
             ]
         },
