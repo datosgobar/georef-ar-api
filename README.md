@@ -48,7 +48,7 @@ Un cliente quiere saber a qué localidad corresponde una dirección dada.
 En este caso, consumiría la API de búsqueda pasando los parámetros `dirección` y `provincia`.
 Si la dirección existe, debería recibir uno o más resultados.
 
-**GET** `/api/v1.0/normalizador?direccion=Echeverria%204497&provincia=Buenos%20Aires`
+**GET** `/api/v1.0/normalizador?direccion=Echeverria+4497&provincia=Buenos+Aires`
 ```json
 {
   "estado": "OK",
