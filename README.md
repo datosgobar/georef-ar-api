@@ -89,7 +89,25 @@ Si la dirección existe, debería recibir uno o más resultados.
 }
 ```
 
-Normalizar lote de direcciones
+**Errores**
+
+Cuando se produce un error durante el procesamiento de una consulta,
+la respuesta de la API incluye el campo "error" con información detallada.
+
+```json
+{
+  "codigo": 400, 
+  "error": {
+    "codigo_interno": null,
+    "info": "https://github.com/datosgobar/georef-api",
+    "mensaje": "El Request tiene parámetros inválidos o está incompleto.",
+  },
+  "estado": "INVALIDO"
+}
+```
+
+
+**Normalizar lote de direcciones**
 
 **POST** `/api/v1.0/normalizador`
 
