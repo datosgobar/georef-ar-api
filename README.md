@@ -49,7 +49,6 @@ En este caso, consumiría la API de búsqueda pasando los parámetros `direcció
 Si la dirección existe, debería recibir uno o más resultados.
 
 **GET** `/api/v1.0/normalizador?direccion=Echeverria%204497&provincia=Buenos%20Aires`
-
 ```json
 {
     "estado": "OK",
@@ -93,7 +92,6 @@ Si la dirección existe, debería recibir uno o más resultados.
 
 Cuando se produce un error durante el procesamiento de una consulta,
 la respuesta de la API incluye el campo "error" con información detallada.
-
 ```json
 {
   "codigo": 400, 
@@ -125,7 +123,7 @@ Entrada:
 }
 ```
 
-Salida: JSON con el siguiente formato
+Salida: JSON con el siguiente formato.
 ```json
 {
     "estado": "OK",
@@ -157,6 +155,135 @@ Salida: JSON con el siguiente formato
 }
 ```
 
+### Provincias `/api/v1.0/provincias`
+Retorna un listado de provincias.
+
+Entrada:
+- nombre: para filtrar por nombre.
+
+**GET** `/api/v1.0/provincias`
+```json
+{
+  "estado": "OK", 
+  "provincias": [
+    {
+      "id": "14", 
+      "nombre": "Córdoba"
+    }, 
+    {
+      "id": "22", 
+      "nombre": "Chaco"
+    }, 
+    {
+      "id": "26", 
+      "nombre": "Chubut"
+    }, 
+    {
+      "id": "06", 
+      "nombre": "Buenos Aires"
+    }, 
+    {
+      "id": "10", 
+      "nombre": "Catamarca"
+    },
+    "..."
+  ]
+}
+```
+
+### Departamentos `/api/v1.0/departamentos`
+Retorna un listado de departamentos.
+
+Entrada:
+- nombre: para filtrar por nombre.
+
+**GET** `/api/v1.0/departamentos?nombre=capital`
+```json
+{
+  "estado": "OK",
+  "departamentos": [
+    {
+      "id": "50007", 
+      "nombre": "Capital", 
+      "provincia": {
+        "id": "50", 
+        "nombre": "Mendoza"
+      }
+    }, 
+    {
+      "id": "54028", 
+      "nombre": "Capital", 
+      "provincia": {
+        "id": "54", 
+        "nombre": "Misiones"
+      }
+    }, 
+    {
+      "id": "86049", 
+      "nombre": "Capital", 
+      "provincia": {
+        "id": "86", 
+        "nombre": "Santiago del Estero"
+      }
+    },
+    "..."
+  ]
+}
+```
+
+### Localidades `/api/v1.0/localidades`
+Retorna un listado de localidades.
+
+Entrada:
+- nombre: para filtrar por nombre.
+
+**GET** `/api/v1.0/localidades`
+```json
+{
+  "estado": "OK", 
+  "localidades": [
+    {
+      "id": "06007080", 
+      "nombre": "Rivera", 
+      "departamento": {
+        "id": "06007", 
+        "nombre": "Adolfo Alsina"
+      }, 
+      "provincia": {
+        "id": "06", 
+        "nombre": "Buenos Aires"
+      }
+    }, 
+    {
+      "id": "06014030", 
+      "nombre": "Juan E. Barra", 
+      "departamento": {
+        "id": "06014", 
+        "nombre": "Adolfo Gonzales Chaves"
+      }, 
+      "provincia": {
+        "id": "06", 
+        "nombre": "Buenos Aires"
+      }
+    }, 
+    {
+      "id": "06021020", 
+      "nombre": "Coronel Seguí", 
+      "departamento": {
+        "id": "06021", 
+        "nombre": "Alberti"
+      }, 
+      "provincia": {
+        "id": "06", 
+        "nombre": "Buenos Aires"
+      }
+    },
+    "..."
+  ]
+}
+```
+
+
 ### Calles `/api/v1.0/calles`
 Retorna calles (normalizadas) de una localidad o provincia.
 
@@ -169,7 +296,7 @@ Ejemplo: obtener todas las calles de Bariloche.
 
 **GET** `/api/v1.0/calles?localidad=Bariloche`
 
-Salida: JSON con el siguiente formato
+Salida: JSON con el siguiente formato.
 ```json
 {
     "estado": "OK",
@@ -194,7 +321,6 @@ Salida: JSON con el siguiente formato
 **GET** `/api/v1.0/calles/{id}`
 
 Retorna detalles de una calle particular.
-
 ```json
 {
     "estado": "OK",
