@@ -19,26 +19,26 @@ Entrada:
 Salida: JSON con el siguiente formato.
 ```json
 {
-    "estado": "OK|SIN_RESULTADOS|INVALIDO",
-    "direcciones": [
-        {
-            "nomenclatura": "Avenida Presidente Roque Sáenz Peña 250, 1425 Ciudad ...",
-            "tipo": "Avenida",
-            "nombre": "Presidente Roque Sáenz Peña",
-            "altura": 250,
-            "codigo_postal": 1425,
-            "localidad": "Ciudad Autónoma de Buenos Aires",
-            "partido": "Ciudad Autónoma de Buenos Aires",
-            "provincia": "Capital Federal",
-            "observaciones": {
-                "fuente": "Fuente del resultado.",
-                "info": "Información adicional sobre el resultado."
-                }
-        },
-        {
-            "..."
-        },
-    ]
+  "estado": "OK|SIN_RESULTADOS|INVALIDO",
+  "direcciones": [
+    {
+      "nomenclatura": "Avenida Presidente Roque Sáenz Peña 250, 1425 Ciudad ...",
+      "tipo": "Avenida",
+      "nombre": "Presidente Roque Sáenz Peña",
+      "altura": 250,
+      "codigo_postal": 1425,
+      "localidad": "Ciudad Autónoma de Buenos Aires",
+      "partido": "Ciudad Autónoma de Buenos Aires",
+      "provincia": "Capital Federal",
+      "observaciones": {
+        "fuente": "Fuente del resultado.",
+        "info": "Información adicional sobre el resultado."
+        }
+    },
+    {
+      "..."
+    },
+  ]
 }
 ```
 
@@ -51,40 +51,40 @@ Si la dirección existe, debería recibir uno o más resultados.
 **GET** `/api/v1.0/normalizador?direccion=Echeverria%204497&provincia=Buenos%20Aires`
 ```json
 {
-    "estado": "OK",
-    "direcciones": [
-        {
-            "nomenclatura": "Esteban Echeverría 4497, 1757 Gregorio Laferrere, Buenos Aires",
-            "tipo": "Calle",
-            "nombre": "Esteban Echeverría",
-            "altura": 4497,
-            "codigo_postal": 1757,
-            "localidad": "Gregorio Laferrere",
-            "partido": "La Matanza",
-            "provincia": "Buenos Aires",
-            "observaciones": {
-                "fuente": "INDEC",
-                "info": "Se procesó correctamente la dirección buscada."
-                }
-        },
-        {
-            "nomenclatura": "Esteban Echeverría 4497, 1706 Villa Sarmiento, Buenos Aires",
-            "tipo": "Calle",
-            "nombre": "Esteban Echeverría",
-            "altura": 4497,
-            "codigo_postal": 1706,
-            "localidad": "Villa Sarmiento",
-            "partido": "Morón",
-            "provincia": "Buenos Aires",
-            "observaciones": {
-                "fuente": "INDEC",
-                "info": "Se procesó correctamente la dirección buscada."
-                }
-        },
-        {
-            "..."
-        },
-    ],
+  "estado": "OK",
+  "direcciones": [
+    {
+      "nomenclatura": "Esteban Echeverría 4497, 1757 Gregorio Laferrere, Buenos Aires",
+      "tipo": "Calle",
+      "nombre": "Esteban Echeverría",
+      "altura": 4497,
+      "codigo_postal": 1757,
+      "localidad": "Gregorio Laferrere",
+      "partido": "La Matanza",
+      "provincia": "Buenos Aires",
+      "observaciones": {
+        "fuente": "INDEC",
+        "info": "Se procesó correctamente la dirección buscada."
+        }
+    },
+    {
+      "nomenclatura": "Esteban Echeverría 4497, 1706 Villa Sarmiento, Buenos Aires",
+      "tipo": "Calle",
+      "nombre": "Esteban Echeverría",
+      "altura": 4497,
+      "codigo_postal": 1706,
+      "localidad": "Villa Sarmiento",
+      "partido": "Morón",
+      "provincia": "Buenos Aires",
+      "observaciones": {
+        "fuente": "INDEC",
+        "info": "Se procesó correctamente la dirección buscada."
+        }
+    },
+    {
+      "..."
+    },
+  ],
 }
 ```
 
@@ -114,44 +114,43 @@ Entrada:
 - **body**: JSON con lote de direcciones para normalizar.
 ```json
 {
-    "direcciones": [
-        "Roque Sáenz Peña 788, Buenos Aires",
-        "Calle Principal 123, 1425 CABA",
-        "Esmeralda 1000, Capital Federal",
-        "..."
-    ]
+  "direcciones": [
+    "Roque Sáenz Peña 788, Buenos Aires",
+    "Calle Principal 123, 1425 CABA",
+    "Esmeralda 1000, Capital Federal",
+    "..."
+  ]
 }
 ```
 
 Salida: JSON con el siguiente formato.
 ```json
 {
-    "estado": "OK",
-    "direcciones": [
+  "estado": "OK",
+  "direcciones": [
+    {
+      "original": "Roque Sáenz Peña 788, Buenos Aires",
+      "normalizadas": [
         {
-            "original": "Roque Sáenz Peña 788, Buenos Aires",
-            "normalizadas": [
-                {
-                    "nomenclatura": "Av. Presidente Roque Sáenz Peña 788, 1035 Ciudad Autónoma ...",
-                    "tipo": "Avenida",
-                    "nombre": "Presidente Roque Sáenz Peña",
-                    "altura": 788,
-                    "codigo_postal": 1035,
-                    "localidad": "Ciudad Autónoma de Buenos Aires",
-                    "partido": "Ciudad Autónoma de Buenos Aires",
-                    "provincia": "Capital Federal",
-                    "observaciones": {
-                        "fuente": "INDEC",
-                        "info": "Se procesó correctamente la dirección buscada."
-                        }
-                },
-            ]
+          "nomenclatura": "Av. Presidente Roque Sáenz Peña 788, 1035 Ciudad Autónoma ...",
+          "tipo": "Avenida",
+          "nombre": "Presidente Roque Sáenz Peña",
+          "altura": 788,
+          "codigo_postal": 1035,
+          "localidad": "Ciudad Autónoma de Buenos Aires",
+          "partido": "Ciudad Autónoma de Buenos Aires",
+          "provincia": "Capital Federal",
+          "observaciones": {
+            "fuente": "INDEC",
+            "info": "Se procesó correctamente la dirección buscada."
+            }
         },
-        {
-            "..."
-        },
-    ],
-    "error": "null"
+      ]
+    },
+    {
+      "..."
+    },
+  ]
 }
 ```
 
@@ -282,7 +281,6 @@ Entrada:
   ]
 }
 ```
-
 
 ### Calles `/api/v1.0/calles`
 Retorna calles (normalizadas) de una localidad o provincia.
