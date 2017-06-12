@@ -54,7 +54,7 @@ def search_osm(address):
         'format': 'json',
         'countrycodes': 'ar',
         'addressdetails': 1,
-        'limit': 15 if not address.get('max') else address.get('max')
+        'limit': address.get('max') or 15
     }
     result = requests.get(url, params=params).json()
     return [parse_osm(match) for match in result
