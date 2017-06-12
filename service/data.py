@@ -23,7 +23,7 @@ def search_es(address):
     es = Elasticsearch()
     terms = []
     query = {'query': {'bool': {'must': terms}},
-             'size': 10 if not address['max'] else address['max']}
+             'size': address['max'] or 10}
     road = address['road']
     number = address['number']
     terms.append({'match_phrase_prefix': {'nomenclatura': road}})
