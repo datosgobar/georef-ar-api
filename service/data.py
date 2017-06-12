@@ -12,9 +12,8 @@ def query(address):
 
 
 def query_entity(name, index):
-    terms = []
-    terms.append({'match_phrase_prefix': {'nombre': name}})
-    query = {'query': {'bool': {'must': terms}} if name else {"match_all": {}}}
+    fuzzy_match = {'match': {'nombre': {'query': name, 'fuzziness': 'AUTO'}}}
+    query = {'query': fuzzy_match if name else {"match_all": {}}}
     result = Elasticsearch().search(index=index, body=query)
     return [hit['_source'] for hit in result['hits']['hits']]
 
