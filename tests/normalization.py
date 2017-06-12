@@ -41,7 +41,7 @@ class MatchResultsTest(TestCase):
         endpoint = '/api/v1.0/normalizador?direccion=Austria,Buenos%20Aires'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
-        assert len(results['direcciones']) == 1
+        assert len(results['direcciones']) == 2
 
     def test_get_request_with_many_matches(self):
         """La dirección recibida puede ser una de varias al normalizar."""

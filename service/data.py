@@ -19,20 +19,21 @@ def query_entity(name, index):
 
 
 def search_es(address):
-    es = Elasticsearch()
     terms = []
-    query = {'query': {'bool': {'must': terms}},
-             'size': address['max'] or 10}
+    query = {'query': {'bool': {'must': terms}}, 'size': address['max'] or 10}
     road = address['road']
     number = address['number']
-    terms.append({'match_phrase_prefix': {'nomenclatura': road}})
+    terms.append(
+        {'match': {'nomenclatura': {'query': road, 'fuzziness': 'AUTO'}}})
     locality = address['locality']
     state = address['state']
     if locality:
-        terms.append({'match': {'localidad': locality}})
+        terms.append(
+            {'match': {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}})
     if state:
-        terms.append({'match': {'provincia': state}})
-    result = es.search(body=query)
+        terms.append(
+            {'match': {'provincia': {'query': state, 'fuzziness': 'AUTO'}}})
+    result = Elasticsearch().search(body=query)
     addresses = [parse_es(hit) for hit in result['hits']['hits']]
     if addresses and number:
         addresses = process_door(number, addresses)
