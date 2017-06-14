@@ -50,7 +50,7 @@ class ResultsParsingTest(TestCase):
 
     def test_result_filtered_by_locality_with_address(self):
         """Busca y normaliza una dirección para una localidad dada."""
-        endpoint = '/api/v1.0/normalizador?direccion=Austria&localidad=Buenos'
+        endpoint = '/api/v1.0/direcciones?direccion=Austria&localidad=Buenos'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert len(results['direcciones']) == 1
@@ -61,7 +61,7 @@ class ResultsParsingTest(TestCase):
 
     def test_result_filtered_by_state_with_address(self):
         """Busca y normaliza una dirección para una provincia dada."""
-        endpoint = '/api/v1.0/normalizador?direccion=Austria&provincia=Buenos'
+        endpoint = '/api/v1.0/direcciones?direccion=Austria&provincia=Buenos'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert len(results['direcciones']) > 1

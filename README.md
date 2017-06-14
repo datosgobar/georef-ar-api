@@ -7,7 +7,7 @@ API del servicio de normalización y geocodificación para direcciones de Argent
 
 ## Uso de georef-api
 
-### Normalizador `/api/v1.0/normalizador`
+### Direcciones `/api/v1.0/direcciones`
 
 Entrada:
 - **direccion**: la dirección que se quiere normalizar (campo obligatorio).
@@ -48,7 +48,7 @@ Un cliente quiere saber a qué localidad corresponde una dirección dada.
 En este caso, consumiría la API de búsqueda pasando los parámetros `dirección` y `provincia`.
 Si la dirección existe, debería recibir uno o más resultados.
 
-**GET** `/api/v1.0/normalizador?direccion=Echeverria+4497&provincia=Buenos+Aires`
+**GET** `/api/v1.0/direcciones?direccion=Echeverria+4497&provincia=Buenos+Aires`
 ```json
 {
   "estado": "OK",
@@ -107,7 +107,7 @@ la respuesta de la API incluye el campo "error" con información detallada.
 
 **Normalizar lote de direcciones**
 
-**POST** `/api/v1.0/normalizador`
+**POST** `/api/v1.0/direcciones`
 
 Entrada:
 - campos: qué campos devolver.

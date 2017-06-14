@@ -25,7 +25,7 @@ def build_result_for(entity, matches):
         }
 
 
-def process(request):
+def process_address(request):
     """Procesa una consulta para normalizar direcciones.
 
     Args:
@@ -37,11 +37,11 @@ def process(request):
     if not parser.validate(request):
         return parser.get_response_for_invalid(request)
     if request.method == 'GET':
-        return process_get(request)
-    return process_post(request)
+        return address_get(request)
+    return address_post(request)
 
 
-def process_get(request):
+def address_get(request):
     """Procesa una consulta de tipo GET para normalizar direcciones.
 
     Args:
@@ -59,7 +59,7 @@ def process_get(request):
     return parser.get_response(result)
 
 
-def process_post(request):
+def address_post(request):
     """Procesa una consulta de tipo POST para normalizar direcciones.
 
     Args:

@@ -3,9 +3,9 @@ from service import app, normalizer
 from flask import request
 
 
-@app.route('/api/v1.0/normalizador', methods=['GET', 'POST'])
+@app.route('/api/v1.0/direcciones', methods=['GET', 'POST'])
 def get_normalized_data():
-    return normalizer.process(request)
+    return normalizer.process_address(request)
 
 
 @app.route('/api/v1.0/localidades', methods=['GET'])
