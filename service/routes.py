@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
+
+"""Módulo 'routes' de georef-api
+
+Declara las rutas de los recursos que expone la API e
+invoca las funciones que procesan dichos recursos.
+"""
+
 from service import app, normalizer
 from flask import request
 
 
 @app.route('/api/v1.0/direcciones', methods=['GET', 'POST'])
-def get_normalized_data():
+def get_addresses():
     return normalizer.process_address(request)
 
 
