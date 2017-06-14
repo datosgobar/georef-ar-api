@@ -1,32 +1,65 @@
 # -*- coding: utf-8 -*-
+
+"""Módulo 'data' de georef-api
+
+Contiene funciones que procesan los parámetros de búsqueda de una consulta
+e impactan dicha búsqueda contra las fuentes de datos disponibles.
+"""
+
 import os
 import requests
 from elasticsearch import Elasticsearch
 
 
-def query(address):
-    matches = search_es(address)
-    if not matches and address.get('source') == 'osm':
-        matches = search_osm(address)
+def query_address(search_params):
+    """Busca direcciones para los parámetros de una consulta.
+
+    Args:
+        search_params (dict): Diccionario con parámetros de búsqueda.
+
+    Returns:
+        list: Resultados de búsqueda de una dirección.
+    """
+    matches = search_es(search_params)
+    if not matches and search_params.get('source') == 'osm':
+        matches = search_osm(search_params)
     return matches
 
 
 def query_entity(name, index):
+    """Busca entidades (localidades, departamentos, o provincias)
+        según parámetros de búsqueda de una consulta.
+
+    Args:
+        name (str): Nombre del tipo de entidad.
+        index (str): Nombre del índice sobre el cual realizar la búsqueda.
+
+    Returns:
+        list: Resultados de búsqueda de entidades.
+    """
     fuzzy_match = {'match': {'nombre': {'query': name, 'fuzziness': 'AUTO'}}}
     query = {'query': fuzzy_match if name else {"match_all": {}}}
     result = Elasticsearch().search(index=index, body=query)
     return [hit['_source'] for hit in result['hits']['hits']]
 
 
-def search_es(address):
+def search_es(params):
+    """Busca en ElasticSearch para los parámetros de una consulta.
+
+    Args:
+        params (dict): Diccionario con parámetros de búsqueda.
+
+    Returns:
+        list: Resultados de búsqueda de una dirección.
+    """
     terms = []
-    query = {'query': {'bool': {'must': terms}}, 'size': address['max'] or 10}
-    road = address['road']
-    number = address['number']
+    query = {'query': {'bool': {'must': terms}}, 'size': params['max'] or 10}
+    road = params['road']
+    number = params['number']
     terms.append(
         {'match': {'nomenclatura': {'query': road, 'fuzziness': 'AUTO'}}})
-    locality = address['locality']
-    state = address['state']
+    locality = params['locality']
+    state = params['state']
     if locality:
         terms.append(
             {'match': {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}})
@@ -40,21 +73,29 @@ def search_es(address):
     return addresses
 
 
-def search_osm(address):
+def search_osm(params):
+    """Busca en OpenStreetMap para los parámetros de una consulta.
+
+    Args:
+        params (dict): Diccionario con parámetros de búsqueda.
+
+    Returns:
+        list: Resultados de búsqueda de una dirección.
+    """
     url = os.environ.get('OSM_API_URL')
-    query = address['road']
-    if address.get('number'):
-        query += ' %s' % address['number']
-    if address.get('locality'):
-        query += ', %s' % address['locality']
-    if address.get('state'):
-        query += ', %s' % address['state']
+    query = params['road']
+    if params.get('number'):
+        query += ' %s' % params['number']
+    if params.get('locality'):
+        query += ', %s' % params['locality']
+    if params.get('state'):
+        query += ', %s' % params['state']
     params = {
         'q': query,
         'format': 'json',
         'countrycodes': 'ar',
         'addressdetails': 1,
-        'limit': address.get('max') or 15
+        'limit': params.get('max') or 15
     }
     result = requests.get(url, params=params).json()
     return [parse_osm(match) for match in result
@@ -62,6 +103,14 @@ def search_osm(address):
 
 
 def parse_es(result):
+    """Procesa un resultado de ElasticSearch para modificar información.
+
+    Args:
+        result (dict): Diccionario con resultado.
+
+    Returns:
+        dict: Resultados modificado.
+    """
     obs = {
         'fuente': 'INDEC',
         'info': 'Se procesó correctamente la dirección buscada.'
@@ -71,6 +120,14 @@ def parse_es(result):
 
 
 def parse_osm(result):
+    """Procesa un resultado de OpenStreetMap para modificar información.
+
+    Args:
+        result (dict): Diccionario con resultado.
+
+    Returns:
+        dict: Resultados modificado.
+    """
     return {
         'nomenclatura': result['display_name'],
         'nombre': result['address'].get('road'),
@@ -86,6 +143,16 @@ def parse_osm(result):
 
 
 def process_door(number, addresses):
+    """Procesa direcciones para verificar el número de puerta
+        y agregar información relacionada.
+
+    Args:
+        number (int or None): Número de puerta.
+        addresses (list): Lista de direcciones.
+
+    Returns:
+        list: Lista de direcciones procesadas.
+    """
     for address in addresses:
         if number:
             address['altura'] = None
@@ -109,6 +176,14 @@ def process_door(number, addresses):
 
 
 def parse_osm_type(osm_type):
+    """Convierte un tipo de resultado de OpenStreetMap a un tipo de georef.
+
+    Args:
+        osm_type (str): Tipo de resultado de OpenStreetMap.
+
+    Returns:
+        str: Tipo de resultado de georef.
+    """
     if osm_type == 'residential':
         return 'CALLE'
     elif osm_type == 'secondary':

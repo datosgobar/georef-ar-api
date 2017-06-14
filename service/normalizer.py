@@ -54,7 +54,7 @@ def address_get(request):
         return parser.get_response_for_invalid(request,
         message='El parámetro "direccion" es obligatorio.')
     search = parser.build_search_from(request.args)
-    matches = data.query(search)
+    matches = data.query_address(search)
     result = build_result_for('direcciones', matches)
     return parser.get_response(result)
 
@@ -79,7 +79,7 @@ def address_post(request):
             parsed_address = parser.get_from_string(address)
             matches.append({
                 'original': address,
-                'normalizadas': data.query(parsed_address)
+                'normalizadas': data.query_address(parsed_address)
                 })
     result = build_result_for('direcciones', matches)
     return parser.get_response(result)
