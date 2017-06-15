@@ -1,34 +1,47 @@
 # -*- coding: utf-8 -*-
+from service import app, parser
 from unittest import TestCase
+import flask
 import json
-import service
 
 
 class InputParsingTest(TestCase):
     """Pruebas de procesamiento de parámetros de entrada de la API."""
     def test_query_with_locality_provided(self):
         """El parámetro 'localidad' está presente en el request."""
-        pass
+        with app.test_request_context('?direccion&localidad=Buenos+Aires'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['locality'] == 'Buenos Aires'
 
     def test_query_with_locality_not_provided(self):
         """El parámetro 'localidad' no está en el request."""
-        pass
+        with app.test_request_context('?direccion'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['locality'] is None
 
     def test_query_with_state_provided(self):
         """El parámetro 'provincia' está presente en el request."""
-        pass
+        with app.test_request_context('?direccion&provincia=Buenos+Aires'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['state']  == 'Buenos Aires'
 
     def test_query_with_state_not_provided(self):
         """El parámetro 'provincia' no está en el request."""
-        pass
+        with app.test_request_context('?direccion'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['state'] is None
 
     def test_query_with_max_provided(self):
         """El parámetro 'max' está presente en el request."""
-        pass
+        with app.test_request_context('?direccion&max=50'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['max']  == '50'
 
     def test_query_with_max_not_provided(self):
         """El parámetro 'max' no está en el request."""
-        pass
+        with app.test_request_context('?direccion'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['max'] is None
 
     def test_query_with_fields_provided(self):
         """El parámetro 'campos' está en el request."""
@@ -42,7 +55,7 @@ class InputParsingTest(TestCase):
 class ResultsParsingTest(TestCase):
     """Pruebas de filtrado de resultados según parámetos de entrada."""
     def setUp(self):
-        self.app = service.app.test_client()
+        self.app = app.test_client()
 
     def test_result_filtered_by_locality_only(self):
         """Devuelve todas las direcciones para una localidad dada."""
@@ -53,7 +66,7 @@ class ResultsParsingTest(TestCase):
         endpoint = '/api/v1.0/direcciones?direccion=Austria&localidad=Buenos'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
-        assert len(results['direcciones']) == 1
+        assert len(results['direcciones']) > 1
 
     def test_result_filtered_by_state_only(self):
         """Devuelve todas las direcciones para una provincia dada."""
@@ -61,7 +74,7 @@ class ResultsParsingTest(TestCase):
 
     def test_result_filtered_by_state_with_address(self):
         """Busca y normaliza una dirección para una provincia dada."""
-        endpoint = '/api/v1.0/direcciones?direccion=Austria&provincia=Buenos'
+        endpoint = '/api/v1.0/direcciones?direccion=Austria&localidad=Buenos'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert len(results['direcciones']) > 1
