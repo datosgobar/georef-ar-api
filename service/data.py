@@ -26,7 +26,7 @@ def query_address(search_params):
     return matches
 
 
-def query_entity(name, index):
+def query_entity(index, name=None, department=None, state=None):
     """Busca entidades (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
@@ -37,8 +37,25 @@ def query_entity(name, index):
     Returns:
         list: Resultados de búsqueda de entidades.
     """
-    fuzzy_match = {'match': {'nombre': {'query': name, 'fuzziness': 'AUTO'}}}
-    query = {'query': fuzzy_match if name else {"match_all": {}}}
+    terms = []
+    if name:
+        terms.append(
+            {'match': {'nombre': {'query': name, 'fuzziness': 'AUTO'}}})
+    if department:
+        if department.isdigit():
+            condition = {'departamento.id': department}
+        else:
+            condition = {'departamento.nombre': {
+                    'query': department, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
+    if state:
+        if state.isdigit():
+            condition = {'provincia.id': state}
+        else:
+            condition = {'provincia.nombre': {
+                    'query': state, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
+    query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}}}
     result = Elasticsearch().search(index=index, body=query)
     return [hit['_source'] for hit in result['hits']['hits']]
 

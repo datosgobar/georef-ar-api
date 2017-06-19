@@ -95,7 +95,9 @@ def process_locality(request):
         Resultado de la consulta como objecto flask.Response.
     """
     name = request.args.get('nombre')
-    matches = data.query_entity(name, 'localidades')
+    department = request.args.get('departamento')
+    state = request.args.get('provincia')
+    matches = data.query_entity('localidades', name, department, state)
     result = build_result_for('localidades', matches)
     return parser.get_response(result)
 
@@ -110,7 +112,8 @@ def process_department(request):
         Resultado de la consulta como objecto flask.Response.
     """
     name = request.args.get('nombre')
-    matches = data.query_entity(name, 'departamentos')
+    state = request.args.get('provincia')
+    matches = data.query_entity('departamentos', name, state=state)
     result = build_result_for('departamentos', matches)
     return parser.get_response(result)
 
@@ -125,6 +128,6 @@ def process_state(request):
         Resultado de la consulta como objecto flask.Response.
     """
     name = request.args.get('nombre')
-    matches = data.query_entity(name, 'provincias')
+    matches = data.query_entity('provincias', name)
     result = build_result_for('provincias', matches)
     return parser.get_response(result)
