@@ -39,8 +39,8 @@ def query_entity(index, name=None, department=None, state=None):
     """
     terms = []
     if name:
-        terms.append(
-            {'match': {'nombre': {'query': name, 'fuzziness': 'AUTO'}}})
+        condition = {'nombre': {'query': name, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
     if department:
         if department.isdigit():
             condition = {'departamento.id': department}
