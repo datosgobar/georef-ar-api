@@ -195,6 +195,7 @@ Retorna un listado de departamentos.
 
 Entrada:
 - nombre: para filtrar por nombre.
+- provincia: para filtrar por *ID* o *nombre* de provincia.
 
 **GET** `/api/v1.0/departamentos?nombre=capital`
 ```json
@@ -235,6 +236,8 @@ Retorna un listado de localidades.
 
 Entrada:
 - nombre: para filtrar por nombre.
+- departamento: para filtrar por *ID* o *nombre* de departamento.
+- provincia: para filtrar por *ID* o *nombre* de provincia.
 
 **GET** `/api/v1.0/localidades`
 ```json
