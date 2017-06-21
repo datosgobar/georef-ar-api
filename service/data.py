@@ -31,8 +31,10 @@ def query_entity(index, name=None, department=None, state=None):
         según parámetros de búsqueda de una consulta.
 
     Args:
-        name (str): Nombre del tipo de entidad.
         index (str): Nombre del índice sobre el cual realizar la búsqueda.
+        name (str): Nombre del tipo de entidad (opcional).
+        department (str): ID o nombre de departamento para filtrar (opcional).
+        state (str): ID o nombre de provincia para filtrar (opcional).
 
     Returns:
         list: Resultados de búsqueda de entidades.
