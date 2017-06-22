@@ -330,7 +330,7 @@ Retorna detalles de una calle particular.
     "nombre": "12 de Octubre",
     "tipo": "Avenida",
     "altura_inicial": 1,
-    "altura_final": 99
+    "altura_final": 99,
     "localidad": "San Carlos de Bariloche",
     "provincia": "Río Negro",
     "geom": "Ax0BF543E..."
