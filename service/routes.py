@@ -15,6 +15,11 @@ def get_addresses():
     return normalizer.process_address(request)
 
 
+@app.route('/api/v1.0/calles', methods=['GET'])
+def get_streets():
+    return normalizer.process_street(request)
+
+
 @app.route('/api/v1.0/localidades', methods=['GET'])
 def get_localities():
     return normalizer.process_locality(request)

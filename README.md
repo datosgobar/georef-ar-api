@@ -329,17 +329,13 @@ Retorna detalles de una calle particular.
     "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
     "nombre": "12 de Octubre",
     "tipo": "Avenida",
-    "altura": {
-        "inicial": 1,
-        "final": 99
-    },
+    "altura_inicial": 1,
+    "altura_final": 99
     "localidad": "San Carlos de Bariloche",
     "provincia": "Río Negro",
     "geom": "Ax0BF543E..."
 }
 ```
-
-### Geocodificador `/api/v1.0/geocodificador`
 
 
 ## Contacto

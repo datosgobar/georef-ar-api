@@ -85,6 +85,22 @@ def address_post(request):
     return parser.get_response(result)
 
 
+def process_street(request):
+    """Procesa una consulta de tipo GET para normalizar calles.
+
+    Args:
+        request (flask.Request): Objeto con información de la consulta HTTP.
+
+    Returns:
+        Resultado de la consulta como objecto flask.Response.
+    """
+    name = request.args.get('nombre')
+    state = request.args.get('provincia')
+    matches = data.query_entity('calles', name, state=state)
+    result = build_result_for('calles', matches)
+    return parser.get_response(result)
+
+
 def process_locality(request):
     """Procesa una consulta de tipo GET para normalizar localidades.
 
