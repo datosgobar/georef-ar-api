@@ -95,7 +95,8 @@ def process_street(request):
         Resultado de la consulta como objecto flask.Response.
     """
     name = request.args.get('nombre')
-    matches = data.query_entity('calles', name)
+    max = request.args.get('max')
+    matches = data.query_entity('calles', name, max=max)
     result = build_result_for('calles', matches)
     return parser.get_response(result)
 
@@ -112,7 +113,8 @@ def process_locality(request):
     name = request.args.get('nombre')
     department = request.args.get('departamento')
     state = request.args.get('provincia')
-    matches = data.query_entity('localidades', name, department, state)
+    max = request.args.get('max')
+    matches = data.query_entity('localidades', name, department, state, max)
     result = build_result_for('localidades', matches)
     return parser.get_response(result)
 
@@ -128,7 +130,8 @@ def process_department(request):
     """
     name = request.args.get('nombre')
     state = request.args.get('provincia')
-    matches = data.query_entity('departamentos', name, state=state)
+    max = request.args.get('max')
+    matches = data.query_entity('departamentos', name, state=state, max=max)
     result = build_result_for('departamentos', matches)
     return parser.get_response(result)
 
@@ -143,6 +146,7 @@ def process_state(request):
         Resultado de la consulta como objecto flask.Response.
     """
     name = request.args.get('nombre')
-    matches = data.query_entity('provincias', name)
+    max = request.args.get('max') or 24
+    matches = data.query_entity('provincias', name, max=max)
     result = build_result_for('provincias', matches)
     return parser.get_response(result)

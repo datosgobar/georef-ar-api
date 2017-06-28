@@ -26,7 +26,7 @@ def query_address(search_params):
     return matches
 
 
-def query_entity(index, name=None, department=None, state=None):
+def query_entity(index, name=None, department=None, state=None, max=None):
     """Busca entidades (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
@@ -57,7 +57,8 @@ def query_entity(index, name=None, department=None, state=None):
             condition = {'provincia.nombre': {
                     'query': state, 'fuzziness': 'AUTO'}}
         terms.append({'match': condition})
-    query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}}}
+    query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
+             'size': max or 10}
     result = Elasticsearch().search(index=index, body=query)
     return [hit['_source'] for hit in result['hits']['hits']]
 
