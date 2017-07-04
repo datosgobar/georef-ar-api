@@ -7,6 +7,7 @@ e impactan dicha búsqueda contra las fuentes de datos disponibles.
 """
 
 import os
+import psycopg2
 import requests
 from elasticsearch import Elasticsearch
 
@@ -188,7 +189,12 @@ def process_door(number, addresses):
                     for section in address.get('tramos'):
                         if (section['inicio_derecha'] <= number and
                             number <= section['fin_izquierda']):
-                            address['geometria'] = section['geometria']
+                            #address['geometria'] = section['geometria']
+                            address['ubicacion'] = location(
+                                section['geometria'],
+                                number,
+                                section['inicio_derecha'],
+                                section['fin_izquierda'])
                             del address['centroide']
                             break
                 else:
@@ -199,6 +205,8 @@ def process_door(number, addresses):
         del address['altura_inicial']
         del address['altura_final']
         del address['tramos']
+
+        # get coordinates for available addresses.
     return addresses
 
 
@@ -221,3 +229,20 @@ def parse_osm_type(osm_type):
         return 'CALLE_ALTURA'
     else:
         return 'SIN_CLASIFICAR'
+
+
+def location(geom, number, start, end):
+    args = geom, number, start, end
+    query = """SELECT geocodificar('%s', %s, %s, %s);""" % args
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        location = cursor.fetchall()[0][0]
+    return location
+
+
+def get_db_connection():
+    return psycopg2.connect(
+        dbname=os.environ.get('POSTGRES_DBNAME'),
+        user=os.environ.get('POSTGRES_USER'),
+        password=os.environ.get('POSTGRES_PASSWORD'))
