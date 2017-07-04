@@ -238,7 +238,8 @@ def location(geom, number, start, end):
     with connection.cursor() as cursor:
         cursor.execute(query)
         location = cursor.fetchall()[0][0]
-    return location
+    lat, lon = location.split(',')
+    return {'lat': lat, 'lon': lon}
 
 
 def get_db_connection():
