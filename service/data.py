@@ -86,7 +86,7 @@ def search_es(params):
     if state:
         terms.append(
             {'match': {'provincia': {'query': state, 'fuzziness': 'AUTO'}}})
-    result = Elasticsearch().search(body=query)
+    result = Elasticsearch().search(index='sanluis', body=query)
     addresses = [parse_es(hit) for hit in result['hits']['hits']]
     if addresses:
         addresses = process_door(number, addresses)
@@ -133,7 +133,7 @@ def parse_es(result):
     """
     obs = {
         'fuente': 'INDEC',
-        'info': 'Se procesó correctamente la dirección buscada.'
+        #'info': 'Se procesó correctamente la dirección buscada.'
         }
     result['_source'].update(observaciones=obs)
     return result['_source']
@@ -176,7 +176,7 @@ def process_door(number, addresses):
     for address in addresses:
         if number:
             address['altura'] = None
-            info = address['observaciones']['info']
+            info = 'Se procesó correctamente la dirección buscada.'
             st_start = address.get('altura_inicial')
             st_end = address.get('altura_final')
             if st_start and st_end:
@@ -185,6 +185,12 @@ def process_door(number, addresses):
                     parts[0] += ' %s' % str(number)
                     address['nomenclatura'] = ', '.join(parts)
                     address['altura'] = number
+                    for section in address.get('tramos'):
+                        if (section['inicio_derecha'] <= number and
+                            number <= section['fin_izquierda']):
+                            address['geometria'] = section['geometria']
+                            del address['centroide']
+                            break
                 else:
                     info = 'La altura buscada está fuera del rango conocido.'
             else:
@@ -192,6 +198,7 @@ def process_door(number, addresses):
             address['observaciones']['info'] = info
         del address['altura_inicial']
         del address['altura_final']
+        del address['tramos']
     return addresses
 
 
