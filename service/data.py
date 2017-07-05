@@ -186,17 +186,7 @@ def process_door(number, addresses):
                     parts[0] += ' %s' % str(number)
                     address['nomenclatura'] = ', '.join(parts)
                     address['altura'] = number
-                    for section in address.get('tramos'):
-                        if (section['inicio_derecha'] <= number and
-                            number <= section['fin_izquierda']):
-                            #address['geometria'] = section['geometria']
-                            address['ubicacion'] = location(
-                                section['geometria'],
-                                number,
-                                section['inicio_derecha'],
-                                section['fin_izquierda'])
-                            del address['centroide']
-                            break
+                    search_street_section(address, number)
                 else:
                     info = 'La altura buscada está fuera del rango conocido.'
             else:
@@ -205,9 +195,17 @@ def process_door(number, addresses):
         del address['altura_inicial']
         del address['altura_final']
         del address['tramos']
-
-        # get coordinates for available addresses.
     return addresses
+
+
+def search_street_section(address, number):
+    for section in address.get('tramos'):
+        if (section['inicio_derecha'] <= number and
+            number <= section['fin_izquierda']):
+            address['ubicacion'] = location(section['geometria'], number,
+                section['inicio_derecha'], section['fin_izquierda'])
+            del address['centroide']
+            return
 
 
 def parse_osm_type(osm_type):
