@@ -199,6 +199,13 @@ def process_door(number, addresses):
 
 
 def search_street_section(address, number):
+    """Procesa los tramos de calle para obtener
+        las coordenadas del número de puerta.
+
+    Args:
+        address (dict): Dirección.
+        number (int): Número de puerta.
+    """
     for section in address.get('tramos'):
         if (section['inicio_derecha'] <= number and
             number <= section['fin_izquierda']):
@@ -230,17 +237,33 @@ def parse_osm_type(osm_type):
 
 
 def location(geom, number, start, end):
+    """Obtiene las coordenadas de un punto dentro de un tramo de calle.
+
+    Args:
+        geom (str): Geometría de un tramo de calle.
+        number (int or None): Número de puerta o altura.
+        start (int): Numeración inicial del tramo de calle.
+        end (int): Numeración final del tramo de calle.
+
+    Returns:
+        dict: Coordenadas del punto.
+    """
     args = geom, number, start, end
     query = """SELECT geocodificar('%s', %s, %s, %s);""" % args
     connection = get_db_connection()
     with connection.cursor() as cursor:
         cursor.execute(query)
-        location = cursor.fetchall()[0][0]
+        location = cursor.fetchall()[0][0] # Query returns single row and col.
     lat, lon = location.split(',')
     return {'lat': lat, 'lon': lon}
 
 
 def get_db_connection():
+    """Se conecta a una base de datos especificada en variables de entorno.
+
+    Returns:
+        connection: Conexión a base de datos.
+    """
     return psycopg2.connect(
         dbname=os.environ.get('POSTGRES_DBNAME'),
         user=os.environ.get('POSTGRES_USER'),
