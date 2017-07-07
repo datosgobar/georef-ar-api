@@ -1,13 +1,41 @@
 # -*- coding: utf-8 -*-
+from service import app, data
 from unittest import TestCase
+from unittest.mock import Mock
 import json
-import service
+
+
+test_response = [
+    {
+        "altura": 123,
+        "localidad": "CIUDAD AUTONOMA BUENOS AIRES",
+        "nombre": "AUSTRIA",
+        "nomenclatura": "CALLE AUSTRIA 123, CIUDAD AUTONOMA BUENOS AIRES...",
+        "observaciones": {
+            "fuente": "INDEC"
+        },
+        "provincia": "CAPITAL FEDERAL",
+        "tipo": "CALLE"
+    },
+    {
+        "altura": None,
+        "localidad": "CIUDAD AUTONOMA BUENOS AIRES",
+        "nombre": "AUSTRALIA",
+        "nomenclatura": "CALLE AUSTRALIA, CIUDAD AUTONOMA BUENOS AIRES...",
+        "observaciones": {
+            "fuente": "INDEC"
+        },
+        "provincia": "CAPITAL FEDERAL",
+        "tipo": "CALLE"
+    }
+]
 
 
 class HouseNumberTest(TestCase):
     """Pruebas relacionadas con la altura de una calle."""
     def setUp(self):
-        self.app = service.app.test_client()
+        self.app = app.test_client()
+        data.query_address = Mock(return_value=test_response)
 
     def test_normalize_when_number_in_range(self):
         """La altura está en el rango de la calle en la base de datos."""
@@ -25,16 +53,17 @@ class HouseNumberTest(TestCase):
 
     def test_normalize_when_number_not_present(self):
         """La calle no tiene numeración en la base de datos."""
-        endpoint = '/api/v1.0/direcciones?direccion=Cabral+123,Buenos+Aires'
+        endpoint = '/api/v1.0/direcciones?direccion=Australia+123,Buenos+Aires'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
-        assert 'AUSTRIA 123' not in results['direcciones'][0]['nomenclatura']
+        assert 'AUSTRALIA 123' not in results['direcciones'][0]['nomenclatura']
 
 
 class MatchResultsTest(TestCase):
     """Pruebas para casos de normalización con uno o más resultados."""
     def setUp(self):
-        self.app = service.app.test_client()
+        self.app = app.test_client()
+        data.query_address = Mock(return_value=test_response)
 
     def test_get_request_with_single_match(self):
         """La dirección recibida coincide con una única dirección."""
@@ -66,7 +95,8 @@ class MatchResultsTest(TestCase):
 class RequestStatusTest(TestCase):
     """Pruebas de los distintos estados de respuesta para un request."""
     def setUp(self):
-        self.app = service.app.test_client()
+        self.app = app.test_client()
+        data.query_address = Mock(return_value=test_response)
 
     def test_valid_request_with_results(self):
         """Request válido con resultados. Retorna OK."""
@@ -78,6 +108,7 @@ class RequestStatusTest(TestCase):
 
     def test_valid_request_with_no_results(self):
         """Request válido sin resultados. Retorna SIN_RESULTADOS."""
+        data.query_address = Mock(return_value=[])
         endpoint = '/api/v1.0/direcciones?direccion=CalleQueNoExiste'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
@@ -86,7 +117,11 @@ class RequestStatusTest(TestCase):
 
     def test_invalid_request(self):
         """Request inválido. Retorna estado INVALIDO."""
-        # This should be invalid for missing a required parameter.
+        # This is invalid for missing a required parameter.
         response = self.app.get('/api/v1.0/direcciones')
         results = json.loads(response.data)
         assert results['estado'] == 'INVALIDO' and response.status_code == 400
+
+
+if __name__ == '__main__':
+    unittest.main()

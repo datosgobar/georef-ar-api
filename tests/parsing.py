@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from service import app, parser
+from service import app, normalizer, parser
 from unittest import TestCase
+from unittest.mock import Mock
 import flask
 import json
 
@@ -54,8 +55,34 @@ class InputParsingTest(TestCase):
 
 class ResultsParsingTest(TestCase):
     """Pruebas de filtrado de resultados según parámetos de entrada."""
+    test_response = """{
+        "estado": "OK",
+        "direcciones": [
+        {
+            "localidad": "CIUDAD AUTONOMA BUENOS AIRES",
+            "nombre": "AUSTRIA",
+            "nomenclatura": "CALLE AUSTRIA, CIUDAD AUTONOMA BUENOS AIRES...",
+            "observaciones": {
+                "fuente": "INDEC"
+            },
+            "provincia": "CAPITAL FEDERAL",
+            "tipo": "CALLE"
+        },
+        {
+            "localidad": "CIUDAD AUTONOMA BUENOS AIRES",
+            "nombre": "AUSTRALIA",
+            "nomenclatura": "CALLE AUSTRALIA, CIUDAD AUTONOMA BUENOS AIRES...",
+            "observaciones": {
+                "fuente": "INDEC"
+            },
+            "provincia": "CAPITAL FEDERAL",
+            "tipo": "CALLE"
+        }]
+    }"""
+
     def setUp(self):
         self.app = app.test_client()
+        normalizer.process_address = Mock(return_value=self.test_response)
 
     def test_result_filtered_by_locality_only(self):
         """Devuelve todas las direcciones para una localidad dada."""
@@ -74,7 +101,7 @@ class ResultsParsingTest(TestCase):
 
     def test_result_filtered_by_state_with_address(self):
         """Busca y normaliza una dirección para una provincia dada."""
-        endpoint = '/api/v1.0/direcciones?direccion=Austria&localidad=Buenos'
+        endpoint = '/api/v1.0/direcciones?direccion=Austria&provincia=Capital'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert len(results['direcciones']) > 1
@@ -86,3 +113,7 @@ class ResultsParsingTest(TestCase):
     def test_result_has_max_requested_or_less(self):
         """Devuelve resultados hasta la cantidad especificada en 'max'."""
         pass
+
+
+if __name__ == '__main__':
+    unittest.main()
