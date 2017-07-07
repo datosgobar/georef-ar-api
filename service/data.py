@@ -181,12 +181,9 @@ def process_door(number, addresses):
             st_start = address.get('altura_inicial')
             st_end = address.get('altura_final')
             if st_start and st_end:
-                if st_start <= number and number <= st_end:
-                    parts = address['nomenclatura'].split(',')
-                    parts[0] += ' %s' % str(number)
-                    address['nomenclatura'] = ', '.join(parts)
-                    address['altura'] = number
-                    search_street_section(address, number)
+                if st_start <= number <= st_end:
+                    update_result_with(address, number)
+                    search_street_section_for(address, number)
                 else:
                     info = 'La altura buscada está fuera del rango conocido.'
             else:
@@ -198,7 +195,23 @@ def process_door(number, addresses):
     return addresses
 
 
-def search_street_section(address, number):
+def update_result_with(address, number):
+    """Agrega la altura a la dirección y a la nomenclatura.
+
+    Args:
+        address (dict): Dirección.
+        number (int): Número de puerta.
+
+    Returns:
+        list: Lista de direcciones procesadas.
+    """
+    parts = address['nomenclatura'].split(',')
+    parts[0] += ' %s' % str(number)
+    address['nomenclatura'] = ', '.join(parts)
+    address['altura'] = number
+
+
+def search_street_section_for(address, number):
     """Procesa los tramos de calle para obtener
         las coordenadas del número de puerta.
 
@@ -207,8 +220,7 @@ def search_street_section(address, number):
         number (int): Número de puerta.
     """
     for section in address.get('tramos'):
-        if (section['inicio_derecha'] <= number and
-            number <= section['fin_izquierda']):
+        if (section['inicio_derecha'] <= number <= section['fin_izquierda']):
             address['ubicacion'] = location(section['geometria'], number,
                 section['inicio_derecha'], section['fin_izquierda'])
             del address['centroide']
