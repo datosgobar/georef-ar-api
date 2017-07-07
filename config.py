@@ -15,5 +15,5 @@ class Config(object):
 
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:postgres@localhost/test'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('POSTGRES_CONNECTION')
     DEBUG = True
