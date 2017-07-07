@@ -178,10 +178,10 @@ def process_door(number, addresses):
         if number:
             address['altura'] = None
             info = 'Se procesó correctamente la dirección buscada.'
-            st_start = address.get('altura_inicial')
-            st_end = address.get('altura_final')
-            if st_start and st_end:
-                if st_start <= number <= st_end:
+            street_start = address.get('altura_inicial')
+            street_end = address.get('altura_final')
+            if street_start and street_end:
+                if street_start <= number <= street_end:
                     update_result_with(address, number)
                     search_street_section_for(address, number)
                 else:
