@@ -77,17 +77,17 @@ def search_es(params):
     query = {'query': {'bool': {'must': terms}}, 'size': params['max'] or 10}
     road = params['road']
     number = params['number']
-    terms.append(
-        {'match': {'nomenclatura': {'query': road, 'fuzziness': 'AUTO'}}})
+    condition = {'nomenclatura': {'query': road, 'fuzziness': 'AUTO'}}
+    terms.append({'match': condition})
     locality = params['locality']
     state = params['state']
     if locality:
-        terms.append(
-            {'match': {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}})
+        condition = {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
     if state:
-        terms.append(
-            {'match': {'provincia': {'query': state, 'fuzziness': 'AUTO'}}})
-    result = Elasticsearch().search(index='sanluis', body=query)
+        condition = {'provincia': {'query': state, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
+    result = Elasticsearch().search(index='calles', body=query)
     addresses = [parse_es(hit) for hit in result['hits']['hits']]
     if addresses:
         addresses = process_door(number, addresses)
@@ -132,10 +132,7 @@ def parse_es(result):
     Returns:
         dict: Resultados modificado.
     """
-    obs = {
-        'fuente': 'INDEC',
-        #'info': 'Se procesó correctamente la dirección buscada.'
-        }
+    obs = {'fuente': 'INDEC'}
     result['_source'].update(observaciones=obs)
     return result['_source']
 
@@ -157,9 +154,7 @@ def parse_osm(result):
         'altura_final': None,
         'localidad': result['address'].get('city'),
         'provincia': result['address'].get('state'),
-        'observaciones': {
-            'fuente': 'OSM'
-            }
+        'observaciones': {'fuente': 'OSM'}
         }
 
 
@@ -199,11 +194,11 @@ def remove_spatial_data_from(address):
     Args:
         address (dict): Dirección.
     """
-    address.pop('altura_inicial')
-    address.pop('altura_final')
-    address.pop('tramos')
+    address.pop('altura_inicial', None)
+    address.pop('altura_final', None)
+    address.pop('tramos', None)
     if address.get('ubicacion'):
-        address.pop('centroide')
+        address.pop('centroide', None)
 
 
 def update_result_with(address, number):
