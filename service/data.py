@@ -168,7 +168,7 @@ def process_door(number, addresses):
         y agregar información relacionada.
 
     Args:
-        number (int or None): Número de puerta.
+        number (int or None): Número de puerta o altura.
         addresses (list): Lista de direcciones.
 
     Returns:
@@ -182,17 +182,28 @@ def process_door(number, addresses):
             street_end = address.get('altura_final')
             if street_start and street_end:
                 if street_start <= number <= street_end:
-                    update_result_with(address, number)
                     search_street_section_for(address, number)
+                    update_result_with(address, number)
                 else:
                     info = 'La altura buscada está fuera del rango conocido.'
             else:
                 info = 'La calle no tiene numeración en la base de datos.'
             address['observaciones']['info'] = info
-        del address['altura_inicial']
-        del address['altura_final']
-        del address['tramos']
+        remove_spatial_data_from(address)
     return addresses
+
+
+def remove_spatial_data_from(address):
+    """Remueve los campos de límites y geometría de una dirección procesada.
+
+    Args:
+        address (dict): Dirección.
+    """
+    address.pop('altura_inicial')
+    address.pop('altura_final')
+    address.pop('tramos')
+    if address.get('ubicacion'):
+        address.pop('centroide')
 
 
 def update_result_with(address, number):
@@ -200,10 +211,7 @@ def update_result_with(address, number):
 
     Args:
         address (dict): Dirección.
-        number (int): Número de puerta.
-
-    Returns:
-        list: Lista de direcciones procesadas.
+        number (int): Número de puerta o altura.
     """
     parts = address['nomenclatura'].split(',')
     parts[0] += ' %s' % str(number)
@@ -217,13 +225,12 @@ def search_street_section_for(address, number):
 
     Args:
         address (dict): Dirección.
-        number (int): Número de puerta.
+        number (int): Número de puerta o altura.
     """
     for section in address.get('tramos'):
         if (section['inicio_derecha'] <= number <= section['fin_izquierda']):
             address['ubicacion'] = location(section['geometria'], number,
                 section['inicio_derecha'], section['fin_izquierda'])
-            del address['centroide']
             return
 
 
