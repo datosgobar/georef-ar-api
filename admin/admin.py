@@ -3,8 +3,6 @@ from flask_admin import Admin, expose, helpers, AdminIndexView
 from flask_admin.contrib import sqla
 import flask_login as login
 
-from werkzeug.security import generate_password_hash
-
 from admin.models import User
 from admin.database import db
 from admin.forms import LoginForm, RegistrationForm
