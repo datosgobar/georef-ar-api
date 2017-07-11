@@ -1,11 +1,12 @@
 from flask import url_for, redirect, request
 from flask_admin import Admin, expose, helpers, AdminIndexView
 from flask_admin.contrib import sqla
+from flask_admin.contrib.sqla import ModelView
 import flask_login as login
 
 from admin.models import User
 from admin.database import db
-from admin.forms import LoginForm, RegistrationForm
+from admin.forms import LoginForm
 
 
 class MyAdminIndexView(AdminIndexView):
@@ -26,31 +27,7 @@ class MyAdminIndexView(AdminIndexView):
 
         if login.current_user.is_authenticated:
             return redirect(url_for('.index'))
-        link = '<p>¿No tiene una cuenta?<a href="' + \
-               url_for('.register_view') + '"> Registrarse</a></p>'
         self._template_args['form'] = form
-        self._template_args['link'] = link
-        return super(MyAdminIndexView, self).index()
-
-    @expose('/register/', methods=('GET', 'POST'))
-    def register_view(self):
-        form = RegistrationForm(request.form)
-        if helpers.validate_form_on_submit(form):
-            user = User()
-
-            form.populate_obj(user)
-
-            user.password = generate_password_hash(form.password.data)
-
-            db.session.add(user)
-            db.session.commit()
-
-            login.login_user(user)
-            return redirect(url_for('.index'))
-        link = '<p>¿Ya tiene una cuenta? <a href="' + url_for(
-            '.login_view') + '">Inicie sesión.</a></p>'
-        self._template_args['form'] = form
-        self._template_args['link'] = link
         return super(MyAdminIndexView, self).index()
 
     @expose('/logout/')
@@ -60,6 +37,7 @@ class MyAdminIndexView(AdminIndexView):
 
 
 class MyModelView(sqla.ModelView):
+    create_template = 'create.html'
     column_list = ('username', 'email', 'active')
 
     def is_accessible(self):
