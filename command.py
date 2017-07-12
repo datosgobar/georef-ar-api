@@ -1,11 +1,10 @@
 import re
 import sys
 
-from flask_script import Command, prompt_pass, prompt
-from werkzeug.security import generate_password_hash
+from flask_script import Command, prompt, prompt_pass
+from flask_security.utils import hash_password
 
 from admin.models import User
-
 
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
@@ -36,10 +35,8 @@ class CreateUserCommand(Command):
 
         admin = User(
             username=username, email=email,
-            password=generate_password_hash(password), active=True
+            password=hash_password(password), active=True
         )
         self.__db.session.add(admin)
         self.__db.session.commit()
         print("Listo!")
-
-
