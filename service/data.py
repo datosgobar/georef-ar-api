@@ -222,7 +222,7 @@ def search_street_section_for(address, number):
         address (dict): Dirección.
         number (int): Número de puerta o altura.
     """
-    for section in address.get('tramos'):
+    for section in address.get('tramos', []):
         if (section['inicio_derecha'] <= number <= section['fin_izquierda']):
             address['ubicacion'] = location(section['geometria'], number,
                 section['inicio_derecha'], section['fin_izquierda'])
