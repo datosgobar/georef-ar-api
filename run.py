@@ -8,7 +8,7 @@ from service.authenticate import authenticate, identity, user_data_store
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object('config.DevelopmentConfig')
+    app.config.from_object('config.Config')
 
     from service.routes import api
     app.register_blueprint(api)
