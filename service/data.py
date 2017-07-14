@@ -210,7 +210,7 @@ def update_result_with(address, number):
     """
     parts = address['nomenclatura'].split(',')
     parts[0] += ' %s' % str(number)
-    address['nomenclatura'] = ', '.join(parts)
+    address['nomenclatura'] = ','.join(parts)
     address['altura'] = number
 
 
