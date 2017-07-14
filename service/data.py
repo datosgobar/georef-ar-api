@@ -77,17 +77,17 @@ def search_es(params):
     query = {'query': {'bool': {'must': terms}}, 'size': params['max'] or 10}
     road = params['road']
     number = params['number']
-    terms.append(
-        {'match': {'nomenclatura': {'query': road, 'fuzziness': 'AUTO'}}})
+    condition = {'nomenclatura': {'query': road, 'fuzziness': 'AUTO'}}
+    terms.append({'match': condition})
     locality = params['locality']
     state = params['state']
     if locality:
-        terms.append(
-            {'match': {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}})
+        condition = {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
     if state:
-        terms.append(
-            {'match': {'provincia': {'query': state, 'fuzziness': 'AUTO'}}})
-    result = Elasticsearch().search(index='sanluis', body=query)
+        condition = {'provincia': {'query': state, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
+    result = Elasticsearch().search(index='calles', body=query)
     addresses = [parse_es(hit) for hit in result['hits']['hits']]
     if addresses:
         addresses = process_door(number, addresses)
@@ -132,10 +132,7 @@ def parse_es(result):
     Returns:
         dict: Resultados modificado.
     """
-    obs = {
-        'fuente': 'INDEC',
-        #'info': 'Se procesó correctamente la dirección buscada.'
-        }
+    obs = {'fuente': 'INDEC'}
     result['_source'].update(observaciones=obs)
     return result['_source']
 
@@ -157,9 +154,7 @@ def parse_osm(result):
         'altura_final': None,
         'localidad': result['address'].get('city'),
         'provincia': result['address'].get('state'),
-        'observaciones': {
-            'fuente': 'OSM'
-            }
+        'observaciones': {'fuente': 'OSM'}
         }
 
 
@@ -168,7 +163,7 @@ def process_door(number, addresses):
         y agregar información relacionada.
 
     Args:
-        number (int or None): Número de puerta.
+        number (int or None): Número de puerta o altura.
         addresses (list): Lista de direcciones.
 
     Returns:
@@ -178,36 +173,60 @@ def process_door(number, addresses):
         if number:
             address['altura'] = None
             info = 'Se procesó correctamente la dirección buscada.'
-            st_start = address.get('altura_inicial')
-            st_end = address.get('altura_final')
-            if st_start and st_end:
-                if st_start <= number and number <= st_end:
-                    parts = address['nomenclatura'].split(',')
-                    parts[0] += ' %s' % str(number)
-                    address['nomenclatura'] = ', '.join(parts)
-                    address['altura'] = number
-                    for section in address.get('tramos'):
-                        if (section['inicio_derecha'] <= number and
-                            number <= section['fin_izquierda']):
-                            #address['geometria'] = section['geometria']
-                            address['ubicacion'] = location(
-                                section['geometria'],
-                                number,
-                                section['inicio_derecha'],
-                                section['fin_izquierda'])
-                            del address['centroide']
-                            break
+            street_start = address.get('altura_inicial')
+            street_end = address.get('altura_final')
+            if street_start and street_end:
+                if street_start <= number <= street_end:
+                    search_street_section_for(address, number)
+                    update_result_with(address, number)
                 else:
                     info = 'La altura buscada está fuera del rango conocido.'
             else:
                 info = 'La calle no tiene numeración en la base de datos.'
             address['observaciones']['info'] = info
-        del address['altura_inicial']
-        del address['altura_final']
-        del address['tramos']
-
-        # get coordinates for available addresses.
+        remove_spatial_data_from(address)
     return addresses
+
+
+def remove_spatial_data_from(address):
+    """Remueve los campos de límites y geometría de una dirección procesada.
+
+    Args:
+        address (dict): Dirección.
+    """
+    address.pop('altura_inicial', None)
+    address.pop('altura_final', None)
+    address.pop('tramos', None)
+    if address.get('ubicacion'):
+        address.pop('centroide', None)
+
+
+def update_result_with(address, number):
+    """Agrega la altura a la dirección y a la nomenclatura.
+
+    Args:
+        address (dict): Dirección.
+        number (int): Número de puerta o altura.
+    """
+    parts = address['nomenclatura'].split(',')
+    parts[0] += ' %s' % str(number)
+    address['nomenclatura'] = ', '.join(parts)
+    address['altura'] = number
+
+
+def search_street_section_for(address, number):
+    """Procesa los tramos de calle para obtener
+        las coordenadas del número de puerta.
+
+    Args:
+        address (dict): Dirección.
+        number (int): Número de puerta o altura.
+    """
+    for section in address.get('tramos', []):
+        if (section['inicio_derecha'] <= number <= section['fin_izquierda']):
+            address['ubicacion'] = location(section['geometria'], number,
+                section['inicio_derecha'], section['fin_izquierda'])
+            return
 
 
 def parse_osm_type(osm_type):
@@ -232,17 +251,33 @@ def parse_osm_type(osm_type):
 
 
 def location(geom, number, start, end):
+    """Obtiene las coordenadas de un punto dentro de un tramo de calle.
+
+    Args:
+        geom (str): Geometría de un tramo de calle.
+        number (int or None): Número de puerta o altura.
+        start (int): Numeración inicial del tramo de calle.
+        end (int): Numeración final del tramo de calle.
+
+    Returns:
+        dict: Coordenadas del punto.
+    """
     args = geom, number, start, end
     query = """SELECT geocodificar('%s', %s, %s, %s);""" % args
     connection = get_db_connection()
     with connection.cursor() as cursor:
         cursor.execute(query)
-        location = cursor.fetchall()[0][0]
+        location = cursor.fetchall()[0][0] # Query returns single row and col.
     lat, lon = location.split(',')
     return {'lat': lat, 'lon': lon}
 
 
 def get_db_connection():
+    """Se conecta a una base de datos especificada en variables de entorno.
+
+    Returns:
+        connection: Conexión a base de datos.
+    """
     return psycopg2.connect(
         dbname=os.environ.get('POSTGRES_DBNAME'),
         user=os.environ.get('POSTGRES_USER'),
