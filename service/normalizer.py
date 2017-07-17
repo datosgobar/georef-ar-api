@@ -95,8 +95,11 @@ def process_street(request):
         Resultado de la consulta como objecto flask.Response.
     """
     name = request.args.get('nombre')
+    locality = request.args.get('localidad')
+    state = request.args.get('provincia')
+    road_type = request.args.get('tipo')
     max = request.args.get('max')
-    matches = data.query_entity('calles', name, max=max)
+    matches = data.query_streets(name, locality, state, road_type, max)
     result = build_result_for('calles', matches)
     return parser.get_response(result)
 

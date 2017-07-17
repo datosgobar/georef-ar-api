@@ -12,6 +12,39 @@ import requests
 from elasticsearch import Elasticsearch
 
 
+def query_streets(name=None, locality=None, state=None, road=None, max=None):
+    """Busca calles según parámetros de búsqueda de una consulta.
+
+    Args:
+        name (str): Nombre de la calle para filtrar (opcional).
+        locality (str): Nombre de la localidad para filtrar (opcional).
+        department (str): ID o nombre de departamento para filtrar (opcional).
+        state (str): ID o nombre de provincia para filtrar (opcional).
+        road_type (str): Nombre del tipo de camino para filtrar (opcional).
+        max (int): Limita la cantidad de resultados (opcional)
+
+    Returns:
+        list: Resultados de búsqueda de calles.
+    """
+    terms = []
+    if name:
+        condition = {'nombre': {'query': name, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
+    if locality:
+        condition = {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
+    if state:
+        condition = {'provincia': {'query': state, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
+    if road:
+        condition = {'tipo': {'query': road, 'fuzziness': 'AUTO'}}
+        terms.append({'match': condition})
+    query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
+             'size': max or 10}
+    result = Elasticsearch().search('calles', body=query)
+    return [hit['_source'] for hit in result['hits']['hits']]
+
+
 def query_address(search_params):
     """Busca direcciones para los parámetros de una consulta.
 
@@ -36,6 +69,7 @@ def query_entity(index, name=None, department=None, state=None, max=None):
         name (str): Nombre del tipo de entidad (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
+        max (int): Limita la cantidad de resultados (opcional)
 
     Returns:
         list: Resultados de búsqueda de entidades.
