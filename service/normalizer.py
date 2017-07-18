@@ -54,6 +54,7 @@ def address_get(request):
         return parser.get_response_for_invalid(request,
         message='El parámetro "direccion" es obligatorio.')
     search = parser.build_search_from(request.args)
+    data.save_address(search)
     matches = data.query_address(search)
     result = build_result_for('direcciones', matches)
     return parser.get_response(result)

@@ -69,7 +69,8 @@ def build_search_from(params):
         'locality': locality,
         'state': state,
         'max': max,
-        'source': source
+        'source': source,
+        'text': params.get('direccion')
     }
 
 

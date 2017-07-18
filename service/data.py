@@ -306,6 +306,20 @@ def location(geom, number, start, end):
     return {'lat': lat, 'lon': lon}
 
 
+def save_address(search, user=None):
+    """Guarda información de una búsqueda."""
+    search_data = {
+        'search_text': search['text'],
+        #'road_type': search['road_type'], <=> parsear de tipo de calle.
+        'road_name': search['road'],
+        'door_number': search['number'],
+        'locality': search['locality'],
+        'state': search['state']
+    }
+    url = os.environ.get('GEOREF_URL') + 'save_address_search'
+    response = requests.post(url, data=search_data)
+
+
 def get_db_connection():
     """Se conecta a una base de datos especificada en variables de entorno.
 
