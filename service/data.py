@@ -317,7 +317,10 @@ def save_address(search, user=None):
         'state': search['state']
     }
     url = os.environ.get('GEOREF_URL') + 'save_address_search'
-    response = requests.post(url, data=search_data)
+    try:
+        response = requests.post(url, data=search_data)
+    except requests.exceptions.RequestException:
+        pass
 
 
 def get_db_connection():
