@@ -154,6 +154,58 @@ Salida: JSON con el siguiente formato.
 }
 ```
 
+### Calles `/api/v1.0/calles`
+Retorna calles (normalizadas) de una localidad o provincia.
+
+Entrada:
+- localidad: para filtrar por localidad.
+- provincia: para filtrar por provincia.
+- tipo: para filtrar por tipo de camino.
+
+Ejemplo: obtener todas las calles de Bariloche.
+
+**GET** `/api/v1.0/calles?localidad=Bariloche`
+
+Salida: JSON con el siguiente formato.
+```json
+{
+    "estado": "OK",
+    "calles": [
+        {
+            "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+            "tipo": "Avenida",
+            "uri": ".../api/v1.0/calles/1"
+        },
+        {
+            "nomenclatura": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
+            "tipo": "Calle",
+            "uri": ".../api/v1.0/calles/2"
+        },
+        {
+            "..."
+        },
+    ],
+}
+```
+
+**GET** `/api/v1.0/calles/{id}`
+
+Retorna detalles de una calle particular.
+```json
+{
+    "estado": "OK",
+    "id": 1,
+    "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+    "nombre": "12 de Octubre",
+    "tipo": "Avenida",
+    "altura_inicial": 1,
+    "altura_final": 99,
+    "localidad": "San Carlos de Bariloche",
+    "provincia": "Río Negro",
+    "geom": "Ax0BF543E..."
+}
+```
+
 ### Provincias `/api/v1.0/provincias`
 Retorna un listado de provincias.
 
@@ -282,58 +334,6 @@ Entrada:
     },
     "..."
   ]
-}
-```
-
-### Calles `/api/v1.0/calles`
-Retorna calles (normalizadas) de una localidad o provincia.
-
-Entrada:
-- localidad: para filtrar por localidad.
-- provincia: para filtrar por provincia.
-- tipo: para filtrar por tipo de camino.
-
-Ejemplo: obtener todas las calles de Bariloche.
-
-**GET** `/api/v1.0/calles?localidad=Bariloche`
-
-Salida: JSON con el siguiente formato.
-```json
-{
-    "estado": "OK",
-    "calles": [
-        {
-            "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
-            "tipo": "Avenida",
-            "uri": ".../api/v1.0/calles/1"
-        },
-        {
-            "nomenclatura": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
-            "tipo": "Calle",
-            "uri": ".../api/v1.0/calles/2"
-        },
-        {
-            "..."
-        },
-    ],
-}
-```
-
-**GET** `/api/v1.0/calles/{id}`
-
-Retorna detalles de una calle particular.
-```json
-{
-    "estado": "OK",
-    "id": 1,
-    "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
-    "nombre": "12 de Octubre",
-    "tipo": "Avenida",
-    "altura_inicial": 1,
-    "altura_final": 99,
-    "localidad": "San Carlos de Bariloche",
-    "provincia": "Río Negro",
-    "geom": "Ax0BF543E..."
 }
 ```
 
