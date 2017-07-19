@@ -43,17 +43,17 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
     """
     terms = []
     if name:
-        condition = {'nombre': {'query': name, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+        condition = build_condition('nombre', name, fuzziness='AUTO')
+        terms.append(condition)
     if locality:
-        condition = {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+        condition = build_condition('localidad', locality, fuzziness='AUTO')
+        terms.append(condition)
     if state:
-        condition = {'provincia': {'query': state, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+        condition = build_condition('provincia', state, fuzziness='AUTO')
+        terms.append(condition)
     if road:
-        condition = {'tipo': {'query': road, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+        condition = build_condition('tipo', road, fuzziness='AUTO')
+        terms.append(condition)
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10}
     result = Elasticsearch().search('calles', body=query)
@@ -76,22 +76,22 @@ def query_entity(index, name=None, department=None, state=None, max=None):
     """
     terms = []
     if name:
-        condition = {'nombre': {'query': name, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+        condition = build_condition('nombre', name, fuzziness='AUTO')
+        terms.append(condition)
     if department:
         if department.isdigit():
-            condition = {'departamento.id': department}
+            condition = build_condition('departamento.id', department)
         else:
-            condition = {'departamento.nombre': {
-                    'query': department, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+            condition = build_condition(
+                'departamento.nombre', department, fuzziness='AUTO')
+        terms.append(condition)
     if state:
         if state.isdigit():
-            condition = {'provincia.id': state}
+            condition = build_condition('provincia.id', state)
         else:
-            condition = {'provincia.nombre': {
-                    'query': state, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+            condition = build_condition(
+                'provincia.nombre', state, fuzziness='AUTO')
+        terms.append(condition)
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10}
     result = Elasticsearch().search(index=index, body=query)
@@ -111,21 +111,29 @@ def search_es(params):
     query = {'query': {'bool': {'must': terms}}, 'size': params['max'] or 10}
     road = params['road']
     number = params['number']
-    condition = {'nomenclatura': {'query': road, 'fuzziness': 'AUTO'}}
-    terms.append({'match': condition})
+    condition = build_condition('nomenclatura', road, fuzziness='AUTO')
+    terms.append(condition)
     locality = params['locality']
     state = params['state']
     if locality:
-        condition = {'localidad': {'query': locality, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+        condition = build_condition('localidad', locality, fuzziness='AUTO')
+        terms.append(condition)
     if state:
-        condition = {'provincia': {'query': state, 'fuzziness': 'AUTO'}}
-        terms.append({'match': condition})
+        condition = build_condition('provincia', state, fuzziness='AUTO')
+        terms.append(condition)
     result = Elasticsearch().search(index='calles', body=query)
     addresses = [parse_es(hit) for hit in result['hits']['hits']]
     if addresses:
         addresses = process_door(number, addresses)
     return addresses
+
+
+def build_condition(field, value, fuzziness=None):
+    if fuzziness:
+        query = {field: {'query': value, 'fuzziness': fuzziness}}
+    else:
+        query = {field: value}
+    return {'match': query}
 
 
 def parse_es(result):
