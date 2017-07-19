@@ -43,16 +43,16 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
     """
     terms = []
     if name:
-        condition = build_condition('nombre', name, fuzziness='AUTO')
+        condition = build_condition('nombre', name, fuzzy=True)
         terms.append(condition)
     if locality:
-        condition = build_condition('localidad', locality, fuzziness='AUTO')
+        condition = build_condition('localidad', locality, fuzzy=True)
         terms.append(condition)
     if state:
-        condition = build_condition('provincia', state, fuzziness='AUTO')
+        condition = build_condition('provincia', state, fuzzy=True)
         terms.append(condition)
     if road:
-        condition = build_condition('tipo', road, fuzziness='AUTO')
+        condition = build_condition('tipo', road, fuzzy=True)
         terms.append(condition)
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10}
@@ -76,21 +76,21 @@ def query_entity(index, name=None, department=None, state=None, max=None):
     """
     terms = []
     if name:
-        condition = build_condition('nombre', name, fuzziness='AUTO')
+        condition = build_condition('nombre', name, fuzzy=True)
         terms.append(condition)
     if department:
         if department.isdigit():
             condition = build_condition('departamento.id', department)
         else:
             condition = build_condition(
-                'departamento.nombre', department, fuzziness='AUTO')
+                'departamento.nombre', department, fuzzy=True)
         terms.append(condition)
     if state:
         if state.isdigit():
             condition = build_condition('provincia.id', state)
         else:
             condition = build_condition(
-                'provincia.nombre', state, fuzziness='AUTO')
+                'provincia.nombre', state, fuzzy=True)
         terms.append(condition)
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10}
@@ -111,15 +111,15 @@ def search_es(params):
     query = {'query': {'bool': {'must': terms}}, 'size': params['max'] or 10}
     road = params['road']
     number = params['number']
-    condition = build_condition('nomenclatura', road, fuzziness='AUTO')
+    condition = build_condition('nomenclatura', road, fuzzy=True)
     terms.append(condition)
     locality = params['locality']
     state = params['state']
     if locality:
-        condition = build_condition('localidad', locality, fuzziness='AUTO')
+        condition = build_condition('localidad', locality, fuzzy=True)
         terms.append(condition)
     if state:
-        condition = build_condition('provincia', state, fuzziness='AUTO')
+        condition = build_condition('provincia', state, fuzzy=True)
         terms.append(condition)
     result = Elasticsearch().search(index='calles', body=query)
     addresses = [parse_es(hit) for hit in result['hits']['hits']]
@@ -128,7 +128,7 @@ def search_es(params):
     return addresses
 
 
-def build_condition(field, value, fuzziness=None):
+def build_condition(field, value, fuzzy=False):
     """Crea una condición para Elasticsearch.
 
     Args:
@@ -139,8 +139,8 @@ def build_condition(field, value, fuzziness=None):
     Returns:
         dict: Condición para Elasticsearch.
     """
-    if fuzziness:
-        query = {field: {'query': value, 'fuzziness': fuzziness}}
+    if fuzzy:
+        query = {field: {'query': value, 'fuzziness': 1}}
     else:
         query = {field: value}
     return {'match': query}
