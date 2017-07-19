@@ -12,6 +12,21 @@ import requests
 from elasticsearch import Elasticsearch
 
 
+def query_address(search_params):
+    """Busca direcciones para los parámetros de una consulta.
+
+    Args:
+        search_params (dict): Diccionario con parámetros de búsqueda.
+
+    Returns:
+        list: Resultados de búsqueda de una dirección.
+    """
+    matches = search_es(search_params)
+    if not matches and search_params.get('source') == 'osm':
+        matches = search_osm(search_params)
+    return matches
+
+
 def query_streets(name=None, locality=None, state=None, road=None, max=None):
     """Busca calles según parámetros de búsqueda de una consulta.
 
@@ -45,23 +60,8 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
     return [hit['_source'] for hit in result['hits']['hits']]
 
 
-def query_address(search_params):
-    """Busca direcciones para los parámetros de una consulta.
-
-    Args:
-        search_params (dict): Diccionario con parámetros de búsqueda.
-
-    Returns:
-        list: Resultados de búsqueda de una dirección.
-    """
-    matches = search_es(search_params)
-    if not matches and search_params.get('source') == 'osm':
-        matches = search_osm(search_params)
-    return matches
-
-
 def query_entity(index, name=None, department=None, state=None, max=None):
-    """Busca entidades (localidades, departamentos, o provincias)
+    """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
     Args:
@@ -128,35 +128,6 @@ def search_es(params):
     return addresses
 
 
-def search_osm(params):
-    """Busca en OpenStreetMap para los parámetros de una consulta.
-
-    Args:
-        params (dict): Diccionario con parámetros de búsqueda.
-
-    Returns:
-        list: Resultados de búsqueda de una dirección.
-    """
-    url = os.environ.get('OSM_API_URL')
-    query = params['road']
-    if params.get('number'):
-        query += ' %s' % params['number']
-    if params.get('locality'):
-        query += ', %s' % params['locality']
-    if params.get('state'):
-        query += ', %s' % params['state']
-    params = {
-        'q': query,
-        'format': 'json',
-        'countrycodes': 'ar',
-        'addressdetails': 1,
-        'limit': params.get('max') or 15
-    }
-    result = requests.get(url, params=params).json()
-    return [parse_osm(match) for match in result
-            if match['class'] == 'highway' or match['type'] == 'house']
-
-
 def parse_es(result):
     """Procesa un resultado de ElasticSearch para modificar información.
 
@@ -169,27 +140,6 @@ def parse_es(result):
     obs = {'fuente': 'INDEC'}
     result['_source'].update(observaciones=obs)
     return result['_source']
-
-
-def parse_osm(result):
-    """Procesa un resultado de OpenStreetMap para modificar información.
-
-    Args:
-        result (dict): Diccionario con resultado.
-
-    Returns:
-        dict: Resultados modificado.
-    """
-    return {
-        'nomenclatura': result['display_name'],
-        'nombre': result['address'].get('road'),
-        'tipo': parse_osm_type(result['type']),
-        'altura_inicial': None,
-        'altura_final': None,
-        'localidad': result['address'].get('city'),
-        'provincia': result['address'].get('state'),
-        'observaciones': {'fuente': 'OSM'}
-        }
 
 
 def process_door(number, addresses):
@@ -222,17 +172,19 @@ def process_door(number, addresses):
     return addresses
 
 
-def remove_spatial_data_from(address):
-    """Remueve los campos de límites y geometría de una dirección procesada.
+def search_street_section_for(address, number):
+    """Procesa los tramos de calle para obtener
+        las coordenadas del número de puerta.
 
     Args:
         address (dict): Dirección.
+        number (int): Número de puerta o altura.
     """
-    address.pop('altura_inicial', None)
-    address.pop('altura_final', None)
-    address.pop('tramos', None)
-    if address.get('ubicacion'):
-        address.pop('centroide', None)
+    for section in address.get('tramos', []):
+        if (section['inicio_derecha'] <= number <= section['fin_izquierda']):
+            address['ubicacion'] = location(section['geometria'], number,
+                section['inicio_derecha'], section['fin_izquierda'])
+            return
 
 
 def update_result_with(address, number):
@@ -248,19 +200,67 @@ def update_result_with(address, number):
     address['altura'] = number
 
 
-def search_street_section_for(address, number):
-    """Procesa los tramos de calle para obtener
-        las coordenadas del número de puerta.
+def remove_spatial_data_from(address):
+    """Remueve los campos de límites y geometría de una dirección procesada.
 
     Args:
         address (dict): Dirección.
-        number (int): Número de puerta o altura.
     """
-    for section in address.get('tramos', []):
-        if (section['inicio_derecha'] <= number <= section['fin_izquierda']):
-            address['ubicacion'] = location(section['geometria'], number,
-                section['inicio_derecha'], section['fin_izquierda'])
-            return
+    address.pop('altura_inicial', None)
+    address.pop('altura_final', None)
+    address.pop('tramos', None)
+    if address.get('ubicacion'):
+        address.pop('centroide', None)
+
+
+def search_osm(params):
+    """Busca en OpenStreetMap para los parámetros de una consulta.
+
+    Args:
+        params (dict): Diccionario con parámetros de búsqueda.
+
+    Returns:
+        list: Resultados de búsqueda de una dirección.
+    """
+    url = os.environ.get('OSM_API_URL')
+    query = params['road']
+    if params.get('number'):
+        query += ' %s' % params['number']
+    if params.get('locality'):
+        query += ', %s' % params['locality']
+    if params.get('state'):
+        query += ', %s' % params['state']
+    params = {
+        'q': query,
+        'format': 'json',
+        'countrycodes': 'ar',
+        'addressdetails': 1,
+        'limit': params.get('max') or 15
+    }
+    result = requests.get(url, params=params).json()
+    return [parse_osm(match) for match in result
+            if match['class'] == 'highway' or match['type'] == 'house']
+
+
+def parse_osm(result):
+    """Procesa un resultado de OpenStreetMap para modificar información.
+
+    Args:
+        result (dict): Diccionario con resultado.
+
+    Returns:
+        dict: Resultados modificado.
+    """
+    return {
+        'nomenclatura': result['display_name'],
+        'nombre': result['address'].get('road'),
+        'tipo': parse_osm_type(result['type']),
+        'altura_inicial': None,
+        'altura_final': None,
+        'localidad': result['address'].get('city'),
+        'provincia': result['address'].get('state'),
+        'observaciones': {'fuente': 'OSM'}
+        }
 
 
 def parse_osm_type(osm_type):
@@ -306,6 +306,18 @@ def location(geom, number, start, end):
     return {'lat': lat, 'lon': lon}
 
 
+def get_db_connection():
+    """Se conecta a una base de datos especificada en variables de entorno.
+
+    Returns:
+        connection: Conexión a base de datos.
+    """
+    return psycopg2.connect(
+        dbname=os.environ.get('POSTGRES_DBNAME'),
+        user=os.environ.get('POSTGRES_USER'),
+        password=os.environ.get('POSTGRES_PASSWORD'))
+
+
 def save_address(search, user=None):
     """Guarda información de una búsqueda."""
     search_data = {
@@ -321,15 +333,3 @@ def save_address(search, user=None):
         response = requests.post(url, data=search_data)
     except requests.exceptions.RequestException:
         pass
-
-
-def get_db_connection():
-    """Se conecta a una base de datos especificada en variables de entorno.
-
-    Returns:
-        connection: Conexión a base de datos.
-    """
-    return psycopg2.connect(
-        dbname=os.environ.get('POSTGRES_DBNAME'),
-        user=os.environ.get('POSTGRES_USER'),
-        password=os.environ.get('POSTGRES_PASSWORD'))
