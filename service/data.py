@@ -129,6 +129,16 @@ def search_es(params):
 
 
 def build_condition(field, value, fuzziness=None):
+    """Crea una condición para Elasticsearch.
+
+    Args:
+        field (str): Campo de la condición.
+        value (str): Valor de comparación.
+        fuzziness (str, int or None): Diccionario con resultado.
+
+    Returns:
+        dict: Condición para Elasticsearch.
+    """
     if fuzziness:
         query = {field: {'query': value, 'fuzziness': fuzziness}}
     else:
