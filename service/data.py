@@ -134,7 +134,7 @@ def build_condition(field, value, fuzzy=False):
     Args:
         field (str): Campo de la condición.
         value (str): Valor de comparación.
-        fuzziness (str, int or None): Diccionario con resultado.
+        fuzzy (bool): Bandera para habilitar tolerancia a errores.
 
     Returns:
         dict: Condición para Elasticsearch.
