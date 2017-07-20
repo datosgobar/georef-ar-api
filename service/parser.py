@@ -21,6 +21,33 @@ REQUEST_INVALID = {
         }
     }
 
+ROAD_TYPES_MAP = {
+    'ACCESO': 'ACC',
+    'AUTOPISTA': 'AUT',
+    'AVENIDA': 'AV',
+    'BARRIO': 'BO',
+    'BOULEVARD': 'BV',
+    'CALLEJON': 'CJON',
+    'CAMINO': 'CNO',
+    'DEPARTAMENTO': 'DEP',
+    'DIAGONAL': 'DIAG',
+    'EMPALME': 'EMP',
+    'KILOMETRO': 'KM',
+    'MANZANA': 'MANZ',
+    'NACIONAL': 'NAC',
+    'NAVIO': 'NAV',
+    'PASAJE': 'PJE',
+    'PASILLO': 'PAS',
+    'PEATONAL': 'PEAT',
+    'PICADA': 'PCDA',
+    'PROLONGACION': 'PROL',
+    'PROVINCIA': 'PCIA',
+    'PROVINCIAL': 'PCIAL',
+    'PUERTO': 'PT',
+    'REGIMIENTO': 'RGTO',
+    'REPUBLICA': 'RCA'
+    }
+
 
 def validate(request):
     """Controla que una consulta sea válida para procesar.
@@ -55,7 +82,9 @@ def build_search_from(params):
     Returns:
         dict: Parámetros de búsqueda.
     """
+
     address = params.get('direccion').split(',')
+    road_type = get_road_type(address[0])
     road, number = get_road_and_number(address[0].strip())
     locality = params.get('localidad')
     state = params.get('provincia')
@@ -66,12 +95,28 @@ def build_search_from(params):
     return {
         'number': number,
         'road': road,
+        'road_type': road_type,
         'locality': locality,
         'state': state,
         'max': max,
         'source': source,
         'text': params.get('direccion')
     }
+
+
+def get_road_type(address):
+    """Analiza una dirección para obtener el tipo de camino si existe.
+
+    Args:
+        address (str): Texto con la calle y altura de una dirección.
+
+    Returns:
+        str or None: Tipo de camino (abreviado).
+    """
+    for word in address.split():
+        if word.upper() in ROAD_TYPES_MAP:
+            return ROAD_TYPES_MAP[word.upper()]
+    return None
 
 
 def get_road_and_number(address):
