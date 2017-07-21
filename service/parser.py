@@ -9,6 +9,7 @@ con los que operan los módulos de la API.
 from flask import jsonify, make_response, request
 import re
 
+from service.abbreviations import ROAD_TYPES_MAP
 
 REQUEST_INVALID = {
     'codigo': 400,
@@ -19,33 +20,6 @@ REQUEST_INVALID = {
         'mensaje': 'El Request tiene parámetros inválidos o está incompleto.',
         'info': 'https://github.com/datosgobar/georef-api'
         }
-    }
-
-ROAD_TYPES_MAP = {
-    'ACCESO': 'ACC',
-    'AUTOPISTA': 'AUT',
-    'AVENIDA': 'AV',
-    'BARRIO': 'BO',
-    'BOULEVARD': 'BV',
-    'CALLEJON': 'CJON',
-    'CAMINO': 'CNO',
-    'DEPARTAMENTO': 'DEP',
-    'DIAGONAL': 'DIAG',
-    'EMPALME': 'EMP',
-    'KILOMETRO': 'KM',
-    'MANZANA': 'MANZ',
-    'NACIONAL': 'NAC',
-    'NAVIO': 'NAV',
-    'PASAJE': 'PJE',
-    'PASILLO': 'PAS',
-    'PEATONAL': 'PEAT',
-    'PICADA': 'PCDA',
-    'PROLONGACION': 'PROL',
-    'PROVINCIA': 'PCIA',
-    'PROVINCIAL': 'PCIAL',
-    'PUERTO': 'PT',
-    'REGIMIENTO': 'RGTO',
-    'REPUBLICA': 'RCA'
     }
 
 
@@ -102,6 +76,24 @@ def build_search_from(params):
         'source': source,
         'text': params.get('direccion')
     }
+
+
+def get_abbr(name, collection):
+    """Buscar y devuelve la abreviatura de un nombre en una collección
+
+    Args:
+        name (str): Texto con el nombre a buscar
+        collection (dict): Collección donde buscar el nombre
+
+    Returns:
+        str or None: Nombre abreviado.
+
+    """
+    name = name.upper()
+    for word in name.split():
+        if word in name:
+            return name.replace(word, collection[word.upper()])
+    return None
 
 
 def get_road_type(address):
