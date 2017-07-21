@@ -61,7 +61,7 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10}
     result = Elasticsearch().search('calles', body=query)
-    return [hit['_source'] for hit in result['hits']['hits']]
+    return [parse_es(hit) for hit in result['hits']['hits']]
 
 
 def query_entity(index, name=None, department=None, state=None, max=None):
@@ -111,22 +111,13 @@ def search_es(params):
     Returns:
         list: Resultados de búsqueda de una dirección.
     """
-    terms = []
-    query = {'query': {'bool': {'must': terms}}, 'size': params['max'] or 10}
     road = params['road']
+    road_type = params['road_type']
     number = params['number']
-    condition = build_condition('nomenclatura', road, fuzzy=True)
-    terms.append(condition)
     locality = params['locality']
     state = params['state']
-    if locality:
-        condition = build_condition('localidad', locality, fuzzy=True)
-        terms.append(condition)
-    if state:
-        condition = build_condition('provincia', state, fuzzy=True)
-        terms.append(condition)
-    result = Elasticsearch().search(index='calles', body=query)
-    addresses = [parse_es(hit) for hit in result['hits']['hits']]
+    max = params['max']
+    addresses = query_streets(road, locality, state, road_type, max)
     if addresses:
         addresses = process_door(number, addresses)
     return addresses
