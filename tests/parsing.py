@@ -72,7 +72,7 @@ class InputParsingTest(TestCase):
             'COMANDANTE': 'CMTE',
         }
         with app.test_request_context('?nombre=comandante brown'):
-            parsed_name = parser.get_abbr(
+            parsed_name = parser.get_abbreviation(
                 flask.request.args.get('nombre'), ABBR_STREETS)
             assert parsed_name == 'CMTE BROWN'
 

@@ -78,22 +78,22 @@ def build_search_from(params):
     }
 
 
-def get_abbr(name, collection):
-    """Buscar y devuelve la abreviatura de un nombre en una collección
+def get_abbreviation(name, collection):
+    """Busca y devuelve la abreviatura de un nombre en una collección
 
     Args:
         name (str): Texto con el nombre a buscar
         collection (dict): Collección donde buscar el nombre
 
     Returns:
-        str or None: Nombre abreviado.
+        str: Nombre abreviado si hubo coincidencias.
 
     """
     name = name.upper()
     for word in name.split():
         if word in collection:
-            return name.replace(word, collection[word.upper()])
-    return None
+            name = name.replace(word, collection[word.upper()])
+    return name
 
 
 def get_road_type(address):
