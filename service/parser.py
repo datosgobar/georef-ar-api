@@ -7,9 +7,9 @@ con los que operan los módulos de la API.
 """
 
 from flask import jsonify, make_response, request
+from service.abbreviations import ROAD_TYPES_MAP
 import re
 
-from service.abbreviations import ROAD_TYPES_MAP
 
 REQUEST_INVALID = {
     'codigo': 400,
@@ -91,7 +91,7 @@ def get_abbr(name, collection):
     """
     name = name.upper()
     for word in name.split():
-        if word in name:
+        if word in collection:
             return name.replace(word, collection[word.upper()])
     return None
 
