@@ -58,8 +58,7 @@ def build_search_from(params):
     """
 
     address = params.get('direccion').split(',')
-    road_type = get_road_type(address[0])
-    road, number = get_road_and_number(address[0].strip())
+    road_type, road, number = get_parts_from(address[0].strip())
     locality = params.get('localidad')
     state = params.get('provincia')
     max = params.get('max')
@@ -82,12 +81,11 @@ def get_abbreviation(name, collection):
     """Busca y devuelve la abreviatura de un nombre en una collección
 
     Args:
-        name (str): Texto con el nombre a buscar
-        collection (dict): Collección donde buscar el nombre
+        name (str): Texto con el nombre a buscar.
+        collection (dict): Colección donde buscar el nombre.
 
     Returns:
         str: Nombre abreviado si hubo coincidencias.
-
     """
     name = name.upper()
     for word in name.split():
@@ -96,22 +94,7 @@ def get_abbreviation(name, collection):
     return name
 
 
-def get_road_type(address):
-    """Analiza una dirección para obtener el tipo de camino si existe.
-
-    Args:
-        address (str): Texto con la calle y altura de una dirección.
-
-    Returns:
-        str or None: Tipo de camino (abreviado).
-    """
-    for word in address.split():
-        if word.upper() in ROAD_TYPES_MAP:
-            return ROAD_TYPES_MAP[word.upper()]
-    return None
-
-
-def get_road_and_number(address):
+def get_parts_from(address):
     """Analiza una dirección para separar en calle y altura.
 
     Args:
@@ -120,10 +103,17 @@ def get_road_and_number(address):
     Returns:
         tuple: Tupla con calle y altura de una dirección.
     """
+    road_type = None
+    for word in address.split():
+        if word.upper() in ROAD_TYPES_MAP:
+            road_type = ROAD_TYPES_MAP[word.upper()]
+            address = address.replace(word, '')
+            break
+
     match = re.search(r'(\s[0-9]+?)$', address)
     number = int(match.group(1)) if match else None
-    address = re.sub(r'(\s[0-9]+?)$', r'', address)
-    return address.strip(), number
+    road_name = re.sub(r'(\s[0-9]+?)$', r'', address)
+    return road_type, road_name.strip(), number
 
 
 def get_response(result):
