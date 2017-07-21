@@ -111,13 +111,13 @@ def search_es(params):
     Returns:
         list: Resultados de búsqueda de una dirección.
     """
-    road = params['road']
+    road_name = params['road_name']
     road_type = params['road_type']
     number = params['number']
     locality = params['locality']
     state = params['state']
     max = params['max']
-    addresses = query_streets(road, locality, state, road_type, max)
+    addresses = query_streets(road_name, locality, state, road_type, max)
     if addresses:
         addresses = process_door(number, addresses)
     return addresses
@@ -335,8 +335,8 @@ def save_address(search, user=None):
     """Guarda información de una búsqueda."""
     search_data = {
         'search_text': search['text'],
-        #'road_type': search['road_type'], <=> parsear de tipo de calle.
-        'road_name': search['road'],
+        'road_type': search['road_type'],
+        'road_name': search['road_name'],
         'door_number': search['number'],
         'locality': search['locality'],
         'state': search['state']

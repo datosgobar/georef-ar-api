@@ -58,7 +58,7 @@ def build_search_from(params):
     """
 
     address = params.get('direccion').split(',')
-    road_type, road, number = get_parts_from(address[0].strip())
+    road_type, road_name, number = get_parts_from(address[0].strip())
     locality = params.get('localidad')
     state = params.get('provincia')
     max = params.get('max')
@@ -67,7 +67,7 @@ def build_search_from(params):
         locality = address[1].strip()
     return {
         'number': number,
-        'road': road,
+        'road_name': road_name,
         'road_type': road_type,
         'locality': locality,
         'state': state,
