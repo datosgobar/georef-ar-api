@@ -11,7 +11,7 @@ import psycopg2
 import requests
 from elasticsearch import Elasticsearch
 
-from service.collections import ABBR_STREETS
+from service.abbreviations import ABBR_STREETS
 from service.parser import get_abbr
 
 

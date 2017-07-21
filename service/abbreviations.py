@@ -81,3 +81,32 @@ ABBR_STREETS = {
     'VECINA': 'VEC',
     'VICECOMODORO': 'VCOMOD',
 }
+
+
+
+ROAD_TYPES_MAP = {
+    'ACCESO': 'ACC',
+    'AUTOPISTA': 'AUT',
+    'AVENIDA': 'AV',
+    'BARRIO': 'BO',
+    'BOULEVARD': 'BV',
+    'CALLEJON': 'CJON',
+    'CAMINO': 'CNO',
+    'DEPARTAMENTO': 'DEP',
+    'DIAGONAL': 'DIAG',
+    'EMPALME': 'EMP',
+    'KILOMETRO': 'KM',
+    'MANZANA': 'MANZ',
+    'NACIONAL': 'NAC',
+    'NAVIO': 'NAV',
+    'PASAJE': 'PJE',
+    'PASILLO': 'PAS',
+    'PEATONAL': 'PEAT',
+    'PICADA': 'PCDA',
+    'PROLONGACION': 'PROL',
+    'PROVINCIA': 'PCIA',
+    'PROVINCIAL': 'PCIAL',
+    'PUERTO': 'PT',
+    'REGIMIENTO': 'RGTO',
+    'REPUBLICA': 'RCA'
+    }

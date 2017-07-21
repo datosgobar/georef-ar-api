@@ -24,7 +24,7 @@ class InputParsingTest(TestCase):
         """El parámetro 'provincia' está presente en el request."""
         with app.test_request_context('?direccion&provincia=Buenos+Aires'):
             search = parser.build_search_from(flask.request.args)
-            assert search['state']  == 'Buenos Aires'
+            assert search['state'] == 'Buenos Aires'
 
     def test_query_with_state_not_provided(self):
         """El parámetro 'provincia' no está en el request."""
@@ -36,7 +36,7 @@ class InputParsingTest(TestCase):
         """El parámetro 'max' está presente en el request."""
         with app.test_request_context('?direccion&max=50'):
             search = parser.build_search_from(flask.request.args)
-            assert search['max']  == '50'
+            assert search['max'] == '50'
 
     def test_query_with_max_not_provided(self):
         """El parámetro 'max' no está en el request."""
@@ -63,6 +63,18 @@ class InputParsingTest(TestCase):
         with app.test_request_context('?direccion=av'):
             search = parser.build_search_from(flask.request.args)
             assert search['road_type'] is None
+
+    def test_title_in_name_is_abbreviated(self):
+        ABBR_STREETS = {
+            'CIUDAD': 'CDAD',
+            'COLECTORA': 'COLEC',
+            'CORTADA': 'CORT',
+            'COMANDANTE': 'CMTE',
+        }
+        with app.test_request_context('?nombre=comandante brown'):
+            parsed_name = parser.get_abbr(
+                flask.request.args.get('nombre'), ABBR_STREETS)
+            assert parsed_name == 'CMTE BROWN'
 
 
 class ResultsParsingTest(TestCase):
