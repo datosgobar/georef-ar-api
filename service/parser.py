@@ -104,6 +104,24 @@ def build_search_from(params):
     }
 
 
+def get_abbr(name, collection):
+    """Buscar y devuelve la abreviatura de un nombre en una collección
+
+    Args:
+        name (str): Texto con el nombre a buscar
+        collection (dict): Collección donde buscar el nombre
+
+    Returns:
+        str or None: Nombre abreviado.
+
+    """
+    name = name.upper()
+    for word in name.split():
+        if word in name:
+            return collection[word.upper()]
+    return None
+
+
 def get_road_type(address):
     """Analiza una dirección para obtener el tipo de camino si existe.
 

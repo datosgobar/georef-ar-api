@@ -11,6 +11,9 @@ import psycopg2
 import requests
 from elasticsearch import Elasticsearch
 
+from service.collections import ABBR_STREETS
+from service.parser import get_abbr
+
 
 def query_address(search_params):
     """Busca direcciones para los parámetros de una consulta.
@@ -43,7 +46,8 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
     """
     terms = []
     if name:
-        condition = build_condition('nombre', name, fuzzy=True)
+        condition = build_condition('nombre', get_abbr(name, ABBR_STREETS),
+                                    fuzzy=True)
         terms.append(condition)
     if locality:
         condition = build_condition('localidad', locality, fuzzy=True)
