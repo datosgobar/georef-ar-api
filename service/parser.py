@@ -7,7 +7,7 @@ con los que operan los módulos de la API.
 """
 
 from flask import jsonify, make_response, request
-from service.abbreviations import ROAD_TYPES_MAP
+from service.abbreviations import ABBR_STREETS, ROAD_TYPES
 import re
 
 
@@ -77,7 +77,7 @@ def build_search_from(params):
     }
 
 
-def get_abbreviation(name, collection):
+def get_abbreviated(name):
     """Busca y devuelve la abreviatura de un nombre en una collección
 
     Args:
@@ -89,8 +89,8 @@ def get_abbreviation(name, collection):
     """
     name = name.upper()
     for word in name.split():
-        if word in collection:
-            name = name.replace(word, collection[word.upper()])
+        if word in ABBR_STREETS:
+            name = name.replace(word, ABBR_STREETS[word.upper()])
     return name
 
 
@@ -105,8 +105,8 @@ def get_parts_from(address):
     """
     road_type = None
     for word in address.split():
-        if word.upper() in ROAD_TYPES_MAP:
-            road_type = ROAD_TYPES_MAP[word.upper()]
+        if word.upper() in ROAD_TYPES:
+            road_type = ROAD_TYPES[word.upper()]
             address = address.replace(word, '')
             break
 

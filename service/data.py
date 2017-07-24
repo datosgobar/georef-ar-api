@@ -10,9 +10,7 @@ import os
 import psycopg2
 import requests
 from elasticsearch import Elasticsearch
-
-from service.abbreviations import ABBR_STREETS
-from service.parser import get_abbreviation
+from service.parser import get_abbreviated
 
 
 def query_address(search_params):
@@ -46,8 +44,7 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
     """
     terms = []
     if name:
-        condition = build_condition(
-            'nombre', get_abbreviation(name, ABBR_STREETS), fuzzy=True)
+        condition = build_condition('nombre', get_abbreviated(name), fuzzy=True)
         terms.append(condition)
     if locality:
         condition = build_condition('localidad', locality, fuzzy=True)

@@ -1,5 +1,4 @@
 ABBR_STREETS = {
-
     'AGRIMENSOR': 'AGRIM',
     'AGENTE': 'AGTE',
     'ALFEREZ': 'ALFZ',
@@ -82,9 +81,7 @@ ABBR_STREETS = {
     'VICECOMODORO': 'VCOMOD',
 }
 
-
-
-ROAD_TYPES_MAP = {
+ROAD_TYPES = {
     'ACCESO': 'ACC',
     'AUTOPISTA': 'AUT',
     'AVENIDA': 'AV',
