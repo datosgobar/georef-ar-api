@@ -22,11 +22,10 @@ Salida: JSON con el siguiente formato.
   "estado": "OK|SIN_RESULTADOS|INVALIDO",
   "direcciones": [
     {
-      "nomenclatura": "Avenida Presidente Roque Sáenz Peña 250, 1425 Ciudad ...",
+      "nomenclatura": "Avenida Presidente Roque Sáenz Peña 250, Ciudad ...",
       "tipo": "Avenida",
       "nombre": "Presidente Roque Sáenz Peña",
       "altura": 250,
-      "codigo_postal": 1425,
       "localidad": "Ciudad Autónoma de Buenos Aires",
       "partido": "Ciudad Autónoma de Buenos Aires",
       "provincia": "Capital Federal",
@@ -54,11 +53,10 @@ Si la dirección existe, debería recibir uno o más resultados.
   "estado": "OK",
   "direcciones": [
     {
-      "nomenclatura": "Esteban Echeverría 4497, 1757 Gregorio Laferrere, Buenos Aires",
+      "nomenclatura": "Esteban Echeverría 4497, Gregorio Laferrere, Buenos Aires",
       "tipo": "Calle",
       "nombre": "Esteban Echeverría",
       "altura": 4497,
-      "codigo_postal": 1757,
       "localidad": "Gregorio Laferrere",
       "partido": "La Matanza",
       "provincia": "Buenos Aires",
@@ -68,11 +66,10 @@ Si la dirección existe, debería recibir uno o más resultados.
         }
     },
     {
-      "nomenclatura": "Esteban Echeverría 4497, 1706 Villa Sarmiento, Buenos Aires",
+      "nomenclatura": "Esteban Echeverría 4497, Villa Sarmiento, Buenos Aires",
       "tipo": "Calle",
       "nombre": "Esteban Echeverría",
       "altura": 4497,
-      "codigo_postal": 1706,
       "localidad": "Villa Sarmiento",
       "partido": "Morón",
       "provincia": "Buenos Aires",
@@ -132,11 +129,10 @@ Salida: JSON con el siguiente formato.
       "original": "Roque Sáenz Peña 788, Buenos Aires",
       "normalizadas": [
         {
-          "nomenclatura": "Av. Presidente Roque Sáenz Peña 788, 1035 Ciudad Autónoma ...",
+          "nomenclatura": "Av. Presidente Roque Sáenz Peña 788, Ciudad Autónoma ...",
           "tipo": "Avenida",
           "nombre": "Presidente Roque Sáenz Peña",
           "altura": 788,
-          "codigo_postal": 1035,
           "localidad": "Ciudad Autónoma de Buenos Aires",
           "partido": "Ciudad Autónoma de Buenos Aires",
           "provincia": "Capital Federal",
@@ -161,6 +157,7 @@ Entrada:
 - localidad: para filtrar por localidad.
 - provincia: para filtrar por provincia.
 - tipo: para filtrar por tipo de camino.
+- max: cantidad máxima esperada de sugerencias.
 
 Ejemplo: obtener todas las calles de Bariloche.
 
@@ -188,29 +185,12 @@ Salida: JSON con el siguiente formato.
 }
 ```
 
-**GET** `/api/v1.0/calles/{id}`
-
-Retorna detalles de una calle particular.
-```json
-{
-    "estado": "OK",
-    "id": 1,
-    "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
-    "nombre": "12 de Octubre",
-    "tipo": "Avenida",
-    "altura_inicial": 1,
-    "altura_final": 99,
-    "localidad": "San Carlos de Bariloche",
-    "provincia": "Río Negro",
-    "geom": "Ax0BF543E..."
-}
-```
-
 ### Provincias `/api/v1.0/provincias`
 Retorna un listado de provincias.
 
 Entrada:
 - nombre: para filtrar por nombre.
+- max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/provincias`
 ```json
@@ -248,6 +228,7 @@ Retorna un listado de departamentos.
 Entrada:
 - nombre: para filtrar por nombre.
 - provincia: para filtrar por *ID* o *nombre* de provincia.
+- max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/departamentos?nombre=capital`
 ```json
@@ -290,6 +271,7 @@ Entrada:
 - nombre: para filtrar por nombre.
 - departamento: para filtrar por *ID* o *nombre* de departamento.
 - provincia: para filtrar por *ID* o *nombre* de provincia.
+- max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/localidades`
 ```json
