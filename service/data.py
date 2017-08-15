@@ -57,7 +57,7 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
         terms.append(condition)
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10}
-    result = Elasticsearch().search('calles', body=query)
+    result = Elasticsearch().search(doc_type='calle', body=query)
     return [parse_es(hit) for hit in result['hits']['hits']]
 
 
