@@ -167,11 +167,11 @@ def process_door(number, addresses):
         if number:
             address['altura'] = None
             info = 'Se procesó correctamente la dirección buscada.'
-            street_start = address.get('altura_inicial')
-            street_end = address.get('altura_final')
+            street_start = address.get('inicio_derecha')
+            street_end = address.get('fin_izquierda')
             if street_start and street_end:
                 if street_start <= number <= street_end:
-                    search_street_section_for(address, number)
+                    search_location_for(address, number)
                     update_result_with(address, number)
                 else:
                     info = 'La altura buscada está fuera del rango conocido.'
@@ -182,7 +182,7 @@ def process_door(number, addresses):
     return addresses
 
 
-def search_street_section_for(address, number):
+def search_location_for(address, number):
     """Procesa los tramos de calle para obtener
         las coordenadas del número de puerta.
 
@@ -190,11 +190,10 @@ def search_street_section_for(address, number):
         address (dict): Dirección.
         number (int): Número de puerta o altura.
     """
-    for section in address.get('tramos', []):
-        if (section['inicio_derecha'] <= number <= section['fin_izquierda']):
-            address['ubicacion'] = location(section['geometria'], number,
-                section['inicio_derecha'], section['fin_izquierda'])
-            return
+    if address.get('geometria'):
+        address['ubicacion'] = location(
+            address['geometria'], number,
+            address['inicio_derecha'], address['fin_izquierda'])
 
 
 def update_result_with(address, number):
@@ -216,9 +215,10 @@ def remove_spatial_data_from(address):
     Args:
         address (dict): Dirección.
     """
-    address.pop('altura_inicial', None)
-    address.pop('altura_final', None)
-    address.pop('tramos', None)
+    address.pop('inicio_derecha', None)
+    address.pop('inicio_izquierda', None)
+    address.pop('fin_derecha', None)
+    address.pop('fin_izquierda', None)
     if address.get('ubicacion'):
         address.pop('centroide', None)
 
@@ -265,8 +265,6 @@ def parse_osm(result):
         'nomenclatura': result['display_name'],
         'nombre': result['address'].get('road'),
         'tipo': parse_osm_type(result['type']),
-        'altura_inicial': None,
-        'altura_final': None,
         'localidad': result['address'].get('city'),
         'provincia': result['address'].get('state'),
         'observaciones': {'fuente': 'OSM'}
