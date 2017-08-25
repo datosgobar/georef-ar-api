@@ -310,8 +310,10 @@ def location(geom, number, start, end):
     with connection.cursor() as cursor:
         cursor.execute(query)
         location = cursor.fetchall()[0][0] # Query returns single row and col.
-    lat, lon = location.split(',')
-    return {'lat': lat, 'lon': lon}
+    if location is not None:
+        lat, lon = location.split(',')
+        return {'lat': lat, 'lon': lon}
+    return None
 
 
 def get_db_connection():
