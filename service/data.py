@@ -115,7 +115,7 @@ def search_es(params):
     state = params['state']
     max = params['max']
     addresses = query_streets(road_name, locality, state, road_type, max)
-    if addresses:
+    if addresses and number:
         addresses = process_door(number, addresses)
     return addresses
 
@@ -157,27 +157,26 @@ def process_door(number, addresses):
         y agregar información relacionada.
 
     Args:
-        number (int or None): Número de puerta o altura.
+        number (int): Número de puerta o altura.
         addresses (list): Lista de direcciones.
 
     Returns:
         list: Lista de direcciones procesadas.
     """
     for address in addresses:
-        if number:
-            address['altura'] = None
-            info = 'Se procesó correctamente la dirección buscada.'
-            street_start = address.get('inicio_derecha')
-            street_end = address.get('fin_izquierda')
-            if street_start and street_end:
-                if street_start <= number <= street_end:
-                    search_location_for(address, number)
-                    update_result_with(address, number)
-                else:
-                    info = 'La altura buscada está fuera del rango conocido.'
+        address['altura'] = None
+        info = 'Se procesó correctamente la dirección buscada.'
+        street_start = address.get('inicio_derecha')
+        street_end = address.get('fin_izquierda')
+        if street_start and street_end:
+            if street_start <= number <= street_end:
+                search_location_for(address, number)
+                update_result_with(address, number)
             else:
-                info = 'La calle no tiene numeración en la base de datos.'
-            address['observaciones']['info'] = info
+                info = 'La altura buscada está fuera del rango conocido.'
+        else:
+            info = 'La calle no tiene numeración en la base de datos.'
+        address['observaciones']['info'] = info
         remove_spatial_data_from(address)
     return addresses
 
