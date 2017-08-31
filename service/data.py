@@ -168,12 +168,14 @@ def process_door(number, addresses):
         info = 'Se procesó correctamente la dirección buscada.'
         street_start = address.get('inicio_derecha')
         street_end = address.get('fin_izquierda')
-        if street_start and street_end:
-            if street_start <= number <= street_end:
+        if street_start or street_end:
+            if street_start == street_end:
+                info = 'No se pudo realizar la interpolación.'
+            elif number < street_start or number > street_end:
+                info = 'La altura buscada está fuera del rango conocido.'
+            else:
                 search_location_for(address, number)
                 update_result_with(address, number)
-            else:
-                info = 'La altura buscada está fuera del rango conocido.'
         else:
             info = 'La calle no tiene numeración en la base de datos.'
         address['observaciones']['info'] = info
@@ -308,10 +310,10 @@ def location(geom, number, start, end):
     connection = get_db_connection()
     with connection.cursor() as cursor:
         cursor.execute(query)
-        location = cursor.fetchall()[0][0] # Query returns single row and col.
-    if location is not None:
-        lat, lon = location.split(',')
-        return {'lat': lat, 'lon': lon}
+        location = cursor.fetchall()[0][0]# Query returns single row and col.
+    if location['code']:
+       lat, lon = location['result'].split(',')
+       return {'lat': lat, 'lon': lon}
     return None
 
 
