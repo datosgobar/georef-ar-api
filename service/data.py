@@ -176,6 +176,9 @@ def process_door(number, addresses):
             else:
                 search_location_for(address, number)
                 update_result_with(address, number)
+                if address['ubicacion'] is None:
+                    address.pop('ubicacion', None)
+                    info = 'La altura buscada no puede ser georeferenciada.'
         else:
             info = 'La calle no tiene numeración en la base de datos.'
         address['observaciones']['info'] = info
