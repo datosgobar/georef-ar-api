@@ -118,7 +118,9 @@ def process_locality(request):
     department = request.args.get('departamento')
     state = request.args.get('provincia')
     max = request.args.get('max')
-    matches = data.query_entity('localidades', name, department, state, max)
+    order = request.args.get('orden')
+    matches = data.query_entity('localidades', name, department,
+                                state, max, order)
     result = build_result_for('localidades', matches)
     return parser.get_response(result)
 
@@ -135,7 +137,9 @@ def process_department(request):
     name = request.args.get('nombre')
     state = request.args.get('provincia')
     max = request.args.get('max')
-    matches = data.query_entity('departamentos', name, state=state, max=max)
+    order = request.args.get('orden')
+    matches = data.query_entity('departamentos', name, state=state,
+                                max=max, order=order)
     result = build_result_for('departamentos', matches)
     return parser.get_response(result)
 
@@ -151,6 +155,7 @@ def process_state(request):
     """
     name = request.args.get('nombre')
     max = request.args.get('max') or 24
-    matches = data.query_entity('provincias', name, max=max)
+    order = request.args.get('orden')
+    matches = data.query_entity('provincias', name, max=max, order=order)
     result = build_result_for('provincias', matches)
     return parser.get_response(result)

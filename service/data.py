@@ -61,7 +61,8 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
     return [parse_es(hit) for hit in result['hits']['hits']]
 
 
-def query_entity(index, name=None, department=None, state=None, max=None):
+def query_entity(index, name=None, department=None,
+                 state=None, max=None, order=None):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
@@ -76,6 +77,7 @@ def query_entity(index, name=None, department=None, state=None, max=None):
         list: Resultados de búsqueda de entidades.
     """
     terms = []
+    sort = {}
     if name:
         condition = build_condition('nombre', name, fuzzy=True)
         terms.append(condition)
@@ -93,8 +95,11 @@ def query_entity(index, name=None, department=None, state=None, max=None):
             condition = build_condition(
                 'provincia.nombre', state, fuzzy=True)
         terms.append(condition)
+    if order:
+        if 'id' in order: sort['id.keyword'] = {'order': 'asc'}
+        if 'nombre' in order: sort['nombre.keyword'] = {'order': 'desc'}
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
-             'size': max or 10}
+             'size': max or 10, 'sort': sort}
     result = Elasticsearch().search(index=index, body=query)
     return [hit['_source'] for hit in result['hits']['hits']]
 
