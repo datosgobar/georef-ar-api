@@ -103,7 +103,7 @@ def query_entity(index, name=None, department=None,
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, 'sort': sort}
     result = Elasticsearch().search(index=index, body=query)
-    return [hit['_source'] for hit in result['hits']['hits']]
+    return [parse_entity(hit) for hit in result['hits']['hits']]
 
 
 def search_es(params):
@@ -157,6 +157,15 @@ def parse_es(result):
     obs = {'fuente': 'INDEC'}
     result['_source'].update(observaciones=obs)
     return result['_source']
+
+
+def parse_entity(result):
+    entity = result['_source']
+    if 'departamento' in entity:
+        entity['departamento'] = entity['departamento']['nombre']
+    if 'provincia' in entity:
+        entity['provincia'] = entity['provincia']['nombre']
+    return entity
 
 
 def process_door(number, addresses):
