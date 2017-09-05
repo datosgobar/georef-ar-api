@@ -99,7 +99,7 @@ def query_entity(index, name=None, department=None,
         terms.append(condition)
     if order:
         if 'id' in order: sort['id.keyword'] = {'order': 'asc'}
-        if 'nombre' in order: sort['nombre.keyword'] = {'order': 'desc'}
+        if 'nombre' in order: sort['nombre.keyword'] = {'order': 'asc'}
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, 'sort': sort}
     result = Elasticsearch().search(index=index, body=query)
