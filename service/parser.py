@@ -44,7 +44,7 @@ def get_fields(args):
     Returns:
         list: campos para filtrar la búsqueda.
     """
-    if args is not None:
+    if args:
         return args.split(',')
     return []
 

@@ -29,7 +29,7 @@ def query_address(search_params):
 
 
 def query_streets(name=None, locality=None, state=None,
-                road=None, max=None, fields=[]):
+                  road=None, max=None, fields=[]):
     """Busca calles según parámetros de búsqueda de una consulta.
 
     Args:
