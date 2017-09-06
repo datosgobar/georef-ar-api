@@ -64,7 +64,7 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
 
 
 def query_entity(index, name=None, department=None,
-                 state=None, max=None, order=None):
+                 state=None, max=None, order=None, fields=None):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
@@ -79,7 +79,8 @@ def query_entity(index, name=None, department=None,
         list: Resultados de búsqueda de entidades.
     """
     terms = []
-    sort = {}
+    sorts = {}
+    stored_fields = []
     if name:
         condition = build_condition('nombre', name, fuzzy=True)
         terms.append(condition)
@@ -94,14 +95,18 @@ def query_entity(index, name=None, department=None,
         if state.isdigit():
             condition = build_condition('provincia.id', state)
         else:
-            condition = build_condition(
-                'provincia.nombre', state, fuzzy=True)
+            condition = build_condition('provincia.nombre', state, fuzzy=True)
         terms.append(condition)
     if order:
-        if 'id' in order: sort['id.keyword'] = {'order': 'asc'}
-        if 'nombre' in order: sort['nombre.keyword'] = {'order': 'asc'}
+        if 'id' in order: sorts['id.keyword'] = {'order': 'asc'}
+        if 'nombre' in order: sorts['nombre.keyword'] = {'order': 'asc'}
+    if fields:
+        if 'id' in fields: stored_fields.append('id')
+        if 'nombre' in fields: stored_fields.append('nombre')
+        if 'departamento' in fields: stored_fields.append('departamento')
+        if 'provincia' in fields: stored_fields.append('provincia')
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
-             'size': max or 10, 'sort': sort}
+             'size': max or 10, 'sort': sorts, '_source': stored_fields}
     result = Elasticsearch().search(index=index, body=query)
     return [parse_entity(hit) for hit in result['hits']['hits']]
 
