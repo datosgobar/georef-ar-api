@@ -126,9 +126,8 @@ def search_es(params):
     locality = params['locality']
     state = params['state']
     max = params['max']
-    addresses = query_streets(road_name, locality, state, road_type, max)
-    if addresses and number:
-        addresses = process_door(number, addresses)
+    streets = query_streets(road_name, locality, state, road_type, max)
+    addresses = process_door(number, streets)
     return addresses
 
 
@@ -173,38 +172,39 @@ def parse_entity(result):
     return entity
 
 
-def process_door(number, addresses):
+def process_door(number, streets):
     """Procesa direcciones para verificar el número de puerta
         y agregar información relacionada.
 
     Args:
         number (int): Número de puerta o altura.
-        addresses (list): Lista de direcciones.
+        streets (list): Lista de calles a procesar.
 
     Returns:
         list: Lista de direcciones procesadas.
     """
-    for address in addresses:
-        address['altura'] = None
-        info = 'Se procesó correctamente la dirección buscada.'
-        street_start = address.get('inicio_derecha')
-        street_end = address.get('fin_izquierda')
-        if street_start or street_end:
-            if street_start == street_end:
-                info = 'No se pudo realizar la interpolación.'
-            elif number < street_start or number > street_end:
-                info = 'La altura buscada está fuera del rango conocido.'
+    for street in streets:
+        if number:
+            street['altura'] = None
+            info = 'Se procesó correctamente la dirección buscada.'
+            street_start = street.get('inicio_derecha')
+            street_end = street.get('fin_izquierda')
+            if street_start or street_end:
+                if street_start == street_end:
+                    info = 'No se pudo realizar la interpolación.'
+                elif number < street_start or number > street_end:
+                    info = 'La altura buscada está fuera del rango conocido.'
+                else:
+                    search_location_for(street, number)
+                    update_result_with(street, number)
+                    if street['ubicacion'] is None:
+                        street.pop('ubicacion', None)
+                        info = 'La altura buscada no puede ser geocodificada.'
             else:
-                search_location_for(address, number)
-                update_result_with(address, number)
-                if address['ubicacion'] is None:
-                    address.pop('ubicacion', None)
-                    info = 'La altura buscada no puede ser georeferenciada.'
-        else:
-            info = 'La calle no tiene numeración en la base de datos.'
-        address['observaciones']['info'] = info
-        remove_spatial_data_from(address)
-    return addresses
+                info = 'La calle no tiene numeración en la base de datos.'
+            street['observaciones']['info'] = info
+        remove_spatial_data_from(street)
+    return streets
 
 
 def search_location_for(address, number):
@@ -244,6 +244,7 @@ def remove_spatial_data_from(address):
     address.pop('inicio_izquierda', None)
     address.pop('fin_derecha', None)
     address.pop('fin_izquierda', None)
+    address.pop('geometria', None)
     if address.get('ubicacion'):
         address.pop('centroide', None)
 

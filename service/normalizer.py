@@ -101,6 +101,7 @@ def process_street(request):
     road_type = request.args.get('tipo')
     max = request.args.get('max')
     matches = data.query_streets(name, locality, state, road_type, max)
+    for street in matches: street.pop('geometria', None)
     result = build_result_for('calles', matches)
     return parser.get_response(result)
 
