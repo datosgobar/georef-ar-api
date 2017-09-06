@@ -100,7 +100,8 @@ def process_street(request):
     state = request.args.get('provincia')
     road_type = request.args.get('tipo')
     max = request.args.get('max')
-    matches = data.query_streets(name, locality, state, road_type, max)
+    fields = parser.get_fields(request.args.get('campos'))
+    matches = data.query_streets(name, locality, state, road_type, max, fields)
     for street in matches: street.pop('geometria', None)
     result = build_result_for('calles', matches)
     return parser.get_response(result)
@@ -120,7 +121,7 @@ def process_locality(request):
     state = request.args.get('provincia')
     max = request.args.get('max')
     order = request.args.get('orden')
-    fields = request.args.get('campos')
+    fields = parser.get_fields(request.args.get('campos'))
     matches = data.query_entity('localidades', name, department,
                                 state, max, order, fields)
     result = build_result_for('localidades', matches)
@@ -140,7 +141,7 @@ def process_department(request):
     state = request.args.get('provincia')
     max = request.args.get('max')
     order = request.args.get('orden')
-    fields = request.args.get('campos')
+    fields = parser.get_fields(request.args.get('campos'))
     matches = data.query_entity('departamentos', name, state=state,
                                 max=max, order=order, fields=fields)
     result = build_result_for('departamentos', matches)
@@ -159,7 +160,7 @@ def process_state(request):
     name = request.args.get('nombre')
     max = request.args.get('max') or 24
     order = request.args.get('orden')
-    fields = request.args.get('campos')
+    fields = parser.get_fields(request.args.get('campos'))
     matches = data.query_entity('provincias', name, max=max,
                                 order=order, fields=fields)
     result = build_result_for('provincias', matches)

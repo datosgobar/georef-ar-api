@@ -28,7 +28,8 @@ def query_address(search_params):
     return matches
 
 
-def query_streets(name=None, locality=None, state=None, road=None, max=None):
+def query_streets(name=None, locality=None, state=None,
+                road=None, max=None, fields=[]):
     """Busca calles según parámetros de búsqueda de una consulta.
 
     Args:
@@ -37,7 +38,8 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
         road_type (str): Nombre del tipo de camino para filtrar (opcional).
-        max (int): Limita la cantidad de resultados (opcional)
+        max (int): Limita la cantidad de resultados (opcional).
+        fields (list): Campos a devolver en los resultados (opcional).
 
     Returns:
         list: Resultados de búsqueda de calles.
@@ -58,13 +60,13 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
         if target_state:  # Narrows search to specific index.
             index = 'calles-' + target_state[0]['id']
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
-             'size': max or 10}
+             'size': max or 10, '_source': fields}
     result = Elasticsearch().search(index=index, doc_type='calle', body=query)
     return [parse_es(hit) for hit in result['hits']['hits']]
 
 
 def query_entity(index, name=None, department=None,
-                 state=None, max=None, order=None, fields=None):
+                 state=None, max=None, order=None, fields=[]):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
@@ -73,14 +75,15 @@ def query_entity(index, name=None, department=None,
         name (str): Nombre del tipo de entidad (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
-        max (int): Limita la cantidad de resultados (opcional)
+        max (int): Limita la cantidad de resultados (opcional).
+        order (str): Campo por el cual ordenar los resultados (opcional).
+        fields (list): Campos a devolver en los resultados (opcional).
 
     Returns:
         list: Resultados de búsqueda de entidades.
     """
     terms = []
     sorts = {}
-    stored_fields = []
     if name:
         condition = build_condition('nombre', name, fuzzy=True)
         terms.append(condition)
@@ -100,13 +103,8 @@ def query_entity(index, name=None, department=None,
     if order:
         if 'id' in order: sorts['id.keyword'] = {'order': 'asc'}
         if 'nombre' in order: sorts['nombre.keyword'] = {'order': 'asc'}
-    if fields:
-        if 'id' in fields: stored_fields.append('id')
-        if 'nombre' in fields: stored_fields.append('nombre')
-        if 'departamento' in fields: stored_fields.append('departamento')
-        if 'provincia' in fields: stored_fields.append('provincia')
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
-             'size': max or 10, 'sort': sorts, '_source': stored_fields}
+             'size': max or 10, 'sort': sorts, '_source': fields}
     result = Elasticsearch().search(index=index, body=query)
     return [parse_entity(hit) for hit in result['hits']['hits']]
 
@@ -126,7 +124,8 @@ def search_es(params):
     locality = params['locality']
     state = params['state']
     max = params['max']
-    streets = query_streets(road_name, locality, state, road_type, max)
+    fields = params['fields']
+    streets = query_streets(road_name, locality, state, road_type, max, fields)
     addresses = process_door(number, streets)
     return addresses
 

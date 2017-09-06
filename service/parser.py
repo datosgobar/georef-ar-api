@@ -35,6 +35,19 @@ def validate(request):
     return True # pending until API keys are implemented.
 
 
+def get_fields(args):
+    """Devuelve los campos a mostrar pedidos en la consulta.
+
+    Args:
+        args (str or None): valores del parámetro "campos".
+
+    Returns:
+        list: campos para filtrar la búsqueda.
+    """
+    if args is not None:
+        return args.split(',')
+    return []
+
 def get_from_string(address_str):
     """Procesa los componentes de una dirección en una cadena de texto.
 
@@ -63,6 +76,7 @@ def build_search_from(params):
     state = params.get('provincia')
     max = params.get('max')
     source = params.get('fuente')
+    fields = params.get('campos')
     if len(address) > 1:
         locality = address[1].strip()
     return {
@@ -73,7 +87,8 @@ def build_search_from(params):
         'state': state,
         'max': max,
         'source': source,
-        'text': params.get('direccion')
+        'fields': fields,
+        'text': params.get('direccion')  # Raw user input.
     }
 
 
