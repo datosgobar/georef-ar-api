@@ -42,26 +42,29 @@ def query_streets(name=None, locality=None, state=None, road=None, max=None):
     Returns:
         list: Resultados de búsqueda de calles.
     """
+    index = ''  # Search in all indexes by default.
     terms = []
     if name:
         condition = build_condition('nombre', get_abbreviated(name), fuzzy=True)
+        terms.append(condition)
+    if road:
+        condition = build_condition('tipo', road, fuzzy=True)
         terms.append(condition)
     if locality:
         condition = build_condition('localidad', locality, fuzzy=True)
         terms.append(condition)
     if state:
-        condition = build_condition('provincia', state, fuzzy=True)
-        terms.append(condition)
-    if road:
-        condition = build_condition('tipo', road, fuzzy=True)
-        terms.append(condition)
+        target_state = query_entity('provincias', state, max=1)
+        if target_state:  # Narrows search to specific index.
+            index = 'calles-' + target_state[0]['id']
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10}
-    result = Elasticsearch().search(doc_type='calle', body=query)
+    result = Elasticsearch().search(index=index, doc_type='calle', body=query)
     return [parse_es(hit) for hit in result['hits']['hits']]
 
 
-def query_entity(index, name=None, department=None, state=None, max=None):
+def query_entity(index, name=None, department=None,
+                 state=None, max=None, order=None):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
@@ -76,6 +79,7 @@ def query_entity(index, name=None, department=None, state=None, max=None):
         list: Resultados de búsqueda de entidades.
     """
     terms = []
+    sort = {}
     if name:
         condition = build_condition('nombre', name, fuzzy=True)
         terms.append(condition)
@@ -93,10 +97,13 @@ def query_entity(index, name=None, department=None, state=None, max=None):
             condition = build_condition(
                 'provincia.nombre', state, fuzzy=True)
         terms.append(condition)
+    if order:
+        if 'id' in order: sort['id.keyword'] = {'order': 'asc'}
+        if 'nombre' in order: sort['nombre.keyword'] = {'order': 'asc'}
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
-             'size': max or 10}
+             'size': max or 10, 'sort': sort}
     result = Elasticsearch().search(index=index, body=query)
-    return [hit['_source'] for hit in result['hits']['hits']]
+    return [parse_entity(hit) for hit in result['hits']['hits']]
 
 
 def search_es(params):
@@ -150,6 +157,15 @@ def parse_es(result):
     obs = {'fuente': 'INDEC'}
     result['_source'].update(observaciones=obs)
     return result['_source']
+
+
+def parse_entity(result):
+    entity = result['_source']
+    if 'departamento' in entity:
+        entity['departamento'] = entity['departamento']['nombre']
+    if 'provincia' in entity:
+        entity['provincia'] = entity['provincia']['nombre']
+    return entity
 
 
 def process_door(number, addresses):
