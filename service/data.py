@@ -11,6 +11,7 @@ import psycopg2
 import requests
 from elasticsearch import Elasticsearch
 from service.parser import get_abbreviated
+from service.fields import *
 
 
 def query_address(search_params):
@@ -47,18 +48,18 @@ def query_streets(name=None, locality=None, state=None,
     index = ''  # Search in all indexes by default.
     terms = []
     if name:
-        condition = build_condition('nombre', get_abbreviated(name), fuzzy=True)
+        condition = build_condition(NAME, get_abbreviated(name), fuzzy=True)
         terms.append(condition)
     if road:
-        condition = build_condition('tipo', road, fuzzy=True)
+        condition = build_condition(ROAD_TYPE, road, fuzzy=True)
         terms.append(condition)
     if locality:
-        condition = build_condition('localidad', locality, fuzzy=True)
+        condition = build_condition(LOCALITY, locality, fuzzy=True)
         terms.append(condition)
     if state:
-        target_state = query_entity('provincias', state, max=1)
+        target_state = query_entity(STATES, state, max=1)
         if target_state:  # Narrows search to specific index.
-            index = 'calles-' + target_state[0]['id']
+            index = '-'.join([STREETS, target_state[0][ID]])
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, '_source': fields}
     result = Elasticsearch().search(index=index, doc_type='calle', body=query)
