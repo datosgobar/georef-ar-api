@@ -43,3 +43,11 @@ ADDRESS = 'direccion'
 ORDER = 'orden'
 FIELDS = 'campos'
 MAX = 'max'
+
+# Elasticsearch
+ID_KEYWORD = 'id.keyword'
+NAME_KEYWORD = 'nombre.keyword'
+DEPT_ID = 'departamento.id'
+DEPT_NAME = 'departamento.nombre'
+STATE_ID = 'provincia.id'
+STATE_NAME = 'provincia.nombre'

@@ -86,25 +86,24 @@ def query_entity(index, name=None, department=None,
     terms = []
     sorts = {}
     if name:
-        condition = build_condition('nombre', name, fuzzy=True)
+        condition = build_condition(NAME, name, fuzzy=True)
         terms.append(condition)
     if department:
         if department.isdigit():
-            condition = build_condition('departamento.id', department)
+            condition = build_condition(DEPT_ID, department)
         else:
-            condition = build_condition(
-                'departamento.nombre', department, fuzzy=True)
+            condition = build_condition(DEPT_NAME, department, fuzzy=True)
         terms.append(condition)
     if state:
         if state.isdigit():
-            condition = build_condition('provincia.id', state)
+            condition = build_condition(STATE_ID, state)
         else:
-            condition = build_condition('provincia.nombre', state,
+            condition = build_condition(STATE_NAME, state,
                                         kind='match_phrase_prefix')
         terms.append(condition)
     if order:
-        if 'id' in order: sorts['id.keyword'] = {'order': 'asc'}
-        if 'nombre' in order: sorts['nombre.keyword'] = {'order': 'asc'}
+        if ID in order: sorts[ID_KEYWORD] = {'order': 'asc'}
+        if NAME in order: sorts[NAME_KEYWORD] = {'order': 'asc'}
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, 'sort': sorts, '_source': fields}
     result = Elasticsearch().search(index=index, body=query)
