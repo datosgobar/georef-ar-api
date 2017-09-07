@@ -11,7 +11,7 @@ import psycopg2
 import requests
 from elasticsearch import Elasticsearch
 from service.parser import get_abbreviated
-from service.fields import *
+from service.constants import *
 
 
 def query_address(search_params):
