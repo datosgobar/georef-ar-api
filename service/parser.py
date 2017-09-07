@@ -76,7 +76,7 @@ def build_search_from(params):
     state = params.get('provincia')
     max = params.get('max')
     source = params.get('fuente')
-    fields = params.get('campos')
+    fields = get_fields(params.get('campos'))
     if len(address) > 1:
         locality = address[1].strip()
     return {
