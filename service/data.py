@@ -98,7 +98,8 @@ def query_entity(index, name=None, department=None,
         if state.isdigit():
             condition = build_condition('provincia.id', state)
         else:
-            condition = build_condition('provincia.nombre', state, fuzzy=True)
+            condition = build_condition('provincia.nombre', state,
+                                        kind='match_phrase_prefix')
         terms.append(condition)
     if order:
         if 'id' in order: sorts['id.keyword'] = {'order': 'asc'}
@@ -130,7 +131,7 @@ def search_es(params):
     return addresses
 
 
-def build_condition(field, value, fuzzy=False):
+def build_condition(field, value, kind='match', fuzzy=False):
     """Crea una condición para Elasticsearch.
 
     Args:
@@ -141,11 +142,11 @@ def build_condition(field, value, fuzzy=False):
     Returns:
         dict: Condición para Elasticsearch.
     """
-    if fuzzy:
+    if fuzzy and kind == 'match':
         query = {field: {'query': value, 'fuzziness': 1}}
     else:
         query = {field: value}
-    return {'match': query}
+    return {kind: query}
 
 
 def parse_es(result):
