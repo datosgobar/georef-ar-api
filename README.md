@@ -238,26 +238,17 @@ Entrada:
     {
       "id": "50007", 
       "nombre": "Capital", 
-      "provincia": {
-        "id": "50", 
-        "nombre": "Mendoza"
-      }
+      "provincia": "Mendoza"
     }, 
     {
       "id": "54028", 
       "nombre": "Capital", 
-      "provincia": {
-        "id": "54", 
-        "nombre": "Misiones"
-      }
+      "provincia": "Misiones"
     }, 
     {
       "id": "86049", 
       "nombre": "Capital", 
-      "provincia": {
-        "id": "86", 
-        "nombre": "Santiago del Estero"
-      }
+      "provincia": "Santiago del Estero"
     },
     "..."
   ]
@@ -281,37 +272,20 @@ Entrada:
     {
       "id": "06007080", 
       "nombre": "Rivera", 
-      "departamento": {
-        "id": "06007", 
-        "nombre": "Adolfo Alsina"
-      }, 
-      "provincia": {
-        "id": "06", 
-        "nombre": "Buenos Aires"
-      }
+      "departamento": "Adolfo Alsina",
+      "provincia": "Buenos Aires"
     }, 
     {
       "id": "06014030", 
       "nombre": "Juan E. Barra", 
-      "departamento": {
-        "id": "06014", 
-        "nombre": "Adolfo Gonzales Chaves"
-      }, 
-      "provincia": {
-        "id": "06", 
-        "nombre": "Buenos Aires"
-      }
+      "departamento": "Adolfo Gonzales Chaves",
+      "provincia": "Buenos Aires"
     }, 
     {
       "id": "06021020", 
       "nombre": "Coronel Seguí", 
-      "departamento": {
-        "id": "06021", 
-        "nombre": "Alberti"
-      }, 
-      "provincia": {
-        "id": "06", 
-        "nombre": "Buenos Aires"
+      "departamento": "Alberti",
+      "provincia": "Buenos Aires"
       }
     },
     "..."
