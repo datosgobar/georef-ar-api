@@ -157,11 +157,12 @@ Entrada:
 - localidad: para filtrar por localidad.
 - provincia: para filtrar por provincia.
 - tipo: para filtrar por tipo de camino.
+- campos: qué campos devolver.
 - max: cantidad máxima esperada de sugerencias.
 
-Ejemplo: obtener todas las calles de Bariloche.
+Ejemplo: obtener todas las calles de Bariloche, mostrando *nomenclatura* y *tipo*.
 
-**GET** `/api/v1.0/calles?localidad=Bariloche`
+**GET** `/api/v1.0/calles?localidad=Bariloche&campos=nomenclatura,tipo`
 
 Salida: JSON con el siguiente formato.
 ```json
@@ -170,13 +171,11 @@ Salida: JSON con el siguiente formato.
     "calles": [
         {
             "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
-            "tipo": "Avenida",
-            "uri": ".../api/v1.0/calles/1"
+            "tipo": "Avenida"
         },
         {
             "nomenclatura": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
-            "tipo": "Calle",
-            "uri": ".../api/v1.0/calles/2"
+            "tipo": "Calle"
         },
         {
             "..."
@@ -190,6 +189,7 @@ Retorna un listado de provincias.
 
 Entrada:
 - nombre: para filtrar por nombre.
+- campos: qué campos devolver.
 - max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/provincias`
@@ -228,6 +228,7 @@ Retorna un listado de departamentos.
 Entrada:
 - nombre: para filtrar por nombre.
 - provincia: para filtrar por *ID* o *nombre* de provincia.
+- campos: qué campos devolver.
 - max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/departamentos?nombre=capital`
@@ -262,6 +263,7 @@ Entrada:
 - nombre: para filtrar por nombre.
 - departamento: para filtrar por *ID* o *nombre* de departamento.
 - provincia: para filtrar por *ID* o *nombre* de provincia.
+- campos: qué campos devolver.
 - max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/localidades`
