@@ -252,7 +252,7 @@ def search_osm(params):
         list: Resultados de búsqueda de una dirección.
     """
     url = os.environ.get('OSM_API_URL')
-    query = params['road']
+    query = params['road_name']
     if params.get('number'):
         query += ' %s' % params['number']
     if params.get('locality'):
