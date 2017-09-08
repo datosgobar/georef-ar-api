@@ -119,14 +119,10 @@ def search_es(params):
     Returns:
         list: Resultados de búsqueda de una dirección.
     """
-    road_name = params['road_name']
-    road_type = params['road_type']
     number = params['number']
-    locality = params['locality']
-    state = params['state']
-    max = params['max']
-    fields = params['fields']
-    streets = query_streets(road_name, locality, state, road_type, max, fields)
+    streets = query_streets(name=params['road_name'], road=params['road_type'],
+                            locality=params['locality'], state=params['state'],
+                            fields=params['fields'], max=params['max'])
     addresses = process_door(number, streets)
     return addresses
 
@@ -158,17 +154,17 @@ def parse_es(result):
     Returns:
         dict: Resultados modificado.
     """
-    obs = {'fuente': 'INDEC'}
-    result['_source'].update(observaciones=obs)
+    obs = {SOURCE: 'INDEC'}
+    result['_source'][OBS] = obs
     return result['_source']
 
 
 def parse_entity(result):
     entity = result['_source']
-    if 'departamento' in entity:
-        entity['departamento'] = entity['departamento']['nombre']
-    if 'provincia' in entity:
-        entity['provincia'] = entity['provincia']['nombre']
+    if DEPT in entity:
+        entity[DEPT] = entity[DEPT][NAME]
+    if STATE in entity:
+        entity[STATE] = entity[STATE][NAME]
     return entity
 
 
@@ -185,24 +181,24 @@ def process_door(number, streets):
     """
     for street in streets:
         if number:
-            street['altura'] = None
-            info = 'Se procesó correctamente la dirección buscada.'
-            street_start = street.get('inicio_derecha')
-            street_end = street.get('fin_izquierda')
+            street[DOOR_NUM] = None
+            info = ADDRESS_PROCESSED_OK
+            street_start = street.get(START_R)
+            street_end = street.get(END_L)
             if street_start or street_end:
                 if street_start == street_end:
-                    info = 'No se pudo realizar la interpolación.'
+                    info = CANNOT_INTERPOLATE_ADDRESS
                 elif number < street_start or number > street_end:
-                    info = 'La altura buscada está fuera del rango conocido.'
+                    info = ADDRESS_OUT_OF_RANGE
                 else:
                     search_location_for(street, number)
                     update_result_with(street, number)
-                    if street['ubicacion'] is None:
-                        street.pop('ubicacion', None)
-                        info = 'La altura buscada no puede ser geocodificada.'
+                    if street[LOCATION] is None:
+                        street.pop(LOCATION, None)
+                        info = CANNOT_GEOCODE_ADDRESS
             else:
-                info = 'La calle no tiene numeración en la base de datos.'
-            street['observaciones']['info'] = info
+                info = UNKNOWN_STREET_RANGE
+            street[OBS][INFO] = info
         remove_spatial_data_from(street)
     return streets
 
@@ -215,10 +211,9 @@ def search_location_for(address, number):
         address (dict): Dirección.
         number (int): Número de puerta o altura.
     """
-    if address.get('geometria'):
-        address['ubicacion'] = location(
-            address['geometria'], number,
-            address['inicio_derecha'], address['fin_izquierda'])
+    if address.get(GEOM):
+        address[LOCATION] = location(address[GEOM], number,
+                                     address[START_R], address[END_L])
 
 
 def update_result_with(address, number):
@@ -228,10 +223,10 @@ def update_result_with(address, number):
         address (dict): Dirección.
         number (int): Número de puerta o altura.
     """
-    parts = address['nomenclatura'].split(',')
+    parts = address[FULL_NAME].split(',')
     parts[0] += ' %s' % str(number)
-    address['nomenclatura'] = ','.join(parts)
-    address['altura'] = number
+    address[FULL_NAME] = ','.join(parts)
+    address[DOOR_NUM] = number
 
 
 def remove_spatial_data_from(address):
@@ -240,13 +235,11 @@ def remove_spatial_data_from(address):
     Args:
         address (dict): Dirección.
     """
-    address.pop('inicio_derecha', None)
-    address.pop('inicio_izquierda', None)
-    address.pop('fin_derecha', None)
-    address.pop('fin_izquierda', None)
-    address.pop('geometria', None)
-    if address.get('ubicacion'):
-        address.pop('centroide', None)
+    address.pop(START_R, None)
+    address.pop(START_L, None)
+    address.pop(END_R, None)
+    address.pop(END_L, None)
+    address.pop(GEOM, None)
 
 
 def search_osm(params):
@@ -288,12 +281,12 @@ def parse_osm(result):
         dict: Resultados modificado.
     """
     return {
-        'nomenclatura': result['display_name'],
-        'nombre': result['address'].get('road'),
-        'tipo': parse_osm_type(result['type']),
-        'localidad': result['address'].get('city'),
-        'provincia': result['address'].get('state'),
-        'observaciones': {'fuente': 'OSM'}
+        FULL_NAME: result['display_name'],
+        NAME: result['address'].get('road'),
+        ROAD_TYPE: parse_osm_type(result['type']),
+        LOCALITY: result['address'].get('city'),
+        STATE: result['address'].get('state'),
+        OBS: {SOURCE: 'OSM'}
         }
 
 
@@ -338,7 +331,7 @@ def location(geom, number, start, end):
         location = cursor.fetchall()[0][0]# Query returns single row and col.
     if location['code']:
        lat, lon = location['result'].split(',')
-       return {'lat': lat, 'lon': lon}
+       return {LAT: lat, LON: lon}
     return None
 
 

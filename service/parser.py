@@ -8,6 +8,7 @@ con los que operan los módulos de la API.
 
 from flask import jsonify, make_response, request
 from service.abbreviations import ABBR_STREETS, ROAD_TYPES
+from service.constants import *
 import re
 
 
@@ -57,7 +58,7 @@ def get_from_string(address_str):
     Returns:
         bool: Si una consulta es válida o no.
     """
-    return build_search_from({'direccion': address_str})
+    return build_search_from({ADDRESS: address_str})
 
 
 def build_search_from(params):
@@ -70,13 +71,13 @@ def build_search_from(params):
         dict: Parámetros de búsqueda.
     """
 
-    address = params.get('direccion').split(',')
+    address = params.get(ADDRESS).split(',')
     road_type, road_name, number = get_parts_from(address[0].strip())
-    locality = params.get('localidad')
-    state = params.get('provincia')
-    max = params.get('max')
-    source = params.get('fuente')
-    fields = get_fields(params.get('campos'))
+    locality = params.get(LOCALITY)
+    state = params.get(STATE)
+    max = params.get(MAX)
+    source = params.get(SOURCE)
+    fields = get_fields(params.get(FIELDS))
     if len(address) > 1:
         locality = address[1].strip()
     return {
@@ -88,7 +89,7 @@ def build_search_from(params):
         'max': max,
         'source': source,
         'fields': fields,
-        'text': params.get('direccion')  # Raw user input.
+        'text': params.get(ADDRESS)  # Raw user input.
     }
 
 
@@ -154,5 +155,5 @@ def get_response_for_invalid(request, message=None):
         flask.Response: Respuesta de la API en formato JSON.
     """
     if message is not None:
-        REQUEST_INVALID['error']['mensaje'] = message
+        REQUEST_INVALID[ERROR][MESSAGE] = message
     return make_response(jsonify(REQUEST_INVALID), 400)
