@@ -7,6 +7,7 @@ de los recursos que expone la API.
 """
 
 from service import data, parser
+from service.constants import *
 
 
 def build_result_for(entity, matches):
@@ -20,7 +21,7 @@ def build_result_for(entity, matches):
         dict: Resultados e información de estado asociada.
     """
     return {
-        'estado': 'OK' if matches else 'SIN_RESULTADOS',
+        STATUS: 'OK' if matches else NO_RESULTS,
         entity: matches
         }
 
@@ -50,13 +51,13 @@ def address_get(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
-    if not request.args.get('direccion'):
+    if not request.args.get(ADDRESS):
         return parser.get_response_for_invalid(request,
         message='El parámetro "direccion" es obligatorio.')
     search = parser.build_search_from(request.args)
     data.save_address(search)
     matches = data.query_address(search)
-    result = build_result_for('direcciones', matches)
+    result = build_result_for(ADDRESSES, matches)
     return parser.get_response(result)
 
 
@@ -72,7 +73,7 @@ def address_post(request):
     matches = []
     json_data = request.get_json()
     if json_data:
-        addresses = json_data.get('direcciones')
+        addresses = json_data.get(ADDRESSES)
         if not addresses:
             return parser.get_response_for_invalid(request,
             message='No hay datos de direcciones para procesar.')
@@ -82,7 +83,7 @@ def address_post(request):
                 'original': address,
                 'normalizadas': data.query_address(parsed_address)
                 })
-    result = build_result_for('direcciones', matches)
+    result = build_result_for(ADDRESSES, matches)
     return parser.get_response(result)
 
 
@@ -95,15 +96,15 @@ def process_street(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
-    name = request.args.get('nombre')
-    locality = request.args.get('localidad')
-    state = request.args.get('provincia')
-    road_type = request.args.get('tipo')
-    max = request.args.get('max')
-    fields = parser.get_fields(request.args.get('campos'))
+    name = request.args.get(NAME)
+    locality = request.args.get(LOCALITY)
+    state = request.args.get(STATE)
+    road_type = request.args.get(ROAD_TYPE)
+    max = request.args.get(MAX)
+    fields = parser.get_fields(request.args.get(FIELDS))
     matches = data.query_streets(name, locality, state, road_type, max, fields)
-    for street in matches: street.pop('geometria', None)
-    result = build_result_for('calles', matches)
+    for street in matches: street.pop(GEOM, None)
+    result = build_result_for(STREETS, matches)
     return parser.get_response(result)
 
 
@@ -116,15 +117,15 @@ def process_locality(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
-    name = request.args.get('nombre')
-    department = request.args.get('departamento')
-    state = request.args.get('provincia')
-    max = request.args.get('max')
-    order = request.args.get('orden')
-    fields = parser.get_fields(request.args.get('campos'))
-    matches = data.query_entity('localidades', name, department,
+    name = request.args.get(NAME)
+    department = request.args.get(DEPT)
+    state = request.args.get(STATE)
+    max = request.args.get(MAX)
+    order = request.args.get(ORDER)
+    fields = parser.get_fields(request.args.get(FIELDS))
+    matches = data.query_entity(LOCALITIES, name, department,
                                 state, max, order, fields)
-    result = build_result_for('localidades', matches)
+    result = build_result_for(LOCALITIES, matches)
     return parser.get_response(result)
 
 
@@ -137,14 +138,14 @@ def process_department(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
-    name = request.args.get('nombre')
-    state = request.args.get('provincia')
-    max = request.args.get('max')
-    order = request.args.get('orden')
-    fields = parser.get_fields(request.args.get('campos'))
-    matches = data.query_entity('departamentos', name, state=state,
+    name = request.args.get(NAME)
+    state = request.args.get(STATE)
+    max = request.args.get(MAX)
+    order = request.args.get(ORDER)
+    fields = parser.get_fields(request.args.get(FIELDS))
+    matches = data.query_entity(DEPARTMENTS, name, state=state,
                                 max=max, order=order, fields=fields)
-    result = build_result_for('departamentos', matches)
+    result = build_result_for(DEPARTMENTS, matches)
     return parser.get_response(result)
 
 
@@ -157,11 +158,11 @@ def process_state(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
-    name = request.args.get('nombre')
-    max = request.args.get('max') or 24
-    order = request.args.get('orden')
-    fields = parser.get_fields(request.args.get('campos'))
-    matches = data.query_entity('provincias', name, max=max,
+    name = request.args.get(NAME)
+    max = request.args.get(MAX) or 24
+    order = request.args.get(ORDER)
+    fields = parser.get_fields(request.args.get(FIELDS))
+    matches = data.query_entity(STATES, name, max=max,
                                 order=order, fields=fields)
-    result = build_result_for('provincias', matches)
+    result = build_result_for(STATES, matches)
     return parser.get_response(result)
