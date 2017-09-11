@@ -288,7 +288,6 @@ Entrada:
       "nombre": "Coronel Seguí", 
       "departamento": "Alberti",
       "provincia": "Buenos Aires"
-      }
     },
     "..."
   ]
