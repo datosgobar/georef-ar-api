@@ -342,7 +342,7 @@ def get_db_connection():
         connection: Conexión a base de datos.
     """
     return psycopg2.connect(
-        host=os.environ.get('GEOREF_HOST')
+        host=os.environ.get('GEOREF_HOST'),
         dbname=os.environ.get('GEOREF_DBNAME'),
         user=os.environ.get('GEOREF_USER'),
         password=os.environ.get('GEOREF_PASSWORD'))
