@@ -46,11 +46,15 @@ class InputParsingTest(TestCase):
 
     def test_query_with_fields_provided(self):
         """El parámetro 'campos' está en el request."""
-        pass
+        with app.test_request_context('?direccion&campos=param1,param2'):
+            search = parser.build_search_from(flask.request.args)
+            assert 'param1' in search['fields'] and 'param2' in search['fields']
 
     def test_query_with_fields_not_provided(self):
         """El parámetro 'campos' no está en el request."""
-        pass
+        with app.test_request_context('?direccion'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['fields'] == []
     
     def test_road_type_is_parsed(self):
         """El tipo de camino está presente y se devuelve su abreviación."""
