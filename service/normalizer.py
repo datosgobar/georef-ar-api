@@ -7,7 +7,7 @@ de los recursos que expone la API.
 """
 
 from service import data, parser
-from service.constants import *
+from service.names import *
 
 
 def build_result_for(entity, matches):

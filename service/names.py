@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Módulo 'fields' de georef-api
+"""Módulo 'names' de georef-api
 
 Declara de los nombres que usa la API para
 los campos, parámetros, y otras claves que se usan frecuentemente.

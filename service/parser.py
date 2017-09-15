@@ -8,7 +8,7 @@ con los que operan los módulos de la API.
 
 from flask import jsonify, make_response, request
 from service.abbreviations import ABBR_STREETS, ROAD_TYPES
-from service.constants import *
+from service.names import *
 import re
 
 
