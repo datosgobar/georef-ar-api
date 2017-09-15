@@ -60,6 +60,8 @@ def query_streets(name=None, locality=None, state=None,
         target_state = query_entity(STATES, state, max=1)
         if target_state:  # Narrows search to specific index.
             index = '-'.join([STREETS, target_state[0][ID]])
+    if LOCATION in fields:
+        fields.extend([GEOM, START_R, START_L, END_R, END_L, FULL_NAME])
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, '_source': fields}
     result = Elasticsearch().search(index=index, doc_type='calle', body=query)
