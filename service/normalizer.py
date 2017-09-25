@@ -123,8 +123,9 @@ def process_locality(request):
     max = request.args.get(MAX)
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
-    matches = data.query_entity(LOCALITIES, name, department,
-                                state, max, order, fields)
+    flatten = FLATTEN in request.args
+    matches = data.query_entity(LOCALITIES, name, department, state,
+                                max, order, fields, flatten)
     result = build_result_for(LOCALITIES, matches)
     return parser.get_response(result)
 
@@ -143,8 +144,9 @@ def process_department(request):
     max = request.args.get(MAX)
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
-    matches = data.query_entity(DEPARTMENTS, name, state=state,
-                                max=max, order=order, fields=fields)
+    flatten = FLATTEN in request.args
+    matches = data.query_entity(DEPARTMENTS, name, state=state, max=max,
+                                order=order, fields=fields, flatten=flatten)
     result = build_result_for(DEPARTMENTS, matches)
     return parser.get_response(result)
 

@@ -44,6 +44,7 @@ NO_RESULTS = 'SIN_RESULTADOS'
 ADDRESS = 'direccion'
 ORDER = 'orden'
 FIELDS = 'campos'
+FLATTEN = 'aplanar'
 MAX = 'max'
 
 # Elasticsearch

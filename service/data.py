@@ -68,8 +68,8 @@ def query_streets(name=None, locality=None, state=None,
     return [parse_es(hit) for hit in result['hits']['hits']]
 
 
-def query_entity(index, name=None, department=None,
-                 state=None, max=None, order=None, fields=[]):
+def query_entity(index, name=None, department=None, state=None,
+                 max=None, order=None, fields=[], flatten=False):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
@@ -109,7 +109,7 @@ def query_entity(index, name=None, department=None,
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, 'sort': sorts, '_source': fields}
     result = Elasticsearch().search(index=index, body=query)
-    return [parse_entity(hit) for hit in result['hits']['hits']]
+    return [parse_entity(hit, flatten) for hit in result['hits']['hits']]
 
 
 def search_es(params):
@@ -148,25 +148,40 @@ def build_condition(field, value, kind='match', fuzzy=False):
 
 
 def parse_es(result):
-    """Procesa un resultado de ElasticSearch para modificar información.
+    """Procesa un resultado de ElasticSearch para modificarlo.
 
     Args:
         result (dict): Diccionario con resultado.
 
     Returns:
-        dict: Resultados modificado.
+        dict: Resultado modificado.
     """
     obs = {SOURCE: 'INDEC'}
     result['_source'][OBS] = obs
     return result['_source']
 
 
-def parse_entity(result):
+def parse_entity(result, flatten):
+    """Procesa un resultado de ElasticSearch para modificarlo.
+
+    Args:
+        result (dict): Diccionario con resultado.
+
+    Returns:
+        dict: Resultado modificado.
+    """
     entity = result['_source']
-    if DEPT in entity:
-        entity[DEPT] = entity[DEPT][NAME]
-    if STATE in entity:
-        entity[STATE] = entity[STATE][NAME]
+    if flatten:
+        if DEPT in entity:
+            department = entity[DEPT]
+            entity['_'.join([DEPT, NAME])] = department[NAME]
+            entity['_'.join([DEPT, ID])] = department[ID]
+            del entity[DEPT]
+        if STATE in entity:
+            state = entity[STATE]
+            entity['_'.join([STATE, NAME])] = state[NAME]
+            entity['_'.join([STATE, ID])] = state[ID]
+            del entity[STATE]
     return entity
 
 
