@@ -11,8 +11,8 @@ API del servicio de normalización y geocodificación para direcciones de Argent
 
 Entrada:
 - **direccion**: la dirección que se quiere normalizar (campo obligatorio).
-- localidad: para filtrar por localidad.
-- provincia: para filtrar por provincia.
+- localidad: para filtrar por *nombre* de localidad.
+- provincia: para filtrar por *nombre* de provincia.
 - campos: qué campos devolver.
 - max: cantidad máxima esperada de sugerencias.
 
@@ -154,8 +154,8 @@ Salida: JSON con el siguiente formato.
 Retorna calles (normalizadas) de una localidad o provincia.
 
 Entrada:
-- localidad: para filtrar por localidad.
-- provincia: para filtrar por provincia.
+- localidad: para filtrar por *nombre* de localidad.
+- provincia: para filtrar por *nombre* de provincia.
 - tipo: para filtrar por tipo de camino.
 - campos: qué campos devolver.
 - max: cantidad máxima esperada de sugerencias.
@@ -190,6 +190,7 @@ Retorna un listado de provincias.
 Entrada:
 - nombre: para filtrar por nombre.
 - campos: qué campos devolver.
+- orden: *id* o *nombre*.
 - max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/provincias`
@@ -229,6 +230,8 @@ Entrada:
 - nombre: para filtrar por nombre.
 - provincia: para filtrar por *ID* o *nombre* de provincia.
 - campos: qué campos devolver.
+- orden: *id* o *nombre*.
+- aplanar: si está presente, muestra el resultado con una estructura plana.
 - max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/departamentos?nombre=capital`
@@ -239,17 +242,54 @@ Entrada:
     {
       "id": "50007", 
       "nombre": "Capital", 
-      "provincia": "Mendoza"
+      "provincia": {
+        "id": "50",
+        "nombre": "Mendoza"
+      }
     }, 
     {
       "id": "54028", 
       "nombre": "Capital", 
-      "provincia": "Misiones"
+      "provincia": {
+        "id": "54",
+        "nombre": "Misiones"
+      }
     }, 
     {
       "id": "86049", 
       "nombre": "Capital", 
-      "provincia": "Santiago del Estero"
+      "provincia": {
+        "id": "86",
+        "nombre": "Santiago del Estero"
+      }
+    },
+    "..."
+  ]
+}
+```
+
+**GET** `/api/v1.0/departamentos?nombre=capital&aplanar`. Resultado con estructura plana.
+```json
+{
+  "estado": "OK",
+  "departamentos": [
+    {
+      "id": "50007", 
+      "nombre": "Capital", 
+      "provincia_id": "50",
+      "provincia_nombre": "Mendoza"
+    }, 
+    {
+      "id": "54028", 
+      "nombre": "Capital", 
+      "provincia_id": "54",
+      "provincia_nombre": "Misiones"
+    }, 
+    {
+      "id": "86049", 
+      "nombre": "Capital", 
+      "provincia_id": "86",
+      "provincia_nombre": "Santiago del Estero"
     },
     "..."
   ]
@@ -264,6 +304,8 @@ Entrada:
 - departamento: para filtrar por *ID* o *nombre* de departamento.
 - provincia: para filtrar por *ID* o *nombre* de provincia.
 - campos: qué campos devolver.
+- orden: *id* o *nombre*.
+- aplanar: si está presente, muestra el resultado con una estructura plana.
 - max: cantidad máxima esperada de sugerencias.
 
 **GET** `/api/v1.0/localidades`
@@ -274,26 +316,57 @@ Entrada:
     {
       "id": "06007080", 
       "nombre": "Rivera", 
-      "departamento": "Adolfo Alsina",
-      "provincia": "Buenos Aires"
+      "departamento": {
+        "id": "06007",
+        "nombre": "Adolfo Alsina"
+      },
+      "provincia": {
+        "id": "06",
+        "nombre": "Buenos Aires"
+      }
     }, 
     {
       "id": "06014030", 
       "nombre": "Juan E. Barra", 
-      "departamento": "Adolfo Gonzales Chaves",
-      "provincia": "Buenos Aires"
+      "departamento": {
+        "id": "06014",
+        "nombre": "Adolfo Gonzales Chaves"
+      },
+      "provincia": {
+        "id": "06",
+        "nombre": "Buenos Aires"
+      }
     }, 
-    {
-      "id": "06021020", 
-      "nombre": "Coronel Seguí", 
-      "departamento": "Alberti",
-      "provincia": "Buenos Aires"
-    },
     "..."
   ]
 }
 ```
 
+**GET** `/api/v1.0/localidades?aplanar`. Resultado con estructura plana.
+```json
+{
+  "estado": "OK", 
+  "localidades": [
+    {
+      "id": "06007080", 
+      "nombre": "Rivera", 
+      "departamento_id": "06007",
+      "departamento_nombre": "Adolfo Alsina",
+      "provincia_id": "06",
+      "provincia_nombre": "Buenos Aires"
+    }, 
+    {
+      "id": "06014030", 
+      "nombre": "Juan E. Barra", 
+      "departamento_id": "06014",
+      "departamento_nombre": "Adolfo Gonzales Chaves",
+      "provincia_id": "06",
+      "provincia_nombre": "Buenos Aires"
+    }, 
+    "..."
+  ]
+}
+```
 
 ## Contacto
 Te invitamos a [crearnos un issue](https://github.com/datosgobar/georef-api/issues/new?title=Encontre-un-bug-en-georef-api) en caso de que encuentres algún bug o tengas comentarios     de alguna parte de `georef-api`. Para todo lo demás, podés mandarnos tu sugerencia o consulta a [datos@modernizacion.gob.ar](mailto:datos@modernizacion.gob.ar).
