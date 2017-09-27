@@ -156,9 +156,11 @@ def parse_es(result):
     Returns:
         dict: Resultado modificado.
     """
+    result = result['_source']
     obs = {SOURCE: 'INDEC'}
-    result['_source'][OBS] = obs
-    return result['_source']
+    result[OBS] = obs
+    result.pop(POSTAL_CODE, None)
+    return result
 
 
 def parse_entity(result, flatten):
