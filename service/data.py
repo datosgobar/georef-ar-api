@@ -125,7 +125,7 @@ def search_es(params):
     streets = query_streets(name=params['road_name'], road=params['road_type'],
                             locality=params['locality'], state=params['state'],
                             fields=params['fields'], max=params['max'])
-    addresses = process_door(number, streets)
+    addresses = [process_door(number, street) for street in streets]
     return addresses
 
 
@@ -185,39 +185,38 @@ def parse_entity(result, flatten):
     return entity
 
 
-def process_door(number, streets):
-    """Procesa direcciones para verificar el número de puerta
-        y agregar información relacionada.
+def process_door(number, street):
+    """Procesa una calle para verificar el número de puerta
+       y agregar información relacionada.
 
     Args:
         number (int): Número de puerta o altura.
-        streets (list): Lista de calles a procesar.
+        street (dict): Calle a procesar.
 
     Returns:
-        list: Lista de direcciones procesadas.
+        dict: Calle procesada con información de altura.
     """
-    for street in streets:
-        if number:
-            street[DOOR_NUM] = None
-            info = ADDRESS_PROCESSED_OK
-            street_start = street.get(START_R)
-            street_end = street.get(END_L)
-            if street_start or street_end:
-                if street_start == street_end:
-                    info = CANNOT_INTERPOLATE_ADDRESS
-                elif number < street_start or number > street_end:
-                    info = ADDRESS_OUT_OF_RANGE
-                else:
-                    search_location_for(street, number)
-                    update_result_with(street, number)
-                    if street[LOCATION] is None:
-                        street.pop(LOCATION, None)
-                        info = CANNOT_GEOCODE_ADDRESS
+    if number:
+        street[DOOR_NUM] = None
+        info = ADDRESS_PROCESSED_OK
+        street_start = street.get(START_R)
+        street_end = street.get(END_L)
+        if street_start or street_end:
+            if street_start == street_end:
+                info = CANNOT_INTERPOLATE_ADDRESS
+            elif number < street_start or number > street_end:
+                info = ADDRESS_OUT_OF_RANGE
             else:
-                info = UNKNOWN_STREET_RANGE
-            street[OBS][INFO] = info
-        remove_spatial_data_from(street)
-    return streets
+                search_location_for(street, number)
+                update_result_with(street, number)
+                if street[LOCATION] is None:
+                    street.pop(LOCATION, None)
+                    info = CANNOT_GEOCODE_ADDRESS
+        else:
+            info = UNKNOWN_STREET_RANGE
+        street[OBS][INFO] = info
+    remove_spatial_data_from(street)
+    return street
 
 
 def search_location_for(address, number):
