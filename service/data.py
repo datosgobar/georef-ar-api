@@ -131,18 +131,15 @@ def search_es(params):
 
     for street in streets:
         address = process_door(number, street)
-        key = street[CODE][:2] + street[CODE][8:]
-        if key[:2] == '02':
+        if street[CODE][:2] == '02':
+            key = street[CODE][:2] + street[CODE][8:]
             caba_streets[key].append(address)
         else:
             addresses.append(address)
 
-    for key in caba_streets:
-        if any(address.get(LOCATION) for address in caba_streets[key]):
-            addresses.extend([address for address in caba_streets[key]
-                             if address.get(LOCATION)])
-        else:
-            addresses.extend(caba_streets[key])
+    for _, streets in caba_streets.items():
+        geocoded = [address for address in streets if address.get(LOCATION)]
+        addresses.extend(geocoded if geocoded else streets)
 
     return addresses
 
