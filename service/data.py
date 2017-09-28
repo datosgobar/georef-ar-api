@@ -9,6 +9,7 @@ e impactan dicha búsqueda contra las fuentes de datos disponibles.
 import os
 import psycopg2
 import requests
+from collections import defaultdict
 from elasticsearch import Elasticsearch
 from service.parser import get_abbreviated
 from service.names import *
@@ -125,7 +126,24 @@ def search_es(params):
     streets = query_streets(name=params['road_name'], road=params['road_type'],
                             locality=params['locality'], state=params['state'],
                             fields=params['fields'], max=params['max'])
-    addresses = [process_door(number, street) for street in streets]
+    addresses = []
+    caba_streets = defaultdict(list)
+
+    for street in streets:
+        address = process_door(number, street)
+        key = street[CODE][:2] + street[CODE][8:]
+        if key[:2] == '02':
+            caba_streets[key].append(address)
+        else:
+            addresses.append(address)
+
+    for key in caba_streets:
+        if any(address.get(LOCATION) for address in caba_streets[key]):
+            addresses.extend([address for address in caba_streets[key]
+                             if address.get(LOCATION)])
+        else:
+            addresses.extend(caba_streets[key])
+
     return addresses
 
 
