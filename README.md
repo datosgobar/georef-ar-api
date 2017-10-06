@@ -1,5 +1,7 @@
 # georef-api
-API del servicio de normalización y geocodificación para direcciones de Argentina.
+API del servicio de normalización y geocodificación de direcciones para organismos de la Administración Pública Nacional.
+
+*Importante: este proyecto está en etapa de desarrollo y usa una muestra con datos de prueba.*
 
 ## Índice 
 * [Uso de georef-api](#uso-de-georef-api)
