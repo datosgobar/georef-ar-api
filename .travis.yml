@@ -7,3 +7,6 @@ install:
 script:
   - python -m unittest tests/normalization.py
   - python -m unittest tests/parsing.py
+env:
+  - FLASK_APP=service/__init__.py
+  - OSM_API_URL="http://nominatim.openstreetmap.org/search"
