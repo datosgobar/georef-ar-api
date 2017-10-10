@@ -1,4 +1,7 @@
 # georef-api
+
+[![Build Status](https://travis-ci.org/datosgobar/georef-api.svg?branch=master)](https://travis-ci.org/datosgobar/georef-api)
+
 API del servicio de normalización y geocodificación de direcciones para organismos de la Administración Pública Nacional.
 
 *Importante: este proyecto está en etapa de desarrollo y usa una muestra con datos de prueba.*
