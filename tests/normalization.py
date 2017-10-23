@@ -67,14 +67,14 @@ class MatchResultsTest(TestCase):
 
     def test_get_request_with_single_match(self):
         """La dirección recibida coincide con una única dirección."""
-        endpoint = '/api/v1.0/direcciones?direccion=Austria,Buenos%20Aires'
+        endpoint = '/api/v1.0/direcciones?direccion=Austria 100,Buenos Aires'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert len(results['direcciones']) == 2
 
     def test_get_request_with_many_matches(self):
         """La dirección recibida puede ser una de varias al normalizar."""
-        endpoint = '/api/v1.0/direcciones?direccion=Italia'
+        endpoint = '/api/v1.0/direcciones?direccion=Italia 100'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert len(results['direcciones']) > 1
@@ -100,7 +100,7 @@ class RequestStatusTest(TestCase):
 
     def test_valid_request_with_results(self):
         """Request válido con resultados. Retorna OK."""
-        endpoint = '/api/v1.0/direcciones?direccion=Austria'
+        endpoint = '/api/v1.0/direcciones?direccion=Austria 100'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert results['estado'] == 'OK' \
@@ -109,7 +109,7 @@ class RequestStatusTest(TestCase):
     def test_valid_request_with_no_results(self):
         """Request válido sin resultados. Retorna SIN_RESULTADOS."""
         data.query_address = Mock(return_value=[])
-        endpoint = '/api/v1.0/direcciones?direccion=CalleQueNoExiste'
+        endpoint = '/api/v1.0/direcciones?direccion=CalleQueNoExiste 100'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
         assert results['estado'] == 'SIN_RESULTADOS' \
