@@ -53,8 +53,11 @@ def address_get(request):
     """
     if not request.args.get(ADDRESS):
         return parser.get_response_for_invalid(request,
-        message='El parámetro "direccion" es obligatorio.')
+            message='El parámetro "direccion" es obligatorio.')
     search = parser.build_search_from(request.args)
+    if search['number'] is None:
+        return parser.get_response_for_invalid(request,
+            message='Debe ingresar una altura.')
     data.save_address(search)
     matches = data.query_address(search)
     result = build_result_for(ADDRESSES, matches)
