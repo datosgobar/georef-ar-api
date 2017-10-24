@@ -19,8 +19,8 @@ REQUEST_INVALID = {
         'causa': 'El Request tiene parámetros inválidos o está incompleto.',
         'mensaje': 'El Request tiene parámetros inválidos o está incompleto.',
         'info': 'https://github.com/datosgobar/georef-api'
-        }
     }
+}
 
 
 def get_fields(args):
@@ -32,9 +32,7 @@ def get_fields(args):
     Returns:
         list: campos para filtrar la búsqueda.
     """
-    if args:
-        return args.split(',')
-    return []
+    return args.split(',') if args else []
 
 def get_from_string(address_str):
     """Procesa los componentes de una dirección en una cadena de texto.
@@ -57,7 +55,6 @@ def build_search_from(params):
     Returns:
         dict: Parámetros de búsqueda.
     """
-
     address = params.get(ADDRESS).split(',')
     road_type, road_name, number = get_parts_from(address[0].strip())
     locality = params.get(LOCALITY)
@@ -67,6 +64,7 @@ def build_search_from(params):
     fields = get_fields(params.get(FIELDS))
     if len(address) > 1:
         locality = address[1].strip()
+
     return {
         'number': number,
         'road_name': road_name,
@@ -94,6 +92,7 @@ def get_abbreviated(name):
     for word in name.split():
         if word in ABBR_STREETS:
             name = name.replace(word, ABBR_STREETS[word.upper()])
+
     return name
 
 
@@ -116,6 +115,7 @@ def get_parts_from(address):
     match = re.search(r'(\s[0-9]+?)$', address)
     number = int(match.group(1)) if match else None
     road_name = re.sub(r'(\s[0-9]+?)$', r'', address)
+
     return road_type, road_name.strip(), number
 
 

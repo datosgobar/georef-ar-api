@@ -54,8 +54,11 @@ STATE_ID = 'provincia.id'
 STATE_NAME = 'provincia.nombre'
 
 # Messages
+ADDRESS_REQUIRED = 'El parámetro "direccion" es obligatorio.'
 ADDRESS_PROCESSED_OK = 'Se procesó correctamente la dirección buscada.'
 ADDRESS_OUT_OF_RANGE = 'La altura buscada está fuera del rango conocido.'
 UNKNOWN_STREET_RANGE = 'La calle no tiene numeración en la base de datos.'
 CANNOT_GEOCODE_ADDRESS = 'La altura buscada no puede ser geocodificada.'
 CANNOT_INTERPOLATE_ADDRESS = 'No se pudo realizar la interpolación.'
+NUMBER_REQUIRED = 'Debe ingresar una altura.'
+EMPTY_DATA = 'No hay datos de direcciones para procesar.'

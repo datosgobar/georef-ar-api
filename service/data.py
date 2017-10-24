@@ -63,9 +63,11 @@ def query_streets(name=None, locality=None, state=None,
             index = '-'.join([STREETS, target_state[0][ID]])
     if LOCATION in fields:
         fields.extend([GEOM, START_R, START_L, END_R, END_L, FULL_NAME])
+
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, '_source': fields}
     result = Elasticsearch().search(index=index, doc_type='calle', body=query)
+
     return [parse_es(hit) for hit in result['hits']['hits']]
 
 
@@ -107,9 +109,11 @@ def query_entity(index, name=None, department=None, state=None,
     if order:
         if ID in order: sorts[ID_KEYWORD] = {'order': 'asc'}
         if NAME in order: sorts[NAME_KEYWORD] = {'order': 'asc'}
+
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, 'sort': sorts, '_source': fields}
     result = Elasticsearch().search(index=index, body=query)
+
     return [parse_entity(hit, flatten) for hit in result['hits']['hits']]
 
 
@@ -199,6 +203,7 @@ def parse_entity(result, flatten):
             entity['_'.join([STATE, NAME])] = state[NAME]
             entity['_'.join([STATE, ID])] = state[ID]
             del entity[STATE]
+
     return entity
 
 
@@ -218,6 +223,7 @@ def process_door(number, street):
         info = ADDRESS_PROCESSED_OK
         street_start = street.get(START_R)
         street_end = street.get(END_L)
+
         if street_start or street_end:
             if street_start == street_end:
                 info = CANNOT_INTERPOLATE_ADDRESS
@@ -232,6 +238,7 @@ def process_door(number, street):
         else:
             info = UNKNOWN_STREET_RANGE
         street[OBS][INFO] = info
+
     remove_spatial_data_from(street)
     return street
 
@@ -292,6 +299,7 @@ def search_osm(params):
         query += ', %s' % params['locality']
     if params.get('state'):
         query += ', %s' % params['state']
+
     params = {
         'q': query,
         'format': 'json',
@@ -300,6 +308,7 @@ def search_osm(params):
         'limit': params.get('max') or 15
     }
     result = requests.get(url, params=params).json()
+
     return [parse_osm(match) for match in result
             if match['class'] == 'highway' or match['type'] == 'house']
 
@@ -320,7 +329,7 @@ def parse_osm(result):
         LOCALITY: result['address'].get('city'),
         STATE: result['address'].get('state'),
         OBS: {SOURCE: 'OSM'}
-        }
+    }
 
 
 def parse_osm_type(osm_type):
@@ -359,12 +368,14 @@ def location(geom, number, start, end):
     args = geom, number, start, end
     query = """SELECT geocodificar('%s', %s, %s, %s);""" % args
     connection = get_db_connection()
+
     with connection.cursor() as cursor:
         cursor.execute(query)
         location = cursor.fetchall()[0][0]# Query returns single row and col.
     if location['code']:
        lat, lon = location['result'].split(',')
        return {LAT: lat, LON: lon}
+
     return None
 
 
@@ -374,11 +385,10 @@ def get_db_connection():
     Returns:
         connection: Conexión a base de datos.
     """
-    return psycopg2.connect(
-        host=os.environ.get('GEOREF_HOST'),
-        dbname=os.environ.get('GEOREF_DBNAME'),
-        user=os.environ.get('GEOREF_USER'),
-        password=os.environ.get('GEOREF_PASSWORD'))
+    return psycopg2.connect(host=os.environ.get('GEOREF_HOST'),
+                            dbname=os.environ.get('GEOREF_DBNAME'),
+                            user=os.environ.get('GEOREF_USER'),
+                            password=os.environ.get('GEOREF_PASSWORD'))
 
 
 def save_address(search, user=None):
