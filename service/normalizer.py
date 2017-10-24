@@ -20,10 +20,7 @@ def build_result_for(entity, matches):
     Returns:
         dict: Resultados e información de estado asociada.
     """
-    return {
-        STATUS: 'OK' if matches else NO_RESULTS,
-        entity: matches
-        }
+    return {entity: matches}
 
 
 def process_address(request):

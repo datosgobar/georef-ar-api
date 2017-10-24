@@ -24,7 +24,6 @@ Entrada:
 Salida: JSON con el siguiente formato.
 ```json
 {
-  "estado": "OK|SIN_RESULTADOS|INVALIDO",
   "direcciones": [
     {
       "nomenclatura": "Avenida Presidente Roque Sáenz Peña 250, Ciudad ...",
@@ -55,7 +54,6 @@ Si la dirección existe, debería recibir uno o más resultados.
 **GET** `/api/v1.0/direcciones?direccion=Echeverria+4497&provincia=Buenos+Aires`
 ```json
 {
-  "estado": "OK",
   "direcciones": [
     {
       "nomenclatura": "Esteban Echeverría 4497, Gregorio Laferrere, Buenos Aires",
@@ -102,7 +100,6 @@ la respuesta de la API incluye el campo "error" con información detallada.
     "info": "https://github.com/datosgobar/georef-api",
     "mensaje": "El Request tiene parámetros inválidos o está incompleto.",
   },
-  "estado": "INVALIDO"
 }
 ```
 
@@ -128,7 +125,6 @@ Entrada:
 Salida: JSON con el siguiente formato.
 ```json
 {
-  "estado": "OK",
   "direcciones": [
     {
       "original": "Roque Sáenz Peña 788, Buenos Aires",
@@ -172,7 +168,6 @@ Ejemplo: obtener todas las calles de Bariloche, mostrando *nomenclatura* y *tipo
 Salida: JSON con el siguiente formato.
 ```json
 {
-    "estado": "OK",
     "calles": [
         {
             "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
@@ -201,7 +196,6 @@ Entrada:
 **GET** `/api/v1.0/provincias`
 ```json
 {
-  "estado": "OK", 
   "provincias": [
     {
       "id": "14", 
@@ -242,7 +236,6 @@ Entrada:
 **GET** `/api/v1.0/departamentos?nombre=capital`
 ```json
 {
-  "estado": "OK",
   "departamentos": [
     {
       "id": "50007", 
@@ -276,7 +269,6 @@ Entrada:
 **GET** `/api/v1.0/departamentos?nombre=capital&aplanar`. Resultado con estructura plana.
 ```json
 {
-  "estado": "OK",
   "departamentos": [
     {
       "id": "50007", 
@@ -316,7 +308,6 @@ Entrada:
 **GET** `/api/v1.0/localidades`
 ```json
 {
-  "estado": "OK", 
   "localidades": [
     {
       "id": "06007080", 
@@ -350,7 +341,6 @@ Entrada:
 **GET** `/api/v1.0/localidades?aplanar`. Resultado con estructura plana.
 ```json
 {
-  "estado": "OK", 
   "localidades": [
     {
       "id": "06007080", 

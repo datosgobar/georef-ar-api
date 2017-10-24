@@ -103,8 +103,7 @@ class RequestStatusTest(TestCase):
         endpoint = '/api/v1.0/direcciones?direccion=Austria 100'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
-        assert results['estado'] == 'OK' \
-        and len(results['direcciones']) > 0
+        assert len(results['direcciones']) > 0
 
     def test_valid_request_with_no_results(self):
         """Request válido sin resultados. Retorna SIN_RESULTADOS."""
@@ -112,15 +111,14 @@ class RequestStatusTest(TestCase):
         endpoint = '/api/v1.0/direcciones?direccion=CalleQueNoExiste 100'
         response = self.app.get(endpoint)
         results = json.loads(response.data)
-        assert results['estado'] == 'SIN_RESULTADOS' \
-        and len(results['direcciones']) == 0
+        assert len(results['direcciones']) == 0
 
     def test_invalid_request(self):
         """Request inválido. Retorna estado INVALIDO."""
         # This is invalid for missing a required parameter.
         response = self.app.get('/api/v1.0/direcciones')
         results = json.loads(response.data)
-        assert results['estado'] == 'INVALIDO' and response.status_code == 400
+        assert response.status_code == 400
 
 
 if __name__ == '__main__':

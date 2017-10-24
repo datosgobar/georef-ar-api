@@ -14,7 +14,6 @@ import re
 
 REQUEST_INVALID = {
     'codigo': 400,
-    'estado': 'INVALIDO',
     'error': {
         'codigo_interno': None,
         'causa': 'El Request tiene parámetros inválidos o está incompleto.',

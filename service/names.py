@@ -37,8 +37,6 @@ SOURCE = 'fuente'
 INFO = 'info'
 ERROR = 'error'
 MESSAGE = 'mensaje'
-STATUS = 'estado'
-NO_RESULTS = 'SIN_RESULTADOS'
 
 # Parameters
 ADDRESS = 'direccion'
