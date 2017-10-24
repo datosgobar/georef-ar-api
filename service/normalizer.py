@@ -35,8 +35,6 @@ def process_address(request):
     Returns:
         Resultado de una de las funciones invocadas según el tipo de Request.
     """
-    if not parser.validate(request):
-        return parser.get_response_for_invalid(request)
     if request.method == 'GET':
         return address_get(request)
     return address_post(request)

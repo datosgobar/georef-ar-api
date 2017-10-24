@@ -24,18 +24,6 @@ REQUEST_INVALID = {
     }
 
 
-def validate(request):
-    """Controla que una consulta sea válida para procesar.
-
-    Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
-
-    Returns:
-        bool: Si una consulta es válida o no.
-    """
-    return True # pending until API keys are implemented.
-
-
 def get_fields(args):
     """Devuelve los campos a mostrar pedidos en la consulta.
 
