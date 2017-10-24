@@ -135,7 +135,7 @@ def search_es(params):
 
     for street in streets:
         address = process_door(number, street)
-        if street[CODE][:2] == '02':
+        if street.get(CODE) and street[CODE][:2] == '02':
             key = street[CODE][:2] + street[CODE][8:]
             caba_streets[key].append(address)
         else:
