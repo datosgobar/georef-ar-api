@@ -10,19 +10,6 @@ from service import data, parser
 from service.names import *
 
 
-def build_result_for(entity, matches):
-    """Arma un diccionario con la lista de resultados para una entidad.
-
-    Args:
-        entity (str): Nombre de la entidad de la que se retornan resulados.
-        matches (list): Lista con los resultados.
-
-    Returns:
-        dict: Resultados e información de estado asociada.
-    """
-    return {entity: matches}
-
-
 def process_address(request):
     """Procesa una consulta para normalizar direcciones.
 
@@ -55,8 +42,7 @@ def address_get(request):
             message='Debe ingresar una altura.')
     data.save_address(search)
     matches = data.query_address(search)
-    result = build_result_for(ADDRESSES, matches)
-    return parser.get_response(result)
+    return parser.get_response({ADDRESSES: matches})
 
 
 def address_post(request):
@@ -81,8 +67,7 @@ def address_post(request):
                 'original': address,
                 'normalizadas': data.query_address(parsed_address)
                 })
-    result = build_result_for(ADDRESSES, matches)
-    return parser.get_response(result)
+    return parser.get_response({ADDRESSES: matches})
 
 
 def process_street(request):
@@ -102,8 +87,7 @@ def process_street(request):
     fields = parser.get_fields(request.args.get(FIELDS))
     matches = data.query_streets(name, locality, state, road_type, max, fields)
     for street in matches: street.pop(GEOM, None)
-    result = build_result_for(STREETS, matches)
-    return parser.get_response(result)
+    return parser.get_response({STREETS: matches})
 
 
 def process_locality(request):
@@ -124,8 +108,7 @@ def process_locality(request):
     flatten = FLATTEN in request.args
     matches = data.query_entity(LOCALITIES, name, department, state,
                                 max, order, fields, flatten)
-    result = build_result_for(LOCALITIES, matches)
-    return parser.get_response(result)
+    return parser.get_response({LOCALITIES: matches})
 
 
 def process_department(request):
@@ -145,8 +128,7 @@ def process_department(request):
     flatten = FLATTEN in request.args
     matches = data.query_entity(DEPARTMENTS, name, state=state, max=max,
                                 order=order, fields=fields, flatten=flatten)
-    result = build_result_for(DEPARTMENTS, matches)
-    return parser.get_response(result)
+    return parser.get_response({DEPARTMENTS: matches})
 
 
 def process_state(request):
@@ -164,5 +146,4 @@ def process_state(request):
     fields = parser.get_fields(request.args.get(FIELDS))
     matches = data.query_entity(STATES, name, max=max,
                                 order=order, fields=fields)
-    result = build_result_for(STATES, matches)
-    return parser.get_response(result)
+    return parser.get_response({STATES: matches})
