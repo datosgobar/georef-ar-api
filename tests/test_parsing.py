@@ -55,7 +55,19 @@ class InputParsingTest(TestCase):
         with app.test_request_context('?direccion'):
             search = parser.build_search_from(flask.request.args)
             assert search['fields'] == []
-    
+
+    def test_number_is_parsed(self):
+        """La altura está presente en el parámetro dirección."""
+        with app.test_request_context('?direccion=av principal 100'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['number'] == 100
+
+    def test_number_is_not_parsed(self):
+        """La altura no está presente en el parámetro dirección."""
+        with app.test_request_context('?direccion=av principal'):
+            search = parser.build_search_from(flask.request.args)
+            assert search['number'] is None
+
     def test_road_type_is_parsed(self):
         """El tipo de camino está presente y se devuelve su abreviación."""
         with app.test_request_context('?direccion=avenida'):
