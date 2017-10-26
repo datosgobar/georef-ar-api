@@ -139,6 +139,28 @@ def process_department(request):
     return parser.get_response({DEPARTMENTS: matches})
 
 
+def process_municipality(request):
+    """Procesa una consulta de tipo GET para normalizar municipios.
+
+    Args:
+        request (flask.Request): Objeto con información de la consulta HTTP.
+
+    Returns:
+        Resultado de la consulta como objecto flask.Response.
+    """
+    name = request.args.get(NAME)
+    state = request.args.get(STATE)
+    max = request.args.get(MAX)
+    order = request.args.get(ORDER)
+    fields = parser.get_fields(request.args.get(FIELDS))
+    flatten = FLATTEN in request.args
+
+    matches = data.query_entity(MUNICIPALITIES, name, state=state, max=max,
+                                order=order, fields=fields, flatten=flatten)
+
+    return parser.get_response({MUNICIPALITIES: matches})
+
+
 def process_state(request):
     """Procesa una consulta de tipo GET para normalizar provincias.
 

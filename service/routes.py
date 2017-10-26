@@ -30,6 +30,11 @@ def get_departments():
     return normalizer.process_department(request)
 
 
+@app.route('/api/v1.0/municipios', methods=['GET'])
+def get_municipalities():
+    return normalizer.process_municipality(request)
+
+
 @app.route('/api/v1.0/provincias', methods=['GET'])
 def get_states():
     return normalizer.process_state(request)

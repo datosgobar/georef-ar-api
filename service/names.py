@@ -11,6 +11,7 @@ ADDRESSES = 'direcciones'
 STREETS = 'calles'
 LOCALITIES = 'localidades'
 DEPARTMENTS = 'departamentos'
+MUNICIPALITIES = 'municipios'
 STATES = 'provincias'
 
 # Fields
