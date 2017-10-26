@@ -193,15 +193,11 @@ def parse_entity(result, flatten):
     """
     entity = result['_source']
     if flatten:
-        flattened = []
         for field in list(entity):
             if isinstance(entity[field], dict):
                 for key, value in entity[field].items():
                     entity['_'.join([field, key])] = value
-                flattened.append(field)
-        for field in flattened:
-            del entity[field]
-
+                del entity[field]
     return entity
 
 
