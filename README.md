@@ -293,6 +293,101 @@ Entrada:
 }
 ```
 
+### Municipios `/api/v1.0/municipios`
+Retorna un listado de municipios.
+
+Entrada:
+- nombre: para filtrar por nombre.
+- provincia: para filtrar por *ID* o *nombre* de provincia.
+- campos: qué campos devolver.
+- orden: *id* o *nombre*.
+- aplanar: si está presente, muestra el resultado con una estructura plana.
+- max: cantidad máxima esperada de sugerencias.
+
+**GET** `/api/v1.0/municipios?provincia=54`
+```json
+{
+  "municipios": [
+    {
+      "id": "24089",
+      "nombre": "MONTECARLO",
+      "provincia": {
+        "id": "54",
+        "nombre": "Misiones"
+      },
+      "ubicacion": {
+        "lat": -26.6388110114284,
+        "lon": -54.561398302505
+      }
+    },
+    {
+      "id": "24138",
+      "nombre": "CAMPO VIERA",
+      "provincia": {
+        "id": "54",
+        "nombre": "Misiones"
+      },
+      "ubicacion": {
+        "lat": -27.2794449755344,
+        "lon": -55.0708317700693
+      }
+    },
+    {
+      "id": "24147",
+      "nombre": "ARISTOBULO DEL VALLE",
+      "provincia": {
+        "id": "54",
+        "nombre": "Misiones"
+      },
+      "ubicacion": {
+        "lat": -27.1206229393642,
+        "lon": -54.8280097328346
+      }
+    },
+    "..."
+  ]
+}
+```
+
+**GET** `/api/v1.0/municipios?provincia=54&aplanar` Resultado con estructura plana.
+```json
+{
+  "municipios": [
+    {
+      "id": "24089",
+      "nombre": "MONTECARLO",
+      "provincia_id": "54",
+      "provincia_nombre": "Misiones",
+      "ubicacion": {
+        "lat": -26.6388110114284,
+        "lon": -54.561398302505
+      }
+    },
+    {
+      "id": "24138",
+      "nombre": "CAMPO VIERA",
+      "provincia_id": "54",
+      "provincia_nombre": "Misiones",
+      "ubicacion": {
+        "lat": -27.2794449755344,
+        "lon": -55.0708317700693
+      }
+    },
+    {
+      "id": "24147",
+      "nombre": "ARISTOBULO DEL VALLE",
+      "provincia_id": "54",
+      "provincia_nombre": "Misiones",
+      "ubicacion": {
+        "lat": -27.1206229393642,
+        "lon": -54.8280097328346
+      }
+    },
+    "..."
+  ]
+}
+```
+
 ### Localidades `/api/v1.0/localidades`
 Retorna un listado de localidades.
 
