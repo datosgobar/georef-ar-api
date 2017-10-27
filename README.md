@@ -168,19 +168,19 @@ Ejemplo: obtener todas las calles de Bariloche, mostrando *nomenclatura* y *tipo
 Salida: JSON con el siguiente formato.
 ```json
 {
-    "calles": [
-        {
-            "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
-            "tipo": "Avenida"
-        },
-        {
-            "nomenclatura": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
-            "tipo": "Calle"
-        },
-        {
-            "..."
-        },
-    ],
+  "calles": [
+    {
+      "nomenclatura": "Avenida 12 de Octubre, 8400 San Carlos de Bariloche, Río Negro",
+      "tipo": "Avenida"
+    },
+    {
+      "nomenclatura": "Diagonal 1, 8400 San Carlos de Bariloche, Río Negro",
+      "tipo": "Calle"
+    },
+    {
+      "..."
+    },
+  ],
 }
 ```
 
