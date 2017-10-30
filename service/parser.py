@@ -34,14 +34,14 @@ def get_fields(args):
     """
     return args.split(',') if args else []
 
-def get_from_string(address_str):
+def get_search_from_string(address_str):
     """Procesa los componentes de una dirección en una cadena de texto.
 
     Args:
         address_str (str): Texto que representa una dirección.
 
     Returns:
-        bool: Si una consulta es válida o no.
+        dict: Parámetros de búsqueda.
     """
     return build_search_from({ADDRESS: address_str})
 

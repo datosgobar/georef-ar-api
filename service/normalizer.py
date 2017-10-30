@@ -63,10 +63,10 @@ def address_post(request):
         if not addresses:
             return parser.get_response_for_invalid(request, message=EMPTY_DATA)
         for address in addresses:
-            parsed_address = parser.get_from_string(address)
+            search = parser.get_search_from_string(address)
             matches.append({
                 'original': address,
-                'normalizadas': data.query_address(parsed_address)
+                'normalizadas': data.query_address(search)
             })
 
     return parser.get_response({ADDRESSES: matches})
