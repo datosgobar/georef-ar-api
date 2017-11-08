@@ -111,7 +111,7 @@ def process_locality(request):
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args
 
-    matches = data.query_entity(LOCALITIES, name, department, state,
+    matches = data.query_entity(SETTLEMENTS, name, department, state,
                                 max, order, fields, flatten)
 
     return parser.get_response({LOCALITIES: matches})

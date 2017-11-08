@@ -9,6 +9,7 @@ los campos, parámetros, y otras claves que se usan frecuentemente.
 # Endpoints
 ADDRESSES = 'direcciones'
 STREETS = 'calles'
+SETTLEMENTS = 'bahra'
 LOCALITIES = 'localidades'
 DEPARTMENTS = 'departamentos'
 MUNICIPALITIES = 'municipios'
