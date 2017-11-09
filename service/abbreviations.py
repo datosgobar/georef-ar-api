@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+
+"""Módulo 'abbreviations' de georef-api
+
+Declara las abreviaciones que usa la API para
+realizar transformaciones previas a la búsqueda.
+"""
+
 ABBR_STREETS = {
     'AGRIMENSOR': 'AGRIM',
     'AGENTE': 'AGTE',
@@ -56,7 +64,6 @@ ABBR_STREETS = {
     'PIONERO': 'PNERO',
     'PIONEROS': 'PNEROS',
     'PRESBITERO': 'PBRO',
-    'PRESIDENTE': 'PRES',
     'PRESIDENTE': 'PRES',
     'PRESIDENCIA': 'PRES',
     'PRIMERO': 'PRO',
