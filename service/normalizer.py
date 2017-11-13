@@ -89,12 +89,14 @@ def process_street(request):
 
     name = request.args.get(NAME)
     locality = request.args.get(LOCALITY)
+    department = request.args.get(DEPT)
     state = request.args.get(STATE)
     road_type = request.args.get(ROAD_TYPE)
     max = request.args.get(MAX)
     fields = parser.get_fields(request.args.get(FIELDS))
 
-    matches = data.query_streets(name, locality, state, road_type, max, fields)
+    matches = data.query_streets(name, locality, department, state,
+                                 road_type, max, fields)
     for street in matches: street.pop(GEOM, None)
 
     return parser.get_response({STREETS: matches})

@@ -30,14 +30,14 @@ def query_address(search_params):
     return matches
 
 
-def query_streets(name=None, locality=None, state=None,
+def query_streets(name=None, locality=None, department=None, state=None,
                   road=None, max=None, fields=[]):
     """Busca calles según parámetros de búsqueda de una consulta.
 
     Args:
         name (str): Nombre de la calle para filtrar (opcional).
         locality (str): Nombre de la localidad para filtrar (opcional).
-        department (str): ID o nombre de departamento para filtrar (opcional).
+        department (str): Nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
         road_type (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
@@ -56,6 +56,9 @@ def query_streets(name=None, locality=None, state=None,
         terms.append(condition)
     if locality:
         condition = build_condition(LOCALITY, locality, fuzzy=True)
+        terms.append(condition)
+    if department:
+        condition = build_condition(DEPT, department, fuzzy=True)
         terms.append(condition)
     if state:
         target_state = query_entity(STATES, state, max=1)
@@ -129,6 +132,7 @@ def search_es(params):
     number = params['number']
     streets = query_streets(name=params['road_name'], road=params['road_type'],
                             locality=params['locality'], state=params['state'],
+                            department=params['department'],
                             fields=params['fields'], max=params['max'])
     addresses = []
     caba_streets = defaultdict(list)

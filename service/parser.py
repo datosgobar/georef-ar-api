@@ -84,6 +84,7 @@ def build_search_from(params):
     address = params.get(ADDRESS).split(',')
     road_type, road_name, number = get_parts_from(address[0].strip())
     locality = params.get(LOCALITY)
+    department = params.get(DEPT)
     state = params.get(STATE)
     max = params.get(MAX)
     source = params.get(SOURCE)
@@ -96,6 +97,7 @@ def build_search_from(params):
         'road_name': road_name,
         'road_type': road_type,
         'locality': locality,
+        'department': department,
         'state': state,
         'max': max,
         'source': source,
