@@ -23,6 +23,31 @@ REQUEST_INVALID = {
 }
 
 
+ENDPOINT_PARAMS = {
+    ADDRESSES: [ADDRESS, LOCALITY, DEPT, STATE, FIELDS, MAX],
+    STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX],
+    SETTLEMENTS: [NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX],
+    MUNICIPALITIES: [NAME, STATE, ORDER, FIELDS, FLATTEN, MAX],
+    DEPARTMENTS: [NAME, STATE, ORDER, FIELDS, FLATTEN, MAX],
+    STATES: [NAME, ORDER, FIELDS, FLATTEN, MAX]
+}
+
+
+def validate_params(request, resource):
+    """Controla que una consulta sea válida para procesar.
+ 
+    Args:
+        request (flask.Request): Objeto con información de la consulta HTTP.
+ 
+    Returns:
+        (bool, str): Si una consulta es válida o no, y un mensaje si hay error.
+    """
+    for param in request.args:
+        if param not in ENDPOINT_PARAMS[resource]:
+            return False, INVALID_PARAM % param
+    return True, ''
+
+
 def get_fields(args):
     """Devuelve los campos a mostrar pedidos en la consulta.
 
@@ -33,6 +58,7 @@ def get_fields(args):
         list: campos para filtrar la búsqueda.
     """
     return args.split(',') if args else []
+
 
 def get_search_from_string(address_str):
     """Procesa los componentes de una dirección en una cadena de texto.

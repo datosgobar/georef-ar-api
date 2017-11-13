@@ -33,10 +33,12 @@ def address_get(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_request, error = parser.validate_params(request, ADDRESSES)
+    if not valid_request:
+        return parser.get_response_for_invalid(request, message=error)
     if not request.args.get(ADDRESS):
         return parser.get_response_for_invalid(request,
                                                message=ADDRESS_REQUIRED)
-
     search = parser.build_search_from(request.args)
     if search['number'] is None:
         return parser.get_response_for_invalid(request, message=NUMBER_REQUIRED)
@@ -81,6 +83,10 @@ def process_street(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_request, error = parser.validate_params(request, STREETS)
+    if not valid_request:
+        return parser.get_response_for_invalid(request, message=error)
+
     name = request.args.get(NAME)
     locality = request.args.get(LOCALITY)
     state = request.args.get(STATE)
@@ -103,6 +109,10 @@ def process_locality(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_request, error = parser.validate_params(request, SETTLEMENTS)
+    if not valid_request:
+        return parser.get_response_for_invalid(request, message=error)
+
     name = request.args.get(NAME)
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
@@ -126,6 +136,10 @@ def process_department(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_request, error = parser.validate_params(request, DEPARTMENTS)
+    if not valid_request:
+        return parser.get_response_for_invalid(request, message=error)
+
     name = request.args.get(NAME)
     state = request.args.get(STATE)
     max = request.args.get(MAX)
@@ -148,6 +162,10 @@ def process_municipality(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_request, error = parser.validate_params(request, MUNICIPALITIES)
+    if not valid_request:
+        return parser.get_response_for_invalid(request, message=error)
+
     name = request.args.get(NAME)
     state = request.args.get(STATE)
     max = request.args.get(MAX)
@@ -170,6 +188,10 @@ def process_state(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_request, error = parser.validate_params(request, STATES)
+    if not valid_request:
+        return parser.get_response_for_invalid(request, message=error)
+
     name = request.args.get(NAME)
     max = request.args.get(MAX) or 24
     order = request.args.get(ORDER)
