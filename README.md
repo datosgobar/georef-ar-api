@@ -16,7 +16,8 @@ API del servicio de normalización y geocodificación de direcciones para organi
 
 Entrada:
 - **direccion**: la dirección que se quiere normalizar (campo obligatorio).
-- localidad: para filtrar por *nombre* de localidad.
+- localidad: para filtrar por *nombre* de localidad censal.
+- departamento: para filtrar por *nombre* de departamento.
 - provincia: para filtrar por *nombre* de provincia.
 - campos: qué campos devolver.
 - max: cantidad máxima esperada de sugerencias.
@@ -155,7 +156,8 @@ Salida: JSON con el siguiente formato.
 Retorna calles (normalizadas) de una localidad o provincia.
 
 Entrada:
-- localidad: para filtrar por *nombre* de localidad.
+- localidad: para filtrar por *nombre* de localidad censal.
+- departamento: para filtrar por *nombre* de departamento.
 - provincia: para filtrar por *nombre* de provincia.
 - tipo: para filtrar por tipo de camino.
 - campos: qué campos devolver.
@@ -389,7 +391,7 @@ Entrada:
 ```
 
 ### Localidades `/api/v1.0/localidades`
-Retorna un listado de localidades.
+Retorna un listado de localidades y entidades de BAHRA.
 
 Entrada:
 - nombre: para filtrar por nombre.
@@ -400,59 +402,75 @@ Entrada:
 - aplanar: si está presente, muestra el resultado con una estructura plana.
 - max: cantidad máxima esperada de sugerencias.
 
-**GET** `/api/v1.0/localidades`
+**GET** `/api/v1.0/localidades?departamento=la+matanza`
 ```json
 {
   "localidades": [
     {
-      "id": "06007080", 
-      "nombre": "Rivera", 
       "departamento": {
-        "id": "06007",
-        "nombre": "Adolfo Alsina"
+        "id": "06427",
+        "nombre": "La Matanza"
       },
+      "id": "06427010004",
+      "nombre": "GREGORIO DE LAFERRERE",
       "provincia": {
         "id": "06",
         "nombre": "Buenos Aires"
+      },
+      "tipo": "Entidad (E)",
+      "ubicacion": {
+        "lat": -34.7468379962,
+        "lon": -58.5925328858
       }
-    }, 
+    },
     {
-      "id": "06014030", 
-      "nombre": "Juan E. Barra", 
       "departamento": {
-        "id": "06014",
-        "nombre": "Adolfo Gonzales Chaves"
+        "id": "06427", 
+        "nombre": "La Matanza"
       },
+      "id": "06427010006",
+      "nombre": "LA TABLADA",
       "provincia": {
         "id": "06",
         "nombre": "Buenos Aires"
+      },
+      "tipo": "Entidad (E)",
+      "ubicacion": {
+        "lat": -34.687053669,
+        "lon": -58.5256123986
       }
-    }, 
+    },
     "..."
   ]
 }
 ```
 
-**GET** `/api/v1.0/localidades?aplanar`. Resultado con estructura plana.
+**GET** `/api/v1.0/localidades?departamento=la+matanza&aplanar`. Resultado con estructura plana.
 ```json
 {
   "localidades": [
     {
-      "id": "06007080", 
-      "nombre": "Rivera", 
-      "departamento_id": "06007",
-      "departamento_nombre": "Adolfo Alsina",
+      "departamento_id": "06427",
+      "departamento_nombre": "La Matanza",
+      "id": "06427010004",
+      "nombre": "GREGORIO DE LAFERRERE",
       "provincia_id": "06",
-      "provincia_nombre": "Buenos Aires"
-    }, 
+      "provincia_nombre": "Buenos Aires",
+      "tipo": "Entidad (E)",
+      "ubicacion_lat": -34.7468379962,
+      "ubicacion_lon": -58.5925328858
+    },
     {
-      "id": "06014030", 
-      "nombre": "Juan E. Barra", 
-      "departamento_id": "06014",
-      "departamento_nombre": "Adolfo Gonzales Chaves",
+      "departamento_id": "06427",
+      "departamento_nombre": "La Matanza",
+      "id": "06427010006",
+      "nombre": "LA TABLADA",
       "provincia_id": "06",
-      "provincia_nombre": "Buenos Aires"
-    }, 
+      "provincia_nombre": "Buenos Aires",
+      "tipo": "Entidad (E)",
+      "ubicacion_lat": -34.687053669,
+      "ubicacion_lon": -58.5256123986
+    },
     "..."
   ]
 }
