@@ -135,19 +135,10 @@ def search_es(params):
                             department=params['department'],
                             fields=params['fields'], max=params['max'])
     addresses = []
-    caba_streets = defaultdict(list)
-
     for street in streets:
         address = process_door(number, street)
-        if street.get(CODE) and street[CODE][:2] == '02':
-            key = street[CODE][:2] + street[CODE][8:]
-            caba_streets[key].append(address)
-        else:
+        if address.get(DOOR_NUM):
             addresses.append(address)
-
-    for _, streets in caba_streets.items():
-        geocoded = [address for address in streets if address.get(LOCATION)]
-        addresses.extend(geocoded if geocoded else streets)
 
     return addresses
 
