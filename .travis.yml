@@ -1,11 +1,13 @@
 language: python
+sudo: required
 python:
-  - "3.6"
-install:
-  - pip install -r requirements.txt
+- '3.6'
 script:
-  - python -m unittest tests/test_normalization.py
-  - python -m unittest tests/test_parsing.py
-env:
-  - FLASK_APP=service/__init__.py
-  - OSM_API_URL="http://nominatim.openstreetmap.org/search"
+- python -m unittest tests/test_normalization.py
+- python -m unittest tests/test_parsing.py
+#deploy:
+#  provider: script
+#  skip_cleanup: true
+#  script: bash bin/deploy
+#  on:
+#    branch: master

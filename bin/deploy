@@ -1,0 +1,17 @@
+#!/bin/bash
+echo '--- Iniciando el script de deploy ---'
+
+echo '- Agregando host a known hosts'
+ssh-keyscan -p $PORT_SSH_DEV $IP_DEV >> ~/.ssh/known_hosts
+
+DEPLOY_SCRIPT="
+cd ${GEOREF_API_DIR};
+. venv/bin/activate;
+pip install -r requirements.txt;
+git pull;
+echo '${PASS_SSH_DEV}' | sudo systemctl restart gunicorn;
+exit;
+"
+
+echo '- Haciendo ssh a la máquina y corriendo script de deploy'
+ssh -p $PORT_SSH_DEV $USER_SSH_DEV@$IP_DEV "${DEPLOY_SCRIPT}"
