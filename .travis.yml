@@ -5,7 +5,7 @@ python:
 deploy:
   provider: script
   skip_cleanup: true
-  script: bin/deploy
+  script: 'bash bin/deploy'
   on:
     branch: master
 before_deploy:
