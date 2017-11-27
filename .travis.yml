@@ -5,9 +5,15 @@ python:
 script:
 - python -m unittest tests/test_normalization.py
 - python -m unittest tests/test_parsing.py
-#deploy:
-#  provider: script
-#  skip_cleanup: true
-#  script: bash bin/deploy
-#  on:
-#    branch: master
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: bin/deploy
+  on:
+    branch: master
+before_deploy:
+- openssl aes-256-cbc -K $encrypted_4c0bf4b7e010_key -iv $encrypted_4c0bf4b7e010_iv
+  -in deploy_rsa.enc -out deploy_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/deploy_rsa
+- ssh-add /tmp/deploy_rsa
