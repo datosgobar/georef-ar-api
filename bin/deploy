@@ -11,7 +11,7 @@ pip install -r requirements.txt;
 git pull;
 python -m unittest tests/test_normalization.py
 python -m unittest tests/test_parsing.py
-echo '${PASS_SSH_DEV}' | sudo systemctl restart gunicorn;
+echo '${PASS_SSH_DEV}' | sudo systemctl restart georef-api;
 exit;
 "
 
