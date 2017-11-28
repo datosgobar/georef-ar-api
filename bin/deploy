@@ -9,7 +9,7 @@ cd ${GEOREF_API_DIR};
 . venv/bin/activate;
 echo '${PASS_SSH_DEV}' | sudo pip install -r requirements.txt;
 git pull;
-echo '${PASS_SSH_DEV}' | sudo systemctl restart georef-api;
+sudo systemctl restart georef-api;
 exit;
 "
 
