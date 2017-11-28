@@ -7,10 +7,8 @@ ssh-keyscan -p $PORT_SSH_DEV $IP_DEV >> ~/.ssh/known_hosts
 DEPLOY_SCRIPT="
 cd ${GEOREF_API_DIR};
 . venv/bin/activate;
-pip install -r requirements.txt;
+echo '${PASS_SSH_DEV}' | sudo pip install -r requirements.txt;
 git pull;
-python -m unittest tests/test_normalization.py
-python -m unittest tests/test_parsing.py
 echo '${PASS_SSH_DEV}' | sudo systemctl restart georef-api;
 exit;
 "
