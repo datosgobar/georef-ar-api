@@ -16,8 +16,7 @@ REQUEST_INVALID = {
     'codigo': 400,
     'error': {
         'codigo_interno': None,
-        'causa': 'El Request tiene parámetros inválidos o está incompleto.',
-        'mensaje': 'El Request tiene parámetros inválidos o está incompleto.',
+        'mensaje': WRONG_QUERY,
         'info': 'https://github.com/datosgobar/georef-api'
     }
 }
@@ -44,7 +43,7 @@ def validate_params(request, resource):
     """
     for param in request.args:
         if param not in ENDPOINT_PARAMS[resource]:
-            return False, INVALID_PARAM % param
+            return False, INVALID_PARAM % (param, resource)
     return True, ''
 
 
