@@ -10,7 +10,7 @@ import os
 import psycopg2
 import requests
 from collections import defaultdict
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, ElasticsearchException
 from service.parser import get_abbreviated
 from service.names import *
 
@@ -46,7 +46,7 @@ def query_streets(name=None, locality=None, department=None, state=None,
     Returns:
         list: Resultados de búsqueda de calles.
     """
-    index = ''  # Search in all indexes by default.
+    index = 'calles-*'  # Search in all indexes by default.
     terms = []
     if name:
         condition = build_condition(NAME, get_abbreviated(name), fuzzy=True)
@@ -69,7 +69,10 @@ def query_streets(name=None, locality=None, department=None, state=None,
 
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, '_source': fields}
-    result = Elasticsearch().search(index=index, doc_type='calle', body=query)
+    try:
+        result = Elasticsearch().search(index=index, body=query)
+    except ElasticsearchException as error:
+        return []
 
     return [parse_es(hit) for hit in result['hits']['hits']]
 
@@ -115,13 +118,16 @@ def query_entity(index, name=None, department=None, state=None,
 
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, 'sort': sorts, '_source': fields}
-    result = Elasticsearch().search(index=index, body=query)
+    try:
+        result = Elasticsearch().search(index=index, body=query)
+    except ElasticsearchException as error:
+        return []
 
     return [parse_entity(hit, flatten) for hit in result['hits']['hits']]
 
 
 def search_es(params):
-    """Busca en ElasticSearch para los parámetros de una consulta.
+    """Busca en ElasticSearch con los parámetros de una consulta.
 
     Args:
         params (dict): Diccionario con parámetros de búsqueda.
