@@ -302,7 +302,10 @@ def search_osm(params):
         'addressdetails': 1,
         'limit': params.get('max') or 15
     }
-    result = requests.get(url, params=params).json()
+    try:
+        result = requests.get(url, params=params).json()
+    except requests.RequestException as error:
+        return []
 
     return [parse_osm(match) for match in result
             if match['class'] == 'highway' or match['type'] == 'house']
