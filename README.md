@@ -6,9 +6,22 @@ API del servicio de normalización y geocodificación de direcciones para organi
 
 *Importante: este proyecto está en etapa de desarrollo y usa una muestra con datos de prueba.*
 
-## Índice 
-* [Uso de georef-api](#uso-de-georef-api)
-* [Contacto](#contacto)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+## Indice
+
+- [Uso de georef-api](#uso-de-georef-api)
+  - [Direcciones `/api/v1.0/direcciones`](#direcciones-apiv10direcciones)
+  - [Ejemplos](#ejemplos)
+  - [Calles `/api/v1.0/calles`](#calles-apiv10calles)
+  - [Provincias `/api/v1.0/provincias`](#provincias-apiv10provincias)
+  - [Departamentos `/api/v1.0/departamentos`](#departamentos-apiv10departamentos)
+  - [Municipios `/api/v1.0/municipios`](#municipios-apiv10municipios)
+  - [Localidades `/api/v1.0/localidades`](#localidades-apiv10localidades)
+- [Contacto](#contacto)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Uso de georef-api
 
