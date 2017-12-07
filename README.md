@@ -203,6 +203,7 @@ Salida: JSON con el siguiente formato.
 Retorna un listado de provincias.
 
 Entrada:
+- id: para filtrar por id.
 - nombre: para filtrar por nombre.
 - campos: qué campos devolver.
 - orden: *id* o *nombre*.
@@ -241,6 +242,7 @@ Entrada:
 Retorna un listado de departamentos.
 
 Entrada:
+- id: para filtrar por id.
 - nombre: para filtrar por nombre.
 - provincia: para filtrar por *ID* o *nombre* de provincia.
 - campos: qué campos devolver.
@@ -312,6 +314,7 @@ Entrada:
 Retorna un listado de municipios.
 
 Entrada:
+- id: para filtrar por id.
 - nombre: para filtrar por nombre.
 - provincia: para filtrar por *ID* o *nombre* de provincia.
 - campos: qué campos devolver.
@@ -407,6 +410,7 @@ Entrada:
 Retorna un listado de localidades y entidades de BAHRA.
 
 Entrada:
+- id: para filtrar por id.
 - nombre: para filtrar por nombre.
 - departamento: para filtrar por *ID* o *nombre* de departamento.
 - provincia: para filtrar por *ID* o *nombre* de provincia.

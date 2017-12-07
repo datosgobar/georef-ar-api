@@ -115,6 +115,7 @@ def process_locality(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
+    locality_id = request.args.get(ID)
     name = request.args.get(NAME)
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
@@ -123,8 +124,9 @@ def process_locality(request):
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args
 
-    matches = data.query_entity(SETTLEMENTS, name, department, state,
-                                max, order, fields, flatten)
+    matches = data.query_entity(SETTLEMENTS, entity_id=locality_id, name=name,
+                                department=department, state=state, max=max,
+                                order=order, fields=fields, flatten=flatten)
 
     return parser.get_response({LOCALITIES: matches})
 
@@ -142,6 +144,7 @@ def process_department(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
+    dept_id = request.args.get(ID)
     name = request.args.get(NAME)
     state = request.args.get(STATE)
     max = request.args.get(MAX)
@@ -149,8 +152,9 @@ def process_department(request):
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args
 
-    matches = data.query_entity(DEPARTMENTS, name, state=state, max=max,
-                                order=order, fields=fields, flatten=flatten)
+    matches = data.query_entity(DEPARTMENTS, entity_id=dept_id, name=name,
+                                state=state, flatten=flatten,
+                                order=order, fields=fields, max=max)
 
     return parser.get_response({DEPARTMENTS: matches})
 
@@ -168,6 +172,7 @@ def process_municipality(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
+    municipality_id = request.args.get(ID)
     name = request.args.get(NAME)
     state = request.args.get(STATE)
     max = request.args.get(MAX)
@@ -175,8 +180,9 @@ def process_municipality(request):
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args
 
-    matches = data.query_entity(MUNICIPALITIES, name, state=state, max=max,
-                                order=order, fields=fields, flatten=flatten)
+    matches = data.query_entity(MUNICIPALITIES, entity_id=municipality_id,
+                                name=name, state=state, flatten=flatten,
+                                order=order, fields=fields, max=max)
 
     return parser.get_response({MUNICIPALITIES: matches})
 
@@ -194,12 +200,13 @@ def process_state(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
+    state_id = request.args.get(ID)
     name = request.args.get(NAME)
     max = request.args.get(MAX) or 24
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
 
-    matches = data.query_entity(STATES, name, max=max,
-                                order=order, fields=fields)
+    matches = data.query_entity(STATES, entity_id=state_id, name=name,
+                                order=order, fields=fields, max=max)
 
     return parser.get_response({STATES: matches})

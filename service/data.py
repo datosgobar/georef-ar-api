@@ -77,7 +77,7 @@ def query_streets(name=None, locality=None, department=None, state=None,
     return [parse_es(hit) for hit in result['hits']['hits']]
 
 
-def query_entity(index, name=None, department=None, state=None,
+def query_entity(index, entity_id=None, name=None, department=None, state=None,
                  max=None, order=None, fields=[], flatten=False):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
@@ -96,6 +96,9 @@ def query_entity(index, name=None, department=None, state=None,
     """
     terms = []
     sorts = {}
+    if entity_id:
+        condition = build_condition(ID, entity_id)
+        terms.append(condition)
     if name:
         condition = build_condition(NAME, name, fuzzy=True)
         terms.append(condition)
