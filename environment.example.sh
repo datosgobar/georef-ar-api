@@ -5,4 +5,4 @@ export GEOREF_URL=
 export GEOREF_DB_HOST=
 export GEOREF_DB_NAME=
 export GEOREF_DB_USER=
-export GEOREF_DB_PASSWORD=
+export GEOREF_DB_PASS=

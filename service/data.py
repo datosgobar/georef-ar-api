@@ -392,7 +392,7 @@ def get_db_connection():
     return psycopg2.connect(host=os.environ.get('GEOREF_DB_HOST'),
                             dbname=os.environ.get('GEOREF_DB_NAME'),
                             user=os.environ.get('GEOREF_DB_USER'),
-                            password=os.environ.get('GEOREF_DB_PASSWORD'))
+                            password=os.environ.get('GEOREF_DB_PASS'))
 
 
 def save_address(search, user=None):
