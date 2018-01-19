@@ -111,6 +111,9 @@ def process_locality(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_rule, format_request, error = parser.get_url_rule(request)
+    if not valid_rule:
+        return parser.get_response_for_invalid(request, message=error)
     valid_request, error = parser.validate_params(request, SETTLEMENTS)
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
@@ -119,16 +122,16 @@ def process_locality(request):
     name = request.args.get(NAME)
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
-    max = request.args.get(MAX)
+    max = request.args.get(MAX) or format_request['max']
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
-    flatten = FLATTEN in request.args
+    flatten = FLATTEN in request.args or format_request['convert']
 
     matches = data.query_entity(SETTLEMENTS, entity_id=locality_id, name=name,
                                 department=department, state=state, max=max,
                                 order=order, fields=fields, flatten=flatten)
 
-    return parser.get_response({LOCALITIES: matches})
+    return parser.get_response({LOCALITIES: matches}, format_request)
 
 
 def process_department(request):
@@ -140,6 +143,9 @@ def process_department(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_rule, format_request, error = parser.get_url_rule(request)
+    if not valid_rule:
+        return parser.get_response_for_invalid(request, message=error)
     valid_request, error = parser.validate_params(request, DEPARTMENTS)
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
@@ -147,16 +153,16 @@ def process_department(request):
     dept_id = request.args.get(ID)
     name = request.args.get(NAME)
     state = request.args.get(STATE)
-    max = request.args.get(MAX)
+    max = request.args.get(MAX) or format_request['max']
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
-    flatten = FLATTEN in request.args
+    flatten = FLATTEN in request.args or format_request['convert']
 
     matches = data.query_entity(DEPARTMENTS, entity_id=dept_id, name=name,
                                 state=state, flatten=flatten,
                                 order=order, fields=fields, max=max)
 
-    return parser.get_response({DEPARTMENTS: matches})
+    return parser.get_response({DEPARTMENTS: matches}, format_request)
 
 
 def process_municipality(request):
@@ -168,6 +174,9 @@ def process_municipality(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_rule, format_request, error = parser.get_url_rule(request)
+    if not valid_rule:
+        return parser.get_response_for_invalid(request, message=error)
     valid_request, error = parser.validate_params(request, MUNICIPALITIES)
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
@@ -175,16 +184,16 @@ def process_municipality(request):
     municipality_id = request.args.get(ID)
     name = request.args.get(NAME)
     state = request.args.get(STATE)
-    max = request.args.get(MAX)
+    max = request.args.get(MAX) or format_request['max']
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
-    flatten = FLATTEN in request.args
+    flatten = FLATTEN in request.args or format_request['convert']
 
     matches = data.query_entity(MUNICIPALITIES, entity_id=municipality_id,
                                 name=name, state=state, flatten=flatten,
                                 order=order, fields=fields, max=max)
 
-    return parser.get_response({MUNICIPALITIES: matches})
+    return parser.get_response({MUNICIPALITIES: matches}, format_request)
 
 
 def process_state(request):
@@ -196,6 +205,9 @@ def process_state(request):
     Returns:
         Resultado de la consulta como objecto flask.Response.
     """
+    valid_rule, format_request, error = parser.get_url_rule(request)
+    if not valid_rule:
+        return parser.get_response_for_invalid(request, message=error)
     valid_request, error = parser.validate_params(request, STATES)
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
@@ -205,8 +217,6 @@ def process_state(request):
     max = request.args.get(MAX) or 24
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
-
     matches = data.query_entity(STATES, entity_id=state_id, name=name,
                                 order=order, fields=fields, max=max)
-
-    return parser.get_response({STATES: matches})
+    return parser.get_response({STATES: matches}, format_request)

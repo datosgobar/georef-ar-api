@@ -6,10 +6,11 @@ Contiene funciones que manipulan los distintos objetos
 con los que operan los módulos de la API.
 """
 
-from flask import jsonify, make_response, request
+from flask import jsonify, make_response, request, Response
 from service.abbreviations import ABBR_STREETS, ROAD_TYPES
 from service.names import *
 import re
+import os
 
 
 REQUEST_INVALID = {
@@ -25,10 +26,10 @@ REQUEST_INVALID = {
 ENDPOINT_PARAMS = {
     ADDRESSES: [ADDRESS, LOCALITY, DEPT, STATE, FIELDS, MAX],
     STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX],
-    SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX],
-    MUNICIPALITIES: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX],
-    DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX],
-    STATES: [ID, NAME, ORDER, FIELDS, FLATTEN, MAX]
+    SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT],
+    MUNICIPALITIES: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT],
+    DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT],
+    STATES: [ID, NAME, ORDER, FIELDS, FLATTEN, MAX, FORMAT]
 }
 
 
@@ -45,6 +46,33 @@ def validate_params(request, resource):
         if param not in ENDPOINT_PARAMS[resource]:
             return False, INVALID_PARAM % (param, resource)
     return True, ''
+
+
+def get_url_rule(request):
+    """Analiza la URL y devuelve un diccionario con el formato solicitado.
+
+    Args:
+        request (flask.Request): Objeto con información de la consulta HTTP.
+
+    Returns:
+        (bool, dict, str): Si una consulta es válida o no, un diccionario con
+        los valores del formato solicitado y un mensaje si hay error.
+    """
+    format_request = {'convert': False, 'max': 10000}
+    path = str(request.url_rule)
+    rule = os.path.split(path)
+
+    if '.' in rule[1]:
+        if len(request.args) > 0:
+            return False, '', WRONG_QUERY
+        for word in rule:
+            if '.csv' in word:
+                format_request['convert'] = True
+    else:
+        if request.args.get(FORMAT) == 'csv':
+            format_request['convert'] = True
+        format_request['max'] = request.args.get(MAX)
+    return True, format_request, ''
 
 
 def get_fields(args):
@@ -146,16 +174,24 @@ def get_parts_from(address):
     return road_type, road_name.strip(), number
 
 
-def get_response(result):
+def get_response(result, format_request={}):
     """Genera una respuesta de la API.
 
     Args:
         result (dict): Diccionario con resultados de una consulta.
+        format_request (dict): Diccionario con los valores del formato.
 
     Returns:
-        flask.Response: Respuesta de la API en formato JSON.
+        flask.Response: Respuesta de la API en formato CSV o JSON
     """
-    return make_response(jsonify(result), 200)
+    if 'convert' in format_request and format_request['convert']:
+        entity = [row for row in result.keys()]
+        headers = {'Content-Disposition': 'attachment; '
+                                          'filename=' + entity[0] + '.csv'}
+        return Response(generate_csv(result), mimetype='text/csv',
+                        headers=headers)
+    else:
+        return make_response(jsonify(result), 200)
 
 
 def get_response_for_invalid(request, message=None):
@@ -171,3 +207,17 @@ def get_response_for_invalid(request, message=None):
     if message is not None:
         REQUEST_INVALID[ERROR][MESSAGE] = message
     return make_response(jsonify(REQUEST_INVALID), 400)
+
+
+def generate_csv(result):
+    """ Generar datos en formato CSV
+    Args:
+        result (dict): Diccionario con resultados de una consulta.
+    """
+    first = True
+    for key, rows in result.items():
+        for row in rows:
+            if first:
+                yield ';'.join(dict(row).keys()) + '\n'
+            yield ';'.join(str(v) for v in dict(row).values()) + '\n'
+            first = False

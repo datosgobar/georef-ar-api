@@ -46,6 +46,7 @@ ORDER = 'orden'
 FIELDS = 'campos'
 FLATTEN = 'aplanar'
 MAX = 'max'
+FORMAT = 'formato'
 
 # Elasticsearch
 ID_KEYWORD = 'id.keyword'
