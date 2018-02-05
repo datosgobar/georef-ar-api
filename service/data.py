@@ -94,6 +94,7 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
     Returns:
         list: Resultados de búsqueda de entidades.
     """
+    fields_excludes = ['geometry']
     terms = []
     sorts = {}
     if entity_id:
@@ -116,14 +117,17 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
                 condition = build_condition(STATE_NAME, state, fuzzy=True)
             else:
                 condition = build_condition(STATE_NAME, state,
-                                        kind='match_phrase_prefix')
+                                            kind='match_phrase_prefix')
         terms.append(condition)
     if order:
         if ID in order: sorts[ID_KEYWORD] = {'order': 'asc'}
         if NAME in order: sorts[NAME_KEYWORD] = {'order': 'asc'}
-
+    if 'geometry' in fields: fields_excludes = []
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
-             'size': max or 10, 'sort': sorts, '_source': fields}
+             'size': max or 10, 'sort': sorts, '_source': {
+                                                    'include': fields,
+                                                    'excludes': fields_excludes
+        }}
     try:
         result = Elasticsearch().search(index=index, body=query)
     except ElasticsearchException as error:
