@@ -4,10 +4,9 @@
         "title": "georef-api",
         "description": "API del servicio de normalización y geocodificación para direcciones de Argentina.",
         "contact": {
-
-        },
-        "license": {
-            "name": "TODO"
+            "name": "Equipo de Datos de la Nación Argentina",
+            "url": "https://github.com/datosgobar",
+            "email": "datos@modernizacion.gob.ar"
         },
         "version": "1.0.0"
     },
@@ -22,6 +21,11 @@
     "externalDocs": {
         "url": "https://github.com/datosgobar/georef-api"
     },
+    "servers": [
+        {
+            "url": "https://georef.datos.gob.ar/api/v1.0"
+        }
+    ],
     "components": {
         "schemas": {
             "calle": {
@@ -80,6 +84,122 @@
                         "type": "string",
                         "example": "CALLE"
                     }
+                }
+            },
+            "departamento": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "14140"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "San Justo"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia"
+                    }
+                }
+            },
+            "departamentos": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/departamento"
+                }
+            },
+            "municipio": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "140084"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "COLONIA CAROYA"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia"
+                    },
+                    "ubicacion": {
+                        "$ref": "#/components/schemas/ubicacion"
+                    }
+                }
+            },
+            "ubicacion": {
+                "type": "object",
+                "properties": {
+                    "lat": {
+                        "type": "number",
+                        "example": -31.0541541598
+                    },
+                    "lon": {
+                        "type": "number",
+                        "example": -64.0859537871
+                    }
+                }
+            },
+            "municipios": {
+                "type": "array",
+                "items": {
+                    "$ref":"#/components/schemas/municipio"
+                }
+            },
+            "localidad": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "14007210002"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "LAS BAJADAS"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia"
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "Localidad simple (LS)",
+                        "enum": [
+                            "Entidad (E)",
+                            "Componente de localidad compuesta (LC)",
+                            "Localidad simple (LS)"
+                        ]
+                    },
+                    "ubicacion": {
+                        "$ref": "#/components/schemas/ubicacion"
+                    }
+                }
+            },
+            "localidades": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/localidad"
+                }
+            },
+            "provincia": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "14"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Córdoba"
+                    }
+                }
+            },
+            "provincias": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/provincia"
                 }
             },
             "calles": {
@@ -287,7 +407,7 @@
         }
     },
     "paths": {
-        "/api/v1.0/direcciones": {
+        "/direcciones": {
             "get": {
                 "summary": "Normaliza una dirección.",
                 "tags": [
@@ -386,7 +506,7 @@
                 }
             }
         },
-        "/api/v1.0/calles": {
+        "/calles": {
             "get": {
                 "summary": "Retorna calles (normalizadas) de una localidad o provincia.",
                 "tags": [
@@ -437,7 +557,7 @@
                 }
             }
         },
-        "/api/v1.0/provincias": {
+        "/provincias": {
             "get": {
                 "summary": "Retorna un listado de provincias.",
                 "tags": [
@@ -468,46 +588,166 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Listado de provincias."
+                        "description": "Listado de provincias.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "provincias": {
+                                            "$ref": "#/components/schemas/provincias"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         },
-        "/api/v1.0/departamentos": {
+        "/departamentos": {
             "get": {
                 "summary": "Retorna un listado de departamentos.",
                 "tags": [
                     "Información"
                 ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Listado de departamentos."
+                        "description": "Listado de departamentos.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "departamentos": {
+                                            "$ref": "#/components/schemas/departamentos"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }                   
                 }
             }
         },
-        "/api/v1.0/municipios": {
+        "/municipios": {
             "get": {
                 "summary": "Retorna un listado de municipios.",
                 "tags": [
                     "Información"
                 ],
+                "parameters":[
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Listado de municipios."
+                        "description": "Listado de municipios.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "municipios": {
+                                            "$ref": "#/components/schemas/municipios"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }                    
                 }
             }
         },
-        "/api/v1.0/localidades": {
+        "/localidades": {
             "get": {
                 "summary": "Retorna un listado de localidades y entidades de BAHRA.",
                 "tags": [
                     "Información"
                 ],
+                "parameters":[
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/departamento"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Listado de localidade y entidades."
+                        "description": "Listado de localidades y entidades.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "localidades": {
+                                            "$ref": "#/components/schemas/localidades"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }                    
                 }
             }
