@@ -82,7 +82,16 @@
                     },
                     "tipo": {
                         "type": "string",
-                        "example": "CALLE"
+                        "example": "CALLE",
+                        "enum": [
+                            "OTRO",
+                            "AV",
+                            "RUTA",
+                            "AUT",
+                            "CALLE",
+                            "PJE",
+                            "BV"                           
+                        ]
                     }
                 }
             },
@@ -371,7 +380,7 @@
         },
         "responses": {
             "direcciones_error": {
-                "description": "Se produjo un error al procesar la consulta.",
+                "description": "Error al procesar la consulta.",
                 "content": {
                     "application/json": {
                         "schema": {
@@ -560,6 +569,7 @@
         "/provincias": {
             "get": {
                 "summary": "Retorna un listado de provincias.",
+                "description": "Agregar '.csv' al path de la URL para obtener los resultados en formato CSV.",
                 "tags": [
                     "Información"
                 ],
@@ -608,6 +618,7 @@
         "/departamentos": {
             "get": {
                 "summary": "Retorna un listado de departamentos.",
+                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de los departamentos en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de los departamentos en formato JSON.",
                 "tags": [
                     "Información"
                 ],
@@ -656,6 +667,7 @@
         "/municipios": {
             "get": {
                 "summary": "Retorna un listado de municipios.",
+                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de los municipios en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de los municipios en formato JSON.",
                 "tags": [
                     "Información"
                 ],
@@ -704,6 +716,7 @@
         "/localidades": {
             "get": {
                 "summary": "Retorna un listado de localidades y entidades de BAHRA.",
+                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de las localidades en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de las localidades en formato JSON.",
                 "tags": [
                     "Información"
                 ],
