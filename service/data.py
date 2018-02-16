@@ -31,7 +31,7 @@ def query_place(index, lat, lon, flatten=False):
     query = {'query': {'bool': {'must': {'match_all': {}},
                                 'filter': {'geo_shape': {'geometry': {'shape': {
                                         'type': 'point',
-                                        'coordinates': [lat, lon]
+                                        'coordinates': [lon, lat]
                                     }}}}}},
              '_source': {'excludes': ['geometry']}}
     try:
