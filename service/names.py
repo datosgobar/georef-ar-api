@@ -14,6 +14,7 @@ LOCALITIES = 'localidades'
 DEPARTMENTS = 'departamentos'
 MUNICIPALITIES = 'municipios'
 STATES = 'provincias'
+PLACE = 'ubicacion'
 
 # Fields
 ID = 'id'
@@ -67,3 +68,5 @@ CANNOT_INTERPOLATE_ADDRESS = 'Falló la interpolación.'
 NUMBER_REQUIRED = 'Falta la altura en el parámetro {direccion}.'
 EMPTY_DATA = 'No hay direcciones en el cuerpo del request.'
 INVALID_PARAM = 'El parámetro {%s} no es válido para el recurso /%s.'
+LAT_REQUIRED = 'El parámetro {lat} es obligatorio.'
+LON_REQUIRED = 'El parámetro {lon} es obligatorio.'

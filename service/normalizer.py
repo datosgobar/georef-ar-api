@@ -10,6 +10,33 @@ from service import data, parser
 from service.names import *
 
 
+def process_place(request):
+    """Procesa una consulta para georreferenciar una ubicación.
+
+    Args:
+        request (flask.Request): Objeto con información de la consulta HTTP.
+
+    Returns:
+        Resultado de una de las funciones invocadas según el tipo de Request.
+    """
+    valid_request, error = parser.validate_params(request, PLACE)
+    if not valid_request:
+        return parser.get_response_for_invalid(request, message=error)
+    if not request.args.get(LAT):
+        return parser.get_response_for_invalid(request, message=LAT_REQUIRED)
+    if not request.args.get(LON):
+        return parser.get_response_for_invalid(request, message=LON_REQUIRED)
+
+    lat = request.args.get(LAT)
+    lon = request.args.get(LON)
+    flatten = FLATTEN in request.args
+    matches = data.query_place(MUNICIPALITIES, lat, lon, flatten)
+    if not matches:
+        matches = data.query_place(DEPARTMENTS, lat, lon, flatten)
+
+    return parser.get_response({PLACE: matches})
+
+
 def process_address(request):
     """Procesa una consulta para normalizar direcciones.
 

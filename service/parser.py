@@ -24,6 +24,7 @@ REQUEST_INVALID = {
 
 
 ENDPOINT_PARAMS = {
+    PLACE: [LAT, LON, FLATTEN],
     ADDRESSES: [ADDRESS, LOCALITY, DEPT, STATE, FIELDS, MAX],
     STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX],
     SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT],
@@ -138,7 +139,6 @@ def get_abbreviated(name):
 
     Args:
         name (str): Texto con el nombre a buscar.
-        collection (dict): Colección donde buscar el nombre.
 
     Returns:
         str: Nombre abreviado si hubo coincidencias.
@@ -221,3 +221,17 @@ def generate_csv(result):
                 yield ';'.join(dict(row).keys()) + '\n'
             yield ';'.join(str(v) for v in dict(row).values()) + '\n'
             first = False
+
+
+def get_flatten_result(result):
+    """ Devuelve datos aplanados
+    Args:
+        result (dict): Diccionario con resultados de una consulta.
+    """
+    for field in list(result):
+        if isinstance(result[field], dict):
+            for key, value in result[field].items():
+                result['_'.join([field, key])] = value
+            del result[field]
+
+    return result

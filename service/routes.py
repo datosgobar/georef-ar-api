@@ -46,3 +46,8 @@ def get_municipalities():
 @app.route('/api/v1.0/provincias.json', methods=['GET'])
 def get_states():
     return normalizer.process_state(request)
+
+
+@app.route('/api/v1.0/ubicacion', methods=['GET'])
+def get_placement():
+    return normalizer.process_place(request)

@@ -11,8 +11,35 @@ import psycopg2
 import requests
 from collections import defaultdict
 from elasticsearch import Elasticsearch, ElasticsearchException
-from service.parser import get_abbreviated
+from service.parser import get_abbreviated, get_flatten_result
 from service.names import *
+
+
+def query_place(index, lat, lon, flatten=False):
+    """Busca a que entidades políticas (municipios, departamentos, o provincias)
+        pertenece una ubicación según parámetros de búsqueda de una consulta.
+
+    Args:
+        index (str): Nombre del índice sobre el cual realizar la búsqueda.
+        lat (str): Latitud correspondiente a una ubicación.
+        lon (str): Longitud correspondiente a una ubicación.
+        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
+
+    Returns:
+        list: Resultados de búsqueda de una ubicación.
+    """
+    query = {'query': {'bool': {'must': {'match_all': {}},
+                                'filter': {'geo_shape': {'geometry': {'shape': {
+                                        'type': 'point',
+                                        'coordinates': [lat, lon]
+                                    }}}}}},
+             '_source': {'excludes': ['geometry']}}
+    try:
+        result = Elasticsearch().search(index=index, body=query)
+    except ElasticsearchException as error:
+        return []
+
+    return [parse_place(hit, index, flatten) for hit in result['hits']['hits']]
 
 
 def query_address(search_params):
@@ -39,7 +66,7 @@ def query_streets(name=None, locality=None, department=None, state=None,
         locality (str): Nombre de la localidad para filtrar (opcional).
         department (str): Nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
-        road_type (str): Nombre del tipo de camino para filtrar (opcional).
+        road (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
 
@@ -90,6 +117,7 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
         max (int): Limita la cantidad de resultados (opcional).
         order (str): Campo por el cual ordenar los resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
+        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
 
     Returns:
         list: Resultados de búsqueda de entidades.
@@ -177,6 +205,34 @@ def build_condition(field, value, kind='match', fuzzy=False):
     return {kind: query}
 
 
+def parse_place(result, index, flatten):
+    """Procesa un resultado de ElasticSearch para modificarlo.
+
+    Args:
+        result (dict): Diccionario con resultado.
+        index (str): Nombre del índice sobre el cual se realizó la búsqueda.
+        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
+
+    Returns:
+        dict: Resultado modificado.
+    """
+    result = result['_source']
+    result = dict(result)
+    if index == MUNICIPALITIES:
+        add = {'municipalidad': {'id': result[ID], 'nombre': result[NAME]}}
+    else:
+        add = {'departamento': {'id': result[ID], 'nombre': result[NAME]}}
+
+    result.update(add)
+    result.pop(ID)
+    result.pop(NAME)
+
+    if flatten:
+        get_flatten_result(result)
+
+    return result
+
+
 def parse_es(result):
     """Procesa un resultado de ElasticSearch para modificarlo.
 
@@ -198,17 +254,14 @@ def parse_entity(result, flatten):
 
     Args:
         result (dict): Diccionario con resultado.
+        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
 
     Returns:
         dict: Resultado modificado.
     """
     entity = result['_source']
     if flatten:
-        for field in list(entity):
-            if isinstance(entity[field], dict):
-                for key, value in entity[field].items():
-                    entity['_'.join([field, key])] = value
-                del entity[field]
+        get_flatten_result(entity)
     return entity
 
 
@@ -379,10 +432,10 @@ def location(geom, number, start, end):
 
     with connection.cursor() as cursor:
         cursor.execute(query)
-        location = cursor.fetchall()[0][0]# Query returns single row and col.
+        location = cursor.fetchall()[0][0]  # Query returns single row and col.
     if location['code']:
-       lat, lon = location['result'].split(',')
-       return {LAT: lat, LON: lon}
+        lat, lon = location['result'].split(',')
+        return {LAT: lat, LON: lon}
 
     return None
 
