@@ -1,17 +1,50 @@
 #!/bin/bash
+
 echo '--- Iniciando el script de deploy ---'
 
+case "$1" in
+        production)
+            echo '- Entorno: production'
+            IP=$IP_PROD
+            PORT_SSH=$PORT_SSH_PROD
+            USER_SSH=$USER_SSH_PROD
+            PASS_SSH=$PASS_SSH_PROD
+            BRANCH=$BRANCH_PROD
+            ;;
+         
+        staging)
+            echo '- Entorno: staging'
+            IP=$IP_STG
+            PORT_SSH=$PORT_SSH_STG
+            USER_SSH=$USER_SSH_STG
+            PASS_SSH=$PASS_SSH_STG
+            BRANCH=$BRANCH_STG
+            ;;
+         
+        development)
+            echo '- Entorno: development'
+            IP=$IP_DEV
+            PORT_SSH=$PORT_SSH_DEV
+            USER_SSH=$USER_SSH_DEV
+            PASS_SSH=$PASS_SSH_DEV
+            BRANCH=$BRANCH_DEV
+            ;;         
+        *)
+            echo 'No se especificó un entorno.'
+            exit 1
+esac
+
 echo '- Agregando host a known hosts'
-ssh-keyscan -p $PORT_SSH_DEV $IP_DEV >> ~/.ssh/known_hosts
+ssh-keyscan -p $PORT_SSH $IP >> ~/.ssh/known_hosts
 
 DEPLOY_SCRIPT="
 cd ${GEOREF_API_DIR};
 . venv/bin/activate;
 pip install -r requirements.txt;
-git pull;
-echo '${PASS_SSH_DEV}' | sudo -S service georef-api restart;
+git pull origin ${BRANCH};
+echo ${PASS_SSH} | sudo -S service georef-api restart;
 exit;
 "
 
 echo '- Haciendo ssh a la máquina y corriendo script de deploy'
-ssh -p $PORT_SSH_DEV $USER_SSH_DEV@$IP_DEV "${DEPLOY_SCRIPT}"
+ssh -p $PORT_SSH $USER_SSH@$IP "${DEPLOY_SCRIPT}"
