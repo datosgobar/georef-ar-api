@@ -150,7 +150,6 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
     if order:
         if ID in order: sorts[ID_KEYWORD] = {'order': 'asc'}
         if NAME in order: sorts[NAME_KEYWORD] = {'order': 'asc'}
-    if 'geometry' in fields: fields_excludes = []
     query = {'query': {'bool': {'must': terms}} if terms else {"match_all": {}},
              'size': max or 10, 'sort': sorts, '_source': {
                                                     'include': fields,
