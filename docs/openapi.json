@@ -12,10 +12,10 @@
     },
     "tags": [
         {
-            "name": "Normalización"
+            "name": "Información"
         },
         {
-            "name": "Información"
+            "name": "Normalización"
         }
     ],
     "externalDocs": {
@@ -416,156 +416,6 @@
         }
     },
     "paths": {
-        "/direcciones": {
-            "get": {
-                "summary": "Normaliza una dirección.",
-                "tags": [
-                    "Normalización"
-                ],
-                "parameters": [
-                    {
-                        "name": "direccion",
-                        "description": "Dirección a normalizar.",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "example": "Av Santa Fe 1000, Buenos Aires"
-                        }
-                    },
-                    {
-                        "$ref": "#/components/parameters/localidad"
-                    },
-                    {
-                        "$ref": "#/components/parameters/departamento"
-                    },
-                    {
-                        "$ref": "#/components/parameters/provincia"
-                    },
-                    {
-                        "$ref": "#/components/parameters/campos"
-                    },
-                    {
-                        "$ref": "#/components/parameters/max"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Listado de direcciones normalizadas.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "direcciones": {
-                                            "$ref": "#/components/schemas/direcciones_normalizadas"
-                                        }
-                                    }                                
-                                }
-                            }
-                        }
-                    },
-                    "4XX": {
-                        "$ref": "#/components/responses/direcciones_error"
-                    }
-                }
-            },
-            "post": {
-                "summary": "Normaliza un lote de direcciones.",
-                "tags": [
-                    "Normalización"
-                ],
-                "parameters": [
-                    {
-                        "name": "direcciones",
-                        "description": "Lista de direcciones a normalizar.",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "example": ["Av Santa Fe 1000", "Corrientes 1200, Buenos Aires"]
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Lote de dirrecciones normalizadas.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "direcciones": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/direcciones_normalizadas_con_original"
-                                            }
-                                        }
-                                    }                                
-                                }
-                            }
-                        }
-                    },
-                    "4XX": {
-                        "$ref": "#/components/responses/direcciones_error"
-                    }
-                }
-            }
-        },
-        "/calles": {
-            "get": {
-                "summary": "Retorna calles (normalizadas) de una localidad o provincia.",
-                "tags": [
-                    "Normalización"
-                ],
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/localidad"
-                    },
-                    {
-                        "$ref": "#/components/parameters/departamento"
-                    },
-                    {
-                        "$ref": "#/components/parameters/provincia"
-                    },
-                    {
-                        "$ref": "#/components/parameters/campos"
-                    },
-                    {
-                        "$ref": "#/components/parameters/max"
-                    },
-                    {
-                        "name": "tipo",
-                        "description": "Tipo de camino.",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "example": "Calle"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Listado de calles normalizadas.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "calles": {
-                                            "$ref": "#/components/schemas/calles"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/provincias": {
             "get": {
                 "summary": "Retorna un listado de provincias.",
@@ -762,6 +612,156 @@
                             }
                         }
                     }                    
+                }
+            }
+        },
+        "/calles": {
+            "get": {
+                "summary": "Retorna calles (normalizadas) de una localidad o provincia.",
+                "tags": [
+                    "Normalización"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/localidad"
+                    },
+                    {
+                        "$ref": "#/components/parameters/departamento"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "name": "tipo",
+                        "description": "Tipo de camino.",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "example": "Calle"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de calles normalizadas.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "calles": {
+                                            "$ref": "#/components/schemas/calles"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/direcciones": {
+            "get": {
+                "summary": "Normaliza una dirección.",
+                "tags": [
+                    "Normalización"
+                ],
+                "parameters": [
+                    {
+                        "name": "direccion",
+                        "description": "Dirección a normalizar.",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Av Santa Fe 1000, Buenos Aires"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/localidad"
+                    },
+                    {
+                        "$ref": "#/components/parameters/departamento"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de direcciones normalizadas.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "direcciones": {
+                                            "$ref": "#/components/schemas/direcciones_normalizadas"
+                                        }
+                                    }                                
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/direcciones_error"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Normaliza un lote de direcciones.",
+                "tags": [
+                    "Normalización"
+                ],
+                "parameters": [
+                    {
+                        "name": "direcciones",
+                        "description": "Lista de direcciones a normalizar.",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "example": ["Av Santa Fe 1000", "Corrientes 1200, Buenos Aires"]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lote de dirrecciones normalizadas.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "direcciones": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/direcciones_normalizadas_con_original"
+                                            }
+                                        }
+                                    }                                
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/direcciones_error"
+                    }
                 }
             }
         }
