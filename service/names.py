@@ -50,8 +50,8 @@ MAX = 'max'
 FORMAT = 'formato'
 
 # Elasticsearch
-ID_KEYWORD = 'id.keyword'
-NAME_KEYWORD = 'nombre.keyword'
+ID_KEYWORD = 'id'
+NAME_KEYWORD = 'nombre'
 DEPT_ID = 'departamento.id'
 DEPT_NAME = 'departamento.nombre'
 STATE_ID = 'provincia.id'
