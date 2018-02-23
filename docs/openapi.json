@@ -104,10 +104,31 @@
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "San Justo"
+                        "example": "SAN JUSTO"
                     },
                     "provincia": {
-                        "$ref": "#/components/schemas/provincia"
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "example": -31.239399
+                    },
+                    "lon": {
+                        "type": "number",
+                        "example": -62.526029
+                    }
+                }
+            },
+            "departamento_sin_coordenadas": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "14007"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "CALAMUCHITA"
                     }
                 }
             },
@@ -117,35 +138,43 @@
                     "$ref": "#/components/schemas/departamento"
                 }
             },
+            "provincia_sin_coordenadas": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "14"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "CÓRDOBA"
+                    }
+                }
+            },
             "municipio": {
                 "type": "object",
                 "properties": {
                     "id": {
                         "type": "string",
-                        "example": "140084"
+                        "example": "140042"
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "COLONIA CAROYA"
+                        "example": "VILLA DEL DIQUE"
+                    },
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
                     },
                     "provincia": {
-                        "$ref": "#/components/schemas/provincia"
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
-                    "ubicacion": {
-                        "$ref": "#/components/schemas/ubicacion"
-                    }
-                }
-            },
-            "ubicacion": {
-                "type": "object",
-                "properties": {
                     "lat": {
                         "type": "number",
-                        "example": -31.0541541598
+                        "example": -32.134857
                     },
                     "lon": {
                         "type": "number",
-                        "example": -64.0859537871
+                        "example": -64.433127
                     }
                 }
             },
@@ -159,30 +188,35 @@
                 "type": "object",
                 "properties": {
                     "departamento": {
-                        "$ref": "#/components/schemas/departamento"
+                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
                     },
                     "id": {
                         "type": "string",
-                        "example": "14007210002"
+                        "example": "14007020000"
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "LAS BAJADAS"
+                        "example": "ARROYO SAN ANTONIO"
                     },
                     "provincia": {
-                        "$ref": "#/components/schemas/provincia"
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
                     "tipo": {
                         "type": "string",
-                        "example": "Localidad simple (LS)",
+                        "example": "Componente de localidad compuesta (LC)",
                         "enum": [
                             "Entidad (E)",
                             "Componente de localidad compuesta (LC)",
                             "Localidad simple (LS)"
                         ]
                     },
-                    "ubicacion": {
-                        "$ref": "#/components/schemas/ubicacion"
+                    "lat": {
+                        "type": "number",
+                        "example": -32.262051
+                    },
+                    "lon": {
+                        "type": "number",
+                        "example": -64.593725
                     }
                 }
             },
@@ -202,6 +236,14 @@
                     "nombre": {
                         "type": "string",
                         "example": "Córdoba"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "example": -32.142933
+                    },
+                    "lon": {
+                        "type": "number",
+                        "example": -63.801753
                     }
                 }
             },
@@ -431,16 +473,10 @@
                         "$ref": "#/components/parameters/nombre"
                     },
                     {
-                        "$ref": "#/components/parameters/provincia"
-                    },
-                    {
                         "$ref": "#/components/parameters/campos"
                     },
                     {
                         "$ref": "#/components/parameters/orden"
-                    },
-                    {
-                        "$ref": "#/components/parameters/aplanar"
                     },
                     {
                         "$ref": "#/components/parameters/max"
@@ -623,6 +659,9 @@
                 ],
                 "parameters": [
                     {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
                         "$ref": "#/components/parameters/localidad"
                     },
                     {
@@ -752,6 +791,91 @@
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/direcciones_normalizadas_con_original"
+                                            }
+                                        }
+                                    }                                
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/direcciones_error"
+                    }
+                }
+            }
+        },
+        "/ubicacion": {
+            "get": {
+                "summary": "Georeferenciación reversa para un punto dado.",
+                "tags": [
+                    "Normalización"
+                ],
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "description": "Latitud del punto.",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "example": -27.2741611173
+                        }
+                    },
+                    {
+                        "name": "lon",
+                        "description": "Longitud del punto.",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "example": -66.7529296875
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resultados de la georeferenciación inversa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "ubicacion": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "departamento": {
+                                                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
+                                                    },
+                                                    "provincia": {
+                                                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                                                    },
+                                                    "municipalidad": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "example": "100077"
+                                                            },
+                                                            "nombre": {
+                                                                "type": "string",
+                                                                "example": "HUALFÍN"
+                                                            }
+                                                        }
+                                                    },
+                                                    "lat": {
+                                                        "type": "number",
+                                                        "example": -27.232774
+                                                    },
+                                                    "lon": {
+                                                        "type": "number",
+                                                        "example": "-66.686735"
+                                                    }
+                                                }
                                             }
                                         }
                                     }                                
