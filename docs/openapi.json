@@ -1,0 +1,893 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "georef-api",
+        "description": "API del servicio de normalización y geocodificación para direcciones de Argentina.",
+        "contact": {
+            "name": "Equipo de Datos de la Nación Argentina",
+            "url": "https://github.com/datosgobar",
+            "email": "datos@modernizacion.gob.ar"
+        },
+        "version": "1.0.0"
+    },
+    "tags": [
+        {
+            "name": "Información"
+        },
+        {
+            "name": "Normalización"
+        }
+    ],
+    "externalDocs": {
+        "url": "https://github.com/datosgobar/georef-api"
+    },
+    "servers": [
+        {
+            "url": "https://georef.datos.gob.ar/api/v1.0"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "calle": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+                        "type": "string",
+                        "example": "Comuna 10"
+                    },
+                    "fin_derecha": {
+                        "type": "integer",
+                        "example": 5949
+                    },
+                    "fin_iqzuierda": {
+                        "type": "integer",
+                        "example": 5950
+                    },
+                    "inicio_derecha": {
+                        "type": "integer",
+                        "example": 5301
+                    },
+                    "inicio_izquierda": {
+                        "type": "integer",
+                        "example": 5302
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "0207001003895"
+                    },
+                    "localidad": {
+                        "type": "string",
+                        "example": "Ciudad Autónoma de Buenos Aires"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "CNL RAMON LISTA"
+                    },
+                    "nomenclatura": {
+                        "type": "string",
+                        "example": "CNL RAMON LISTA, Ciudad Autónoma de Buenos Aires, Ciudad Autónoma de Buenos Aires"
+                    },
+                    "observaciones": {
+                        "type": "object",
+                        "properties": {
+                            "fuente": {
+                                "type": "string",
+                                "example": "INDEC"
+                            }
+                        }
+                    },
+                    "provincia": {
+                        "type": "string",
+                        "example": "Ciudad Autónoma de Buenos Aires"
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "CALLE",
+                        "enum": [
+                            "OTRO",
+                            "AV",
+                            "RUTA",
+                            "AUT",
+                            "CALLE",
+                            "PJE",
+                            "BV"                           
+                        ]
+                    }
+                }
+            },
+            "departamento": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "14140"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "SAN JUSTO"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "example": -31.239399
+                    },
+                    "lon": {
+                        "type": "number",
+                        "example": -62.526029
+                    }
+                }
+            },
+            "departamento_sin_coordenadas": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "14007"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "CALAMUCHITA"
+                    }
+                }
+            },
+            "departamentos": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/departamento"
+                }
+            },
+            "provincia_sin_coordenadas": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "14"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "CÓRDOBA"
+                    }
+                }
+            },
+            "municipio": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "140042"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "VILLA DEL DIQUE"
+                    },
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "example": -32.134857
+                    },
+                    "lon": {
+                        "type": "number",
+                        "example": -64.433127
+                    }
+                }
+            },
+            "municipios": {
+                "type": "array",
+                "items": {
+                    "$ref":"#/components/schemas/municipio"
+                }
+            },
+            "localidad": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "14007020000"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "ARROYO SAN ANTONIO"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "Componente de localidad compuesta (LC)",
+                        "enum": [
+                            "Entidad (E)",
+                            "Componente de localidad compuesta (LC)",
+                            "Localidad simple (LS)"
+                        ]
+                    },
+                    "lat": {
+                        "type": "number",
+                        "example": -32.262051
+                    },
+                    "lon": {
+                        "type": "number",
+                        "example": -64.593725
+                    }
+                }
+            },
+            "localidades": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/localidad"
+                }
+            },
+            "provincia": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "14"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Córdoba"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "example": -32.142933
+                    },
+                    "lon": {
+                        "type": "number",
+                        "example": -63.801753
+                    }
+                }
+            },
+            "provincias": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/provincia"
+                }
+            },
+            "calles": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/calle"
+                }
+            },
+            "direccion_normalizada": {
+                "type": "object",
+                "properties": {
+                    "altura": {
+                        "type": "integer",
+                        "example": 1000
+                    },
+                    "departamento": {
+                        "type": "string",
+                        "example": "Comuna 14"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "0209801001740"
+                    }, 
+                    "localidad": {
+                        "type": "string",
+                        "example": "Ciudad Autónoma de Buenos Aires"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "AV SANTA FE"
+                    },
+                    "nomenclatura": {
+                        "type": "string",
+                        "example": "AV SANTA FE 1000, Ciudad Autónoma de Buenos Aires, Ciudad Autónoma de Buenos Aires"
+                    },
+                    "observaciones": {
+                        "type": "object",
+                        "properties": {
+                            "fuente": {
+                                "type": "string",
+                                "example": "INDEC"
+                            },
+                            "info": {
+                                "type": "string",
+                                "example": "¡Encontramos la dirección!"
+                            }
+                        }
+                    },
+                    "provincia": {
+                        "type": "string",
+                        "example": "Ciudad Autónoma de Buenos Aires"
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "AV"
+                    },
+                    "ubicacion": {
+                        "type": "object",
+                        "properties": {
+                            "lat": {
+                                "type": "string",
+                                "example": "-34.5953240538455"
+                            },
+                            "lon": {
+                                "type": "string",
+                                "example": "-58.3810302935299"
+                            }
+                        }
+                    }
+                }
+            },
+            "direcciones_normalizadas": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/direccion_normalizada"
+                }
+            },
+            "direcciones_normalizadas_con_original": {
+                "type": "object",
+                "properties": {
+                    "normalizadas": {
+                        "$ref": "#/components/schemas/direcciones_normalizadas"
+                    },
+                    "original": {
+                        "type": "string",
+                        "example": "Av Santa Fe 1000"
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "provincia": {
+                "name": "provincia",
+                "description": "Filtrar por nombre o ID de provincia.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "localidad": {
+                "name": "localidad",
+                "description": "Filtrar por nombre o ID de localidad.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "departamento": {
+                "name": "departamento",
+                "description": "Filtrar por nombre o ID de departamento.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "max": {
+                "name": "max",
+                "description": "Cantidad máxima de resultados a devolver.",
+                "in": "query",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 10
+                }
+            },
+            "campos": {
+                "name": "campos",
+                "description": "Campos a incluir en la respuesta.",
+                "in": "query",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "aplanar": {
+                "name": "aplanar",
+                "description": "Si es verdadero, muestra el resultado con una estructura plana.",
+                "in": "query",
+                "schema": {
+                    "type": "boolean"
+                }
+            },
+            "id": {
+                "name": "id",
+                "description": "Filtrar por ID.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "nombre": {
+                "name": "nombre",
+                "description": "Filtrar por nombre.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "orden": {
+                "name": "orden",
+                "description": "Campo por el cual ordenar los resultados.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses": {
+            "direcciones_error": {
+                "description": "Error al procesar la consulta.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "codigo": {
+                                    "type": "integer",
+                                    "example": 400
+                                },
+                                "error": {
+                                    "type": "object",
+                                    "properties": {
+                                        "codigo_interno": {
+                                            "type": "string",
+                                            "nullable": true,
+                                            "example": "123456"
+                                        },
+                                        "info": {
+                                            "type": "string",
+                                            "example": "https://github.com/datosgobar/georef-api"
+                                        },
+                                        "mensaje": {
+                                            "type": "string",
+                                            "example": "El Request tiene parámetros inválidos o está incompleto."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/provincias": {
+            "get": {
+                "summary": "Retorna un listado de provincias.",
+                "description": "Agregar '.csv' al path de la URL para obtener los resultados en formato CSV.",
+                "tags": [
+                    "Información"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de provincias.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "provincias": {
+                                            "$ref": "#/components/schemas/provincias"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/departamentos": {
+            "get": {
+                "summary": "Retorna un listado de departamentos.",
+                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de los departamentos en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de los departamentos en formato JSON.",
+                "tags": [
+                    "Información"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de departamentos.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "departamentos": {
+                                            "$ref": "#/components/schemas/departamentos"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }                   
+                }
+            }
+        },
+        "/municipios": {
+            "get": {
+                "summary": "Retorna un listado de municipios.",
+                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de los municipios en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de los municipios en formato JSON.",
+                "tags": [
+                    "Información"
+                ],
+                "parameters":[
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de municipios.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "municipios": {
+                                            "$ref": "#/components/schemas/municipios"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }                    
+                }
+            }
+        },
+        "/localidades": {
+            "get": {
+                "summary": "Retorna un listado de localidades y entidades de BAHRA.",
+                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de las localidades en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de las localidades en formato JSON.",
+                "tags": [
+                    "Información"
+                ],
+                "parameters":[
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/departamento"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de localidades y entidades.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "localidades": {
+                                            "$ref": "#/components/schemas/localidades"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }                    
+                }
+            }
+        },
+        "/calles": {
+            "get": {
+                "summary": "Retorna calles (normalizadas) de una localidad o provincia.",
+                "tags": [
+                    "Normalización"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/localidad"
+                    },
+                    {
+                        "$ref": "#/components/parameters/departamento"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "name": "tipo",
+                        "description": "Tipo de camino.",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "example": "Calle"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de calles normalizadas.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "calles": {
+                                            "$ref": "#/components/schemas/calles"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/direcciones": {
+            "get": {
+                "summary": "Normaliza una dirección.",
+                "tags": [
+                    "Normalización"
+                ],
+                "parameters": [
+                    {
+                        "name": "direccion",
+                        "description": "Dirección a normalizar.",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "Av Santa Fe 1000, Buenos Aires"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/localidad"
+                    },
+                    {
+                        "$ref": "#/components/parameters/departamento"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de direcciones normalizadas.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "direcciones": {
+                                            "$ref": "#/components/schemas/direcciones_normalizadas"
+                                        }
+                                    }                                
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/direcciones_error"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Normaliza un lote de direcciones.",
+                "tags": [
+                    "Normalización"
+                ],
+                "parameters": [
+                    {
+                        "name": "direcciones",
+                        "description": "Lista de direcciones a normalizar.",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "example": ["Av Santa Fe 1000", "Corrientes 1200, Buenos Aires"]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lote de dirrecciones normalizadas.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "direcciones": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/direcciones_normalizadas_con_original"
+                                            }
+                                        }
+                                    }                                
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/direcciones_error"
+                    }
+                }
+            }
+        },
+        "/ubicacion": {
+            "get": {
+                "summary": "Georeferenciación reversa para un punto dado.",
+                "tags": [
+                    "Normalización"
+                ],
+                "parameters": [
+                    {
+                        "name": "lat",
+                        "description": "Latitud del punto.",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "example": -27.2741611173
+                        }
+                    },
+                    {
+                        "name": "lon",
+                        "description": "Longitud del punto.",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "example": -66.7529296875
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resultados de la georeferenciación inversa.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "ubicacion": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "departamento": {
+                                                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
+                                                    },
+                                                    "provincia": {
+                                                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                                                    },
+                                                    "municipalidad": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "string",
+                                                                "example": "100077"
+                                                            },
+                                                            "nombre": {
+                                                                "type": "string",
+                                                                "example": "HUALFÍN"
+                                                            }
+                                                        }
+                                                    },
+                                                    "lat": {
+                                                        "type": "number",
+                                                        "example": -27.232774
+                                                    },
+                                                    "lon": {
+                                                        "type": "number",
+                                                        "example": "-66.686735"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }                                
+                                }
+                            }
+                        }
+                    },
+                    "4XX": {
+                        "$ref": "#/components/responses/direcciones_error"
+                    }
+                }
+            }
+        }
+    }
+}
