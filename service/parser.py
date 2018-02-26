@@ -193,13 +193,13 @@ def get_response(result, format_request={}):
     Returns:
         flask.Response: Respuesta de la API en formato CSV o JSON
     """
-    if format_request['type'] == 'csv':
+    if 'type' in format_request and format_request['type'] == 'csv':
         entity = [row for row in result.keys()]
         headers = {'Content-Disposition': 'attachment; '
                                           'filename=' + entity[0] + '.csv'}
         return Response(generate_csv(result), mimetype='text/csv',
                         headers=headers)
-    elif format_request['type'] == 'geojson':
+    elif 'type' in format_request and format_request['type'] == 'geojson':
         features = []
         for key, _ in result.items():
             for entity in result[key]:
