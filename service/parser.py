@@ -7,6 +7,7 @@ con los que operan los módulos de la API.
 """
 
 from flask import jsonify, make_response, request, Response
+from geojson import Feature, FeatureCollection, Point, Polygon
 from service.abbreviations import ABBR_STREETS, ROAD_TYPES
 from service.names import *
 import re
@@ -59,7 +60,7 @@ def get_url_rule(request):
         (bool, dict, str): Si una consulta es válida o no, un diccionario con
         los valores del formato solicitado y un mensaje si hay error.
     """
-    format_request = {'convert': False, 'max': 10000}
+    format_request = {'convert': True, 'max': 10000, 'type': 'api'}
     path = str(request.url_rule)
     rule = os.path.split(path)
 
@@ -68,10 +69,18 @@ def get_url_rule(request):
             return False, '', WRONG_QUERY
         for word in rule:
             if '.csv' in word:
-                format_request['convert'] = True
+                format_request['type'] = 'csv'
+            elif '.geojson' in word:
+                format_request['type'] = 'geojson'
+            else:
+                format_request['convert'] = False
     else:
         if request.args.get(FORMAT) == 'csv':
-            format_request['convert'] = True
+            format_request['type'] = 'csv'
+        elif request.args.get(FORMAT) == 'geojson':
+            format_request['type'] = 'geojson'
+        else:
+            format_request['convert'] = False
         format_request['max'] = request.args.get(MAX)
     return True, format_request, ''
 
@@ -184,12 +193,27 @@ def get_response(result, format_request={}):
     Returns:
         flask.Response: Respuesta de la API en formato CSV o JSON
     """
-    if 'convert' in format_request and format_request['convert']:
+    if format_request['type'] == 'csv':
         entity = [row for row in result.keys()]
         headers = {'Content-Disposition': 'attachment; '
                                           'filename=' + entity[0] + '.csv'}
         return Response(generate_csv(result), mimetype='text/csv',
                         headers=headers)
+    elif format_request['type'] == 'geojson':
+        features = []
+        for key, _ in result.items():
+            for entity in result[key]:
+                properties = dict(entity)
+                point = None
+                if 'lat' and 'lon' in entity.keys():
+                    properties.pop('lat')
+                    properties.pop('lon')
+                    point = Point((entity['lat'], entity['lon']))
+                features.append(Feature(
+                    geometry=point,
+                    properties=properties
+                ))
+            return jsonify(FeatureCollection(features))
     else:
         return make_response(jsonify(result), 200)
 
