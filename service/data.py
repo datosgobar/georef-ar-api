@@ -73,7 +73,7 @@ def query_streets(name=None, locality=None, department=None, state=None,
     Returns:
         list: Resultados de búsqueda de calles.
     """
-    index = 'calles-*'  # Search in all indexes by default.
+    index = STREETS + '-*'  # Search in all indexes by default.
     terms = []
     if name:
         condition = build_condition(NAME, get_abbreviated(name), fuzzy=True)
@@ -88,7 +88,11 @@ def query_streets(name=None, locality=None, department=None, state=None,
         condition = build_condition(DEPT, department, fuzzy=True)
         terms.append(condition)
     if state:
-        target_state = query_entity(STATES, state, max=1)
+        if state.isdigit():
+            target_state = query_entity(STATES, entity_id=state, max=1)
+        else:
+            target_state = query_entity(STATES, name=state, max=1)
+            
         if target_state:  # Narrows search to specific index.
             index = '-'.join([STREETS, target_state[0][ID]])
     if LOCATION in fields:
@@ -141,11 +145,7 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
         if state.isdigit():
             condition = build_condition(STATE_ID, state)
         else:
-            if len(state.split()) == 1:
-                condition = build_condition(STATE_NAME, state, fuzzy=True)
-            else:
-                condition = build_condition(STATE_NAME, state,
-                                            kind='match_phrase_prefix')
+            condition = build_condition(STATE_NAME, state, fuzzy=True)
         terms.append(condition)
     if order:
         if ID in order: sorts[ID_KEYWORD] = {'order': 'asc'}
