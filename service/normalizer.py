@@ -210,6 +210,7 @@ def process_municipality(request):
 
     municipality_id = request.args.get(ID)
     name = request.args.get(NAME)
+    department = request.args.get(DEPT)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
     order = request.args.get(ORDER)
@@ -217,8 +218,9 @@ def process_municipality(request):
     flatten = FLATTEN in request.args or format_request['convert']
 
     matches = data.query_entity(MUNICIPALITIES, entity_id=municipality_id,
-                                name=name, state=state, flatten=flatten,
-                                order=order, fields=fields, max=max)
+                                name=name, department=department, state=state,
+                                flatten=flatten, order=order, fields=fields,
+                                max=max)
 
     return parser.get_response({MUNICIPALITIES: matches}, format_request)
 
