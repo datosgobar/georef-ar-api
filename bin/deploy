@@ -40,8 +40,8 @@ ssh-keyscan -p $PORT_SSH $IP >> ~/.ssh/known_hosts
 DEPLOY_SCRIPT="
 cd ${GEOREF_API_DIR};
 . venv/bin/activate;
-pip install -r requirements.txt;
 git pull origin ${BRANCH};
+pip install -r requirements.txt;
 echo ${PASS_SSH} | sudo -S service georef-api restart;
 exit;
 "
