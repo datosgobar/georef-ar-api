@@ -145,7 +145,11 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
         if state.isdigit():
             condition = build_condition(STATE_ID, state)
         else:
-            condition = build_condition(STATE_NAME, state, fuzzy=True)
+            if len(state.split()) == 1:
+                condition = build_condition(STATE_NAME, state, fuzzy=True)
+            else:
+                condition = build_condition(STATE_NAME, state,
+                                            kind='match_phrase_prefix')
         terms.append(condition)
     if order:
         if ID in order: sorts[ID_KEYWORD] = {'order': 'asc'}
