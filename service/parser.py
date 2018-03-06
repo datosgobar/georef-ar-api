@@ -63,17 +63,17 @@ def get_url_rule(request):
     format_request = {'convert': True, 'max': 10000, 'type': 'api'}
     path = str(request.url_rule)
     rule = os.path.split(path)
+    endpoint = rule[1]  # request endpoint
 
-    if '.' in rule[1]:
+    if '.' in endpoint:
         if len(request.args) > 0:
             return False, '', WRONG_QUERY
-        for word in rule:
-            if '.csv' in word:
-                format_request['type'] = 'csv'
-            elif '.geojson' in word:
-                format_request['type'] = 'geojson'
-            else:
-                format_request['convert'] = False
+        if '.csv' in endpoint:
+            format_request['type'] = 'csv'
+        elif '.geojson' in endpoint:
+            format_request['type'] = 'geojson'
+        else:
+            format_request['convert'] = False
     else:
         if request.args.get(FORMAT) == 'csv':
             format_request['type'] = 'csv'
