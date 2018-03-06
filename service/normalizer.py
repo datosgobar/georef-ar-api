@@ -150,7 +150,7 @@ def process_locality(request):
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
-    order = request.args.get(ORDER)
+    order = request.args.get(ORDER) if len(request.args) > 0 else ID
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
 
@@ -181,7 +181,7 @@ def process_department(request):
     name = request.args.get(NAME)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
-    order = request.args.get(ORDER)
+    order = request.args.get(ORDER) if len(request.args) > 0 else ID
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
 
@@ -213,7 +213,7 @@ def process_municipality(request):
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
-    order = request.args.get(ORDER)
+    order = request.args.get(ORDER) if len(request.args) > 0 else ID
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
 
@@ -244,7 +244,7 @@ def process_state(request):
     state_id = request.args.get(ID)
     name = request.args.get(NAME)
     max = request.args.get(MAX) or 24
-    order = request.args.get(ORDER)
+    order = request.args.get(ORDER) if len(request.args) > 0 else ID
     fields = parser.get_fields(request.args.get(FIELDS))
     matches = data.query_entity(STATES, entity_id=state_id, name=name,
                                 order=order, fields=fields, max=max)
