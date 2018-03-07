@@ -1,6 +1,7 @@
 # georef-api Swagger UI
 
 `docs/openapi.json`: Documentación para `georef-api` en formato OpenAPI 3.
+
 `src/`: Archivos de `swagger-ui-dist` modificados para la documentación de `georef-api`.
 
 ## Desarrollo
