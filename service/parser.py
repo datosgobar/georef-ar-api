@@ -60,7 +60,7 @@ def get_url_rule(request):
         (bool, dict, str): Si una consulta es válida o no, un diccionario con
         los valores del formato solicitado y un mensaje si hay error.
     """
-    format_request = {'convert': True, 'max': 10000, 'type': 'api'}
+    format_request = {'convert': True, 'max': 10000, 'type': 'json'}
     path = str(request.url_rule)
     rule = os.path.split(path)
     endpoint = rule[1]  # request endpoint
@@ -75,13 +75,16 @@ def get_url_rule(request):
         else:
             format_request['convert'] = False
     else:
-        if request.args.get(FORMAT) == 'csv':
-            format_request['type'] = 'csv'
-        elif request.args.get(FORMAT) == 'geojson':
-            format_request['type'] = 'geojson'
+        if request.args.get(FORMAT):
+            if request.args.get(FORMAT) == 'csv':
+                format_request['type'] = 'csv'
+            elif request.args.get(FORMAT) == 'geojson':
+                format_request['type'] = 'geojson'
+            elif request.args.get(FORMAT) != 'json':
+                return False, '', WRONG_QUERY
         else:
             format_request['convert'] = False
-        format_request['max'] = request.args.get(MAX)
+            format_request['max'] = request.args.get(MAX)
     return True, format_request, ''
 
 

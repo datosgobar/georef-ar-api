@@ -59,7 +59,6 @@ def process_department(request):
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
-
     matches = data.query_entity(DEPARTMENTS, entity_id=dept_id, name=name,
                                 state=state, flatten=flatten,
                                 order=order, fields=fields, max=max)
