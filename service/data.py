@@ -13,11 +13,12 @@ from collections import defaultdict
 from elasticsearch import Elasticsearch, ElasticsearchException
 from service.parser import get_abbreviated, get_flatten_result
 from service.names import *
+from service.constants import *
 
 
 def query_entity(index, entity_id=None, name=None, department=None, state=None,
                  municipality=None, max=None, order=None,
-                 fields=[], flatten=False):
+                 fields=[], flatten=False, mode=FUZZY):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
@@ -31,6 +32,8 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
         order (str): Campo por el cual ordenar los resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
         flatten (bool): Bandera para habilitar que el resultado sea aplanado.
+        mode (str): Modo de búsqueda por nombre (toma efecto sólo si se
+            especificaron los parámetros 'name', 'department' o 'state'.)
 
     Returns:
         list: Resultados de búsqueda de entidades.
@@ -38,11 +41,12 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
     fields_excludes = ['geometry']
     terms = []
     sorts = {}
+
     if entity_id:
-        condition = build_condition(ID, entity_id)
+        condition = build_match_condition(ID, entity_id)
         terms.append(condition)
     if name:
-        condition = build_condition(NAME, name, fuzzy=True)
+        condition = build_name_condition(NAME, name, mode)
         terms.append(condition)
     if municipality:
         if municipality.isdigit():
@@ -52,15 +56,15 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
         terms.append(condition)
     if department:
         if department.isdigit():
-            condition = build_condition(DEPT_ID, department)
+            condition = build_match_condition(DEPT_ID, department)
         else:
-            condition = build_condition(DEPT_NAME, department, fuzzy=True)
+            condition = build_name_condition(DEPT_NAME, department, mode)
         terms.append(condition)
     if state:
         if state.isdigit():
-            condition = build_condition(STATE_ID, state)
+            condition = build_match_condition(STATE_ID, state)
         else:
-            condition = build_condition(STATE_NAME, state, fuzzy=True)
+            condition = build_name_condition(STATE_NAME, state, mode)
         terms.append(condition)
     if order:
         if ID in order: sorts[ID_KEYWORD] = {'order': 'asc'}
@@ -97,16 +101,16 @@ def query_streets(name=None, locality=None, department=None, state=None,
     index = STREETS + '-*'  # Search in all indexes by default.
     terms = []
     if name:
-        condition = build_condition(NAME, get_abbreviated(name), fuzzy=True)
+        condition = build_match_condition(NAME, get_abbreviated(name), fuzzy=True)
         terms.append(condition)
     if road:
-        condition = build_condition(ROAD_TYPE, road, fuzzy=True)
+        condition = build_match_condition(ROAD_TYPE, road, fuzzy=True)
         terms.append(condition)
     if locality:
-        condition = build_condition(LOCALITY, locality, fuzzy=True)
+        condition = build_match_condition(LOCALITY, locality, fuzzy=True)
         terms.append(condition)
     if department:
-        condition = build_condition(DEPT, department, fuzzy=True)
+        condition = build_match_condition(DEPT, department, fuzzy=True)
         terms.append(condition)
     if state:
         if state.isdigit():
@@ -171,22 +175,70 @@ def query_place(index, lat, lon, flatten=False):
     return [parse_place(hit, index, flatten) for hit in result['hits']['hits']]
 
 
-def build_condition(field, value, kind='match', fuzzy=False):
-    """Crea una condición para Elasticsearch.
+def build_name_condition(field, value, mode):
+    """Crea una condición de búsqueda por nombre para Elasticsearch.
+       Las entidades con nombres son, por el momento, las provincias, los
+       departamentos, los municipios y las localidades.
+
+    Args:
+        field (str): Campo de la condición.
+        value (str): Valor de comparación.
+        mode (str): Modo de búsqueda. Los valores posibles son: 'fuzzy' para
+            realizar una búsqueda aproximada y 'filter' para realizar una
+            búsqueda por términos exactos
+    Returns:
+        dict: Condición para Elasticsearch.
+    """
+    terms = []
+
+    if mode == FUZZY:
+        if len(value) >= MIN_AUTOCOMPLETE_CHARS:
+            terms.append(build_match_phrase_prefix_condition(field, value))
+        terms.append(build_match_condition(field, value, True, operator='and'))
+
+    elif mode == FILTER:
+        field += EXACT_SUFFIX
+        terms.append(build_match_condition(field, value, False))
+
+    return {
+        'bool': {
+            'should': terms
+        }
+    }
+
+
+def build_match_phrase_prefix_condition(field, value):
+    """Crea una condición 'Match Phrase Prefix' para Elasticsearch.
+
+    Args:
+        field (str): Campo de la condición.
+        value (str): Valor de comparación.
+    Returns:
+        dict: Condición para Elasticsearch.
+    """
+    return {
+        'match_phrase_prefix': {
+            field: value
+        }
+    }
+
+
+def build_match_condition(field, value, fuzzy=False, operator='or'):
+    """Crea una condición 'Match' para Elasticsearch.
 
     Args:
         field (str): Campo de la condición.
         value (str): Valor de comparación.
         fuzzy (bool): Bandera para habilitar tolerancia a errores.
-        kind (str): Valor de tipo de coincidencia.
+        operator (bool): Operador a utilizar para conectar clausulas 'term'
     Returns:
         dict: Condición para Elasticsearch.
     """
-    if fuzzy and kind == 'match':
-        query = {field: {'query': value, 'fuzziness': 1}}
-    else:
-        query = {field: value}
-    return {kind: query}
+    query = {field: {'query': value, 'operator': operator}}
+    if fuzzy:
+        query[field]['fuzziness'] = 'AUTO'
+
+    return {'match': query}
 
 
 def parse_entity(result, flatten):

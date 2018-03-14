@@ -25,14 +25,14 @@ REQUEST_INVALID = {
 
 
 ENDPOINT_PARAMS = {
-    STATES: [ID, NAME, ORDER, FIELDS, FLATTEN, FORMAT, MAX],
-    DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, FORMAT, MAX],
-    MUNICIPALITIES: [ID, NAME, STATE, DEPT, ORDER,
-                     FIELDS, FLATTEN, FORMAT, MAX],
-    SETTLEMENTS: [ID, NAME, STATE, DEPT, MUN, ORDER,
-                  FIELDS, FLATTEN, FORMAT, MAX],
-    STREETS: [NAME, STATE, DEPT, LOCALITY, ROAD_TYPE, FIELDS, MAX],
-    ADDRESSES: [ADDRESS, STATE, DEPT, LOCALITY, FIELDS, MAX],
+    STATES: [ID, NAME, ORDER, FIELDS, FLATTEN, MAX, FORMAT, MODE],
+    DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT, MODE],
+    MUNICIPALITIES: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, 
+                     FORMAT, MODE],
+    SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, MUN, FLATTEN, MAX,
+                  FORMAT, MODE],
+    ADDRESSES: [ADDRESS, LOCALITY, DEPT, STATE, FIELDS, MAX],
+    STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX],
     PLACE: [LAT, LON, FLATTEN]
 }
 
@@ -49,6 +49,10 @@ def validate_params(request, resource):
     for param in request.args:
         if param not in ENDPOINT_PARAMS[resource]:
             return False, INVALID_PARAM % (param, resource)
+
+    if request.args.get(MODE, FUZZY) not in [FUZZY, FILTER]:
+        return False, INVALID_PARAM % (param, resource)
+
     return True, ''
 
 
