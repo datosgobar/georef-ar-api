@@ -29,10 +29,11 @@ def process_state(request):
     state_id = request.args.get(ID)
     name = request.args.get(NAME)
     max = request.args.get(MAX) or 24
+    mode = request.args.get(MODE) or FUZZY
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     matches = data.query_entity(STATES, entity_id=state_id, name=name,
-                                order=order, fields=fields, max=max)
+                                order=order, fields=fields, max=max, mode=mode)
     return parser.get_response({STATES: matches}, format_request)
 
 
@@ -56,12 +57,13 @@ def process_department(request):
     name = request.args.get(NAME)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
+    mode = request.args.get(MODE) or FUZZY
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
     matches = data.query_entity(DEPARTMENTS, entity_id=dept_id, name=name,
                                 state=state, flatten=flatten,
-                                order=order, fields=fields, max=max)
+                                order=order, fields=fields, max=max, mode=mode)
 
     return parser.get_response({DEPARTMENTS: matches}, format_request)
 
@@ -87,6 +89,7 @@ def process_municipality(request):
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
+    mode = request.args.get(MODE) or FUZZY
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
@@ -94,7 +97,7 @@ def process_municipality(request):
     matches = data.query_entity(MUNICIPALITIES, entity_id=municipality_id,
                                 name=name, department=department, state=state,
                                 flatten=flatten, order=order, fields=fields,
-                                max=max)
+                                max=max, mode=mode)
 
     return parser.get_response({MUNICIPALITIES: matches}, format_request)
 
@@ -120,13 +123,15 @@ def process_locality(request):
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
+    mode = request.args.get(MODE) or FUZZY
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
 
     matches = data.query_entity(SETTLEMENTS, entity_id=locality_id, name=name,
                                 department=department, state=state, max=max,
-                                order=order, fields=fields, flatten=flatten)
+                                order=order, fields=fields, flatten=flatten,
+                                mode=mode)
 
     return parser.get_response({LOCALITIES: matches}, format_request)
 
