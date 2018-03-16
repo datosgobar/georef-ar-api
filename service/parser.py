@@ -26,10 +26,12 @@ REQUEST_INVALID = {
 
 ENDPOINT_PARAMS = {
     PLACE: [LAT, LON, FLATTEN],
-    ADDRESSES: [ADDRESS, LOCALITY, DEPT, STATE, FIELDS, MAX],
-    STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX],
-    SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT, MODE],
-    MUNICIPALITIES: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT, MODE],
+    ADDRESSES: [ADDRESS, LOCALITY, DEPT, STATE, FIELDS, MAX, MODE],
+    STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX, MODE],
+    SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT,
+        MODE],
+    MUNICIPALITIES: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX,
+        FORMAT, MODE],
     DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT, MODE],
     STATES: [ID, NAME, ORDER, FIELDS, FLATTEN, MAX, FORMAT, MODE]
 }
@@ -131,6 +133,7 @@ def build_search_from(params):
     department = params.get(DEPT)
     state = params.get(STATE)
     max = params.get(MAX)
+    mode = params.get(MODE) or FUZZY
     source = params.get(SOURCE)
     fields = get_fields(params.get(FIELDS))
     if len(address) > 1:
@@ -144,6 +147,7 @@ def build_search_from(params):
         'department': department,
         'state': state,
         'max': max,
+        'mode': mode,
         'source': source,
         'fields': fields,
         'text': params.get(ADDRESS)  # Raw user input.

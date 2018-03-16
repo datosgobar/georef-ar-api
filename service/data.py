@@ -76,7 +76,7 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
 
 
 def query_streets(name=None, locality=None, department=None, state=None,
-                  road=None, max=None, fields=[]):
+                  road=None, max=None, fields=None, mode=FUZZY):
     """Busca calles según parámetros de búsqueda de una consulta.
 
     Args:
@@ -91,19 +91,22 @@ def query_streets(name=None, locality=None, department=None, state=None,
     Returns:
         list: Resultados de búsqueda de calles.
     """
+    if not fields:
+        fields = []
+
     index = STREETS + '-*'  # Search in all indexes by default.
     terms = []
     if name:
-        condition = build_match_condition(NAME, get_abbreviated(name), fuzzy=True)
+        condition = build_name_condition(NAME, get_abbreviated(name), mode)
         terms.append(condition)
     if road:
         condition = build_match_condition(ROAD_TYPE, road, fuzzy=True)
         terms.append(condition)
     if locality:
-        condition = build_match_condition(LOCALITY, locality, fuzzy=True)
+        condition = build_name_condition(LOCALITY, locality, mode)
         terms.append(condition)
     if department:
-        condition = build_match_condition(DEPT, department, fuzzy=True)
+        condition = build_name_condition(DEPT, department, mode)
         terms.append(condition)
     if state:
         if state.isdigit():
@@ -113,6 +116,18 @@ def query_streets(name=None, locality=None, department=None, state=None,
 
         if target_state:  # Narrows search to specific index.
             index = '-'.join([STREETS, target_state[0][ID]])
+        elif not state.isdigit():
+            # La provincia pudo no haberse encontrado por tres razones:
+            # - El ID de la provincia era inválido
+            # - El nombre de la provincia estaba muy mal escrito
+            # - El índice de la provincia no existe
+            #
+            # Los últimos dos casos pueden ser remediados agregando una 
+            # restricción por nombre de provincia (fuzzy) a la búsqueda de
+            # calles.
+            condition = build_name_condition(STATE, state, FUZZY)
+            terms.append(condition)
+
     if LOCATION in fields:
         fields.extend([GEOM, START_R, START_L, END_R, END_L, FULL_NAME])
 
@@ -168,10 +183,10 @@ def query_place(index, lat, lon, flatten=False):
     return [parse_place(hit, index, flatten) for hit in result['hits']['hits']]
 
 
-def build_name_condition(field, value, mode):
+def build_name_condition(field, value, mode=FUZZY):
     """Crea una condición de búsqueda por nombre para Elasticsearch.
        Las entidades con nombres son, por el momento, las provincias, los
-       departamentos, los municipios y las localidades.
+       departamentos, los municipios, las localidades y las calles.
 
     Args:
         field (str): Campo de la condición.
@@ -185,7 +200,7 @@ def build_name_condition(field, value, mode):
     terms = []
 
     if mode == FUZZY:
-        if len(value) >= MIN_AUTOCOMPLETE_CHARS:
+        if len(value.strip()) >= MIN_AUTOCOMPLETE_CHARS:
             terms.append(build_match_phrase_prefix_condition(field, value))
         terms.append(build_match_condition(field, value, True, operator='and'))
 
@@ -383,7 +398,8 @@ def search_es(params):
     streets = query_streets(name=params['road_name'], road=params['road_type'],
                             locality=params['locality'], state=params['state'],
                             department=params['department'],
-                            fields=params['fields'], max=params['max'])
+                            fields=params['fields'], max=params['max'],
+                            mode=params['mode'])
     addresses = []
     for street in streets:
         address = process_door(number, street)
