@@ -133,6 +133,7 @@ def build_search_from(params):
     department = params.get(DEPT)
     state = params.get(STATE)
     max = params.get(MAX)
+    mode = params.get(MODE) or FUZZY
     source = params.get(SOURCE)
     fields = get_fields(params.get(FIELDS))
     if len(address) > 1:
@@ -146,6 +147,7 @@ def build_search_from(params):
         'department': department,
         'state': state,
         'max': max,
+        'mode': mode,
         'source': source,
         'fields': fields,
         'text': params.get(ADDRESS)  # Raw user input.

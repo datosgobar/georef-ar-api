@@ -157,10 +157,11 @@ def process_street(request):
     state = request.args.get(STATE)
     road_type = request.args.get(ROAD_TYPE)
     max = request.args.get(MAX)
+    mode = request.args.get(MODE) or FUZZY
     fields = parser.get_fields(request.args.get(FIELDS))
 
     matches = data.query_streets(name, locality, department, state,
-                                 road_type, max, fields)
+                                 road_type, max, fields, mode)
     for street in matches: street.pop(GEOM, None)
 
     return parser.get_response({STREETS: matches})
