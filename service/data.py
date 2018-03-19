@@ -38,6 +38,9 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
     Returns:
         list: Resultados de búsqueda de entidades.
     """
+    if not fields:
+        fields = []
+
     fields_excludes = ['geometry']
     terms = []
     sorts = {}
@@ -94,6 +97,8 @@ def query_streets(name=None, locality=None, department=None, state=None,
         road (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
+        mode (str): Modo de búsqueda por nombre (toma efecto sólo si se
+            especificaron los parámetros 'name', 'locality' o 'department'.)
 
     Returns:
         list: Resultados de búsqueda de calles.
@@ -251,7 +256,7 @@ def build_match_condition(field, value, fuzzy=False, operator='or'):
     """
     query = {field: {'query': value, 'operator': operator}}
     if fuzzy:
-        query[field]['fuzziness'] = 'AUTO'
+        query[field]['fuzziness'] = 'AUTO:4,8'
 
     return {'match': query}
 
