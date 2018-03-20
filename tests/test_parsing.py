@@ -68,23 +68,11 @@ class InputParsingTest(TestCase):
             search = parser.build_search_from(flask.request.args)
             assert search['number'] is None
 
-    def test_road_type_is_parsed(self):
-        """El tipo de camino está presente y se devuelve su abreviación."""
-        with app.test_request_context('?direccion=avenida'):
-            search = parser.build_search_from(flask.request.args)
-            assert search['road_type'] == 'AV'
-
     def test_road_type_is_not_parsed(self):
         """El tipo de camino está presente y se devuelve su abreviación."""
         with app.test_request_context('?direccion=av'):
             search = parser.build_search_from(flask.request.args)
             assert search['road_type'] is None
-
-    def test_title_in_name_is_abbreviated(self):
-        with app.test_request_context('?nombre=comandante brown'):
-            name = flask.request.args.get('nombre')
-            parsed_name = parser.get_abbreviated(name)
-            assert parsed_name == 'CMTE BROWN'
 
 
 class ResultsParsingTest(TestCase):
