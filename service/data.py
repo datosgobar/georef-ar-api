@@ -523,20 +523,3 @@ def location(geom, number, start, end):
         return {LAT: lat, LON: lon}
 
     return None
-
-
-def save_address(search, user=None):
-    """Guarda información de una búsqueda."""
-    search_data = {
-        'search_text': search['text'],
-        'road_type': search['road_type'],
-        'road_name': search['road_name'],
-        'door_number': search['number'],
-        'locality': search['locality'],
-        'state': search['state']
-    }
-    url = os.environ.get('GEOREF_URL') + 'save_address_search'
-    try:
-        response = requests.post(url, data=search_data)
-    except requests.exceptions.RequestException:
-        pass

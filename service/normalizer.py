@@ -198,7 +198,6 @@ def address_get(request):
     if search['number'] is None:
         return parser.get_response_for_invalid(request, message=NUMBER_REQUIRED)
 
-    data.save_address(search)
     matches = data.query_address(search)
     return parser.get_response({ADDRESSES: matches})
 
