@@ -8,7 +8,6 @@ con los que operan los módulos de la API.
 
 from flask import jsonify, make_response, request, Response
 from geojson import Feature, FeatureCollection, Point, Polygon
-from service.abbreviations import ABBR_STREETS, ROAD_TYPES
 from service.names import *
 import re
 import os
@@ -31,8 +30,8 @@ ENDPOINT_PARAMS = {
                      FORMAT, MODE],
     SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, MUN, FLATTEN, MAX,
                   FORMAT, MODE],
-    ADDRESSES: [ADDRESS, LOCALITY, DEPT, STATE, FIELDS, MAX],
-    STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX],
+    ADDRESSES: [ADDRESS, LOCALITY, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, MODE],
+    STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX, MODE],
     PLACE: [LAT, LON, FLATTEN]
 }
 
@@ -128,7 +127,8 @@ def build_search_from(params):
         dict: Parámetros de búsqueda.
     """
     address = params.get(ADDRESS).split(',')
-    road_type, road_name, number = get_parts_from(address[0].strip())
+    road_name, number = get_parts_from(address[0].strip())
+    road_type = params.get(ROAD_TYPE)
     locality = params.get(LOCALITY)
     department = params.get(DEPT)
     state = params.get(STATE)
@@ -154,23 +154,6 @@ def build_search_from(params):
     }
 
 
-def get_abbreviated(name):
-    """Busca y devuelve la abreviatura de un nombre en una collección
-
-    Args:
-        name (str): Texto con el nombre a buscar.
-
-    Returns:
-        str: Nombre abreviado si hubo coincidencias.
-    """
-    name = name.upper()
-    for word in name.split():
-        if word in ABBR_STREETS:
-            name = name.replace(word, ABBR_STREETS[word.upper()])
-
-    return name
-
-
 def get_parts_from(address):
     """Analiza una dirección para separar en calle y altura.
 
@@ -180,18 +163,11 @@ def get_parts_from(address):
     Returns:
         tuple: Tupla con calle y altura de una dirección.
     """
-    road_type = None
-    for word in address.split():
-        if word.upper() in ROAD_TYPES:
-            road_type = ROAD_TYPES[word.upper()]
-            address = address.replace(word, '')
-            break
-
     match = re.search(r'(\s[0-9]+?)$', address)
     number = int(match.group(1)) if match else None
     road_name = re.sub(r'(\s[0-9]+?)$', r'', address)
 
-    return road_type, road_name.strip(), number
+    return road_name.strip(), number
 
 
 def get_response(result, format_request={}):

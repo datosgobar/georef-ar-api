@@ -11,7 +11,7 @@ import psycopg2
 import requests
 from collections import defaultdict
 from elasticsearch import Elasticsearch, ElasticsearchException
-from service.parser import get_abbreviated, get_flatten_result
+from service.parser import get_flatten_result
 from service.names import *
 from service.constants import *
 
@@ -76,7 +76,7 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
              'size': max or 10, 'sort': sorts, '_source': {
                                                     'include': fields,
                                                     'excludes': fields_excludes
-        }}
+        }}    
     try:
         result = Elasticsearch().search(index=index, body=query)
     except ElasticsearchException as error:
@@ -109,7 +109,7 @@ def query_streets(name=None, locality=None, department=None, state=None,
     index = STREETS + '-*'  # Search in all indexes by default.
     terms = []
     if name:
-        condition = build_name_condition(NAME, get_abbreviated(name), mode)
+        condition = build_name_condition(NAME, name, mode)
         terms.append(condition)
     if road:
         condition = build_match_condition(ROAD_TYPE, road, fuzzy=True)
