@@ -95,13 +95,13 @@ Ejemplo:
 
 Agregar la configuración de los servicios `gunicorn` y `nginx`.
 
-1. Configurar servicio en `/etc/systemd/system/`. Completar y modificar el archivo `georef-api.service` de este repositorio.
+1. Configurar servicio en `/etc/systemd/system/`. Completar y modificar el archivo `georef-api.service` **de este repositorio**.
 
 2. Levantar el servicio:
 
     `# systemctl start georef-api.service`
 
-3. Para `nginx`, crear `/etc/nginx/sites-available/georef-api` tomando como base la configuración del archivo `georef-api.nginx`.
+3. Para `nginx`, crear `/etc/nginx/sites-available/georef-api` tomando como base la configuración del archivo `georef-api.nginx` **de este repositorio**.
 
 4. Generar un link simbólico a la configuración del sitio:
 

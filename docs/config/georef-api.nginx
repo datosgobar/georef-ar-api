@@ -1,0 +1,18 @@
+server {
+    listen 80 default_server;
+    client_max_body_size 4G;
+
+    keepalive_timeout 5;
+
+    # path for static files
+    root /home/<user>/georef-api;
+
+    location / {
+        # checks for static file, if not found proxy to app
+        try_files $uri @proxy_to_app;
+    }
+
+    location @proxy_to_app {
+        proxy_pass http://localhost:5000;
+    }
+}
