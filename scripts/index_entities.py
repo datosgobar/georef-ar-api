@@ -50,7 +50,7 @@ def run():
         if not args:
             print('''
             crear-entidades         Crear índices de entidades
-            crear-vias              Crear índices de Vías de circulación
+            crear-vias              Crear índices de vías de circulación
             borrar <nombre-índice>  Borrar un índice de entidad
             borrar-entidades        Borrar todos los índices de entidades
             ''')
