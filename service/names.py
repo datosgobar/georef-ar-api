@@ -49,16 +49,21 @@ FIELDS = 'campos'
 FLATTEN = 'aplanar'
 MAX = 'max'
 FORMAT = 'formato'
+MODE = 'modo'
+FILTER = 'filtrar'
+FUZZY = 'aproximar'
 
 # Elasticsearch
-ID_KEYWORD = 'id.keyword'
-NAME_KEYWORD = 'nombre.keyword'
+ID_KEYWORD = 'id'
+NAME_KEYWORD = 'nombre'
 STATE_ID = 'provincia.id'
 STATE_NAME = 'provincia.nombre'
 DEPT_ID = 'departamento.id'
 DEPT_NAME = 'departamento.nombre'
 MUN_ID = 'municipio.id'
 MUN_NAME = 'municipio.nombre'
+
+EXACT_SUFFIX = '.exacto'
 
 # Messages
 WRONG_QUERY = 'El request tiene parámetros inválidos o está incompleto.'
