@@ -304,6 +304,17 @@ def index_settlements(es):
                     'lat': {'type': 'keyword'},
                     'lon': {'type': 'keyword'},
                     'geometry': {'type': 'geo_shape'},
+                    'municipio': {
+                        'type': 'object',
+                        'dynamic': 'false',
+                        'properties': {
+                            'id': {'type': 'keyword'},
+                            'nombre': {
+                                'type': 'keyword',
+                                'normalizer': 'uppercase_normalizer'
+                            },
+                        }
+                    },
                     'departamento': {
                         'type': 'object',
                         'dynamic': 'false',
