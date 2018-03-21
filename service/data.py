@@ -16,13 +16,14 @@ from service.names import *
 
 
 def query_entity(index, entity_id=None, name=None, department=None, state=None,
-                 max=None, order=None, fields=[], flatten=False):
+                 municipality=None, max=None, order=None,
+                 fields=[], flatten=False):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
     Args:
         index (str): Nombre del índice sobre el cual realizar la búsqueda.
-        entity_id (int): ID de la entidad.
+        entity_id (str): ID de la entidad.
         name (str): Nombre del tipo de entidad (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
@@ -42,6 +43,12 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
         terms.append(condition)
     if name:
         condition = build_condition(NAME, name, fuzzy=True)
+        terms.append(condition)
+    if municipality:
+        if municipality.isdigit():
+            condition = build_condition(MUN_ID, municipality)
+        else:
+            condition = build_condition(MUN_NAME, municipality)
         terms.append(condition)
     if department:
         if department.isdigit():
@@ -79,7 +86,7 @@ def query_streets(name=None, locality=None, department=None, state=None,
         name (str): Nombre de la calle para filtrar (opcional).
         locality (str): Nombre de la localidad para filtrar (opcional).
         department (str): Nombre de departamento para filtrar (opcional).
-        state (str): ID o nombre de provincia para filtrar (opcional).
+        state (str / int): ID o nombre de provincia para filtrar (opcional).
         road (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).

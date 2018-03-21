@@ -117,14 +117,16 @@ def process_locality(request):
 
     locality_id = request.args.get(ID)
     name = request.args.get(NAME)
-    department = request.args.get(DEPT)
     state = request.args.get(STATE)
-    max = request.args.get(MAX) or format_request['max']
+    department = request.args.get(DEPT)
+    municipality = request.args.get(MUN)
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
+    max = request.args.get(MAX) or format_request['max']
 
     matches = data.query_entity(SETTLEMENTS, entity_id=locality_id, name=name,
+                                municipality=municipality,
                                 department=department, state=state, max=max,
                                 order=order, fields=fields, flatten=flatten)
 
