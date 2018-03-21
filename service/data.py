@@ -53,9 +53,9 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
         terms.append(condition)
     if municipality:
         if municipality.isdigit():
-            condition = build_condition(MUN_ID, municipality)
+            condition = build_match_condition(MUN_ID, municipality)
         else:
-            condition = build_condition(MUN_NAME, municipality)
+            condition = build_name_condition(MUN_NAME, municipality, mode)
         terms.append(condition)
     if department:
         if department.isdigit():
