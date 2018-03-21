@@ -22,14 +22,15 @@ def get_db_connection():
 def run():
     try:
         files_path = [
-            'scripts/function_geocodificar.sql',
+            os.path.join('scripts', 'function_geocodificar.sql')
         ]
 
         for file in files_path:
             with open(file, 'r') as f:
                 func = f.read()
-            with get_db_connection().cursor() as cursor:
-                cursor.execute(func)
+            with get_db_connection() as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(func)
         print(MESSAGES['functions_load_success'])
     except psycopg2.DatabaseError as e:
         print(e)

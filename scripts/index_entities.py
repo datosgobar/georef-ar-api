@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from elasticsearch import Elasticsearch, ElasticsearchException
+from elasticsearch_params import *
 import json
 import sys
 import os
-
-INDEXES = ['provincias', 'departamentos', 'municipios', 'localidades', 'bahra']
-
-DEFAULT_SETTINGS = {
-    'analysis': {
-        'normalizer': {
-            'uppercase_normalizer': {
-                'type': 'custom',
-                'filter': ['uppercase']
-            }
-        }
-    }
-}
 
 MESSAGES = {
     'states_exists': 'Ya existe el índice de Provincias.',
@@ -82,7 +70,8 @@ def create_entities_indexes():
 
 
 def index_states(es):
-    path_file = os.environ.get('ENTIDADES_DATA_DIR') + 'provincias.json'
+    path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
+                             'provincias.json')
 
     if es.indices.exists(index='provincias'):
         print(MESSAGES['states_exists'])
@@ -95,8 +84,15 @@ def index_states(es):
                 'properties': {
                     'id': {'type': 'keyword'},
                     'nombre': {
-                        'type': 'keyword',
-                        'normalizer': 'uppercase_normalizer'
+                        'type': 'text',
+                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'search_analyzer': NAME_ANALYZER,
+                        'fields': {
+                            'exacto': {
+                                'type': 'keyword',
+                                'normalizer': LOWCASE_ASCII_NORMALIZER
+                            }
+                        }
                     },
                     'lat': {'type': 'keyword'},
                     'lon': {'type': 'keyword'},
@@ -104,6 +100,7 @@ def index_states(es):
                 }
             }
         }
+
         es.indices.create(index='provincias', body={
             'settings': DEFAULT_SETTINGS,
             'mappings': mapping
@@ -118,7 +115,8 @@ def index_states(es):
 
 
 def index_departments(es):
-    path_file = os.environ.get('ENTIDADES_DATA_DIR') + 'departamentos.json'
+    path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
+                             'departamentos.json')
 
     if es.indices.exists(index='departamentos'):
         print(MESSAGES['departments_exists'])
@@ -131,21 +129,35 @@ def index_departments(es):
                 'properties': {
                     'id': {'type': 'keyword'},
                     'nombre': {
-                        'type': 'keyword',
-                        'normalizer': 'uppercase_normalizer'
+                        'type': 'text',
+                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'search_analyzer': NAME_ANALYZER,
+                        'fields': {
+                            'exacto': {
+                                'type': 'keyword',
+                                'normalizer': LOWCASE_ASCII_NORMALIZER
+                            }
+                        }
                     },
                     'lat': {'type': 'keyword'},
                     'lon': {'type': 'keyword'},
                     'geometry': {'type': 'geo_shape'},
                     'provincia': {
                         'type': 'object',
-                        'dynamic': 'false',
+                        'dynamic': 'strict',
                         'properties': {
                             'id': {'type': 'keyword'},
                             'nombre': {
-                                'type': 'keyword',
-                                'normalizer': 'uppercase_normalizer'
-                            },
+                                'type': 'text',
+                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                                'search_analyzer': NAME_ANALYZER,
+                                'fields': {
+                                    'exacto': {
+                                        'type': 'keyword',
+                                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -167,7 +179,8 @@ def index_departments(es):
 
 
 def index_municipalities(es):
-    path_file = os.environ.get('ENTIDADES_DATA_DIR') + 'municipios.json'
+    path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
+                             'municipios.json')
 
     if es.indices.exists(index='municipios'):
         print(MESSAGES['municipalities_exists'])
@@ -180,31 +193,52 @@ def index_municipalities(es):
                 'properties': {
                     'id': {'type': 'keyword'},
                     'nombre': {
-                        'type': 'keyword',
-                        'normalizer': 'uppercase_normalizer'
+                        'type': 'text',
+                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'search_analyzer': NAME_ANALYZER,
+                        'fields': {
+                            'exacto': {
+                                'type': 'keyword',
+                                'normalizer': LOWCASE_ASCII_NORMALIZER
+                            }
+                        }
                     },
                     'lat': {'type': 'keyword'},
                     'lon': {'type': 'keyword'},
                     'geometry': {'type': 'geo_shape'},
                     'departamento': {
                         'type': 'object',
-                        'dynamic': 'false',
+                        'dynamic': 'strict',
                         'properties': {
                             'id': {'type': 'keyword'},
                             'nombre': {
-                                'type': 'keyword',
-                                'normalizer': 'uppercase_normalizer'
-                            },
+                                'type': 'text',
+                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                                'search_analyzer': NAME_ANALYZER,
+                                'fields': {
+                                    'exacto': {
+                                        'type': 'keyword',
+                                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                                    }
+                                }
+                            }
                         }
                     },
                     'provincia': {
                         'type': 'object',
-                        'dynamic': 'false',
+                        'dynamic': 'strict',
                         'properties': {
                             'id': {'type': 'keyword'},
                             'nombre': {
-                                'type': 'keyword',
-                                'normalizer': 'uppercase_normalizer'
+                                'type': 'text',
+                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                                'search_analyzer': NAME_ANALYZER,
+                                'fields': {
+                                    'exacto': {
+                                        'type': 'keyword',
+                                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                                    }
+                                }
                             }
                         }
                     }
@@ -227,7 +261,8 @@ def index_municipalities(es):
 
 
 def index_localities(es):
-    path_file = os.environ.get('ENTIDADES_DATA_DIR') + 'localidades.json'
+    path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
+                             'localidades.json')
 
     if es.indices.exists(index='localidades'):
         print(MESSAGES['localities_exists'])
@@ -240,28 +275,49 @@ def index_localities(es):
                 'properties': {
                     'id': {'type': 'keyword'},
                     'nombre': {
-                        'type': 'keyword',
-                        'normalizer': 'uppercase_normalizer'
+                        'type': 'text',
+                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'search_analyzer': NAME_ANALYZER,
+                        'fields': {
+                            'exacto': {
+                                'type': 'keyword',
+                                'normalizer': LOWCASE_ASCII_NORMALIZER
+                            }
+                        }
                     },
                     'departamento': {
                         'type': 'object',
-                        'dynamic': 'false',
+                        'dynamic': 'strict',
                         'properties': {
                             'id': {'type': 'keyword'},
-                            'nombre': {
-                                'type': 'keyword',
-                                'normalizer': 'uppercase_normalizer'
-                            },
+                        'nombre': {
+                                'type': 'text',
+                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                                'search_analyzer': NAME_ANALYZER,
+                                'fields': {
+                                    'exacto': {
+                                        'type': 'keyword',
+                                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                                    }
+                                }
+                            }
                         }
                     },
                     'provincia': {
                         'type': 'object',
-                        'dynamic': 'false',
+                        'dynamic': 'strict',
                         'properties': {
                             'id': {'type': 'keyword'},
                             'nombre': {
-                                'type': 'keyword',
-                                'normalizer': 'uppercase_normalizer'
+                                'type': 'text',
+                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                                'search_analyzer': NAME_ANALYZER,
+                                'fields': {
+                                    'exacto': {
+                                        'type': 'keyword',
+                                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                                    }
+                                }
                             }
                         }
                     }
@@ -284,7 +340,8 @@ def index_localities(es):
 
 
 def index_settlements(es):
-    path_file = os.environ.get('ENTIDADES_DATA_DIR') + 'asentamientos.json'
+    path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
+                             'asentamientos.json')
 
     if es.indices.exists(index='bahra'):
         print(MESSAGES['settlements_exists'])
@@ -297,8 +354,15 @@ def index_settlements(es):
                 'properties': {
                     'id': {'type': 'keyword'},
                     'nombre': {
-                        'type': 'keyword',
-                        'normalizer': 'uppercase_normalizer'
+                        'type': 'text',
+                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'search_analyzer': NAME_ANALYZER,
+                        'fields': {
+                            'exacto': {
+                                'type': 'keyword',
+                                'normalizer': LOWCASE_ASCII_NORMALIZER
+                            }
+                        }
                     },
                     'tipo': {'type': 'keyword'},
                     'lat': {'type': 'keyword'},
@@ -306,35 +370,56 @@ def index_settlements(es):
                     'geometry': {'type': 'geo_shape'},
                     'municipio': {
                         'type': 'object',
-                        'dynamic': 'false',
+                        'dynamic': 'strict',
                         'properties': {
                             'id': {'type': 'keyword'},
                             'nombre': {
-                                'type': 'keyword',
-                                'normalizer': 'uppercase_normalizer'
+                                'type': 'text',
+                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                                'search_analyzer': NAME_ANALYZER,
+                                'fields': {
+                                    'exacto': {
+                                        'type': 'keyword',
+                                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                                    }
+                                }
                             },
                         }
                     },
                     'departamento': {
                         'type': 'object',
-                        'dynamic': 'false',
+                        'dynamic': 'strict',
                         'properties': {
                             'id': {'type': 'keyword'},
                             'nombre': {
-                                'type': 'keyword',
-                                'normalizer': 'uppercase_normalizer'
-                            },
+                                'type': 'text',
+                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                                'search_analyzer': NAME_ANALYZER,
+                                'fields': {
+                                    'exacto': {
+                                        'type': 'keyword',
+                                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                                    }
+                                }
+                            }
                         }
                     },
                     'provincia': {
                         'type': 'object',
-                        'dynamic': 'false',
+                        'dynamic': 'strict',
                         'properties': {
                             'id': {'type': 'keyword'},
                             'nombre': {
-                                'type': 'keyword',
-                                'normalizer': 'uppercase_normalizer'
-                            },
+                                'type': 'text',
+                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                                'search_analyzer': NAME_ANALYZER,
+                                'fields': {
+                                    'exacto': {
+                                        'type': 'keyword',
+                                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -355,6 +440,92 @@ def index_settlements(es):
         print(MESSAGES['file_not_exists'] % 'asentamientos')
 
 
+STREET_MAPPING = {
+    'calle': {
+        'properties': {
+            'nomenclatura': {
+                'type': 'text',
+                'index': False
+            },
+            'id': {'type': 'keyword'},
+            'nombre': {
+                'type': 'text',
+                'analyzer': NAME_ANALYZER_ROAD_SYNONYMS,
+                'search_analyzer': NAME_ANALYZER,
+                'fields': {
+                    'exacto': {
+                        'type': 'keyword',
+                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                    }
+                }
+            },
+            'tipo': {
+                'type': 'text',
+                'analyzer': NAME_ANALYZER_ROAD_SYNONYMS,
+                'search_analyzer': NAME_ANALYZER
+            },
+            'inicio_derecha': {
+                'type': 'integer',
+                'index': False
+            },
+            'inicio_izquierda': {
+                'type': 'integer',
+                'index': False
+            },
+            'fin_derecha': {
+                'type': 'integer',
+                'index': False
+            },
+            'fin_izquierda': {
+                'type': 'integer',
+                'index': False
+            },
+            'geometria': {
+                'type': 'text',
+                'index': False
+            },
+            'codigo_postal': {
+                'type': 'text',
+                'index': False
+            },
+            'localidad': {
+                'type': 'text',
+                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'search_analyzer': NAME_ANALYZER,
+                'fields': {
+                    'exacto': {
+                        'type': 'keyword',
+                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                    }
+                }
+            },
+            'provincia': {
+                'type': 'text',
+                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'search_analyzer': NAME_ANALYZER,
+                'fields': {
+                    'exacto': {
+                        'type': 'keyword',
+                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                    }
+                }
+            },
+            'departamento': {
+                'type': 'text',
+                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'search_analyzer': NAME_ANALYZER,
+                'fields': {
+                    'exacto': {
+                        'type': 'keyword',
+                        'normalizer': LOWCASE_ASCII_NORMALIZER
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 def index_roads():
     es = Elasticsearch()
     path = os.environ.get('VIAS_DATA_DIR')
@@ -366,7 +537,13 @@ def index_roads():
             print(MESSAGES['roads_exists'] % index_name)
             continue
         print(MESSAGES['roads_info'] % index_name)
-        data = json.load(open('{}{}'.format(path, i)))
+        data = json.load(open(os.path.join(path, i)))
+
+        es.indices.create(index=index_name, body={
+            'settings': DEFAULT_SETTINGS,
+            'mappings': STREET_MAPPING
+        })
+
         es.bulk(index=index_name, doc_type='calle', body=data, refresh=True,
                 request_timeout=320)
         print(MESSAGES['roads_success'] % index_name)
