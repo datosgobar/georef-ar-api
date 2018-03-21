@@ -19,28 +19,28 @@ DEFAULT_SETTINGS = {
 }
 
 MESSAGES = {
-    'states_exists': '-- Ya existe el índice de Provincias.',
+    'states_exists': 'Ya existe el índice de Provincias.',
     'states_info': '-- Creando índice de Provincias.',
-    'states_success': '-- Se creó el índice de Provincias exitosamente.',
-    'departments_exists': '-- Ya existe el índice de Departamentos.',
+    'states_success': 'Se creó el índice de Provincias exitosamente.',
+    'departments_exists': 'Ya existe el índice de Departamentos.',
     'departments_info': '-- Creando índice de Departamentos.',
-    'departments_success': '-- Se creó el índice de Departamentos exitosamente.',
-    'municipalities_exists': '-- Ya existe el índice de Municipios.',
+    'departments_success': 'Se creó el índice de Departamentos exitosamente.',
+    'municipalities_exists': 'Ya existe el índice de Municipios.',
     'municipalities_info': '-- Creando índice de Municipios.',
-    'municipalities_success': '-- Se creó el índice de Municipios exitosamente.',
-    'localities_exists': '-- Ya existe el índice de Localidades.',
+    'municipalities_success': 'Se creó el índice de Municipios exitosamente.',
+    'localities_exists': 'Ya existe el índice de Localidades.',
     'localities_info': '-- Creando índice de Localidades.',
-    'localities_sucess': '-- Se creó el índice de Localidades exitosamente.',
-    'settlements_exists': '-- Ya existe el índice de BAHRA.',
+    'localities_sucess': 'Se creó el índice de Localidades exitosamente.',
+    'settlements_exists': 'Ya existe el índice de BAHRA.',
     'settlements_info': '-- Creando índice de Asentamientos.',
-    'settlements_success': '-- Se creó el índice de Asentamientos exitosamente.',
-    'roads_exists': '-- Ya existe el índice "%s".',
+    'settlements_success': 'Se creó el índice de Asentamientos exitosamente.',
+    'roads_exists': 'Ya existe el índice "%s".',
     'roads_info': '-- Creando índice de calles: "%s".',
-    'roads_success': '-- Se creó el índice de "%s" exitosamente.',
-    'index_error_add': '-- Error: debe ingresar un índice.',
-    'index_delete': '-- Se eliminó el índice "%s" correctamente.',
-    'invalid_option': '-- Opción inválida.',
-    'file_not_exists': '-- No existe el archivo "%s.json".'
+    'roads_success': 'Se creó el índice de "%s" exitosamente.',
+    'index_error_add': 'Error: debe ingresar un índice.',
+    'index_delete': 'Se eliminó el índice "%s" correctamente.',
+    'invalid_option': 'Opción inválida.',
+    'file_not_exists': 'No existe el archivo "%s.json".'
 }
 
 
