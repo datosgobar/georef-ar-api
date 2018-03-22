@@ -24,14 +24,14 @@ REQUEST_INVALID = {
 
 
 ENDPOINT_PARAMS = {
-    STATES: [ID, NAME, ORDER, FIELDS, FLATTEN, MAX, FORMAT, MODE],
-    DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT, MODE],
+    STATES: [ID, NAME, ORDER, FIELDS, FLATTEN, MAX, FORMAT, EXACT],
+    DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT, EXACT],
     MUNICIPALITIES: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, 
-                     FORMAT, MODE],
+                     FORMAT, EXACT],
     SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, MUN, FLATTEN, MAX,
-                  FORMAT, MODE],
-    ADDRESSES: [ADDRESS, LOCALITY, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, MODE],
-    STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX, MODE],
+                  FORMAT, EXACT],
+    ADDRESSES: [ADDRESS, LOCALITY, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, EXACT],
+    STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX, EXACT],
     PLACE: [LAT, LON, FLATTEN]
 }
 
@@ -48,9 +48,6 @@ def validate_params(request, resource):
     for param in request.args:
         if param not in ENDPOINT_PARAMS[resource]:
             return False, INVALID_PARAM % (param, resource)
-
-    if request.args.get(MODE, FUZZY) not in [FUZZY, FILTER]:
-        return False, INVALID_PARAM % (param, resource)
 
     return True, ''
 
@@ -133,7 +130,7 @@ def build_search_from(params):
     department = params.get(DEPT)
     state = params.get(STATE)
     max = params.get(MAX)
-    mode = params.get(MODE) or FUZZY
+    exact = EXACT in params
     source = params.get(SOURCE)
     fields = get_fields(params.get(FIELDS))
     if len(address) > 1:
@@ -147,7 +144,7 @@ def build_search_from(params):
         'department': department,
         'state': state,
         'max': max,
-        'mode': mode,
+        'exact': exact,
         'source': source,
         'fields': fields,
         'text': params.get(ADDRESS)  # Raw user input.
@@ -170,7 +167,7 @@ def get_parts_from(address):
     return road_name.strip(), number
 
 
-def get_response(result, format_request={}):
+def get_response(result, format_request=None):
     """Genera una respuesta de la API.
 
     Args:
@@ -180,6 +177,9 @@ def get_response(result, format_request={}):
     Returns:
         flask.Response: Respuesta de la API en formato CSV o JSON
     """
+    if not format_request:
+        format_request = {}
+
     if 'type' in format_request and format_request['type'] == 'csv':
         entity = [row for row in result.keys()]
         headers = {'Content-Disposition': 'attachment; '

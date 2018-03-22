@@ -49,9 +49,7 @@ FIELDS = 'campos'
 FLATTEN = 'aplanar'
 MAX = 'max'
 FORMAT = 'formato'
-MODE = 'modo'
-FILTER = 'filtrar'
-FUZZY = 'aproximar'
+EXACT = 'exacto'
 
 # Elasticsearch
 ID_KEYWORD = 'id'
