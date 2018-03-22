@@ -195,7 +195,7 @@ def get_response(result, format_request=None):
                 if 'lat' and 'lon' in entity.keys():
                     properties.pop('lat')
                     properties.pop('lon')
-                    point = Point((entity['lat'], entity['lon']))
+                    point = Point((float(entity['lat']), float(entity['lon'])))
                 features.append(Feature(
                     geometry=point,
                     properties=properties

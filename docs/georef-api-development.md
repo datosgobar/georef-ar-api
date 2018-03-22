@@ -20,31 +20,35 @@ Crear una base de datos en PostgreSQL con la extensión Postgis.
 
 Ejemplo:
 
-    ```sql
-    -- Creando base de datos
-    CREATE DATABASE georef_api WITH ENCODING='UTF8';
-    
-    -- Agregando Postgis a la base de datos creada
-    CREATE EXTENSION postgis;
-    ```
+```plsql
+-- Creando base de datos
+CREATE DATABASE georef_api WITH ENCODING='UTF8';
+
+-- Agregando Postgis a la base de datos creada
+CREATE EXTENSION postgis;
+```
 
 ## Instalación
 
-1. Clonar repositorio:
+- Clonar repositorio:
 
     `$ git clone https://github.com/datosgobar/georef-api.git`
     
-2. Crear un entorno virtual e instalar dependencias con _pip_:
+- Crear un entorno virtual y activarlo:
 
     `$ python3.6 -m venv venv`
     
+    `$ . venv/bin/activate`
+ 
+- Instalar dependencias con _pip_:
+    
     `(venv)$ pip install -r requirements.txt`
 
-3. Copiar las variables de entorno:
+- Copiar las variables de entorno:
 
     `(venv)$ cp environment.example.sh environment.sh`
     
-4. Completar los valores con los datos correspondientes:
+- Completar el archivo `environment.sh` con los valores con los datos correspondientes:
 
     ```bash
     export GEOREF_API_DB_HOST= # localhost
@@ -56,7 +60,7 @@ Ejemplo:
     export VIAS_DATA_DIR= # /directorio/datos/de/vias
  
     export FLASK_APP=service/__init__.py
-    export FLASK_DEBUG=0
+    export FLASK_DEBUG=1
 
     export OSM_API_URL='http://nominatim.openstreetmap.org/search'
     ```
@@ -70,10 +74,10 @@ Ejemplo:
 - Probar el servicio:
 
     `$ curl -X GET 'http://localhost:9200'`
+    
+### Generar índices
 
-## Correr API 
-
-- Generar variables de entorno:
+- Importar variables de entorno:
     
     `(venv)$ . environment.sh`
     
@@ -84,6 +88,8 @@ Ejemplo:
 - Generar índices de vías de circulación:
 
     `(venv)$ python scripts/index_entities.py crear-vias`
+
+## Correr API 
 
 - Correr _georef-api_:
     
@@ -97,11 +103,9 @@ Ejemplo:
 
 - Pruebas unitarias:
 
-    `(venv) $ python -m unittest tests/test_normalization.py`
+    `(venv) $ python -m unittest`
   
-    `(venv) $ python -m unittest tests/test_parsing.py`
-  
-- Consumir mediante la herramienta CURL:
+- Consumir la API mediante la herramienta CURL:
 
     `$ curl localhost:5000/api/v1.0/direcciones?direccion=cabral+500`
   

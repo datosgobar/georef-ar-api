@@ -22,32 +22,35 @@ Crear una base de datos en PostgreSQL con la extensión Postgis.
 
 Ejemplo:
 
-    ```sql
-    -- Creando base de datos
-    CREATE DATABASE georef_api WITH ENCODING='UTF8';
-    
-    -- Agregando Postgis a la base de datos creada
-    CREATE EXTENSION postgis;
-    ```
+```plsql
+-- Creando base de datos
+CREATE DATABASE georef_api WITH ENCODING='UTF8';
+
+-- Agregando Postgis a la base de datos creada
+CREATE EXTENSION postgis;
+```
 
 ## Instalación
 
-1. Clonar repositorio
+- Clonar repositorio:
 
     `$ git clone https://github.com/datosgobar/georef-api.git`
     
-2. Crear entorno virtual e instalar dependencias con pip
+- Crear un entorno virtual y activarlo:
 
     `$ python3.6 -m venv venv`
     
+    `$ . venv/bin/activate`
+
+- Instalar dependencias con pip:
+    
     `(venv)$ pip install -r requirements.txt`
     
+- Copiar las variables de entorno:
 
-3. Copiar las variables de entorno
-
-    `$ cp environment.example.sh environment.sh`
+    `(venv)$ cp environment.example.sh environment.sh`
     
-4. Completar los valores con los datos correspondientes:
+- Completar el archivo `environment.sh` con los valores con los datos correspondientes:
 
     ```bash
     export GEOREF_API_DB_HOST= # localhost
@@ -66,56 +69,70 @@ Ejemplo:
  
 ## ElasticSearch
 
-1. Instalar dependencias JDK version 1.8.0_131
+- Instalar dependencias JDK version 1.8.0_131:
 
     `$ sudo apt install default-jre`
   
-2. Instalar eleasticSearch
+- Instalar eleasticSearch:
 
     `$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.0.deb`
 
     `# dpkg -i elasticsearch-6.2.0.deb`
 
-3. Configuraciones
+- Configuraciones:
 
     `$ sudo vi /etc/elasticsearch/elasticsearch.yml`
 
     ```
-    cluster.name: georef
+    cluster.name: georef-api
     node.name: node-1
     network.host: 0.0.0.0
     http.max_content_length: 100mb
     ```
     
-4. Probar el servicio:
+- Probar el servicio:
 
     `$ curl -X GET 'http://localhost:9200'`
 
-## Correr API 
+### Generar índices
+
+- Importar variables de entorno:
+    
+    `(venv)$ . environment.sh`
+    
+- Generar índices de entidades:
+
+    `(venv)$ python scripts/index_entities.py crear-entidades`
+    
+- Generar índices de vías de circulación:
+
+    `(venv)$ python scripts/index_entities.py crear-vias`
+
+## Correr API  
 
 Agregar la configuración de los servicios `gunicorn` y `nginx`.
 
-1. Configurar servicio en `/etc/systemd/system/`. Completar y modificar el archivo `georef-api.service` **de este repositorio**.
+- Configurar servicio en `/etc/systemd/system/`. Completar y modificar el archivo `georef-api.service` [de este repositorio](config/georef-api.service).
 
-2. Levantar el servicio:
+- Levantar el servicio:
 
     `# systemctl start georef-api.service`
 
-3. Para `nginx`, crear `/etc/nginx/sites-available/georef-api` tomando como base la configuración del archivo `georef-api.nginx` **de este repositorio**.
+- Para `nginx`, crear `/etc/nginx/sites-available/georef-api` tomando como base la configuración del archivo `georef-api.nginx` [de este repositorio](config/georef-api.nginx).
 
-4. Generar un link simbólico a la configuración del sitio:
+- Generar un link simbólico a la configuración del sitio:
 
     `# ln -s /etc/nginx/sites-available/georef-api /etc/nginx/sites-enabled`,
 
-5. Validar configuración:
+- Validar configuración:
 
     `# nginx -t`
 
-6. Cargar la nueva configuración:
+- Cargar la nueva configuración:
 
     `# nginx -s reload`
 
-7. Correr Nginx:
+- Correr Nginx:
 
     `# nginx`
 
@@ -123,9 +140,7 @@ Agregar la configuración de los servicios `gunicorn` y `nginx`.
 
 - Pruebas unitarias:
 
-  `(venv) $ python -m unittest tests/test_normalization.py`
-  
-  `(venv) $ python -m unittest tests/test_parsing.py`
+  `(venv) $ python -m unittest`
   
 - Consumir mediante la herramienta CURL:
 
