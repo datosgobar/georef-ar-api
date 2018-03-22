@@ -29,11 +29,11 @@ def process_state(request):
     state_id = request.args.get(ID)
     name = request.args.get(NAME)
     max = request.args.get(MAX) or 24
-    mode = request.args.get(MODE) or FUZZY
+    exact = EXACT in request.args
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     matches = data.query_entity(STATES, entity_id=state_id, name=name,
-                                order=order, fields=fields, max=max, mode=mode)
+                                order=order, fields=fields, max=max, exact=exact)
     return parser.get_response({STATES: matches}, format_request)
 
 
@@ -57,13 +57,13 @@ def process_department(request):
     name = request.args.get(NAME)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
-    mode = request.args.get(MODE) or FUZZY
+    exact = EXACT in request.args
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
     matches = data.query_entity(DEPARTMENTS, entity_id=dept_id, name=name,
                                 state=state, flatten=flatten,
-                                order=order, fields=fields, max=max, mode=mode)
+                                order=order, fields=fields, max=max, exact=exact)
 
     return parser.get_response({DEPARTMENTS: matches}, format_request)
 
@@ -89,7 +89,7 @@ def process_municipality(request):
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
     max = request.args.get(MAX) or format_request['max']
-    mode = request.args.get(MODE) or FUZZY
+    exact = EXACT in request.args
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
@@ -97,7 +97,7 @@ def process_municipality(request):
     matches = data.query_entity(MUNICIPALITIES, entity_id=municipality_id,
                                 name=name, department=department, state=state,
                                 flatten=flatten, order=order, fields=fields,
-                                max=max, mode=mode)
+                                max=max, exact=exact)
 
     return parser.get_response({MUNICIPALITIES: matches}, format_request)
 
@@ -123,7 +123,7 @@ def process_locality(request):
     state = request.args.get(STATE)
     department = request.args.get(DEPT)
     municipality = request.args.get(MUN)
-    mode = request.args.get(MODE) or FUZZY
+    exact = EXACT in request.args
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS))
     flatten = FLATTEN in request.args or format_request['convert']
@@ -133,7 +133,7 @@ def process_locality(request):
                                 municipality=municipality,
                                 department=department, state=state, max=max,
                                 order=order, fields=fields, flatten=flatten,
-                                mode=mode)
+                                exact=exact)
 
     return parser.get_response({LOCALITIES: matches}, format_request)
 
@@ -157,11 +157,13 @@ def process_street(request):
     state = request.args.get(STATE)
     road_type = request.args.get(ROAD_TYPE)
     max = request.args.get(MAX)
-    mode = request.args.get(MODE) or FUZZY
+    exact = EXACT in request.args
     fields = parser.get_fields(request.args.get(FIELDS))
 
-    matches = data.query_streets(name, locality, department, state,
-                                 road_type, max, fields, mode)
+    matches = data.query_streets(name=name, locality=locality, 
+                                 department=department, state=state,
+                                 road=road_type, max=max, fields=fields,
+                                 exact=exact)
     for street in matches: street.pop(GEOM, None)
 
     return parser.get_response({STREETS: matches})
