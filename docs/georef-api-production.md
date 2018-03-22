@@ -66,6 +66,10 @@ CREATE EXTENSION postgis;
 
     export OSM_API_URL='http://nominatim.openstreetmap.org/search'
     ```
+    
+- Cargar funciones en PostgreSQL:
+
+    `(venv)$ python scripts/functions_load.py`
  
 ## ElasticSearch
 
