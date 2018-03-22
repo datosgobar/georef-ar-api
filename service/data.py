@@ -72,8 +72,8 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
             condition = build_name_condition(STATE_NAME, state, exact)
         terms.append(condition)
     if order:
-        if ID in order: sorts[ID_KEYWORD] = {'order': 'asc'}
-        if NAME in order: sorts[NAME_KEYWORD] = {'order': 'asc'}
+        if ID in order: sorts[ID] = {'order': 'asc'}
+        if NAME in order: sorts[NAME + EXACT_SUFFIX] = {'order': 'asc'}
     query = {
         'query': {
             'bool': {
@@ -90,6 +90,7 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
     try:
         result = Elasticsearch().search(index=index, body=query)
     except ElasticsearchException as error:
+        print(error)
         return []
 
     return [parse_entity(hit, flatten) for hit in result['hits']['hits']]
