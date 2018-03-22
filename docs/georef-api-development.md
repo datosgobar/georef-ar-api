@@ -20,7 +20,7 @@ Crear una base de datos en PostgreSQL con la extensión Postgis.
 
 Ejemplo:
 
-    ```sql
+    ```
     -- Creando base de datos
     CREATE DATABASE georef_api WITH ENCODING='UTF8';
     
@@ -73,7 +73,7 @@ Ejemplo:
 
 ## Correr API 
 
-- Generar variables de entorno:
+- Importar variables de entorno:
     
     `(venv)$ . environment.sh`
     
