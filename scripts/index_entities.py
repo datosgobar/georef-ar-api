@@ -41,6 +41,7 @@ def run():
             crear-vias              Crear índices de vías de circulación
             borrar <nombre-índice>  Borrar un índice de entidad
             borrar-entidades        Borrar todos los índices de entidades
+            listar                  Listar índices
             ''')
         else:
             if args[0] == 'crear-entidades':
@@ -53,6 +54,8 @@ def run():
                 if len(args) == 1:
                     raise SyntaxError(MESSAGES['index_error_add'])
                 delete_index(args[1])
+            elif args[0] == 'listar':
+                list_indexes()
             else:
                 print(MESSAGES['invalid_option'])
 
@@ -562,6 +565,14 @@ def delete_indexes():
         for index in INDEXES:
             Elasticsearch().indices.delete(index=index)
             print(MESSAGES['index_delete'] % index)
+    except (ElasticsearchException, SyntaxError) as error:
+        print(error)
+
+
+def list_indexes():
+    try:
+        for index in sorted(Elasticsearch().indices.get_alias("*")):
+            print(index)
     except (ElasticsearchException, SyntaxError) as error:
         print(error)
 

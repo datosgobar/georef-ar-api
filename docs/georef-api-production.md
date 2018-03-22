@@ -84,7 +84,7 @@ CREATE EXTENSION postgis;
     `$ sudo vi /etc/elasticsearch/elasticsearch.yml`
 
     ```
-    cluster.name: georef
+    cluster.name: georef-api
     node.name: node-1
     network.host: 0.0.0.0
     http.max_content_length: 100mb
