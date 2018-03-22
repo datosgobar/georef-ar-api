@@ -52,8 +52,6 @@ FORMAT = 'formato'
 EXACT = 'exacto'
 
 # Elasticsearch
-ID_KEYWORD = 'id'
-NAME_KEYWORD = 'nombre'
 STATE_ID = 'provincia.id'
 STATE_NAME = 'provincia.nombre'
 DEPT_ID = 'departamento.id'
