@@ -17,6 +17,7 @@ from service.names import *
 MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_MAX = 10
 
+
 def query_entity(index, entity_id=None, name=None, department=None, state=None,
                  municipality=None, max=None, order=None,
                  fields=None, flatten=False, exact=False):
@@ -90,7 +91,6 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
     try:
         result = Elasticsearch().search(index=index, body=query)
     except ElasticsearchException as error:
-        print(error)
         return []
 
     return [parse_entity(hit, flatten) for hit in result['hits']['hits']]

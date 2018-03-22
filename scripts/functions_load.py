@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+
+"""Módulo 'functions_load' de georef-api
+
+Contiene métodos para la carga de funciones PostgreSQL que son utilizados por
+los recursos que expone la API.
+"""
+
 import psycopg2
 import os
 
@@ -20,6 +28,11 @@ def get_db_connection():
 
 
 def run():
+    """ Se conecta a una base datos y realiza la carga de funciones.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     try:
         files_path = [
             os.path.join('scripts', 'function_geocodificar.sql')
