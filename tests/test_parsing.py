@@ -103,6 +103,7 @@ class ResultsParsingTest(TestCase):
     }"""
 
     def setUp(self):
+        app.testing = True
         self.app = app.test_client()
         normalizer.process_address = Mock(return_value=self.test_response)
 

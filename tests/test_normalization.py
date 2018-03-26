@@ -35,6 +35,7 @@ test_response = [
 class HouseNumberTest(TestCase):
     """Pruebas relacionadas con la altura de una calle."""
     def setUp(self):
+        app.testing = True
         self.app = app.test_client()
         self.endpoint = '/api/v1.0/direcciones'
         data.query_address = Mock(return_value=test_response)
@@ -72,6 +73,7 @@ class HouseNumberTest(TestCase):
 class MatchResultsTest(TestCase):
     """Pruebas para casos de normalización con uno o más resultados."""
     def setUp(self):
+        app.testing = True
         self.app = app.test_client()
         self.endpoint = '/api/v1.0/direcciones'
         data.query_address = Mock(return_value=test_response)
@@ -116,6 +118,7 @@ class MatchResultsTest(TestCase):
 class RequestStatusTest(TestCase):
     """Pruebas de los distintos estados de respuesta para un request."""
     def setUp(self):
+        app.testing = True
         self.app = app.test_client()
         self.endpoint = '/api/v1.0/direcciones'
         data.query_address = Mock(return_value=test_response)

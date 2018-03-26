@@ -48,7 +48,7 @@ DEFAULT_SETTINGS = {
         'analyzer': {
             NAME_ANALYZER: {
                 'type': 'custom',
-                'tokenizer': 'whitespace',
+                'tokenizer': 'standard',
                 'filter': [
                     'lowercase',
                     'asciifolding',
@@ -57,7 +57,7 @@ DEFAULT_SETTINGS = {
             },
             NAME_ANALYZER_ENTITY_SYNONYMS: {
                 'type': 'custom',
-                'tokenizer': 'whitespace',
+                'tokenizer': 'standard',
                 'filter': [
                     'lowercase',
                     'asciifolding',
@@ -67,7 +67,7 @@ DEFAULT_SETTINGS = {
             },
             NAME_ANALYZER_ROAD_SYNONYMS: {
                 'type': 'custom',
-                'tokenizer': 'whitespace',
+                'tokenizer': 'standard',
                 'filter': [
                     'lowercase',
                     'asciifolding',

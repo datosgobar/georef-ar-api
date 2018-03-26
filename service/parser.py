@@ -35,6 +35,9 @@ ENDPOINT_PARAMS = {
     PLACE: [LAT, LON, FLATTEN]
 }
 
+NONEMPTY_PARAMS = set([ID, NAME, ORDER, FIELDS, MAX, FORMAT, STATE, DEPT, MUN,
+    LOCALITY, ADDRESS, ROAD_TYPE, LAT, LON])
+
 
 def validate_params(request, resource):
     """Controla que una consulta sea válida para procesar.
@@ -47,9 +50,12 @@ def validate_params(request, resource):
     """
     for param in request.args:
         if param not in ENDPOINT_PARAMS[resource]:
-            return False, INVALID_PARAM % (param, resource)
+            return False, INVALID_PARAM.format(param=param, res=resource)
 
-    return True, ''
+        if param in NONEMPTY_PARAMS and not request.args[param]:
+            return False, EMPTY_PARAM.format(param=param) 
+
+    return True, None
 
 
 def get_url_rule(request):
