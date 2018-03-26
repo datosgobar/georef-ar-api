@@ -33,6 +33,12 @@ MESSAGES = {
 
 
 def run():
+    """Recibe argumentos pasados por línea de comando y ejecuta la acción
+        solicitada por el usuario.
+
+     Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     try:
         args = sys.argv[1:]
         if not args:
@@ -64,6 +70,7 @@ def run():
 
 
 def create_entities_indexes():
+    """Crea índices Elasticsearch de entidades políticas."""
     es = Elasticsearch()
     index_states(es)
     index_departments(es)
@@ -73,6 +80,15 @@ def create_entities_indexes():
 
 
 def index_states(es):
+    """Genera índice Elasticsearch para la entidad Provincia.
+
+    Args:
+        es (elasticsearch.client.Elasticsearch): Instancia cliente
+        Elasticsearch.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'provincias.json')
 
@@ -118,6 +134,15 @@ def index_states(es):
 
 
 def index_departments(es):
+    """Genera índice Elasticsearch para la entidad Departamento.
+
+    Args:
+        es (elasticsearch.client.Elasticsearch): Instancia cliente
+        Elasticsearch.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'departamentos.json')
 
@@ -182,6 +207,15 @@ def index_departments(es):
 
 
 def index_municipalities(es):
+    """Genera índice Elasticsearch para la entidad Municipio.
+
+    Args:
+        es (elasticsearch.client.Elasticsearch): Instancia cliente
+        Elasticsearch.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'municipios.json')
 
@@ -264,6 +298,15 @@ def index_municipalities(es):
 
 
 def index_localities(es):
+    """Genera índice Elasticsearch para la entidad Localidad.
+
+    Args:
+        es (elasticsearch.client.Elasticsearch): Instancia cliente
+        Elasticsearch.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'localidades.json')
 
@@ -343,6 +386,15 @@ def index_localities(es):
 
 
 def index_settlements(es):
+    """Genera índice Elasticsearch para la entidad Asentamientos informales.
+
+    Args:
+        es (elasticsearch.client.Elasticsearch): Instancia cliente
+        Elasticsearch.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'asentamientos.json')
 
@@ -530,6 +582,11 @@ STREET_MAPPING = {
 
 
 def index_roads():
+    """Genera índices Elasticsearch para vías de circulación.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     es = Elasticsearch()
     path = os.environ.get('VIAS_DATA_DIR')
     objects = os.listdir(path)
@@ -553,6 +610,14 @@ def index_roads():
 
 
 def delete_index(index):
+    """Elimina un índice Elasticsearch.
+
+    Args:
+        index (str): Nombre del índice que se requiere eliminar.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     try:
         Elasticsearch().indices.delete(index=index)
         print(MESSAGES['index_delete'] % index)
@@ -561,6 +626,11 @@ def delete_index(index):
 
 
 def delete_indexes():
+    """Elimina índices Elasticsearch correspondientes a entidades.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     try:
         for index in INDEXES:
             Elasticsearch().indices.delete(index=index)
@@ -570,6 +640,11 @@ def delete_indexes():
 
 
 def list_indexes():
+    """Devuelve un listado con índices Elasticsearch activos.
+
+    Returns:
+        str: Devuelve un mensaje con el resultado de la operación.
+    """
     try:
         for index in sorted(Elasticsearch().indices.get_alias("*")):
             print(index)
