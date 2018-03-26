@@ -17,7 +17,7 @@ def process_state(request):
         request (flask.Request): Objeto con información de la consulta HTTP.
 
     Returns:
-        Resultado de la consulta como objecto flask.Response.
+        Resultado de la consulta como objeto flask.Response.
     """
     valid_rule, format_request, error = parser.get_url_rule(request)
     if not valid_rule:
@@ -44,7 +44,7 @@ def process_department(request):
         request (flask.Request): Objeto con información de la consulta HTTP.
 
     Returns:
-        Resultado de la consulta como objecto flask.Response.
+        Resultado de la consulta como objeto flask.Response.
     """
     valid_rule, format_request, error = parser.get_url_rule(request)
     if not valid_rule:
@@ -75,7 +75,7 @@ def process_municipality(request):
         request (flask.Request): Objeto con información de la consulta HTTP.
 
     Returns:
-        Resultado de la consulta como objecto flask.Response.
+        Resultado de la consulta como objeto flask.Response.
     """
     valid_rule, format_request, error = parser.get_url_rule(request)
     if not valid_rule:
@@ -109,7 +109,7 @@ def process_locality(request):
         request (flask.Request): Objeto con información de la consulta HTTP.
 
     Returns:
-        Resultado de la consulta como objecto flask.Response.
+        Resultado de la consulta como objeto flask.Response.
     """
     valid_rule, format_request, error = parser.get_url_rule(request)
     if not valid_rule:
@@ -145,7 +145,7 @@ def process_street(request):
         request (flask.Request): Objeto con información de la consulta HTTP.
 
     Returns:
-        Resultado de la consulta como objecto flask.Response.
+        Resultado de la consulta como objeto flask.Response.
     """
     valid_request, error = parser.validate_params(request, STREETS)
     if not valid_request:
@@ -190,7 +190,7 @@ def address_get(request):
         request (flask.Request): Objeto con información de la consulta HTTP.
 
     Returns:
-        Resultado de la consulta como objecto flask.Response.
+        Resultado de la consulta como objeto flask.Response.
     """
     valid_request, error = parser.validate_params(request, ADDRESSES)
     if not valid_request:
@@ -213,7 +213,7 @@ def address_post(request):
         request (flask.Request): Objeto con información de la consulta HTTP.
 
     Returns:
-        Resultado de la consulta como objecto flask.Response.
+        Resultado de la consulta como objeto flask.Response.
     """
     matches = []
     json_data = request.get_json()

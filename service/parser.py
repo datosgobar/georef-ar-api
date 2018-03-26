@@ -41,6 +41,7 @@ def validate_params(request, resource):
  
     Args:
         request (flask.Request): Objeto con información de la consulta HTTP.
+        resource: (str): Nombre del recurso a validar.
  
     Returns:
         (bool, str): Si una consulta es válida o no, y un mensaje si hay error.
@@ -222,6 +223,7 @@ def get_response_for_invalid(request, message=None):
 
 def generate_csv(result):
     """ Generar datos en formato CSV
+
     Args:
         result (dict): Diccionario con resultados de una consulta.
     """
@@ -235,7 +237,8 @@ def generate_csv(result):
 
 
 def get_flatten_result(result):
-    """ Devuelve datos aplanados
+    """ Procesa y retorna los datos aplanados.
+
     Args:
         result (dict): Diccionario con resultados de una consulta.
     """
