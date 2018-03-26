@@ -18,7 +18,7 @@ MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_MAX = 10
 
 
-def query_entity(index, entity_id=None, name=None, department=None, state=None,
+def query_entity(index, entity_id=None, name=None, state=None, department=None,
                  municipality=None, max=None, order=None,
                  fields=None, flatten=False, exact=False):
     """Busca entidades políticas (localidades, departamentos, o provincias)
@@ -28,8 +28,9 @@ def query_entity(index, entity_id=None, name=None, department=None, state=None,
         index (str): Nombre del índice sobre el cual realizar la búsqueda.
         entity_id (str): ID de la entidad.
         name (str): Nombre del tipo de entidad (opcional).
-        department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
+        department (str): ID o nombre de departamento para filtrar (opcional).
+        municipality (str): ID o nombre de municipio para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         order (str): Campo por el cual ordenar los resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
@@ -429,8 +430,8 @@ def search_es(params):
 
 
 def search_location_for(address, number):
-    """Procesa los tramos de calle para obtener
-        las coordenadas del número de puerta.
+    """Procesa los tramos de calle para obtener las coordenadas
+        del número de puerta.
 
     Args:
         address (dict): Dirección.
