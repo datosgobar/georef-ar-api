@@ -64,6 +64,7 @@ CREATE EXTENSION postgis;
 
     export OSM_API_URL='http://nominatim.openstreetmap.org/search'
     ```
+
 - Cargar funciones en PostgreSQL:
 
     `(venv)$ python scripts/functions_load.py`
@@ -91,16 +92,16 @@ CREATE EXTENSION postgis;
 - Generar índices de vías de circulación:
 
     `(venv)$ python scripts/index_entities.py crear-vias`
+    
+- Listar otros comandos utiles:
+
+    `(venv)$ python scripts/index_entities.py`
 
 ## Correr API 
 
 - Correr _georef-api_:
     
     `(venv)$ flask run`
-    
-- Listar otros comandos utiles:
-
-    `(venv)$ python scripts/index_entities.py`
 
 ## Pruebas
 

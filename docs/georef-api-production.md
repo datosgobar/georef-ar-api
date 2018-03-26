@@ -42,7 +42,7 @@ CREATE EXTENSION postgis;
     
     `$ . venv/bin/activate`
 
-- Instalar dependencias con pip:
+- Instalar dependencias con _pip_:
     
     `(venv)$ pip install -r requirements.txt`
     
@@ -73,7 +73,7 @@ CREATE EXTENSION postgis;
  
 ## ElasticSearch
 
-- Instalar dependencias JDK version 1.8.0_131:
+- Instalar dependencias _JDK_ version 1.8.0_131:
 
     `$ sudo apt install default-jre`
   
@@ -83,7 +83,7 @@ CREATE EXTENSION postgis;
 
     `# dpkg -i elasticsearch-6.2.0.deb`
 
-- Configuraciones:
+- Configuraciones recomendadas:
 
     `$ sudo vi /etc/elasticsearch/elasticsearch.yml`
 
@@ -111,6 +111,10 @@ CREATE EXTENSION postgis;
 - Generar índices de vías de circulación:
 
     `(venv)$ python scripts/index_entities.py crear-vias`
+
+- Listar otros comandos utiles:
+
+    `(venv)$ python scripts/index_entities.py`
 
 ## Correr API  
 
