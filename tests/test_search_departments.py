@@ -50,10 +50,21 @@ class SearchDepartmentsTest(SearchEntitiesTest):
 
         self.assertListEqual(lengths, results_lengths)
 
+    def test_id_length(self):
+        """El ID de la entidad debe tener la longitud correcta."""
+        data = self.get_response({'max': 1})[0]
+        self.assertTrue(len(data['id']) == 5)
+
     def test_id_search(self):
         """La búsqueda por ID debe devolver el depto. correspondiente."""
         data = self.get_response({'id': '06077'})
         self.assertListEqual([p['nombre'] for p in data], ['ARRECIFES'])
+
+    def test_default_results_fields(self):
+        """Las entidades devueltas deben tener los campos default."""
+        data = self.get_response({'max': 1})[0]
+        fields = sorted(['id', 'lat', 'lon', 'nombre', 'provincia'])
+        self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de los deptos. devueltos deben ser filtrables."""
@@ -119,6 +130,12 @@ class SearchDepartmentsTest(SearchEntitiesTest):
 
         self.assert_name_search_id_matches(expected, exact=True)
 
+    def test_id_invalid_search(self):
+        """La búsqueda por ID debe devolver 0 resultados cuando se
+        utiliza un ID no existente."""
+        data = self.get_response({'id': '99999'})
+        self.assertTrue(len(data) == 0)
+
     def test_name_exact_gibberish_search(self):
         """La búsqueda por nombre exacto debe devolver 0 resultados cuando se
         utiliza un nombre no existente."""
@@ -135,16 +152,16 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         """La búsqueda por nombre aproximado debe tener una tolerancia
         de AUTO:4,8."""
         expected = [
-            (['90028'], 'FAMAIL'),        # -2 caracteres (de 8+)
-            (['90028'], 'FAMAILL'),       # -1 caracteres (de 8+)
-            (['90028'], 'FAMAILLÁA'),     # +1 caracteres (de 8+)
-            (['90028'], 'FAMAILLÁAA'),    # +2 caracteres (de 8+)
-            (['14126'], 'SAN ALBER'),     # -2 caracteres (de 8+)
-            (['14126'], 'SAN ALBERT'),    # -1 caracteres (de 8+)
-            (['14126'], 'SAN ALBERTOO'),  # +1 caracteres (de 8+)
-            (['14126'], 'SAN ALBERTOOR'), # +2 caracteres (de 8+)
-            (['54063'], 'IGUAZ'),         # -1 caracteres (de 4-7)
-            (['54063'], 'IGUAZÚU')        # +1 caracteres (de 4-7)
+            (['90021'], 'ICLIGASTA'),        # -2 caracteres (de 8+)
+            (['90021'], 'HICLIGASTA'),       # -1 caracteres (de 8+)
+            (['90021'], 'cCHICLIGASTA'),     # +1 caracteres (de 8+)
+            (['90021'], 'ccCHICLIGASTA'),    # +2 caracteres (de 8+)
+            (['78042'], 'GALLANES'),     # -2 caracteres (de 8+)
+            (['78042'], 'AGALLANES'),    # -1 caracteres (de 8+)
+            (['78042'], 'mMAGALLANES'),  # +1 caracteres (de 8+)
+            (['78042'], 'mMAGALLANESs'), # +2 caracteres (de 8+)
+            (['54063'], 'GUAZÚ'),         # -1 caracteres (de 4-7)
+            (['54063'], 'iIGUAZÚ')        # +1 caracteres (de 4-7)
         ]
 
         self.assert_name_search_id_matches(expected)
@@ -190,7 +207,7 @@ class SearchDepartmentsTest(SearchEntitiesTest):
             for dept in data
         ]
 
-        self.assertTrue(all(results))
+        self.assertTrue(all(results) and results)
 
     def test_search_by_state(self):
         """Se debe poder buscar departamentos por provincia."""
@@ -201,7 +218,8 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         data.extend(self.get_response({'provincia': state_name}))
         data.extend(self.get_response({'provincia': state_name, 'exacto': 1}))
 
-        self.assertTrue(all(dept['id'].startswith(state_id) for dept in data))
+        results = [dept['id'].startswith(state_id) for dept in data]
+        self.assertTrue(all(results) and results)
 
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores

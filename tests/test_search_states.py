@@ -52,10 +52,21 @@ class SearchStatesTest(SearchEntitiesTest):
 
         self.assertListEqual(lengths, results_lengths)
 
+    def test_id_length(self):
+        """El ID de la entidad debe tener la longitud correcta."""
+        data = self.get_response({'max': 1})[0]
+        self.assertTrue(len(data['id']) == 2)
+
     def test_id_search(self):
         """La búsqueda por ID debe devolver la provincia correspondiente."""
         data = self.get_response({'id': '06'})
         self.assertListEqual([p['nombre'] for p in data], ['BUENOS AIRES'])
+
+    def test_default_results_fields(self):
+        """Las entidades devueltas deben tener los campos default."""
+        data = self.get_response({'max': 1})[0]
+        fields = sorted(['id', 'lat', 'lon', 'nombre'])
+        self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de las provincias devueltas deben ser filtrables."""
@@ -117,6 +128,12 @@ class SearchStatesTest(SearchEntitiesTest):
 
         self.assert_name_search_id_matches(expected, exact=True)
 
+    def test_id_invalid_search(self):
+        """La búsqueda por ID debe devolver 0 resultados cuando se
+        utiliza un ID no existente."""
+        data = self.get_response({'id': '99999'})
+        self.assertTrue(len(data) == 0)
+
     def test_name_exact_gibberish_search(self):
         """La búsqueda por nombre exacto debe devolver 0 resultados cuando se
         utiliza un nombre no existente."""
@@ -133,18 +150,14 @@ class SearchStatesTest(SearchEntitiesTest):
         """La búsqueda por nombre aproximado debe tener una tolerancia
         de AUTO:4,8."""
         expected = [
-            (['54'], 'Mision'),     # -2 caracteres (de 8+)
-            (['54'], 'Misione'),    # -1 caracteres (de 8+)
-            (['54'], 'Misioness'),  # +1 caracteres (de 8+)
-            (['54'], 'Misionesss'), # +2 caracteres (de 8+)
-            (['10'], 'Catamar'),    # -2 caracteres (de 8+)
-            (['10'], 'Catamarc'),   # -1 caracteres (de 8+)
-            (['10'], 'Catamarcar'), # +1 caracteres (de 8+)
-            (['10'], 'Catamarca'),  # +2 caracteres (de 8+)
-            (['38'], 'Juju'),       # -1 caracteres (de 4-7)
-            (['38'], 'Jujuyy'),     # +1 caracteres (de 4-7)
-            (['66'], 'Salt'),       # -1 caracteres (de 4-7)
-            (['66'], 'Saltas')      # +1 caracteres (de 4-7)
+            (['18'], 'rrientes'),     # -2 caracteres (de 8+)
+            (['18'], 'orrientes'),    # -1 caracteres (de 8+)
+            (['18'], 'cCorrientes'),  # +1 caracteres (de 8+)
+            (['18'], 'cCorrientesS'), # +2 caracteres (de 8+)
+            (['38'], 'ujuy'),       # -1 caracteres (de 4-7)
+            (['38'], 'jJujuy'),     # +1 caracteres (de 4-7)
+            (['66'], 'alta'),       # -1 caracteres (de 4-7)
+            (['66'], 'sSalta')      # +1 caracteres (de 4-7)
         ]
 
         self.assert_name_search_id_matches(expected)
