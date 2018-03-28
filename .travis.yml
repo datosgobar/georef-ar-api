@@ -4,6 +4,8 @@ python:
 - '3.6'
 install:
 - pip install -r requirements.txt
+- sudo apt-get update -qq
+- sudo apt-get install -y openvpn
 script:
 - python -m unittest tests/test_normalization.py
 - python -m unittest tests/test_parsing.py
@@ -30,3 +32,8 @@ before_deploy:
 - eval "$(ssh-agent -s)"
 - chmod 600 /tmp/deploy_rsa
 - ssh-add /tmp/deploy_rsa
+- openssl aes-256-cbc -K $encrypted_5f43eadfe7ce_key -iv $encrypted_5f43eadfe7ce_iv
+  -in travis_georef.ovpn.enc -out travis_georef.ovpn -d
+- sudo openvpn --config travis_georef.ovpn --daemon --verb 0 --writepid openvpn.pid
+after_deploy:
+- sudo kill -SIGTERM `cat openvpn.pid`

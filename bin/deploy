@@ -39,10 +39,15 @@ ssh-keyscan -p $PORT_SSH $IP >> ~/.ssh/known_hosts
 
 DEPLOY_SCRIPT="
 cd ${GEOREF_API_DIR};
+echo 'Activando virtualenv...'
 . venv/bin/activate;
+echo 'Pulleando branch git...'
 git pull origin ${BRANCH};
+echo 'Actualizando dependencias...'
 pip install -r requirements.txt;
-echo ${PASS_SSH} | sudo -S service georef-api restart;
+echo 'Reiniciando servicio...'
+sudo service georef-api restart;
+echo 'Listo.'
 exit;
 "
 
