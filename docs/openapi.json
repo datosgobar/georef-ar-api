@@ -12,20 +12,12 @@
     },
     "tags": [
         {
-            "name": "Información"
-        },
-        {
-            "name": "Normalización"
+            "name": "Recursos"
         }
     ],
     "externalDocs": {
         "url": "https://github.com/datosgobar/georef-api"
     },
-    "servers": [
-        {
-            "url": "https://georef.datos.gob.ar/api/v1.0"
-        }
-    ],
     "components": {
         "schemas": {
             "calle": {
@@ -238,12 +230,12 @@
                         "example": "Córdoba"
                     },
                     "lat": {
-                        "type": "number",
-                        "example": -32.142933
+                        "type": "string",
+                        "example": "-32.142933"
                     },
                     "lon": {
-                        "type": "number",
-                        "example": -63.801753
+                        "type": "string",
+                        "example": "-63.801753"
                     }
                 }
             },
@@ -350,17 +342,25 @@
                     "type": "string"
                 }
             },
-            "localidad": {
-                "name": "localidad",
-                "description": "Filtrar por nombre o ID de localidad.",
+            "departamento": {
+                "name": "departamento",
+                "description": "Filtrar por nombre o ID de departamento.",
                 "in": "query",
                 "schema": {
                     "type": "string"
                 }
             },
-            "departamento": {
-                "name": "departamento",
-                "description": "Filtrar por nombre o ID de departamento.",
+            "municipio": {
+                "name": "municipio",
+                "description": "Filtrar por nombre o ID de municipio.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "localidad": {
+                "name": "localidad",
+                "description": "Filtrar por nombre o ID de localidad.",
                 "in": "query",
                 "schema": {
                     "type": "string"
@@ -378,7 +378,7 @@
             },
             "campos": {
                 "name": "campos",
-                "description": "Campos a incluir en la respuesta.",
+                "description": "Campos a incluir en la respuesta separados por comas, sin espacios.",
                 "in": "query",
                 "schema": {
                     "type": "array",
@@ -389,10 +389,10 @@
             },
             "aplanar": {
                 "name": "aplanar",
-                "description": "Si es verdadero, muestra el resultado con una estructura plana.",
+                "description": "Cuando está presente, muestra el resultado con una estructura plana.",
                 "in": "query",
                 "schema": {
-                    "type": "boolean"
+                    "enum": [true]
                 }
             },
             "id": {
@@ -411,12 +411,21 @@
                     "type": "string"
                 }
             },
+            "exacto": {
+                "name": "exacto",
+                "description": "Cuando está presente, se activa el modo de búsqueda por texto exacto. Sólo tiene efecto cuando se está buscando entidades por nombre, nombre de provincia, nombre de departamento, nombre de municipio, o nombre de localidad.",
+                "in": "query",
+                "schema": {
+                  "enum": [true]
+                }
+            },
             "orden": {
                 "name": "orden",
                 "description": "Campo por el cual ordenar los resultados.",
                 "in": "query",
                 "schema": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": ["id", "nombre"]
                 }
             }
         },
@@ -461,9 +470,9 @@
         "/provincias": {
             "get": {
                 "summary": "Retorna un listado de provincias.",
-                "description": "Agregar '.csv' al path de la URL para obtener los resultados en formato CSV.",
+                "description": "Agregar '`.csv`' al path de la URL para obtener la **totalidad** de las provincias en formato CSV, '`.json`' para obtener la **totalidad** de las provincias en formato JSON, o '`.geojson`' para obtener la **totalidad** de las provincias en formato GeoJSON.",
                 "tags": [
-                    "Información"
+                    "Recursos"
                 ],
                 "parameters": [
                     {
@@ -480,6 +489,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
                     }
                 ],
                 "responses": {
@@ -504,9 +516,9 @@
         "/departamentos": {
             "get": {
                 "summary": "Retorna un listado de departamentos.",
-                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de los departamentos en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de los departamentos en formato JSON.",
+                "description": "Agregar '`.csv`' al path de la URL para obtener la **totalidad** de los departamentos en formato CSV, '`.json`' para obtener la **totalidad** de los departamentos en formato JSON, o '`.geojson`' para obtener la **totalidad** de los departamentos en formato GeoJSON.",
                 "tags": [
-                    "Información"
+                    "Recursos"
                 ],
                 "parameters": [
                     {
@@ -529,6 +541,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
                     }
                 ],
                 "responses": {
@@ -553,10 +568,10 @@
         "/municipios": {
             "get": {
                 "summary": "Retorna un listado de municipios.",
-                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de los municipios en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de los municipios en formato JSON.",
                 "tags": [
-                    "Información"
+                    "Recursos"
                 ],
+                "description": "Agregar '`.csv`' al path de la URL para obtener la **totalidad** de los municipios en formato CSV, '`.json`' para obtener la **totalidad** de los municipio en formato JSON, o '`.geojson`' para obtener la **totalidad** de los municipios en formato GeoJSON.",
                 "parameters":[
                     {
                         "$ref": "#/components/parameters/id"
@@ -566,6 +581,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/departamento"
                     },
                     {
                         "$ref": "#/components/parameters/campos"
@@ -578,6 +596,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
                     }
                 ],
                 "responses": {
@@ -602,9 +623,9 @@
         "/localidades": {
             "get": {
                 "summary": "Retorna un listado de localidades y entidades de BAHRA.",
-                "description": "Agregar '.csv' al path de la URL para obtener la totalidad de las localidades en formato CSV. Agregar '.json' al path de la URL para obtener la totalidad de las localidades en formato JSON.",
+                "description": "Agregar '`.csv`' al path de la URL para obtener la **totalidad** de las localidades en formato CSV, '`.json`' para obtener la **totalidad** de las localidades en formato JSON, o '`.geojson`' para obtener la **totalidad** de las en formato GeoJSON.",
                 "tags": [
-                    "Información"
+                    "Recursos"
                 ],
                 "parameters":[
                     {
@@ -614,10 +635,13 @@
                         "$ref": "#/components/parameters/nombre"
                     },
                     {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
                         "$ref": "#/components/parameters/departamento"
                     },
                     {
-                        "$ref": "#/components/parameters/provincia"
+                        "$ref": "#/components/parameters/municipio"
                     },
                     {
                         "$ref": "#/components/parameters/campos"
@@ -630,6 +654,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
                     }
                 ],
                 "responses": {
@@ -655,7 +682,7 @@
             "get": {
                 "summary": "Retorna calles (normalizadas) de una localidad o provincia.",
                 "tags": [
-                    "Normalización"
+                    "Recursos"
                 ],
                 "parameters": [
                     {
@@ -675,6 +702,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
                     },
                     {
                         "name": "tipo",
@@ -709,7 +739,7 @@
             "get": {
                 "summary": "Normaliza una dirección.",
                 "tags": [
-                    "Normalización"
+                    "Recursos"
                 ],
                 "parameters": [
                     {
@@ -736,6 +766,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
                     }
                 ],
                 "responses": {
@@ -762,7 +795,7 @@
             "post": {
                 "summary": "Normaliza un lote de direcciones.",
                 "tags": [
-                    "Normalización"
+                    "Recursos"
                 ],
                 "parameters": [
                     {
@@ -777,6 +810,24 @@
                             },
                             "example": ["Av Santa Fe 1000", "Corrientes 1200, Buenos Aires"]
                         }
+                    },
+                    {
+                        "$ref": "#/components/parameters/localidad"
+                    },
+                    {
+                        "$ref": "#/components/parameters/departamento"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
                     }
                 ],
                 "responses": {
@@ -808,7 +859,7 @@
             "get": {
                 "summary": "Georeferenciación reversa para un punto dado.",
                 "tags": [
-                    "Normalización"
+                    "Recursos"
                 ],
                 "parameters": [
                     {
