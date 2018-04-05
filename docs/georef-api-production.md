@@ -3,7 +3,7 @@
 ## Dependencias
 
 - [Elasticsearch >=6.2.0](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html)
-- Gunicorn
+- [Gunicorn](http://gunicorn.org/)
 - [Nginx](https://nginx.org/)
 - [Python >=3.6.x](https://www.python.org/downloads/)
 - [Pip](https://pip.pypa.io/en/stable/installing/)
@@ -20,7 +20,7 @@ En [este documento](georef-api-data.md) se detalla el modelo de datos utilizado 
 
 Crear una base de datos en PostgreSQL con la extensión Postgis.
 
-Ejemplo:
+Ejemplo utilizando `georef_api` como nombre para la base de datos:
 
 ```plsql
 -- Creando base de datos
@@ -53,10 +53,10 @@ CREATE EXTENSION postgis;
 - Completar el archivo `environment.sh` con los valores con los datos correspondientes:
 
     ```bash
-    export GEOREF_API_DB_HOST= # localhost
-    export GEOREF_API_DB_NAME= # georef 
-    export GEOREF_API_DB_USER= # postgres
-    export GEOREF_API_DB_PASS= # postgres   
+    export GEOREF_API_DB_HOST= # Dirección de la base de datos PostgreSQL
+    export GEOREF_API_DB_NAME= # Nombre de la base de datos (por ejemplo, 'georef_api')
+    export GEOREF_API_DB_USER= # Usuario de la base de datos
+    export GEOREF_API_DB_PASS= # Contraseña del usuario de la base de datos
  
     export ENTIDADES_DATA_DIR= # /directorio/datos/de/entidades
     export VIAS_DATA_DIR= # /directorio/datos/de/vias
