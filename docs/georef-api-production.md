@@ -2,7 +2,7 @@
 
 ## Dependencias
 
-- [ElasticSearch >=6.2](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html)
+- [Elasticsearch >=6.2.0](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html)
 - Gunicorn
 - [Nginx](https://nginx.org/)
 - [Python >=3.6.x](https://www.python.org/downloads/)
@@ -14,7 +14,7 @@
 
 ## Datos
 
-Los datos de las entidades políticas y vías de circulación deben descargarse del [portal de datos](http://datos.gob.ar/).  
+En [este documento](georef-api-data.md) se detalla el modelo de datos utilizado por la API y las URLs donde se encuentran publicados. 
 
 ## Base de datos
 
@@ -71,13 +71,13 @@ CREATE EXTENSION postgis;
 
     `(venv)$ python scripts/functions_load.py`
  
-## ElasticSearch
+## Elasticsearch
 
 - Instalar dependencias _JDK_ version 1.8.0_131:
 
     `$ sudo apt install default-jre`
   
-- Instalar eleasticSearch:
+- Instalar Elasticsearch:
 
     `$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.0.deb`
 
