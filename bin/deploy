@@ -34,21 +34,20 @@ case "$1" in
             exit 1
 esac
 
-echo '- Agregando host a known hosts'
+echo '- Agregando host a known hosts...'
 ssh-keyscan -p $PORT_SSH $IP >> ~/.ssh/known_hosts
 
 DEPLOY_SCRIPT="
 cd ${GEOREF_API_DIR};
-echo 'Activando virtualenv...'
-. venv/bin/activate;
-echo 'Pulleando branch git...'
-git pull origin ${BRANCH};
-echo 'Actualizando dependencias...'
-pip install -r requirements.txt;
-echo 'Reiniciando servicio...'
-sudo service georef-api restart;
+echo '- Activando virtualenv...'
+. venv/bin/activate
+echo '- Pulleando branch git...'
+git pull origin ${BRANCH}
+echo '- Actualizando dependencias...'
+pip install --upgrade --force-reinstall -r requirements.txt
+echo '- Reiniciando servicio...'
+sudo service georef-api restart
 echo 'Listo.'
-exit;
 "
 
 echo '- Haciendo ssh a la máquina y corriendo script de deploy'
