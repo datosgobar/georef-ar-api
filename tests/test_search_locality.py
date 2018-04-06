@@ -4,52 +4,32 @@ from service import app
 from . import SearchEntitiesTest, asciifold
 from .test_search_states import STATES
 from .test_search_departments import DEPARTMENTS
+from .test_search_municipalities import MUNICIPALITIES
 
-MUNICIPALITIES = [
-    (['060098'], 'BERISSO'),
-    (['060756', '180143'], 'SAN ISIDRO'),
-    (['100056'], 'ANTOFAGASTA DE LA SIERRA'),
-    (['060154'], 'CARLOS TEJEDOR'),
-    (['100063'], 'BELÉN'),
-    (['060134'], 'CAÑUELAS'),
-    (['060168'], 'CASTELLI'),
-    (['060175'], 'COLÓN'),
-    (['060182'], 'CORONEL DE MARINA LEONARDO ROSALES'),
-    (['060203'], 'CORONEL SUÁREZ'),
-    (['060274'], 'FLORENCIO VARELA'),
-    (['060277'], 'FLORENTINO AMEGHINO'),
-    (['060351'], 'GENERAL PINTO'),
-    (['340126'], 'IBARRETA'),
-    (['060294'], 'GENERAL ARENALES'),
-    (['140658'], 'VILLA ROSSI'),
-    (['140665'], 'BIALET MASSÉ'),
-    (['060322'], 'GENERAL LA MADRID'),
-    (['060408'], 'HURLINGHAM'),
-    (['060476'], 'LOBERÍA'),
-    (['060515', '140133'], 'MALVINAS ARGENTINAS'),
-    (['060602'], 'PATAGONES'),
-    (['060547'], 'MONTE'),
-    (['060581'], 'NECOCHEA'),
-    (['060644'], 'PINAMAR'),
-    (['060648'], 'PRESIDENTE PERÓN'),
-    (['060679', '500084', '700084', '823183'], 'RIVADAVIA'),
-    (['060700'], 'SAAVEDRA'),
-    (['060714'], 'SALTO'),
-    (['060770', '141106', '540504'], 'SAN PEDRO'),
-    (['060778', '142875', '540203', '822350'], 'SAN VICENTE'),
-    (['060840'], 'TRES DE FEBRERO'),
-    (['060798'], 'TAPALQUÉ'),
-    (['060819'], 'TORNQUIST'),
-    (['060847'], 'TRES LOMAS'),
-    (['060861'], 'VICENTE LÓPEZ')
+LOCALITIES = [
+    (['06840010015'], 'VILLA RAFFO'),
+    (['06756010003'], 'BOULOGNE SUR MER'),
+    (['62042450001'], 'BARRIO PINO AZUL'),
+    (['14021150001'], 'DUMESNIL'),
+    (['70056020000'], 'GRAN CHINA'),
+    (['50028020003'], 'CAPILLA DEL ROSARIO'),
+    (['54112010000'], 'CRUCE CABALLERO'),
+    (['82021270000'], 'PLAZA CLUCELLAS'),
+    (['94014010000'], 'LAGUNA ESCONDIDA'),
+    (['38077030000'], 'CIENEGUILLAS'),
+    (['34035030000'], 'COMANDANTE FONTANA'),
+    (['78014040000'], 'JARAMILLO'),
+    (['86014030000'], 'DONADEU'),
+    (['26035010000'], 'ALDEA ESCOLAR'),
+    (['26021030009'], 'BARRIO MANANTIAL ROSALES'),
 ]
 
-class SearchMunicipalitiesTest(SearchEntitiesTest):
-    """Pruebas de búsqueda de municipios."""
+class SearchLocalityTest(SearchEntitiesTest):
+    """Pruebas de búsqueda de localidades (índice de asentamientos)."""
 
     def setUp(self):
-        self.endpoint = '/api/v1.0/municipios'
-        self.entity = 'municipios'
+        self.endpoint = '/api/v1.0/localidades'
+        self.entity = 'localidades'
         super().setUp()
 
     def test_max_results_returned(self):
@@ -65,27 +45,37 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
     def test_id_length(self):
         """El ID de la entidad debe tener la longitud correcta."""
         data = self.get_response({'max': 1})[0]
-        self.assertTrue(len(data['id']) == 6)
+        self.assertTrue(len(data['id']) == 11)
 
     def test_id_search(self):
         """La búsqueda por ID debe devolver el municipio correspondiente."""
-        data = self.get_response({'id': '060182'})
-        self.assertListEqual([p['nombre'] for p in data], ['CORONEL DE MARINA LEONARDO ROSALES'])
+        data = self.get_response({'id': '06840010015'})
+        self.assertListEqual([p['nombre'] for p in data], ['VILLA RAFFO'])
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['id', 'lat', 'lon', 'nombre', 'provincia', 'departamento'])
+        fields = sorted([
+            'id',
+            'lat',
+            'lon',
+            'nombre',
+            'provincia',
+            'departamento',
+            'municipio',
+            'tipo'
+        ])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
-        """Los campos de los municipios devueltos deben ser filtrables."""
+        """Los campos de las localidades devueltas deben ser filtrables."""
         fields_lists = [
             ['id', 'nombre'],
             ['lat', 'lon'],
             ['id', 'lat'],
             ['lat', 'provincia'],
-            ['departamento', 'id', 'nombre']
+            ['departamento', 'id', 'nombre'],
+            ['id', 'municipio', 'provincia']
         ]
         fields_results = []
 
@@ -119,16 +109,16 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
     def test_name_exact_search(self):
         """La búsqueda por nombre exacto debe devolver los municipios
          correspondientes."""
-        self.assert_name_search_id_matches(MUNICIPALITIES, exact=True)
+        self.assert_name_search_id_matches(LOCALITIES, exact=True)
 
     def test_name_exact_search_ignores_case(self):
         """La búsqueda por nombre exacto debe ignorar mayúsculas y 
         minúsculas."""
         expected = [
-            (['060408'], 'HURLINGHAM'),
-            (['060408'], 'hurlingham'),
-            (['060408'], 'Hurlingham'),
-            (['060408'], 'HuRlInGhAm')
+            (['14098090000'], 'CORONEL BAIGORRIA'),
+            (['14098090000'], 'coronel baigorria'),
+            (['14098090000'], 'Coronel Baigorria'),
+            (['14098090000'], 'CoRoNeL BaIgOrRiA')
         ]
 
         self.assert_name_search_id_matches(expected, exact=True)
@@ -136,10 +126,10 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
     def test_name_exact_search_ignores_tildes(self):
         """La búsqueda por nombre exacto debe ignorar tildes."""
         expected = [
-            (['140665'], 'BIALET MASSÉ'),
-            (['140665'], 'bialet massé'),
-            (['140665'], 'BIALET MASSE'),
-            (['140665'], 'bialet masse')
+            (['46049060000'], 'CHAÑARMUYO'),
+            (['46049060000'], 'CHANARMUYO'),
+            (['46049060000'], 'chañarmuyo'),
+            (['46049060000'], 'chanarmuyo')
         ]
 
         self.assert_name_search_id_matches(expected, exact=True)
@@ -166,16 +156,16 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         """La búsqueda por nombre aproximado debe tener una tolerancia
         de AUTO:4,8."""
         expected = [
-            (['060408'], 'RLINGHAM'),     # -2 caracteres (de 8+)
-            (['060408'], 'URLINGHAM'),    # -1 caracteres (de 8+)
-            (['060408'], 'hHURLINGHAM'),  # +1 caracteres (de 8+)
-            (['060408'], 'hHURLINGHAMm'), # +2 caracteres (de 8+)
-            (['142448'], 'GUIZAMÓN'),     # -2 caracteres (de 8+)
-            (['142448'], 'EGUIZAMÓN'),    # -1 caracteres (de 8+)
-            (['142448'], 'lLEGUIZAMÓN'),  # +1 caracteres (de 8+)
-            (['142448'], 'lLEGUIZAMÓNn'), # +2 caracteres (de 8+)
-            (['142238'], 'INCEN'),         # -1 caracteres (de 4-7)
-            (['142238'], 'pPINCEN'),       # +1 caracteres (de 4-7)
+            (['06476060000'], 'MANGUEYU'),      # -2 caracteres (de 8+)
+            (['06476060000'], 'AMANGUEYU'),     # -1 caracteres (de 8+)
+            (['06476060000'], 'tTAMANGUEYU'),   # +1 caracteres (de 8+)
+            (['06476060000'], 'tTAMANGUEYUu'),  # +2 caracteres (de 8+)
+            (['06819020000'], 'LDUNGARAY'),     # -2 caracteres (de 8+)
+            (['06819020000'], 'ALDUNGARAY'),    # -1 caracteres (de 8+)
+            (['06819020000'], 'sSALDUNGARAY'),  # +1 caracteres (de 8+)
+            (['06819020000'], 'sSALDUNGARAYy'), # +2 caracteres (de 8+)
+            (['82098050000'], 'OMANG'),         # -1 caracteres (de 4-7)
+            (['82098050000'], 'rROMANG'),       # +1 caracteres (de 4-7)
         ]
 
         self.assert_name_search_id_matches(expected)
@@ -184,21 +174,18 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         """La búsqueda por nombre aproximado debe también actuar como
         autocompletar cuando la longitud de la query es >= 4."""
         expected = [
-            (['142623'], 'CAPILLA DE LOS REMEDIO'),
-            (['142623'], 'CAPILLA DE LOS REMEDI'),
-            (['142623'], 'CAPILLA DE LOS REMED'),
-            (['142623'], 'CAPILLA DE LOS REME'),
-            (['142623'], 'CAPILLA DE LOS REM'),
-            (['142623'], 'CAPILLA DE LOS RE'),
-            (['142623'], 'CAPILLA DE LOS R'),
-            (['142091'], 'VILLA QUILLINZ'),
-            (['142091'], 'VILLA QUILLIN'),
-            (['142091'], 'VILLA QUILLI'),
-            (['142091'], 'VILLA QUILL'),
-            (['142091'], 'VILLA QUIL'),
-            (['142091', '908455'], 'VILLA QUI'),
-            (['142091', '908455'], 'VILLA QU'),
-            (['142091', '908455'], 'VILLA Q')
+            (['38098030000'], 'PURMAMARCA'),
+            (['38098030000'], 'PURMAMARC'),
+            (['38098030000'], 'PURMAMAR'),
+            (['38098030000'], 'PURMAMA'),
+            (['38098030000'], 'PURMAM'),
+            (['86056070000'], 'PAMPA DE LOS GUANACOS'),
+            (['86056070000'], 'PAMPA DE LOS GUANACO'),
+            (['86056070000'], 'PAMPA DE LOS GUANA'),
+            (['86056070000'], 'PAMPA DE LOS GUAN'),
+            (['86056070000'], 'PAMPA DE LOS GUA'),
+            (['86056070000'], 'PAMPA DE LOS GU'),
+            (['86056070000'], 'PAMPA DE LOS G')
         ]
 
         self.assert_name_search_id_matches(expected)
@@ -206,16 +193,16 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
     def test_name_search_stopwords(self):
         """La búsqueda por nombre aproximado debe ignorar stopwords."""
         expected = [
-            (['060840'], 'TRES DE FEBRERO'),
-            (['060840'], 'TRES DEL FEBRERO'),
-            (['060840'], 'TRES D FEBRERO'),
-            (['060840'], 'TRES LA FEBRERO'),
+            (['10063040003'], 'LA FALDA DE DE SAN ANTONIO'),
+            (['10063040003'], 'LA LA FALDA DE SAN ANTONIO'),
+            (['10063040003'], 'FALDA DE SAN ANTONIO'),
+            (['10063040003'], 'FALDA SAN ANTONIO')
         ]
 
         self.assert_name_search_id_matches(expected)
 
     def test_code_prefix(self):
-        """Los IDs de los municipios deben comenzar con el ID de sus
+        """Los IDs de las localidades deben comenzar con el ID de sus
         provincias."""
         data = self.get_response({'max': 25})
         results = [
@@ -226,38 +213,50 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         self.assertTrue(all(results) and results)
 
     def test_search_by_state(self):
-        """Se debe poder buscar municipios por provincia."""
-
-        # Algunas provincias no tienen municipios, por el momento buscar
-        # utilizando una provincia que sabemos contiene uno o mas
-        state_id, state_name = '82', 'SANTA FE'
+        """Se debe poder buscar localidades por provincia."""
+        state = random.choice(STATES)
+        state_id, state_name = state[0][0], state[1]
 
         data = self.get_response({'provincia': state_id})
         data.extend(self.get_response({'provincia': state_name}))
         data.extend(self.get_response({'provincia': state_name, 'exacto': 1}))
 
-        results = [mun['id'].startswith(state_id) for mun in data]
+        results = [loc['id'].startswith(state_id) for loc in data]
         self.assertTrue(all(results) and results)
 
     def test_search_by_department(self):
-        """Se debe poder buscar municipios por departamento."""
+        """Se debe poder buscar localidades por departamento."""
 
-        # Algunos departamentos no tienen municipios, por el momento buscar
-        # utilizando un departamento que sabemos contiene uno o mas
-        dept_id, dept_name = '82021', 'CASTELLANOS'
+        # Algunos departamentos no tienen localidades, por el momento buscar
+        # utilizando un departamento que sabemos contiene una o mas
+        dept_id, dept_name = '14007', 'CALAMUCHITA'
 
         data = self.get_response({'departamento': dept_id})
         data.extend(self.get_response({'departamento': dept_name}))
         data.extend(self.get_response({'departamento': dept_name, 'exacto': 1}))
 
-        results = [mun['departamento']['id'] == dept_id for mun in data]
+        results = [loc['departamento']['id'] == dept_id for loc in data]
+        self.assertTrue(all(results) and results)
+
+    def test_search_by_municipality(self):
+        """Se debe poder buscar localidades por municipio."""
+
+        # Algunos municipios no tienen localidades, por el momento buscar
+        # utilizando un municipio que sabemos contiene una o mas
+        mun_id, mun_name = '620133', 'CIPOLLETTI'
+
+        data = self.get_response({'municipio': mun_id})
+        data.extend(self.get_response({'municipio': mun_name}))
+        data.extend(self.get_response({'municipio': mun_name, 'exacto': 1}))
+
+        results = [loc['municipio']['id'] == mun_id for loc in data]
         self.assertTrue(all(results) and results)
 
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""
         params = ['id', 'nombre', 'orden', 'campos', 'max', 'formato',
-                  'provincia', 'departamento']
+                  'provincia', 'departamento', 'municipio']
         self.assert_empty_params_return_400(params)
 
     def test_unknown_param_returns_400(self):

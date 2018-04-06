@@ -78,6 +78,7 @@ class SearchStatesTest(SearchEntitiesTest):
         fields_results = []
 
         for fields in fields_lists:
+            fields = sorted(fields)
             data = self.get_response({'campos': ','.join(fields), 'max': 1})
             fields_results.append(sorted(data[0].keys()))
 
@@ -234,6 +235,10 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_unknown_param_returns_400(self):
         """El endpoint no debe aceptar parámetros desconocidos."""
         self.assert_unknown_param_returns_400()
+
+    def test_formats(self):
+        """El endpoint debe tener distintos formatos de respuesta."""
+        self.assert_formats_ok()
 
 
 if __name__ == '__main__':

@@ -32,6 +32,11 @@ class SearchEntitiesTest(TestCase):
         response = self.app.get(self.endpoint + '?foo=bar')
         self.assertEqual(response.status_code, 400)
 
+    def assert_formats_ok(self):
+        for fmt in ['.json', '.csv', '.geojson']:
+            response = self.app.get(self.endpoint + fmt)
+            self.assertEqual(response.status_code, 200)
+
     def assert_name_search_id_matches(self, term_matches, exact=False):
         results = []
         for _, query in term_matches:
