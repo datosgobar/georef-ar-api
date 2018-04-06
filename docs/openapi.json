@@ -794,6 +794,7 @@
             },
             "post": {
                 "summary": "Normaliza un lote de direcciones.",
+                "description": "Los parámetros deben estar en formato JSON.",
                 "tags": [
                     "Recursos"
                 ],
@@ -810,24 +811,6 @@
                             },
                             "example": ["Av Santa Fe 1000", "Corrientes 1200, Buenos Aires"]
                         }
-                    },
-                    {
-                        "$ref": "#/components/parameters/localidad"
-                    },
-                    {
-                        "$ref": "#/components/parameters/departamento"
-                    },
-                    {
-                        "$ref": "#/components/parameters/provincia"
-                    },
-                    {
-                        "$ref": "#/components/parameters/campos"
-                    },
-                    {
-                        "$ref": "#/components/parameters/max"
-                    },
-                    {
-                        "$ref": "#/components/parameters/exacto"
                     }
                 ],
                 "responses": {
