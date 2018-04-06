@@ -48,7 +48,7 @@ class SearchLocalityTest(SearchEntitiesTest):
         self.assertTrue(len(data['id']) == 11)
 
     def test_id_search(self):
-        """La búsqueda por ID debe devolver el municipio correspondiente."""
+        """La búsqueda por ID debe devolver la localidad correspondiente."""
         data = self.get_response({'id': '06840010015'})
         self.assertListEqual([p['nombre'] for p in data], ['VILLA RAFFO'])
 
@@ -107,7 +107,7 @@ class SearchLocalityTest(SearchEntitiesTest):
         self.assertListEqual(sorted(data), data)
 
     def test_name_exact_search(self):
-        """La búsqueda por nombre exacto debe devolver los municipios
+        """La búsqueda por nombre exacto debe devolver las localidades
          correspondientes."""
         self.assert_name_search_id_matches(LOCALITIES, exact=True)
 
