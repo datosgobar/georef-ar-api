@@ -520,20 +520,22 @@ STREET_MAPPING = {
                 'search_analyzer': NAME_ANALYZER
             },
             'inicio_derecha': {
-                'type': 'integer',
-                'index': False
+                'type': 'integer'
             },
             'inicio_izquierda': {
                 'type': 'integer',
+                # Solo START_R y END_L son necesarias para la busqueda de
+                # calles por altura.
                 'index': False
             },
             'fin_derecha': {
                 'type': 'integer',
+                # Solo START_R y END_L son necesarias para la busqueda de
+                # calles por altura.
                 'index': False
             },
             'fin_izquierda': {
-                'type': 'integer',
-                'index': False
+                'type': 'integer'
             },
             'geometria': {
                 'type': 'text',

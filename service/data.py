@@ -98,7 +98,7 @@ def query_entity(index, entity_id=None, name=None, state=None, department=None,
 
 
 def query_streets(name=None, locality=None, department=None, state=None,
-                  road=None, max=None, fields=None, exact=False):
+                  road=None, max=None, fields=None, exact=False, number=None):
     """Busca calles según parámetros de búsqueda de una consulta.
 
     Args:
@@ -133,6 +133,9 @@ def query_streets(name=None, locality=None, department=None, state=None,
     if department:
         condition = build_name_condition(DEPT, department, exact)
         terms.append(condition)
+    if number:
+        terms.append(build_range_condition(START_R, '<=', number))
+        terms.append(build_range_condition(END_L, '>=', number))
     if state:
         if state.isdigit():
             target_state = query_entity(STATES, entity_id=state, max=1, 
@@ -250,6 +253,25 @@ def build_match_phrase_prefix_condition(field, value):
         }
     }
 
+def build_range_condition(field, operator, value):
+    if operator == '<':
+        es_operator = 'lt'
+    elif operator == '<=':
+        es_operator = 'lte'
+    elif operator == '>':
+        es_operator = 'gt'
+    elif operator == '>=':
+        es_operator = 'gte'
+    else:
+        raise ValueError('Invalid operator.')
+    
+    return {
+        'range': {
+            field: {
+                es_operator: value
+            }
+        }
+    }
 
 def build_match_condition(field, value, fuzzy=False, operator='or'):
     """Crea una condición 'Match' para Elasticsearch.
@@ -369,42 +391,6 @@ def parse_osm_type(osm_type):
         return 'SIN_CLASIFICAR'
 
 
-def process_door(number, street):
-    """Procesa una calle para verificar el número de puerta
-       y agregar información relacionada.
-
-    Args:
-        number (int): Número de puerta o altura.
-        street (dict): Calle a procesar.
-
-    Returns:
-        dict: Calle procesada con información de altura.
-    """
-    if number:
-        street[DOOR_NUM] = None
-        info = ADDRESS_PROCESSED_OK
-        street_start = street.get(START_R)
-        street_end = street.get(END_L)
-
-        if street_start or street_end:
-            if street_start == street_end:
-                info = CANNOT_INTERPOLATE_ADDRESS
-            elif number < street_start or number > street_end:
-                info = ADDRESS_OUT_OF_RANGE
-            else:
-                search_location_for(street, number)
-                update_result_with(street, number)
-                if street[LOCATION] is None:
-                    street.pop(LOCATION, None)
-                    info = CANNOT_GEOCODE_ADDRESS
-        else:
-            info = UNKNOWN_STREET_RANGE
-        street[OBS][INFO] = info
-
-    remove_spatial_data_from(street)
-    return street
-
-
 def search_es(params):
     """Busca en ElasticSearch con los parámetros de una consulta.
 
@@ -419,27 +405,25 @@ def search_es(params):
                             locality=params['locality'], state=params['state'],
                             department=params['department'],
                             fields=params['fields'], max=params['max'],
-                            exact=params['exact'])
+                            exact=params['exact'], number=number)
     addresses = []
     for street in streets:
-        address = process_door(number, street)
-        if address.get(DOOR_NUM):
-            addresses.append(address)
+        update_result_with(street, number)
+
+        loc = location(street[GEOM], number, street[START_R], 
+            street[END_L])
+        
+        if not loc:
+            street[LOCATION] = {LAT: None, LON: None}
+            street[OBS][INFO] = CANNOT_GEOCODE_ADDRESS
+        else:
+            street[LOCATION] = loc
+            street[OBS][INFO] = ADDRESS_PROCESSED_OK
+
+        remove_spatial_data_from(street)
+        addresses.append(street)
 
     return addresses
-
-
-def search_location_for(address, number):
-    """Procesa los tramos de calle para obtener las coordenadas
-        del número de puerta.
-
-    Args:
-        address (dict): Dirección.
-        number (int): Número de puerta o altura.
-    """
-    if address.get(GEOM):
-        address[LOCATION] = location(address[GEOM], number,
-                                     address[START_R], address[END_L])
 
 
 def search_osm(params):
@@ -527,6 +511,9 @@ def location(geom, number, start, end):
     Returns:
         dict: Coordenadas del punto.
     """
+    if not number:
+        return None
+
     args = geom, number, start, end
     query = """SELECT geocodificar('%s', %s, %s, %s);""" % args
     connection = get_db_connection()

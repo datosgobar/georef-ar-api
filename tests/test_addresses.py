@@ -12,7 +12,6 @@ class SearchAddressesTest(SearchEntitiesTest):
         self.entity = 'direcciones'
         super().setUp()
 
-    @unittest.skip('Parámetro max de direcciones no funciona correctamente')
     def test_max_results_returned(self):
         """La cantidad máxima de resultados debe ser configurable."""
         lengths = [1, 2, 4]
@@ -28,12 +27,12 @@ class SearchAddressesTest(SearchEntitiesTest):
 
     def test_id_length(self):
         """El ID de la entidad debe tener la longitud correcta."""
-        data = self.get_response({'direccion': VALID_ADDRESS})[0]
+        data = self.get_response({'direccion': VALID_ADDRESS, 'max': 1})[0]
         self.assertTrue(len(data['id']) == 13)
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
-        data = self.get_response({'direccion': VALID_ADDRESS})[0]
+        data = self.get_response({'direccion': VALID_ADDRESS, 'max': 1})[0]
         fields = sorted([
             'altura',
             'departamento',
@@ -43,24 +42,28 @@ class SearchAddressesTest(SearchEntitiesTest):
             'nomenclatura',
             'observaciones',
             'provincia',
-            'tipo'
+            'tipo',
+            'ubicacion'
         ])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""
         fields_lists = [
-            ['altura', 'id', 'nombre', 'observaciones'],
-            ['altura', 'id', 'nombre', 'nomenclatura', 'observaciones'],
-            ['altura', 'id', 'nombre', 'observaciones'],
-            ['altura', 'id', 'localidad', 'nombre', 'observaciones']
+            ['altura', 'id', 'nombre', 'observaciones', 'ubicacion'],
+            ['altura', 'id', 'nombre', 'nomenclatura', 'observaciones', 
+                'ubicacion'],
+            ['altura', 'id', 'nombre', 'observaciones', 'ubicacion'],
+            ['altura', 'id', 'localidad', 'nombre', 'observaciones',
+                'ubicacion']
         ]
         fields_results = []
 
         for fields in fields_lists:
             data = self.get_response({
                 'campos': ','.join(fields),
-                'direccion': VALID_ADDRESS
+                'direccion': VALID_ADDRESS,
+                'max': 1
             })
             fields_results.append(sorted(data[0].keys()))
 

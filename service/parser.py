@@ -42,7 +42,8 @@ ENDPOINT_OBLIGATORY_FIELDS = {
     MUNICIPALITIES: [ID, NAME],
     SETTLEMENTS: [ID, NAME],
     STREETS: [ID, NAME, OBS],
-    ADDRESSES: [ID, NAME, DOOR_NUM, GEOM, START_R, START_L, END_R, END_L, OBS]
+    ADDRESSES: [ID, NAME, DOOR_NUM, GEOM, START_R, START_L, END_R, END_L, OBS,
+        LOCATION]
 }
 
 NONEMPTY_PARAMS = set([ID, NAME, ORDER, FIELDS, MAX, FORMAT, STATE, DEPT, MUN,
@@ -182,6 +183,8 @@ def get_parts_from(address):
     """
     match = re.search(r'(\s[0-9]+?)$', address)
     number = int(match.group(1)) if match else None
+    if number == 0:
+        number = None
     road_name = re.sub(r'(\s[0-9]+?)$', r'', address)
 
     return road_name.strip(), number
