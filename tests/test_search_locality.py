@@ -71,16 +71,15 @@ class SearchLocalityTest(SearchEntitiesTest):
         """Los campos de las localidades devueltas deben ser filtrables."""
         fields_lists = [
             ['id', 'nombre'],
-            ['lat', 'lon'],
-            ['id', 'lat'],
-            ['lat', 'provincia'],
+            ['id', 'lat', 'lon', 'nombre'],
+            ['id', 'lat', 'nombre'],
+            ['id', 'lat', 'nombre', 'provincia'],
             ['departamento', 'id', 'nombre'],
-            ['id', 'municipio', 'provincia']
+            ['id', 'municipio', 'nombre', 'provincia']
         ]
         fields_results = []
 
         for fields in fields_lists:
-            fields = sorted(fields)
             data = self.get_response({'campos': ','.join(fields), 'max': 1})
             fields_results.append(sorted(data[0].keys()))
 

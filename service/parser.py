@@ -36,6 +36,15 @@ ENDPOINT_PARAMS = {
     PLACE: [LAT, LON, FLATTEN]
 }
 
+ENDPOINT_OBLIGATORY_FIELDS = {
+    STATES: [ID, NAME],
+    DEPARTMENTS: [ID, NAME],
+    MUNICIPALITIES: [ID, NAME],
+    SETTLEMENTS: [ID, NAME],
+    STREETS: [ID, NAME, OBS],
+    ADDRESSES: [ID, NAME, DOOR_NUM, GEOM, START_R, START_L, END_R, END_L, OBS]
+}
+
 NONEMPTY_PARAMS = set([ID, NAME, ORDER, FIELDS, MAX, FORMAT, STATE, DEPT, MUN,
     LOCALITY, ADDRESS, ROAD_TYPE, LAT, LON, SOURCE])
 
@@ -98,7 +107,7 @@ def get_url_rule(request):
     return True, format_request, ''
 
 
-def get_fields(args):
+def get_fields(args, resource):
     """Devuelve los campos a mostrar pedidos en la consulta.
 
     Args:
@@ -107,7 +116,10 @@ def get_fields(args):
     Returns:
         list: campos para filtrar la búsqueda.
     """
-    return args.split(',') if args else []
+    if not args:
+        return []
+    
+    return list(set(args.split(',') + ENDPOINT_OBLIGATORY_FIELDS[resource]))
 
 
 def get_search_from_string(address_str):
@@ -140,7 +152,7 @@ def build_search_from(params):
     max = params.get(MAX)
     exact = EXACT in params
     source = params.get(SOURCE)
-    fields = get_fields(params.get(FIELDS))
+    fields = get_fields(params.get(FIELDS), ADDRESSES)
     if len(address) > 1:
         locality = address[1].strip()
 

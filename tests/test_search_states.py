@@ -72,13 +72,12 @@ class SearchStatesTest(SearchEntitiesTest):
         """Los campos de las provincias devueltas deben ser filtrables."""
         fields_lists = [
             ['id', 'nombre'],
-            ['lat', 'lon'],
-            ['id', 'lat']
+            ['id', 'lat', 'lon', 'nombre'],
+            ['id', 'lat', 'nombre']
         ]
         fields_results = []
 
         for fields in fields_lists:
-            fields = sorted(fields)
             data = self.get_response({'campos': ','.join(fields), 'max': 1})
             fields_results.append(sorted(data[0].keys()))
 

@@ -147,7 +147,7 @@ def query_streets(name=None, locality=None, department=None, state=None,
             terms.append(condition)
 
     if LOCATION in fields:
-        fields.extend([GEOM, START_R, START_L, END_R, END_L, FULL_NAME])
+        fields.extend([GEOM, START_R, START_L, END_R, END_L])
 
     query = {
         'query': {
@@ -483,9 +483,10 @@ def update_result_with(address, number):
         address (dict): Dirección.
         number (int): Número de puerta o altura.
     """
-    parts = address[FULL_NAME].split(',')
-    parts[0] += ' %s' % str(number)
-    address[FULL_NAME] = ','.join(parts)
+    if FULL_NAME in address:
+        parts = address[FULL_NAME].split(',')
+        parts[0] += ' %s' % str(number)
+        address[FULL_NAME] = ','.join(parts)
     address[DOOR_NUM] = number
 
 

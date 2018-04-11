@@ -31,7 +31,7 @@ def process_state(request):
     max = request.args.get(MAX) or 24
     exact = EXACT in request.args
     order = request.args.get(ORDER)
-    fields = parser.get_fields(request.args.get(FIELDS))
+    fields = parser.get_fields(request.args.get(FIELDS), STATES)
     matches = data.query_entity(STATES, entity_id=state_id, name=name,
                                 order=order, fields=fields, max=max, exact=exact)
     return parser.get_response({STATES: matches}, format_request)
@@ -59,7 +59,7 @@ def process_department(request):
     max = request.args.get(MAX) or format_request['max']
     exact = EXACT in request.args
     order = request.args.get(ORDER)
-    fields = parser.get_fields(request.args.get(FIELDS))
+    fields = parser.get_fields(request.args.get(FIELDS), DEPARTMENTS)
     flatten = FLATTEN in request.args or format_request['convert']
     matches = data.query_entity(DEPARTMENTS, entity_id=dept_id, name=name,
                                 state=state, flatten=flatten,
@@ -91,7 +91,7 @@ def process_municipality(request):
     max = request.args.get(MAX) or format_request['max']
     exact = EXACT in request.args
     order = request.args.get(ORDER)
-    fields = parser.get_fields(request.args.get(FIELDS))
+    fields = parser.get_fields(request.args.get(FIELDS), MUNICIPALITIES)
     flatten = FLATTEN in request.args or format_request['convert']
 
     matches = data.query_entity(MUNICIPALITIES, entity_id=municipality_id,
@@ -125,7 +125,7 @@ def process_locality(request):
     municipality = request.args.get(MUN)
     exact = EXACT in request.args
     order = request.args.get(ORDER)
-    fields = parser.get_fields(request.args.get(FIELDS))
+    fields = parser.get_fields(request.args.get(FIELDS), SETTLEMENTS)
     flatten = FLATTEN in request.args or format_request['convert']
     max = request.args.get(MAX) or format_request['max']
 
@@ -158,14 +158,14 @@ def process_street(request):
     road_type = request.args.get(ROAD_TYPE)
     max = request.args.get(MAX)
     exact = EXACT in request.args
-    fields = parser.get_fields(request.args.get(FIELDS))
+    fields = parser.get_fields(request.args.get(FIELDS), STREETS)
 
     matches = data.query_streets(name=name, locality=locality, 
                                  department=department, state=state,
                                  road=road_type, max=max, fields=fields,
                                  exact=exact)
     for street in matches: street.pop(GEOM, None)
-
+        
     return parser.get_response({STREETS: matches})
 
 

@@ -47,19 +47,17 @@ class SearchAddressesTest(SearchEntitiesTest):
         ])
         self.assertListEqual(fields, sorted(data.keys()))
 
-    @unittest.skip('Parámetro campos de direcciones no funciona correctamente')
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""
         fields_lists = [
-            ['altura', 'nombre'],
-            ['nomenclatura', 'nombre'],
-            ['id', 'observaciones'],
-            ['tipo', 'provincia', 'localidad', 'id']
+            ['altura', 'id', 'nombre', 'observaciones'],
+            ['altura', 'id', 'nombre', 'nomenclatura', 'observaciones'],
+            ['altura', 'id', 'nombre', 'observaciones'],
+            ['altura', 'id', 'localidad', 'nombre', 'observaciones']
         ]
         fields_results = []
 
         for fields in fields_lists:
-            fields = sorted(fields)
             data = self.get_response({
                 'campos': ','.join(fields),
                 'direccion': VALID_ADDRESS
