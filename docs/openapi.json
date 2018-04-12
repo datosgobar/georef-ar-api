@@ -350,6 +350,14 @@
                     "type": "string"
                 }
             },
+            "departamento_nombre": {
+                "name": "departamento",
+                "description": "Filtrar por nombre de departamento.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
             "municipio": {
                 "name": "municipio",
                 "description": "Filtrar por nombre o ID de municipio.",
@@ -361,6 +369,14 @@
             "localidad": {
                 "name": "localidad",
                 "description": "Filtrar por nombre o ID de localidad.",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "localidad_nombre": {
+                "name": "localidad",
+                "description": "Filtrar por nombre de localidad.",
                 "in": "query",
                 "schema": {
                     "type": "string"
@@ -689,10 +705,10 @@
                         "$ref": "#/components/parameters/nombre"
                     },
                     {
-                        "$ref": "#/components/parameters/localidad"
+                        "$ref": "#/components/parameters/localidad_nombre"
                     },
                     {
-                        "$ref": "#/components/parameters/departamento"
+                        "$ref": "#/components/parameters/departamento_nombre"
                     },
                     {
                         "$ref": "#/components/parameters/provincia"
@@ -753,10 +769,10 @@
                         }
                     },
                     {
-                        "$ref": "#/components/parameters/localidad"
+                        "$ref": "#/components/parameters/localidad_nombre"
                     },
                     {
-                        "$ref": "#/components/parameters/departamento"
+                        "$ref": "#/components/parameters/departamento_nombre"
                     },
                     {
                         "$ref": "#/components/parameters/provincia"
