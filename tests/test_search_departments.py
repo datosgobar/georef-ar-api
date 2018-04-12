@@ -236,5 +236,9 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         """El endpoint debe tener distintos formatos de respuesta."""
         self.assert_formats_ok()
 
+    def test_flat_results(self):
+        """El parametro aplanar deberia aplanar los resultados devueltos."""
+        self.assert_flat_results()
+
 if __name__ == '__main__':
     unittest.main()

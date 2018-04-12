@@ -173,8 +173,8 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
             (['142448'], 'EGUIZAMÓN'),    # -1 caracteres (de 8+)
             (['142448'], 'lLEGUIZAMÓN'),  # +1 caracteres (de 8+)
             (['142448'], 'lLEGUIZAMÓNn'), # +2 caracteres (de 8+)
-            (['142238'], 'INCEN'),         # -1 caracteres (de 4-7)
-            (['142238'], 'pPINCEN'),       # +1 caracteres (de 4-7)
+            (['142238'], 'INCEN'),        # -1 caracteres (de 4-7)
+            (['142238'], 'pPINCEN'),      # +1 caracteres (de 4-7)
         ]
 
         self.assert_name_search_id_matches(expected)
@@ -266,6 +266,10 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
     def test_formats(self):
         """El endpoint debe tener distintos formatos de respuesta."""
         self.assert_formats_ok()
+
+    def test_flat_results(self):
+        """El parametro aplanar deberia aplanar los resultados devueltos."""
+        self.assert_flat_results()
 
 
 if __name__ == '__main__':

@@ -13,6 +13,8 @@ import re
 import os
 
 
+DEFAULT_MAX_FMT = 10000
+
 REQUEST_INVALID = {
     'codigo': 400,
     'error': {
@@ -24,14 +26,13 @@ REQUEST_INVALID = {
 
 
 ENDPOINT_PARAMS = {
-    STATES: [ID, NAME, ORDER, FIELDS, FLATTEN, MAX, FORMAT, EXACT],
+    STATES: [ID, NAME, ORDER, FIELDS, MAX, FORMAT, EXACT],
     DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT, EXACT],
     MUNICIPALITIES: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, 
                      FORMAT, EXACT],
     SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, MUN, FLATTEN, MAX,
                   FORMAT, EXACT],
-    ADDRESSES: [ADDRESS, LOCALITY, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, EXACT,
-                SOURCE],
+    ADDRESSES: [ADDRESS, LOCALITY, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, EXACT],
     STREETS: [NAME, ROAD_TYPE, LOCALITY, DEPT, STATE, FIELDS, MAX, EXACT],
     PLACE: [LAT, LON, FLATTEN]
 }
@@ -80,7 +81,7 @@ def get_url_rule(request):
         (bool, dict, str): Si una consulta es válida o no, un diccionario con
         los valores del formato solicitado y un mensaje si hay error.
     """
-    format_request = {'convert': True, 'max': 10000, 'type': 'json'}
+    format_request = {'convert': True, 'max': DEFAULT_MAX_FMT, 'type': 'json'}
     path = str(request.url_rule)
     rule = os.path.split(path)
     endpoint = rule[1]  # request endpoint

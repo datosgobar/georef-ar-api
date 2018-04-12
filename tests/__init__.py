@@ -37,6 +37,12 @@ class SearchEntitiesTest(TestCase):
             response = self.app.get(self.endpoint + fmt)
             self.assertEqual(response.status_code, 200)
 
+    def assert_flat_results(self):
+        resp = self.get_response({'aplanar': 1, 'max': 1})
+        self.assertTrue(all([
+            not isinstance(v, dict) for v in resp[0].values()
+        ]) and resp)
+
     def assert_name_search_id_matches(self, term_matches, exact=False):
         results = []
         for _, query in term_matches:
