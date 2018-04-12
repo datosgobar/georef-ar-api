@@ -254,6 +254,13 @@ def build_match_phrase_prefix_condition(field, value):
     }
 
 def build_range_condition(field, operator, value):
+    """Crea una condición 'Range' para Elasticsearch.
+
+    Args:
+        field (str): Campo de la condición.
+        value (int): Número contra el que se debería comparar el campo.
+        operator (str): Operador a utilizar (>, =>, <, =<)
+    """
     if operator == '<':
         es_operator = 'lt'
     elif operator == '<=':

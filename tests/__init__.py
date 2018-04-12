@@ -26,6 +26,8 @@ class SearchEntitiesTest(TestCase):
 
         query = self.endpoint + '?' + urllib.parse.urlencode(params)
         response = self.app.get(query)
+        if response.status_code != 200:
+            raise Exception('El request no devolvió código 200.')
         return json.loads(response.data)[self.entity]
 
     def assert_unknown_param_returns_400(self):
