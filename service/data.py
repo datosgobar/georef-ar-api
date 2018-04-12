@@ -197,12 +197,26 @@ def query_place(index, lat, lon, flatten=False):
     Returns:
         list: Resultados de búsqueda de una ubicación.
     """
-    query = {'query': {'bool': {'must': {'match_all': {}},
-                                'filter': {'geo_shape': {'geometry': {'shape': {
-                                        'type': 'point',
-                                        'coordinates': [lon, lat]
-                                    }}}}}},
-             '_source': {'excludes': ['geometry']}}
+    query = {
+        'query': {
+            'bool': {
+                'filter': {
+                    'geo_shape': {
+                        'geometry': {
+                            'shape': {
+                                'type': 'point',
+                                'coordinates': [lon, lat]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        '_source': {
+            'excludes': ['geometry']
+        }
+    }
+
     try:
         result = Elasticsearch().search(index=index, body=query)
     except ElasticsearchException as error:
@@ -344,9 +358,9 @@ def parse_place(result, index, flatten):
     result = result['_source']
     result = dict(result)
     if index == MUNICIPALITIES:
-        add = {'municipalidad': {'id': result[ID], 'nombre': result[NAME]}}
+        add = {MUN: {ID: result[ID], NAME: result[NAME]}}
     else:
-        add = {'departamento': {'id': result[ID], 'nombre': result[NAME]}}
+        add = {DEPT: {ID: result[ID], NAME: result[NAME]}}
 
     result.update(add)
     result.pop(ID)
