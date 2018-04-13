@@ -37,7 +37,6 @@ class SearchAddressesTest(SearchEntitiesTest):
             'altura',
             'departamento',
             'id',
-            'localidad',
             'nombre',
             'nomenclatura',
             'observaciones',
@@ -53,8 +52,7 @@ class SearchAddressesTest(SearchEntitiesTest):
             ['altura', 'id', 'nombre', 'observaciones', 'ubicacion'],
             ['altura', 'id', 'nombre', 'nomenclatura', 'observaciones', 
                 'ubicacion'],
-            ['altura', 'id', 'nombre', 'observaciones', 'ubicacion'],
-            ['altura', 'id', 'localidad', 'nombre', 'observaciones',
+            ['altura', 'departamento','id', 'nombre', 'observaciones',
                 'ubicacion']
         ]
         fields_results = []
@@ -263,8 +261,8 @@ class SearchAddressesTest(SearchEntitiesTest):
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""
-        params = ['direccion', 'tipo', 'localidad', 'departamento', 'provincia', 
-            'max', 'campos']
+        params = ['direccion', 'tipo', 'departamento', 'provincia', 'max',
+            'campos']
         self.assert_empty_params_return_400(params)
 
     def test_unknown_param_returns_400(self):

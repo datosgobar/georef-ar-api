@@ -97,13 +97,12 @@ def query_entity(index, entity_id=None, name=None, state=None, department=None,
     return [parse_entity(hit, flatten) for hit in result['hits']['hits']]
 
 
-def query_streets(name=None, locality=None, department=None, state=None,
+def query_streets(name=None, department=None, state=None,
                   road=None, max=None, fields=None, exact=False, number=None):
     """Busca calles según parámetros de búsqueda de una consulta.
 
     Args:
         name (str): Nombre de la calle para filtrar (opcional).
-        locality (str): Nombre de la localidad para filtrar (opcional).
         department (str): Nombre de departamento para filtrar (opcional).
         state (str / int): ID o nombre de provincia para filtrar (opcional).
         road (str): Nombre del tipo de camino para filtrar (opcional).
@@ -126,9 +125,6 @@ def query_streets(name=None, locality=None, department=None, state=None,
         terms.append(condition)
     if road:
         condition = build_match_condition(ROAD_TYPE, road, fuzzy=True)
-        terms.append(condition)
-    if locality:
-        condition = build_name_condition(LOCALITY, locality, exact)
         terms.append(condition)
     if department:
         condition = build_name_condition(DEPT, department, exact)
@@ -423,7 +419,7 @@ def search_es(params):
     """
     number = params['number']
     streets = query_streets(name=params['road_name'], road=params['road_type'],
-                            locality=params['locality'], state=params['state'],
+                            state=params['state'],
                             department=params['department'],
                             fields=params['fields'], max=params['max'],
                             exact=params['exact'], number=number)

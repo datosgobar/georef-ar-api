@@ -160,8 +160,7 @@ def process_street(request):
     exact = EXACT in request.args
     fields = parser.get_fields(request.args.get(FIELDS), STREETS)
 
-    matches = data.query_streets(name=name, locality=locality, 
-                                 department=department, state=state,
+    matches = data.query_streets(name=name, department=department, state=state,
                                  road=road_type, max=max, fields=fields,
                                  exact=exact)
     for street in matches: street.pop(GEOM, None)

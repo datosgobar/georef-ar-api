@@ -1,7 +1,7 @@
 from synonyms_entities import SYNONYMS_ENTITIES
 from synonyms_roads import SYNONYMS_ROADS
 
-INDEXES = ['provincias', 'departamentos', 'municipios', 'localidades', 'bahra']
+INDEXES = ['provincias', 'departamentos', 'municipios', 'bahra']
 
 # Uso General
 SPANISH_STOP_FILTER = 'name_stop_spanish'

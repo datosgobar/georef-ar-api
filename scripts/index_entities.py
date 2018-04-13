@@ -16,9 +16,6 @@ MESSAGES = {
     'municipalities_exists': 'Ya existe el índice de Municipios.',
     'municipalities_info': '-- Creando índice de Municipios.',
     'municipalities_success': 'Se creó el índice de Municipios exitosamente.',
-    'localities_exists': 'Ya existe el índice de Localidades.',
-    'localities_info': '-- Creando índice de Localidades.',
-    'localities_sucess': 'Se creó el índice de Localidades exitosamente.',
     'settlements_exists': 'Ya existe el índice de BAHRA.',
     'settlements_info': '-- Creando índice de Asentamientos.',
     'settlements_success': 'Se creó el índice de Asentamientos exitosamente.',
@@ -75,7 +72,6 @@ def create_entities_indexes():
     index_states(es)
     index_departments(es)
     index_municipalities(es)
-    index_localities(es)
     index_settlements(es)
 
 
@@ -297,94 +293,6 @@ def index_municipalities(es):
         print(MESSAGES['file_not_exists'] % 'municipios')
 
 
-def index_localities(es):
-    """Genera índice Elasticsearch para la entidad Localidad.
-
-    Args:
-        es (elasticsearch.client.Elasticsearch): Instancia cliente
-        Elasticsearch.
-
-    Returns:
-        str: Devuelve un mensaje con el resultado de la operación.
-    """
-    path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
-                             'localidades.json')
-
-    if es.indices.exists(index='localidades'):
-        print(MESSAGES['localities_exists'])
-        return
-    if os.path.exists(path_file):
-        print(MESSAGES['localities_info'])
-
-        mapping = {
-            'localidad': {
-                'properties': {
-                    'id': {'type': 'keyword'},
-                    'nombre': {
-                        'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                        'search_analyzer': NAME_ANALYZER,
-                        'fields': {
-                            'exacto': {
-                                'type': 'keyword',
-                                'normalizer': LOWCASE_ASCII_NORMALIZER
-                            }
-                        }
-                    },
-                    'departamento': {
-                        'type': 'object',
-                        'dynamic': 'strict',
-                        'properties': {
-                            'id': {'type': 'keyword'},
-                        'nombre': {
-                                'type': 'text',
-                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                                'search_analyzer': NAME_ANALYZER,
-                                'fields': {
-                                    'exacto': {
-                                        'type': 'keyword',
-                                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    'provincia': {
-                        'type': 'object',
-                        'dynamic': 'strict',
-                        'properties': {
-                            'id': {'type': 'keyword'},
-                            'nombre': {
-                                'type': 'text',
-                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                                'search_analyzer': NAME_ANALYZER,
-                                'fields': {
-                                    'exacto': {
-                                        'type': 'keyword',
-                                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        es.indices.create(index='localidades', body={
-            'settings': DEFAULT_SETTINGS,
-            'mappings': mapping
-        })
-
-        data = json.load(open(path_file))
-
-        es.bulk(index='localidades', doc_type='localidad', body=data,
-                refresh=True, request_timeout=120)
-        print(MESSAGES['localities_sucess'])
-    else:
-        print(MESSAGES['file_not_exists'] % 'localidades')
-
-
 def index_settlements(es):
     """Genera índice Elasticsearch para la entidad Asentamientos informales.
 
@@ -545,17 +453,6 @@ STREET_MAPPING = {
                 'type': 'text',
                 'index': False
             },
-            'localidad': {
-                'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                'search_analyzer': NAME_ANALYZER,
-                'fields': {
-                    'exacto': {
-                        'type': 'keyword',
-                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                    }
-                }
-            },
             'provincia': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
@@ -633,12 +530,12 @@ def delete_indexes():
     Returns:
         str: Devuelve un mensaje con el resultado de la operación.
     """
-    try:
-        for index in INDEXES:
+    for index in INDEXES:
+        try:
             Elasticsearch().indices.delete(index=index)
             print(MESSAGES['index_delete'] % index)
-    except (ElasticsearchException, SyntaxError) as error:
-        print(error)
+        except (ElasticsearchException, SyntaxError) as error:
+            print(error)
 
 
 def list_indexes():
