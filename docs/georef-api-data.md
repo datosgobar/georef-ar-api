@@ -1,6 +1,6 @@
 # Modelo de datos para Georef API
 
-Los datos utilizados por la API están separados en dos grupos: **entidades** y **vías de circulación**. El grupo de entidades está compuesto por cinco (5) archivos `.json`, los cuales contienen provincias, departamentos, municipios, localidades y asentamientos. Por el otro lado, el grupo de las vías está compuesto por veinticuatro (24) archivos `.json`, los cuales detallan las vías de circulación de cada provincia y la Ciudad Autónoma de Buenos Aires (CABA).
+Los datos utilizados por la API están separados en dos grupos: **entidades** y **vías de circulación**. El grupo de entidades está compuesto por cuatro (4) archivos `.json`, los cuales contienen provincias, departamentos, municipios y asentamientos. Por el otro lado, el grupo de las vías está compuesto por veinticuatro (24) archivos `.json`, los cuales detallan las vías de circulación de cada provincia y la Ciudad Autónoma de Buenos Aires (CABA).
 
 ## Fuentes
 Los datos utilizados por Georef API fueron obtenidos a través de un proceso de ETL. Los orígenes de los datos procesados son:
@@ -68,26 +68,6 @@ El archivo de datos de municipios debe llamarse `municipios.json` y tener format
             "nombre": "BOLÍVAR"
         },
         "provincia": {  // Provincia que contiene al municipio
-            "id": "06",
-            "nombre": "BUENOS AIRES"
-        }
-    },
-    { ... },
-]
-```
-
-### Localidades
-El archivo de datos de localidades debe llamarse `localidades.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
-```
-[
-    {
-        "id": "06070040", // ID de la localidad
-        "nombre": "VILLA ALSINA", // Nombre de la localidad
-        "departamento": { // Departamento que contiene a la localidad
-            "id": "06070",
-            "nombre": "BARADERO"
-        },
-        "provincia": {  // Provincia que contiene a la localidad
             "id": "06",
             "nombre": "BUENOS AIRES"
         }
