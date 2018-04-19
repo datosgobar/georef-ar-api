@@ -14,7 +14,6 @@ A continuación se detallan, a través de ejemplos, los esquemas de los archivos
 El archivo de datos de provincias debe llamarse `provincias.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
 ```
 [
-    {"index": {"_id": 1}}, // ID utilizado por Elasticsearch
     {
         "id": "02", // ID de provincia
         "nombre": "CIUDAD AUTÓNOMA DE BUENOS AIRES", // Nombre de provincia
@@ -25,7 +24,6 @@ El archivo de datos de provincias debe llamarse `provincias.json` y tener format
             "coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]] // Listado de coordenadas (formato WKT) del MultiPolygon
         }
     },
-    {"index": {"_id": 2}},
     { ... },
 ]
 ```
@@ -34,7 +32,6 @@ El archivo de datos de provincias debe llamarse `provincias.json` y tener format
 El archivo de datos de departamentos debe llamarse `departamentos.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
 ```
 [
-    {"index": {"_id": 1}}, // ID utilizado por Elasticsearch
     {
         "id": "06427", // ID del departamento
         "nombre": "LA MATANZA", // Nombre del departamento
@@ -49,7 +46,6 @@ El archivo de datos de departamentos debe llamarse `departamentos.json` y tener 
             "nombre": "BUENOS AIRES"
         }
     },
-    {"index": {"_id": 2}},
     { ... },
 ]
 ```
@@ -58,7 +54,6 @@ El archivo de datos de departamentos debe llamarse `departamentos.json` y tener 
 El archivo de datos de municipios debe llamarse `municipios.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
 ```
 [
-    {"index": {"_id": 1}}, // ID utilizado por Elasticsearch
     {
         "id": "060105", // ID del municipio
         "nombre": "BOLÍVAR", // Nombre del municipio
@@ -77,7 +72,6 @@ El archivo de datos de municipios debe llamarse `municipios.json` y tener format
             "nombre": "BUENOS AIRES"
         }
     },
-    {"index": {"_id": 2}},
     { ... },
 ]
 ```
@@ -86,7 +80,6 @@ El archivo de datos de municipios debe llamarse `municipios.json` y tener format
 El archivo de datos de localidades debe llamarse `localidades.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
 ```
 [
-    {"index": {"_id": 1}}, // ID utilizado por Elasticsearch
     {
         "id": "06070040", // ID de la localidad
         "nombre": "VILLA ALSINA", // Nombre de la localidad
@@ -99,7 +92,6 @@ El archivo de datos de localidades debe llamarse `localidades.json` y tener form
             "nombre": "BUENOS AIRES"
         }
     },
-    {"index": {"_id": 2}},
     { ... },
 ]
 ```
@@ -108,7 +100,6 @@ El archivo de datos de localidades debe llamarse `localidades.json` y tener form
 El archivo de datos de asentamientos debe llamarse `asentamientos.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
 ```
 [
-    {"index": {"_id": 1}}, // ID utilizado por Elasticsearch
     {
         "id": "06189080000", // ID del asentamiento
         "nombre": "SAN ROMAN", // Nombre del asentamiento
@@ -132,7 +123,6 @@ El archivo de datos de asentamientos debe llamarse `asentamientos.json` y tener 
             "nombre": "BUENOS AIRES"
         }
     },
-    {"index": {"_id": 2}},
     { ... },
 ]
 ```
@@ -141,7 +131,6 @@ El archivo de datos de asentamientos debe llamarse `asentamientos.json` y tener 
 Cada archivo de vías de circulación debe llamarse `calles-XX.json`, donde `XX` es el código INDEC de dos dígitos de la provincia o CABA. El esquema de datos de cada archivo debe ser el siguiente:
 ```
 [
-    {"index": {"_id": 1}}, // ID utilizado por Elasticsearch
     {
         "nomenclatura": "LARREA, CIUDAD AUTÓNOMA DE BUENOS AIRES, CIUDAD AUTÓNOMA DE BUENOS AIRES", // Nomenclatura: 'nombre, localidad, provincia'
         "id": "0202101007345", // ID de la vía de circulación
@@ -157,7 +146,6 @@ Cada archivo de vías de circulación debe llamarse `calles-XX.json`, donde `XX`
         "departamento": "COMUNA 3", // Departamento
         "provincia": "CIUDAD AUTÓNOMA DE BUENOS AIRES" // Provincia
     },
-    {"index": {"_id": 2}},
     { ... },
 ]
 ```

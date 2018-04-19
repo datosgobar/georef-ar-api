@@ -75,6 +75,14 @@ def create_entities_indexes():
     index_settlements(es)
 
 
+def get_elasticsearch_docs(fp):
+    data = []
+    for i, doc in enumerate(json.load(fp)):
+        data.append({'index': {'_id': i + 1}})
+        data.append(doc)
+    return data
+
+
 def index_states(es):
     """Genera índice Elasticsearch para la entidad Provincia.
 
@@ -121,7 +129,9 @@ def index_states(es):
             'mappings': mapping
         })
 
-        data = json.load(open(path_file))
+        with open(path_file) as f:
+            data = get_elasticsearch_docs(f)
+
         es.bulk(index='provincias', doc_type='provincia', body=data,
                 refresh=True, request_timeout=320)
         print(MESSAGES['states_success'])
@@ -193,7 +203,8 @@ def index_departments(es):
             'mappings': mapping
         })
 
-        data = json.load(open(path_file))
+        with open(path_file) as f:
+            data = get_elasticsearch_docs(f)
 
         es.bulk(index='departamentos', doc_type='departamento', body=data,
                 refresh=True, request_timeout=320)
@@ -284,7 +295,8 @@ def index_municipalities(es):
             'mappings': mapping
         })
 
-        data = json.load(open(path_file))
+        with open(path_file) as f:
+            data = get_elasticsearch_docs(f)
 
         es.bulk(index='municipios', doc_type='municipio', body=data,
                 refresh=True, request_timeout=320)
@@ -394,7 +406,8 @@ def index_settlements(es):
             'mappings': mapping
         })
 
-        data = json.load(open(path_file))
+        with open(path_file) as f:
+            data = get_elasticsearch_docs(f)
 
         es.bulk(index='bahra', doc_type='asentamiento', body=data, refresh=True,
                 request_timeout=320)
@@ -496,7 +509,9 @@ def index_roads():
             print(MESSAGES['roads_exists'] % index_name)
             continue
         print(MESSAGES['roads_info'] % index_name)
-        data = json.load(open(os.path.join(path, i)))
+
+        with open(os.path.join(path, i)) as f:
+            data = get_elasticsearch_docs(f)
 
         es.indices.create(index=index_name, body={
             'settings': DEFAULT_SETTINGS,

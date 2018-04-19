@@ -130,6 +130,15 @@ class SearchAddressesTest(SearchEntitiesTest):
         data = self.get_response({'direccion': 'FoobarFoobar 1', 'exacto': 1})
         self.assertTrue(len(data) == 0)
 
+    def test_address_wrong_number_search(self):
+        """La búsqueda debe devolver 0 resultados cuando se utiliza una altura
+        no existente."""
+        data = self.get_response({
+            'direccion': 'ANGEL PELUFFO 1000000',
+            'provincia': '02'
+        })
+        self.assertTrue(len(data) == 0)
+
     def test_address_search_fuzziness(self):
         """La búsqueda aproximada debe tener una tolerancia de AUTO:4,8."""
         expected = [
