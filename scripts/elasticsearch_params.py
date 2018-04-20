@@ -21,6 +21,10 @@ NAME_ANALYZER_ROAD_SYNONYMS = 'name_analyzer_road_synonyms'
 
 
 DEFAULT_SETTINGS = {
+    'index': {
+        'number_of_shards': 5,
+        'number_of_replicas': 2
+    },
     'analysis': {
         'filter': {
             SPANISH_STOP_FILTER: {

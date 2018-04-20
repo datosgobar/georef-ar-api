@@ -2,26 +2,15 @@
 
 from elasticsearch import Elasticsearch, ElasticsearchException
 from elasticsearch_params import *
+from elasticsearch_mappings import *
 import json
 import sys
 import os
 
 MESSAGES = {
-    'states_exists': 'Ya existe el índice de Provincias.',
-    'states_info': '-- Creando índice de Provincias.',
-    'states_success': 'Se creó el índice de Provincias exitosamente.',
-    'departments_exists': 'Ya existe el índice de Departamentos.',
-    'departments_info': '-- Creando índice de Departamentos.',
-    'departments_success': 'Se creó el índice de Departamentos exitosamente.',
-    'municipalities_exists': 'Ya existe el índice de Municipios.',
-    'municipalities_info': '-- Creando índice de Municipios.',
-    'municipalities_success': 'Se creó el índice de Municipios exitosamente.',
-    'settlements_exists': 'Ya existe el índice de BAHRA.',
-    'settlements_info': '-- Creando índice de Asentamientos.',
-    'settlements_success': 'Se creó el índice de Asentamientos exitosamente.',
-    'roads_exists': 'Ya existe el índice "%s".',
-    'roads_info': '-- Creando índice de calles: "%s".',
-    'roads_success': 'Se creó el índice de "%s" exitosamente.',
+    'index_exists': 'Ya existe el índice "%s".',
+    'creating_index': '--> Creando índice: "%s".',
+    'creation_success': 'Se creó el índice de "%s" exitosamente.',
     'index_error_add': 'Error: debe ingresar un índice.',
     'index_delete': 'Se eliminó el índice "%s" correctamente.',
     'invalid_option': 'Opción inválida.',
@@ -50,7 +39,7 @@ def run():
             if args[0] == 'crear-entidades':
                 create_entities_indexes()
             elif args[0] == 'borrar-entidades':
-                delete_indexes()
+                delete_entities()
             elif args[0] == 'crear-vias':
                 index_roads()
             elif args[0] == 'borrar':
@@ -75,422 +64,148 @@ def create_entities_indexes():
     index_settlements(es)
 
 
-def get_elasticsearch_docs(fp):
-    data = []
-    for i, doc in enumerate(json.load(fp)):
-        data.append({'index': {'_id': i + 1}})
-        data.append(doc)
-    return data
+def read_json(path):
+    with open(path) as f:
+        return json.load(f)
 
 
-def index_states(es):
-    """Genera índice Elasticsearch para la entidad Provincia.
+def document_list(data, excludes=None):
+    docs = []
+    for i, doc in enumerate(data):
+        docs.append({'index': {'_id': i + 1}})
+
+        if excludes is None:
+            excludes = []
+        
+        docs.append({
+            key: doc[key] for key in doc.keys() if key not in excludes
+        })
+    
+    return docs
+
+
+def index_entity(es, index, doc_type, data, mappings, excludes=None):
+    """Genera índices Elasticsearch para una entidad, comprobando que el índice
+       ya no exista.
 
     Args:
         es (elasticsearch.client.Elasticsearch): Instancia cliente
         Elasticsearch.
+        index_name (str): Nombre del índice a crear, si no existe.
+        doc_type (str): Nombre de documento a utilizar.
+        data (list): Lista de datos a indexar.
+        excludes (map): Campos a ignorar completamente al momento de indexar.
+    """  
 
-    Returns:
-        str: Devuelve un mensaje con el resultado de la operación.
+    if not es.indices.exists(index=index):
+        print(MESSAGES['creating_index'] % index)
+
+        es.indices.create(index=index, body={
+            'settings': DEFAULT_SETTINGS,
+            'mappings': mappings
+        })
+
+        docs = document_list(data, excludes)
+
+        es.bulk(index=index, doc_type=doc_type, body=docs, refresh=True,
+            request_timeout=320)
+
+        print(MESSAGES['creation_success'] % index)
+    else:
+        print(MESSAGES['index_exists'] % index)
+
+
+def index_states(es):
+    """Genera índices Elasticsearch para la entidad Provincia.
+
+    Args:
+        es (elasticsearch.client.Elasticsearch): Instancia cliente
+        Elasticsearch.
     """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'provincias.json')
 
-    if es.indices.exists(index='provincias'):
-        print(MESSAGES['states_exists'])
-        return
     if os.path.exists(path_file):
-        print(MESSAGES['states_info'])
-
-        mapping = {
-            'provincia': {
-                'properties': {
-                    'id': {'type': 'keyword'},
-                    'nombre': {
-                        'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                        'search_analyzer': NAME_ANALYZER,
-                        'fields': {
-                            'exacto': {
-                                'type': 'keyword',
-                                'normalizer': LOWCASE_ASCII_NORMALIZER
-                            }
-                        }
-                    },
-                    'lat': {'type': 'keyword'},
-                    'lon': {'type': 'keyword'},
-                    'geometry': {'type': 'geo_shape'}
-                }
-            }
-        }
-
-        es.indices.create(index='provincias', body={
-            'settings': DEFAULT_SETTINGS,
-            'mappings': mapping
-        })
-
-        with open(path_file) as f:
-            data = get_elasticsearch_docs(f)
-
-        es.bulk(index='provincias', doc_type='provincia', body=data,
-                refresh=True, request_timeout=320)
-        print(MESSAGES['states_success'])
+        states = read_json(path_file)
     else:
         print(MESSAGES['file_not_exists'] % 'provincias')
+        return
+
+    # Crear índice de provincias sin geometrías
+    index_entity(es, 'provincias', 'provincia', states, MAP_STATE, ['geometria'])
+
+    # Crear índice de provincias con geometrías
+    index_entity(es, 'provincias-geometria', 'provincia', states, MAP_STATE_GEOM)
+
 
 
 def index_departments(es):
-    """Genera índice Elasticsearch para la entidad Departamento.
+    """Genera índices Elasticsearch para la entidad Departamento.
 
     Args:
         es (elasticsearch.client.Elasticsearch): Instancia cliente
         Elasticsearch.
-
-    Returns:
-        str: Devuelve un mensaje con el resultado de la operación.
     """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'departamentos.json')
 
-    if es.indices.exists(index='departamentos'):
-        print(MESSAGES['departments_exists'])
-        return
     if os.path.exists(path_file):
-        print(MESSAGES['departments_info'])
-
-        mapping = {
-            'departamento': {
-                'properties': {
-                    'id': {'type': 'keyword'},
-                    'nombre': {
-                        'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                        'search_analyzer': NAME_ANALYZER,
-                        'fields': {
-                            'exacto': {
-                                'type': 'keyword',
-                                'normalizer': LOWCASE_ASCII_NORMALIZER
-                            }
-                        }
-                    },
-                    'lat': {'type': 'keyword'},
-                    'lon': {'type': 'keyword'},
-                    'geometry': {'type': 'geo_shape'},
-                    'provincia': {
-                        'type': 'object',
-                        'dynamic': 'strict',
-                        'properties': {
-                            'id': {'type': 'keyword'},
-                            'nombre': {
-                                'type': 'text',
-                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                                'search_analyzer': NAME_ANALYZER,
-                                'fields': {
-                                    'exacto': {
-                                        'type': 'keyword',
-                                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        es.indices.create(index='departamentos', body={
-            'settings': DEFAULT_SETTINGS,
-            'mappings': mapping
-        })
-
-        with open(path_file) as f:
-            data = get_elasticsearch_docs(f)
-
-        es.bulk(index='departamentos', doc_type='departamento', body=data,
-                refresh=True, request_timeout=320)
-        print(MESSAGES['departments_success'])
+        depts = read_json(path_file)
     else:
         print(MESSAGES['file_not_exists'] % 'departamentos')
+        return
+
+    # Crear índice de departamentos sin geometrías
+    index_entity(es, 'departamentos', 'departamento', depts, MAP_DEPT, ['geometria'])
+
+    # Crear índice de departamentos con geometrías
+    index_entity(es, 'departamentos-geometria', 'departamento', depts, MAP_DEPT_GEOM)
 
 
 def index_municipalities(es):
-    """Genera índice Elasticsearch para la entidad Municipio.
+    """Genera índices Elasticsearch para la entidad Municipio.
 
     Args:
         es (elasticsearch.client.Elasticsearch): Instancia cliente
         Elasticsearch.
-
-    Returns:
-        str: Devuelve un mensaje con el resultado de la operación.
     """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'municipios.json')
 
-    if es.indices.exists(index='municipios'):
-        print(MESSAGES['municipalities_exists'])
-        return
     if os.path.exists(path_file):
-        print(MESSAGES['municipalities_info'])
-
-        mapping = {
-            'municipio': {
-                'properties': {
-                    'id': {'type': 'keyword'},
-                    'nombre': {
-                        'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                        'search_analyzer': NAME_ANALYZER,
-                        'fields': {
-                            'exacto': {
-                                'type': 'keyword',
-                                'normalizer': LOWCASE_ASCII_NORMALIZER
-                            }
-                        }
-                    },
-                    'lat': {'type': 'keyword'},
-                    'lon': {'type': 'keyword'},
-                    'geometry': {'type': 'geo_shape'},
-                    'departamento': {
-                        'type': 'object',
-                        'dynamic': 'strict',
-                        'properties': {
-                            'id': {'type': 'keyword'},
-                            'nombre': {
-                                'type': 'text',
-                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                                'search_analyzer': NAME_ANALYZER,
-                                'fields': {
-                                    'exacto': {
-                                        'type': 'keyword',
-                                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    'provincia': {
-                        'type': 'object',
-                        'dynamic': 'strict',
-                        'properties': {
-                            'id': {'type': 'keyword'},
-                            'nombre': {
-                                'type': 'text',
-                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                                'search_analyzer': NAME_ANALYZER,
-                                'fields': {
-                                    'exacto': {
-                                        'type': 'keyword',
-                                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        es.indices.create(index='municipios', body={
-            'settings': DEFAULT_SETTINGS,
-            'mappings': mapping
-        })
-
-        with open(path_file) as f:
-            data = get_elasticsearch_docs(f)
-
-        es.bulk(index='municipios', doc_type='municipio', body=data,
-                refresh=True, request_timeout=320)
-        print(MESSAGES['municipalities_success'])
+        munis = read_json(path_file)
     else:
         print(MESSAGES['file_not_exists'] % 'municipios')
+        return
+
+    # Crear índice de municipios sin geometrías
+    index_entity(es, 'municipios', 'municipio', munis, MAP_MUNI, ['geometria'])
+
+    # Crear índice de municipios con geometrías
+    index_entity(es, 'municipios-geometria', 'municipio', munis, MAP_MUNI_GEOM)
 
 
 def index_settlements(es):
-    """Genera índice Elasticsearch para la entidad Asentamientos informales.
+    """Genera índices Elasticsearch para la entidad Asentamientos informales.
 
     Args:
         es (elasticsearch.client.Elasticsearch): Instancia cliente
         Elasticsearch.
-
-    Returns:
-        str: Devuelve un mensaje con el resultado de la operación.
     """
     path_file = os.path.join(os.environ.get('ENTIDADES_DATA_DIR'),
                              'asentamientos.json')
 
-    if es.indices.exists(index='bahra'):
-        print(MESSAGES['settlements_exists'])
-        return
     if os.path.exists(path_file):
-        print(MESSAGES['settlements_info'])
-
-        mapping = {
-            'asentamiento': {
-                'properties': {
-                    'id': {'type': 'keyword'},
-                    'nombre': {
-                        'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                        'search_analyzer': NAME_ANALYZER,
-                        'fields': {
-                            'exacto': {
-                                'type': 'keyword',
-                                'normalizer': LOWCASE_ASCII_NORMALIZER
-                            }
-                        }
-                    },
-                    'tipo': {'type': 'keyword'},
-                    'lat': {'type': 'keyword'},
-                    'lon': {'type': 'keyword'},
-                    'geometry': {'type': 'geo_shape'},
-                    'municipio': {
-                        'type': 'object',
-                        'dynamic': 'strict',
-                        'properties': {
-                            'id': {'type': 'keyword'},
-                            'nombre': {
-                                'type': 'text',
-                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                                'search_analyzer': NAME_ANALYZER,
-                                'fields': {
-                                    'exacto': {
-                                        'type': 'keyword',
-                                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                                    }
-                                }
-                            },
-                        }
-                    },
-                    'departamento': {
-                        'type': 'object',
-                        'dynamic': 'strict',
-                        'properties': {
-                            'id': {'type': 'keyword'},
-                            'nombre': {
-                                'type': 'text',
-                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                                'search_analyzer': NAME_ANALYZER,
-                                'fields': {
-                                    'exacto': {
-                                        'type': 'keyword',
-                                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    'provincia': {
-                        'type': 'object',
-                        'dynamic': 'strict',
-                        'properties': {
-                            'id': {'type': 'keyword'},
-                            'nombre': {
-                                'type': 'text',
-                                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                                'search_analyzer': NAME_ANALYZER,
-                                'fields': {
-                                    'exacto': {
-                                        'type': 'keyword',
-                                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        es.indices.create(index='bahra', body={
-            'settings': DEFAULT_SETTINGS,
-            'mappings': mapping
-        })
-
-        with open(path_file) as f:
-            data = get_elasticsearch_docs(f)
-
-        es.bulk(index='bahra', doc_type='asentamiento', body=data, refresh=True,
-                request_timeout=320)
-        print(MESSAGES['settlements_success'])
+        settlements = read_json(path_file)
     else:
         print(MESSAGES['file_not_exists'] % 'asentamientos')
+        return
 
+    # Crear índice de asentamientos sin geometrías
+    index_entity(es, 'bahra', 'asentamiento', settlements, MAP_SETTLEMENT, ['geometria'])
 
-STREET_MAPPING = {
-    'calle': {
-        'properties': {
-            'nomenclatura': {
-                'type': 'text',
-                'index': False
-            },
-            'id': {'type': 'keyword'},
-            'nombre': {
-                'type': 'text',
-                'analyzer': NAME_ANALYZER_ROAD_SYNONYMS,
-                'search_analyzer': NAME_ANALYZER,
-                'fields': {
-                    'exacto': {
-                        'type': 'keyword',
-                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                    }
-                }
-            },
-            'tipo': {
-                'type': 'text',
-                'analyzer': NAME_ANALYZER_ROAD_SYNONYMS,
-                'search_analyzer': NAME_ANALYZER
-            },
-            'inicio_derecha': {
-                'type': 'integer'
-            },
-            'inicio_izquierda': {
-                'type': 'integer',
-                # Solo START_R y END_L son necesarias para la busqueda de
-                # calles por altura.
-                'index': False
-            },
-            'fin_derecha': {
-                'type': 'integer',
-                # Solo START_R y END_L son necesarias para la busqueda de
-                # calles por altura.
-                'index': False
-            },
-            'fin_izquierda': {
-                'type': 'integer'
-            },
-            'geometria': {
-                'type': 'text',
-                'index': False
-            },
-            'codigo_postal': {
-                'type': 'text',
-                'index': False
-            },
-            'provincia': {
-                'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                'search_analyzer': NAME_ANALYZER,
-                'fields': {
-                    'exacto': {
-                        'type': 'keyword',
-                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                    }
-                }
-            },
-            'departamento': {
-                'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
-                'search_analyzer': NAME_ANALYZER,
-                'fields': {
-                    'exacto': {
-                        'type': 'keyword',
-                        'normalizer': LOWCASE_ASCII_NORMALIZER
-                    }
-                }
-            }
-        }
-    }
-}
+    # Crear índice de asentamientos con geometrías
+    index_entity(es, 'bahra-geometria', 'asentamiento', settlements, MAP_SETTLEMENT_GEOM)
 
 
 def index_roads():
@@ -505,22 +220,15 @@ def index_roads():
 
     for i in objects:
         index_name = i[:-5]
-        if es.indices.exists(index=index_name):
-            print(MESSAGES['roads_exists'] % index_name)
+        index_file = os.path.join(path, i)
+
+        if os.path.exists(index_file):
+            roads = read_json(index_file)
+        else:
+            print(MESSAGES['file_not_exists'] % index_name)
             continue
-        print(MESSAGES['roads_info'] % index_name)
 
-        with open(os.path.join(path, i)) as f:
-            data = get_elasticsearch_docs(f)
-
-        es.indices.create(index=index_name, body={
-            'settings': DEFAULT_SETTINGS,
-            'mappings': STREET_MAPPING
-        })
-
-        es.bulk(index=index_name, doc_type='calle', body=data, refresh=True,
-                request_timeout=320)
-        print(MESSAGES['roads_success'] % index_name)
+        index_entity(es, index_name, 'calle', roads, MAP_STREET)
 
 
 def delete_index(index):
@@ -539,18 +247,15 @@ def delete_index(index):
         print(error)
 
 
-def delete_indexes():
+def delete_entities():
     """Elimina índices Elasticsearch correspondientes a entidades.
 
     Returns:
         str: Devuelve un mensaje con el resultado de la operación.
     """
     for index in INDEXES:
-        try:
-            Elasticsearch().indices.delete(index=index)
-            print(MESSAGES['index_delete'] % index)
-        except (ElasticsearchException, SyntaxError) as error:
-            print(error)
+        delete_index(index)
+        delete_index(index + '-geometria')
 
 
 def list_indexes():

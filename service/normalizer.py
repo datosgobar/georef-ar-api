@@ -251,8 +251,11 @@ def process_place(request):
     lat = request.args.get(LAT)
     lon = request.args.get(LON)
     flatten = FLATTEN in request.args
-    matches = data.query_place(MUNICIPALITIES, lat, lon, flatten)
+
+    muni_index = MUNICIPALITIES + '-' + GEOM
+    matches = data.query_place(muni_index, lat, lon, flatten)
     if not matches:
-        matches = data.query_place(DEPARTMENTS, lat, lon, flatten)
+        dept_index = DEPARTMENTS + '-' + GEOM
+        matches = data.query_place(dept_index, lat, lon, flatten)
 
     return parser.get_response({PLACE: matches})

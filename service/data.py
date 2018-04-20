@@ -45,7 +45,6 @@ def query_entity(index, entity_id=None, name=None, state=None, department=None,
     if not fields:
         fields = []
 
-    fields_excludes = ['geometry']
     terms = []
     sorts = {}
 
@@ -85,8 +84,7 @@ def query_entity(index, entity_id=None, name=None, state=None, department=None,
         'size': max or DEFAULT_MAX,
         'sort': sorts,
         '_source': {
-            'include': fields,
-            'excludes': fields_excludes
+            'include': fields
         }
     }    
     try:
@@ -198,7 +196,7 @@ def query_place(index, lat, lon, flatten=False):
             'bool': {
                 'filter': {
                     'geo_shape': {
-                        'geometry': {
+                        GEOM: {
                             'shape': {
                                 'type': 'point',
                                 'coordinates': [lon, lat]
@@ -209,7 +207,7 @@ def query_place(index, lat, lon, flatten=False):
             }
         },
         '_source': {
-            'excludes': ['geometry']
+            'excludes': [GEOM]
         }
     }
 
@@ -353,7 +351,7 @@ def parse_place(result, index, flatten):
     """
     result = result['_source']
     result = dict(result)
-    if index == MUNICIPALITIES:
+    if index.startswith(MUNICIPALITIES):
         add = {MUN: {ID: result[ID], NAME: result[NAME]}}
     else:
         add = {DEPT: {ID: result[ID], NAME: result[NAME]}}
