@@ -47,10 +47,6 @@
                         "type": "string",
                         "example": "0207001003895"
                     },
-                    "localidad": {
-                        "type": "string",
-                        "example": "Ciudad Autónoma de Buenos Aires"
-                    },
                     "nombre": {
                         "type": "string",
                         "example": "CNL RAMON LISTA"
@@ -265,10 +261,6 @@
                     "id": {
                         "type": "string",
                         "example": "0209801001740"
-                    }, 
-                    "localidad": {
-                        "type": "string",
-                        "example": "Ciudad Autónoma de Buenos Aires"
                     },
                     "nombre": {
                         "type": "string",
@@ -374,14 +366,6 @@
                     "type": "string"
                 }
             },
-            "localidad_nombre": {
-                "name": "localidad",
-                "description": "Filtrar por nombre de localidad.",
-                "in": "query",
-                "schema": {
-                    "type": "string"
-                }
-            },
             "max": {
                 "name": "max",
                 "description": "Cantidad máxima de resultados a devolver.",
@@ -394,7 +378,7 @@
             },
             "campos": {
                 "name": "campos",
-                "description": "Campos a incluir en la respuesta separados por comas, sin espacios.",
+                "description": "Campos a incluir en la respuesta separados por comas, sin espacios. Algunos campos siempre serán incluidos, incluso si no se agregaron en la lista.",
                 "in": "query",
                 "schema": {
                     "type": "array",
@@ -705,9 +689,6 @@
                         "$ref": "#/components/parameters/nombre"
                     },
                     {
-                        "$ref": "#/components/parameters/localidad_nombre"
-                    },
-                    {
                         "$ref": "#/components/parameters/departamento_nombre"
                     },
                     {
@@ -767,9 +748,6 @@
                             "type": "string",
                             "example": "Av Santa Fe 1000, Buenos Aires"
                         }
-                    },
-                    {
-                        "$ref": "#/components/parameters/localidad_nombre"
                     },
                     {
                         "$ref": "#/components/parameters/departamento_nombre"
@@ -904,7 +882,7 @@
                                                     "provincia": {
                                                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                                                     },
-                                                    "municipalidad": {
+                                                    "municipio": {
                                                         "type": "object",
                                                         "properties": {
                                                             "id": {
