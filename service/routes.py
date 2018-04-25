@@ -53,5 +53,6 @@ def get_addresses():
 
 
 @app.route('/api/v1.0/ubicacion', methods=['GET'])
+@normalizer.disable_cache
 def get_placement():
     return normalizer.process_place(request)

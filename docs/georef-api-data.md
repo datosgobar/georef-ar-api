@@ -122,7 +122,6 @@ Cada archivo de vías de circulación debe llamarse `calles-XX.json`, donde `XX`
         "fin_izquierda": 800, // Número final de altura (lado izquierdo)
         "geometria": "0105000020E61000...", // Geometría MultiLineString en formato WKB, representación hexadecimal
         "codigo_postal": "C1030AAJ", // Código postal, puede ser null
-        "localidad": "CIUDAD AUTÓNOMA DE BUENOS AIRES", // Localidad
         "departamento": "COMUNA 3", // Departamento
         "provincia": "CIUDAD AUTÓNOMA DE BUENOS AIRES" // Provincia
     },

@@ -128,9 +128,15 @@ Agregar la configuración de los servicios `gunicorn` y `nginx`.
 
 - Para `nginx`, crear `/etc/nginx/sites-available/georef-api` tomando como base la configuración del archivo `georef-api.nginx` [de este repositorio](config/georef-api.nginx).
 
+- Para activar el uso del cache de `nginx`, descomentar las líneas contentiendo las directivas `proxy_cache` y `proxy_cache_valid` del archivo `georef-api` creado. Luego, activar el cache `georef` agregando la siguiente línea al archivo de configuración `nginx.conf` (sección `http`):
+    ```
+    proxy_cache_path /data/nginx/cache levels=1:2 inactive=120m keys_zone=georef:10m use_temp_path=off;
+    ```
+    Finalmente, crear el directorio `/data/nginx/cache`.
+
 - Generar un link simbólico a la configuración del sitio:
 
-    `# ln -s /etc/nginx/sites-available/georef-api /etc/nginx/sites-enabled`,
+    `# ln -s /etc/nginx/sites-available/georef-api /etc/nginx/sites-enabled/georef-api`
 
 - Validar configuración:
 
