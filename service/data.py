@@ -9,6 +9,7 @@ e impactan dicha búsqueda contra las fuentes de datos disponibles.
 import os
 import psycopg2
 import requests
+from flask import g
 from collections import defaultdict
 from elasticsearch import Elasticsearch, ElasticsearchException
 from service.parser import get_flatten_result
@@ -16,6 +17,13 @@ from service.names import *
 
 MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_MAX = 10
+
+
+def get_elasticsearch():
+    if 'elasticsearch' not in g:
+        g.elasticsearch = Elasticsearch()
+
+    return g.elasticsearch
 
 
 def query_entity(index, entity_id=None, name=None, state=None, department=None,
