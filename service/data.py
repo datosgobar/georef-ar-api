@@ -96,7 +96,7 @@ def query_entity(index, entity_id=None, name=None, state=None, department=None,
         }
     }    
     try:
-        result = Elasticsearch().search(index=index, body=query)
+        result = get_elasticsearch().search(index=index, body=query)
     except ElasticsearchException as error:
         return []
 
@@ -164,7 +164,7 @@ def query_streets(name=None, department=None, state=None,
         '_source': fields
     }
     try:
-        result = Elasticsearch().search(index=index, body=query)
+        result = get_elasticsearch().search(index=index, body=query)
     except ElasticsearchException as error:
         return []
 
@@ -220,7 +220,7 @@ def query_place(index, lat, lon, flatten=False):
     }
 
     try:
-        result = Elasticsearch().search(index=index, body=query)
+        result = get_elasticsearch().search(index=index, body=query)
     except ElasticsearchException as error:
         return []
 
