@@ -7,6 +7,8 @@ from elasticsearch_params import *
 # a aumentar significativamente el tamaño de los documentos, por lo que la 
 # performance de la búsqueda por id/texto/etc se ve disminuida.
 
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
+
 MAP_STATE = {
     'provincia': {
         'properties': {

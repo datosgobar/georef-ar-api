@@ -90,8 +90,17 @@ CREATE EXTENSION postgis;
     ```
     cluster.name: georef-api
     node.name: node-1
-    network.host: 0.0.0.0
     http.max_content_length: 100mb
+    ```
+
+    `$ sudo vi /etc/elasticsearch/jvm.options` (siguiendo las recomendaciones de [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html))
+
+    ```
+    # Tamaño del heap size de la JVM
+    # Se recomienda utilizar siempre el mismo valor como mínimo y máximo
+    # Ejemplo: 4 GB
+    -Xms4g
+    -Xmx4g
     ```
     
 - Probar el servicio:
@@ -146,9 +155,9 @@ Agregar la configuración de los servicios `gunicorn` y `nginx`.
 
     `# nginx -s reload`
 
-- Correr Nginx:
+- Reiniciar Nginx:
 
-    `# nginx`
+    `# systemctl restart nginx.service`
 
 ## Pruebas
 
