@@ -268,6 +268,24 @@ class SearchAddressesTest(SearchEntitiesTest):
 
         assert(validations and all(validations))
 
+    def test_batch_search_no_addresses(self):
+        """La búsqueda en baches debería fallar si no se pasan direcciones."""
+        addresses = {
+            'direcciones': []
+        }
+        response = self.app.post(self.endpoint, json=addresses)
+        self.assertEqual(response.status_code, 400)
+
+    def test_batch_search_matches(self):
+        """La búsqueda en baches debería encontrar resultados para una
+        dirección."""
+        addresses = {
+            'direcciones': [VALID_ADDRESS]
+        }
+        response = self.get_response(params=addresses, method='POST')
+        results = response[0]['normalizadas']
+        self.assertTrue(len(response) > 0 and len(results) > 0)
+
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""

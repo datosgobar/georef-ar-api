@@ -9,9 +9,7 @@ e impactan dicha búsqueda contra las fuentes de datos disponibles.
 import os
 import psycopg2
 import requests
-from flask import g
 from collections import defaultdict
-from elasticsearch import Elasticsearch, ElasticsearchException
 from service.parser import get_flatten_result
 from service.names import *
 
@@ -19,20 +17,14 @@ MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_MAX = 10
 
 
-def get_elasticsearch():
-    if 'elasticsearch' not in g:
-        g.elasticsearch = Elasticsearch()
-
-    return g.elasticsearch
-
-
-def query_entity(index, entity_id=None, name=None, state=None, department=None,
-                 municipality=None, max=None, order=None,
+def query_entity(es, index, entity_id=None, name=None, state=None,
+                 department=None, municipality=None, max=None, order=None,
                  fields=None, flatten=False, exact=False):
     """Busca entidades políticas (localidades, departamentos, o provincias)
         según parámetros de búsqueda de una consulta.
 
     Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
         index (str): Nombre del índice sobre el cual realizar la búsqueda.
         entity_id (str): ID de la entidad.
         name (str): Nombre del tipo de entidad (opcional).
@@ -95,19 +87,17 @@ def query_entity(index, entity_id=None, name=None, state=None, department=None,
             'include': fields
         }
     }    
-    try:
-        result = get_elasticsearch().search(index=index, body=query)
-    except ElasticsearchException as error:
-        return []
-
+    
+    result = es.search(index=index, body=query)
     return [parse_entity(hit, flatten) for hit in result['hits']['hits']]
 
 
-def query_streets(name=None, department=None, state=None,
-                  road=None, max=None, fields=None, exact=False, number=None):
+def query_streets(es, name=None, department=None, state=None, road=None,
+                  max=None, fields=None, exact=False, number=None):
     """Busca calles según parámetros de búsqueda de una consulta.
 
     Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
         name (str): Nombre de la calle para filtrar (opcional).
         department (str): Nombre de departamento para filtrar (opcional).
         state (str / int): ID o nombre de provincia para filtrar (opcional).
@@ -140,10 +130,11 @@ def query_streets(name=None, department=None, state=None,
         terms.append(build_range_condition(END_L, '>=', number))
     if state:
         if state.isdigit():
-            target_state = query_entity(STATES, entity_id=state, max=1, 
+            target_state = query_entity(es, STATES, entity_id=state, max=1, 
                                         exact=exact)
         else:
-            target_state = query_entity(STATES, name=state, max=1, exact=exact)
+            target_state = query_entity(es, STATES, name=state, max=1, 
+                                        exact=exact)
 
         if target_state:  # Narrows search to specific index.
             index = '-'.join([STREETS, target_state[0][ID]])
@@ -163,34 +154,33 @@ def query_streets(name=None, department=None, state=None,
         'size': max or DEFAULT_MAX,
         '_source': fields
     }
-    try:
-        result = get_elasticsearch().search(index=index, body=query)
-    except ElasticsearchException as error:
-        return []
-
+    
+    result = es.search(index=index, body=query)
     return [parse_es(hit) for hit in result['hits']['hits']]
 
 
-def query_address(search_params):
+def query_address(es, search_params):
     """Busca direcciones para los parámetros de una consulta.
 
     Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
         search_params (dict): Diccionario con parámetros de búsqueda.
 
     Returns:
         list: Resultados de búsqueda de una dirección.
     """
-    matches = search_es(search_params)
+    matches = search_es(es, search_params)
     if not matches and search_params.get('source') == 'osm':
         matches = search_osm(search_params)
     return matches
 
 
-def query_place(index, lat, lon, flatten=False):
+def query_place(es, index, lat, lon, flatten=False):
     """Busca a que entidades políticas (municipios, departamentos, o provincias)
         pertenece una ubicación según parámetros de búsqueda de una consulta.
 
     Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
         index (str): Nombre del índice sobre el cual realizar la búsqueda.
         lat (str): Latitud correspondiente a una ubicación.
         lon (str): Longitud correspondiente a una ubicación.
@@ -219,11 +209,7 @@ def query_place(index, lat, lon, flatten=False):
         }
     }
 
-    try:
-        result = get_elasticsearch().search(index=index, body=query)
-    except ElasticsearchException as error:
-        return []
-
+    result = es.search(index=index, body=query)
     return [parse_place(hit, index, flatten) for hit in result['hits']['hits']]
 
 
@@ -414,17 +400,19 @@ def parse_osm_type(osm_type):
         return 'SIN_CLASIFICAR'
 
 
-def search_es(params):
+def search_es(es, params):
     """Busca en ElasticSearch con los parámetros de una consulta.
 
     Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
         params (dict): Diccionario con parámetros de búsqueda.
 
     Returns:
         list: Resultados de búsqueda de una dirección.
     """
     number = params['number']
-    streets = query_streets(name=params['road_name'], road=params['road_type'],
+    streets = query_streets(es, name=params['road_name'],
+                            road=params['road_type'],
                             state=params['state'],
                             department=params['department'],
                             fields=params['fields'], max=params['max'],

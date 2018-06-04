@@ -57,6 +57,7 @@ CREATE EXTENSION postgis;
     export GEOREF_API_DB_NAME= # Nombre de la base de datos (por ejemplo, 'georef_api')
     export GEOREF_API_DB_USER= # Usuario de la base de datos
     export GEOREF_API_DB_PASS= # Contraseña del usuario de la base de datos
+    export GEOREF_API_LOG_CONFIG= # Path a archivo JSON de configuración de logs (opcional)
  
     export ENTIDADES_DATA_DIR= # /directorio/datos/de/entidades
     export VIAS_DATA_DIR= # /directorio/datos/de/vias

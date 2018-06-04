@@ -1,0 +1,29 @@
+{
+    "version": 1,
+    "formatters": {
+        "default": {
+            "format": "%(name)s - %(levelname)s: %(message)s"
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+            "level": "INFO"
+        }
+    },
+    "loggers": {
+        "elasticsearch": {
+            "level": "WARNING",
+            "handlers": ["console"]
+        },
+        "flask": {
+            "level": "WARNING",
+            "handlers": ["console"]
+        },
+        "werkzeug": {
+            "level": "INFO",
+            "handlers": ["console"]
+        }
+    }
+}

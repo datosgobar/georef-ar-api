@@ -9,6 +9,15 @@ de los recursos que expone la API.
 from functools import wraps
 from service import data, parser
 from service.names import *
+from elasticsearch import Elasticsearch, ElasticsearchException
+from flask import g, abort
+
+
+def get_elasticsearch():
+    if 'elasticsearch' not in g:
+        g.elasticsearch = Elasticsearch()
+
+    return g.elasticsearch
 
 
 def process_state(request):
@@ -33,8 +42,15 @@ def process_state(request):
     exact = EXACT in request.args
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS), STATES)
-    matches = data.query_entity(STATES, entity_id=state_id, name=name,
-                                order=order, fields=fields, max=max, exact=exact)
+
+    try:
+        es = get_elasticsearch()
+        matches = data.query_entity(es, STATES, entity_id=state_id, name=name,
+                                    order=order, fields=fields, max=max,
+                                    exact=exact)
+    except ElasticsearchException:
+        abort(500)
+
     return parser.get_response({STATES: matches}, format_request)
 
 
@@ -62,9 +78,15 @@ def process_department(request):
     order = request.args.get(ORDER)
     fields = parser.get_fields(request.args.get(FIELDS), DEPARTMENTS)
     flatten = FLATTEN in request.args or format_request['convert']
-    matches = data.query_entity(DEPARTMENTS, entity_id=dept_id, name=name,
-                                state=state, flatten=flatten,
-                                order=order, fields=fields, max=max, exact=exact)
+
+    try:
+        es = get_elasticsearch()
+        matches = data.query_entity(es, DEPARTMENTS, entity_id=dept_id,
+                                    name=name, state=state, flatten=flatten,
+                                    order=order, fields=fields, max=max,
+                                    exact=exact)
+    except ElasticsearchException:
+        abort(500)
 
     return parser.get_response({DEPARTMENTS: matches}, format_request)
 
@@ -95,10 +117,15 @@ def process_municipality(request):
     fields = parser.get_fields(request.args.get(FIELDS), MUNICIPALITIES)
     flatten = FLATTEN in request.args or format_request['convert']
 
-    matches = data.query_entity(MUNICIPALITIES, entity_id=municipality_id,
-                                name=name, department=department, state=state,
+    try:
+        es = get_elasticsearch()
+        matches = data.query_entity(es, MUNICIPALITIES,
+                                entity_id=municipality_id, name=name,
+                                department=department, state=state,
                                 flatten=flatten, order=order, fields=fields,
                                 max=max, exact=exact)
+    except ElasticsearchException:
+        abort(500)
 
     return parser.get_response({MUNICIPALITIES: matches}, format_request)
 
@@ -130,11 +157,15 @@ def process_locality(request):
     flatten = FLATTEN in request.args or format_request['convert']
     max = request.args.get(MAX) or format_request['max']
 
-    matches = data.query_entity(SETTLEMENTS, entity_id=locality_id, name=name,
-                                municipality=municipality,
-                                department=department, state=state, max=max,
-                                order=order, fields=fields, flatten=flatten,
-                                exact=exact)
+    try:
+        es = get_elasticsearch()
+        matches = data.query_entity(es, SETTLEMENTS, entity_id=locality_id,
+                                    name=name, municipality=municipality,
+                                    department=department, state=state,
+                                    max=max, order=order, fields=fields,
+                                    flatten=flatten, exact=exact)
+    except ElasticsearchException:
+        abort(500)
 
     return parser.get_response({LOCALITIES: matches}, format_request)
 
@@ -161,9 +192,14 @@ def process_street(request):
     exact = EXACT in request.args
     fields = parser.get_fields(request.args.get(FIELDS), STREETS)
 
-    matches = data.query_streets(name=name, department=department, state=state,
-                                 road=road_type, max=max, fields=fields,
-                                 exact=exact)
+    try:
+        es = get_elasticsearch()
+        matches = data.query_streets(es, name=name, department=department,
+                                     state=state, road=road_type, max=max,
+                                     fields=fields, exact=exact)
+    except ElasticsearchException:
+        abort(500)
+
     for street in matches: street.pop(GEOM, None)
         
     return parser.get_response({STREETS: matches})
@@ -202,7 +238,12 @@ def address_get(request):
     if search['number'] is None:
         return parser.get_response_for_invalid(request, message=NUMBER_REQUIRED)
 
-    matches = data.query_address(search)
+    try:
+        es = get_elasticsearch()
+        matches = data.query_address(es, search)
+    except ElasticsearchException:
+        abort(500)
+
     return parser.get_response({ADDRESSES: matches})
 
 
@@ -222,12 +263,16 @@ def address_post(request):
         addresses = json_data.get(ADDRESSES)
         if not addresses:
             return parser.get_response_for_invalid(request, message=EMPTY_DATA)
-        for address in addresses:
-            search = parser.get_search_from_string(address)
-            matches.append({
-                'original': address,
-                'normalizadas': data.query_address(search)
-            })
+        try:
+            es = get_elasticsearch()
+            for address in addresses:
+                search = parser.get_search_from_string(address)
+                matches.append({
+                    'original': address,
+                    'normalizadas': data.query_address(es, search)
+                })
+        except ElasticsearchException:
+            abort(500)
 
     return parser.get_response({ADDRESSES: matches})
 
@@ -253,11 +298,15 @@ def process_place(request):
     lon = request.args.get(LON)
     flatten = FLATTEN in request.args
 
-    muni_index = MUNICIPALITIES + '-' + GEOM
-    matches = data.query_place(muni_index, lat, lon, flatten)
-    if not matches:
-        dept_index = DEPARTMENTS + '-' + GEOM
-        matches = data.query_place(dept_index, lat, lon, flatten)
+    try:
+        es = get_elasticsearch()
+        muni_index = MUNICIPALITIES + '-' + GEOM
+        matches = data.query_place(es, muni_index, lat, lon, flatten)
+        if not matches:
+            dept_index = DEPARTMENTS + '-' + GEOM
+            matches = data.query_place(es, dept_index, lat, lon, flatten)
+    except ElasticsearchException:
+        abort(500)
 
     return parser.get_response({PLACE: matches})
 

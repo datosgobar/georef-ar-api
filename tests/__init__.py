@@ -20,12 +20,18 @@ class SearchEntitiesTest(TestCase):
         app.testing = True
         self.app = app.test_client()
 
-    def get_response(self, params=None):
+    def get_response(self, params=None, method='GET'):
         if not params:
             params = {}
 
-        query = self.endpoint + '?' + urllib.parse.urlencode(params)
-        response = self.app.get(query)
+        if method == 'GET':
+            query = self.endpoint + '?' + urllib.parse.urlencode(params)
+            response = self.app.get(query)
+        elif method == 'POST':
+            response = self.app.post(self.endpoint, json=params)
+        else:
+            raise ValueError('Método desconocido.')
+
         if response.status_code != 200:
             raise Exception('El request no devolvió código 200.')
         return json.loads(response.data)[self.entity]
