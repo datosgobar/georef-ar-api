@@ -49,6 +49,10 @@ CREATE EXTENSION postgis;
 - Copiar las variables de entorno:
 
     `(venv)$ cp environment.example.sh environment.sh`
+
+- Copiar el archivo de configuración de logs:
+
+    `(venv)$ cp docs/config/logging.example.ini logging.ini`
     
 - Completar el archivo `environment.sh` con los valores con los datos correspondientes:
 
@@ -57,7 +61,6 @@ CREATE EXTENSION postgis;
     export GEOREF_API_DB_NAME= # Nombre de la base de datos (por ejemplo, 'georef_api')
     export GEOREF_API_DB_USER= # Usuario de la base de datos
     export GEOREF_API_DB_PASS= # Contraseña del usuario de la base de datos
-    export GEOREF_API_LOG_CONFIG= # Path a archivo JSON de configuración de logs (opcional)
  
     export ENTIDADES_DATA_DIR= # /directorio/datos/de/entidades
     export VIAS_DATA_DIR= # /directorio/datos/de/vias

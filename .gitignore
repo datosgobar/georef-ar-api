@@ -60,6 +60,7 @@ db.sqlite3
 .vscode/
 
 environment.sh
+logging.ini
 
 # migraciones
 migrations/

@@ -8,7 +8,11 @@ User=<user>
 Group=www-data
 RuntimeDirectory=gunicorn
 WorkingDirectory=/home/<user>/georef-api
-ExecStart=/home/<user>/georef-api/venv/bin/gunicorn --pid /run/gunicorn/api-pid -w 4 --bind 0.0.0.0:5000 service:app
+ExecStart=/home/<user>/georef-api/venv/bin/gunicorn \
+          --pid /run/gunicorn/api-pid \
+          -w 4 \
+          --bind 0.0.0.0:5000 service:app \
+          --log-config /home/<user>/georef-api/logging.ini
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 PrivateTmp=true
