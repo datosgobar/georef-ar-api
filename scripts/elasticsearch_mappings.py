@@ -1,10 +1,12 @@
-from elasticsearch_params import *
+from elasticsearch_params import LOWCASE_ASCII_NORMALIZER
+from elasticsearch_params import NAME_ANALYZER
+from elasticsearch_params import NAME_ANALYZER_SYNONYMS
 
 # Mapeos de entidades para Elasticsearch
 # Por cada entidad, se define un mapeo sin geometría, con campos indexados,
 # y otro con geometría, con el resto de los campos sin indexar.
 # La separación en dos mapeos por entidad se debe a que las geometrías tienden
-# a aumentar significativamente el tamaño de los documentos, por lo que la 
+# a aumentar significativamente el tamaño de los documentos, por lo que la
 # performance de la búsqueda por id/texto/etc se ve disminuida.
 
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
@@ -15,7 +17,7 @@ MAP_STATE = {
             'id': {'type': 'keyword'},
             'nombre': {
                 'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER,
                 'fields': {
                     'exacto': {
@@ -48,7 +50,7 @@ MAP_DEPT = {
             'id': {'type': 'keyword'},
             'nombre': {
                 'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER,
                 'fields': {
                     'exacto': {
@@ -66,7 +68,7 @@ MAP_DEPT = {
                     'id': {'type': 'keyword'},
                     'nombre': {
                         'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'analyzer': NAME_ANALYZER_SYNONYMS,
                         'search_analyzer': NAME_ANALYZER,
                         'fields': {
                             'exacto': {
@@ -100,7 +102,7 @@ MAP_MUNI = {
             'id': {'type': 'keyword'},
             'nombre': {
                 'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER,
                 'fields': {
                     'exacto': {
@@ -118,7 +120,7 @@ MAP_MUNI = {
                     'id': {'type': 'keyword'},
                     'nombre': {
                         'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'analyzer': NAME_ANALYZER_SYNONYMS,
                         'search_analyzer': NAME_ANALYZER,
                         'fields': {
                             'exacto': {
@@ -136,7 +138,7 @@ MAP_MUNI = {
                     'id': {'type': 'keyword'},
                     'nombre': {
                         'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'analyzer': NAME_ANALYZER_SYNONYMS,
                         'search_analyzer': NAME_ANALYZER,
                         'fields': {
                             'exacto': {
@@ -171,7 +173,7 @@ MAP_SETTLEMENT = {
             'id': {'type': 'keyword'},
             'nombre': {
                 'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER,
                 'fields': {
                     'exacto': {
@@ -190,7 +192,7 @@ MAP_SETTLEMENT = {
                     'id': {'type': 'keyword'},
                     'nombre': {
                         'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'analyzer': NAME_ANALYZER_SYNONYMS,
                         'search_analyzer': NAME_ANALYZER,
                         'fields': {
                             'exacto': {
@@ -208,7 +210,7 @@ MAP_SETTLEMENT = {
                     'id': {'type': 'keyword'},
                     'nombre': {
                         'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'analyzer': NAME_ANALYZER_SYNONYMS,
                         'search_analyzer': NAME_ANALYZER,
                         'fields': {
                             'exacto': {
@@ -226,7 +228,7 @@ MAP_SETTLEMENT = {
                     'id': {'type': 'keyword'},
                     'nombre': {
                         'type': 'text',
-                        'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                        'analyzer': NAME_ANALYZER_SYNONYMS,
                         'search_analyzer': NAME_ANALYZER,
                         'fields': {
                             'exacto': {
@@ -267,7 +269,7 @@ MAP_STREET = {
             'id': {'type': 'keyword'},
             'nombre': {
                 'type': 'text',
-                'analyzer': NAME_ANALYZER_ROAD_SYNONYMS,
+                'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER,
                 'fields': {
                     'exacto': {
@@ -278,7 +280,7 @@ MAP_STREET = {
             },
             'tipo': {
                 'type': 'text',
-                'analyzer': NAME_ANALYZER_ROAD_SYNONYMS,
+                'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER
             },
             'inicio_derecha': {
@@ -309,7 +311,7 @@ MAP_STREET = {
             },
             'provincia': {
                 'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER,
                 'fields': {
                     'exacto': {
@@ -320,7 +322,7 @@ MAP_STREET = {
             },
             'departamento': {
                 'type': 'text',
-                'analyzer': NAME_ANALYZER_ENTITY_SYNONYMS,
+                'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER,
                 'fields': {
                     'exacto': {
