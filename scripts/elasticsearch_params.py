@@ -1,5 +1,3 @@
-INDEXES = ['provincias', 'departamentos', 'municipios', 'bahra']
-
 SPANISH_STOP_WORDS = [
     'la', 'las', 'el', 'los', 'de', 'del', 'y', 'e', 'lo', 'al', 'd'
 ]

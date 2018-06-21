@@ -1,6 +1,50 @@
-doctoc: ## generate table of contents, doctoc command line tool required
-        ## https://github.com/thlorenz/doctoc
-        ## hay que ir al documento y manualmente agregar un espacio entre los
-        ## comentarios especiales de doctoc y el --title para que se vea bien
-	doctoc --title "## Indice" README.md
-	bash fix_github_links.sh docs/api_reference.md
+BASE_CMD = python scripts/index_utils.py
+TIMEOUT = 320
+
+indexar_vias:
+	$(BASE_CMD) indexar -n vias -i -t $(TIMEOUT)
+
+borrar_vias:
+	$(BASE_CMD) borrar -n vias -i
+
+indexar_provincias:
+	$(BASE_CMD) indexar -n provincias -i -t $(TIMEOUT)
+
+borrar_provincias:
+	$(BASE_CMD) borrar -n provincias -i
+
+indexar_departamentos:
+	$(BASE_CMD) indexar -n departamentos -i -t $(TIMEOUT)
+
+borrar_departamentos:
+	$(BASE_CMD) borrar -n departamentos -i
+
+indexar_municipios:
+	$(BASE_CMD) indexar -n municipios -i -t $(TIMEOUT)
+
+borrar_municipios:
+	$(BASE_CMD) borrar -n municipios -i
+
+indexar_bahra:
+	$(BASE_CMD) indexar -n bahra -i -t $(TIMEOUT)
+
+borrar_bahra:
+	$(BASE_CMD) borrar -n bahra -i
+
+indexar_todos: \
+	indexar_vias \
+	indexar_provincias \
+	indexar_departamentos \
+	indexar_municipios \
+	indexar_bahra
+
+borrar_todos: \
+	borrar_vias \
+	borrar_provincias \
+	borrar_departamentos \
+	borrar_municipios \
+	borrar_bahra
+
+listar_indices:
+	$(BASE_CMD) listar
+

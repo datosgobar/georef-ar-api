@@ -12,7 +12,7 @@ from elasticsearch_params import NAME_ANALYZER_SYNONYMS
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
 
 MAP_STATE = {
-    'provincia': {
+    '_doc': {
         'properties': {
             'id': {'type': 'keyword'},
             'nombre': {
@@ -33,7 +33,7 @@ MAP_STATE = {
 }
 
 MAP_STATE_GEOM = {
-    'provincia': {
+    '_doc': {
         'properties': {
             'id': {'type': 'keyword', 'index': False},
             'nombre': {'type': 'keyword', 'index': False},
@@ -45,7 +45,7 @@ MAP_STATE_GEOM = {
 }
 
 MAP_DEPT = {
-    'departamento': {
+    '_doc': {
         'properties': {
             'id': {'type': 'keyword'},
             'nombre': {
@@ -84,7 +84,7 @@ MAP_DEPT = {
 }
 
 MAP_DEPT_GEOM = {
-    'departamento': {
+    '_doc': {
         'properties': {
             'id': {'type': 'keyword', 'index': False},
             'nombre': {'type': 'keyword', 'index': False},
@@ -97,7 +97,7 @@ MAP_DEPT_GEOM = {
 }
 
 MAP_MUNI = {
-    'municipio': {
+    '_doc': {
         'properties': {
             'id': {'type': 'keyword'},
             'nombre': {
@@ -154,7 +154,7 @@ MAP_MUNI = {
 }
 
 MAP_MUNI_GEOM = {
-    'municipio': {
+    '_doc': {
         'properties': {
             'id': {'type': 'keyword', 'index': False},
             'nombre': {'type': 'keyword', 'index': False},
@@ -168,7 +168,7 @@ MAP_MUNI_GEOM = {
 }
 
 MAP_SETTLEMENT = {
-    'asentamiento': {
+    '_doc': {
         'properties': {
             'id': {'type': 'keyword'},
             'nombre': {
@@ -244,7 +244,7 @@ MAP_SETTLEMENT = {
 }
 
 MAP_SETTLEMENT_GEOM = {
-    'asentamiento': {
+    '_doc': {
         'properties': {
             'id': {'type': 'keyword', 'index': False},
             'nombre': {'type': 'keyword', 'index': False},
@@ -260,7 +260,7 @@ MAP_SETTLEMENT_GEOM = {
 }
 
 MAP_STREET = {
-    'calle': {
+    '_doc': {
         'properties': {
             'nomenclatura': {
                 'type': 'text',
