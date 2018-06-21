@@ -32,6 +32,7 @@ CREATE EXTENSION postgis;
 - Clonar el repositorio:
 
     `$ git clone https://github.com/datosgobar/georef-api.git`
+
 	`$ cd georef-api`
     
 - Crear un entorno virtual y activarlo:

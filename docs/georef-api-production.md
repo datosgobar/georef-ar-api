@@ -35,6 +35,7 @@ CREATE EXTENSION postgis;
 - Clonar el repositorio:
 
     `$ git clone https://github.com/datosgobar/georef-api.git`
+
 	`$ cd georef-api`
     
 - Crear un entorno virtual y activarlo:
@@ -135,6 +136,7 @@ Agregar la configuración de los servicios `gunicorn` y `nginx`.
 - Activar y arrancar el servicio:
 
 	`# systemctl enable georef-api.service`
+
     `# systemctl start georef-api.service`
 
 - Para `nginx`, crear `/etc/nginx/sites-available/georef-api` tomando como base la configuración del archivo `georef-api.nginx` [de este repositorio](config/georef-api.nginx).
