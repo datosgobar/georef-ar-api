@@ -6,45 +6,46 @@
 - [Gunicorn](http://gunicorn.org/)
 - [Nginx](https://nginx.org/)
 - [Python >=3.6.x](https://www.python.org/downloads/)
-- [Pip](https://pip.pypa.io/en/stable/installing/)
 - [PostgreSQL 9.6](https://www.postgresql.org/download/)
-- [PostGis 2.3](http://postgis.net/install/)
-- [Virtualenv](https://packaging.python.org/guides/installing-using-pip-and-virtualenv/)
-- Wget
+- [PostGIS 2.3](http://postgis.net/install/)
+- `wget`
 
-## Datos
+## Instalación
+
+### Datos
 
 En [este documento](georef-api-data.md) se detalla el modelo de datos utilizado por la API y las URLs donde se encuentran publicados. 
 
-## Base de datos
+### Base de datos
 
-Crear una base de datos en PostgreSQL con la extensión Postgis.
+Crear una base de datos en PostgreSQL con la extensión PostGIS.
 
 Ejemplo utilizando `georef_api` como nombre para la base de datos:
 
 ```plsql
--- Creando base de datos
+-- Crear la base de datos
 CREATE DATABASE georef_api WITH ENCODING='UTF8';
 
--- Agregando Postgis a la base de datos creada
+-- Agregar PostGIS a la base de datos creada
 CREATE EXTENSION postgis;
 ```
 
-## Instalación
+### Repositorio y dependencias
 
-- Clonar repositorio:
+- Clonar el repositorio:
 
     `$ git clone https://github.com/datosgobar/georef-api.git`
+	`$ cd georef-api`
     
 - Crear un entorno virtual y activarlo:
 
-    `$ python3.6 -m venv venv`
+    `$ python3 -m venv venv`
     
     `$ . venv/bin/activate`
 
-- Instalar dependencias con _pip_:
+- Instalar dependencias con `pip`:
     
-    `(venv)$ pip install -r requirements.txt`
+    `(venv)$ pip3 install -r requirements.txt`
     
 - Copiar las variables de entorno:
 
@@ -75,9 +76,9 @@ CREATE EXTENSION postgis;
 
     `(venv)$ python scripts/functions_load.py`
  
-## Elasticsearch
+### Elasticsearch
 
-- Instalar dependencias _JDK_ version 1.8.0_131:
+- Instalar el entorno de ejecución para Java:
 
     `$ sudo apt install default-jre`
   
@@ -87,7 +88,7 @@ CREATE EXTENSION postgis;
 
     `# dpkg -i elasticsearch-6.2.0.deb`
 
-- Configuraciones recomendadas:
+- Opcionalmente, aplicar las configuraciones recomendadas:
 
     `$ sudo vi /etc/elasticsearch/elasticsearch.yml`
 
@@ -107,27 +108,23 @@ CREATE EXTENSION postgis;
     -Xmx4g
     ```
     
-- Probar el servicio:
+- Probar el servicio Elasticsearch:
 
     `$ curl -X GET 'http://localhost:9200'`
 
-### Generar índices
+### Crear los índices
 
 - Importar variables de entorno:
     
     `(venv)$ . environment.sh`
     
-- Generar índices de entidades:
+- Generar índices de entidades. Se debe contar con los archivos de datos para entidades mencionados al comienzo de la guía, y sus directorios deben estar en las variables de entorno (vía el archivo `environment.sh`).
 
-    `(venv)$ python scripts/index_entities.py crear-entidades`
-    
-- Generar índices de vías de circulación:
+    `(venv)$ make indexar_todos`
+        
+- Listar los índices creados:
 
-    `(venv)$ python scripts/index_entities.py crear-vias`
-
-- Listar otros comandos utiles:
-
-    `(venv)$ python scripts/index_entities.py`
+    `(venv)$ make listar_indices`
 
 ## Correr API  
 
@@ -135,8 +132,9 @@ Agregar la configuración de los servicios `gunicorn` y `nginx`.
 
 - Configurar servicio en `/etc/systemd/system/`. Completar y modificar el archivo `georef-api.service` [de este repositorio](config/georef-api.service).
 
-- Levantar el servicio:
+- Activar y arrancar el servicio:
 
+	`# systemctl enable georef-api.service`
     `# systemctl start georef-api.service`
 
 - Para `nginx`, crear `/etc/nginx/sites-available/georef-api` tomando como base la configuración del archivo `georef-api.nginx` [de este repositorio](config/georef-api.nginx).
@@ -151,7 +149,7 @@ Agregar la configuración de los servicios `gunicorn` y `nginx`.
 
     `# ln -s /etc/nginx/sites-available/georef-api /etc/nginx/sites-enabled/georef-api`
 
-- Validar configuración:
+- Validar la configuración:
 
     `# nginx -t`
 
