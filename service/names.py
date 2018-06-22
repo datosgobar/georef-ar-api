@@ -36,7 +36,6 @@ END_R = 'fin_derecha'
 END_L = 'fin_izquierda'
 START_R = 'inicio_derecha'
 START_L = 'inicio_izquierda'
-OBS = 'observaciones'
 SOURCE = 'fuente'
 INFO = 'info'
 ERROR = 'error'
@@ -72,3 +71,8 @@ INVALID_PARAM = 'El parámetro \'{param}\' no es válido para el recurso /{res}.
 EMPTY_PARAM = 'El parámetro \'{param}\' no puede estar vacío.'
 LAT_REQUIRED = 'El parámetro \'lat\' es obligatorio.'
 LON_REQUIRED = 'El parámetro \'lon\' es obligatorio.'
+
+# Fuentes
+SOURCE_INDEC = 'INDEC'
+SOURCE_BAHRA = 'BAHRA'
+SOURCE_IGN = 'IGN'

@@ -42,8 +42,8 @@ ENDPOINT_OBLIGATORY_FIELDS = {
     DEPARTMENTS: [ID, NAME],
     MUNICIPALITIES: [ID, NAME],
     SETTLEMENTS: [ID, NAME],
-    STREETS: [ID, NAME, OBS],
-    ADDRESSES: [ID, NAME, DOOR_NUM, GEOM, START_R, START_L, END_R, END_L, OBS,
+    STREETS: [ID, NAME],
+    ADDRESSES: [ID, NAME, DOOR_NUM, GEOM, START_R, START_L, END_R, END_L,
         LOCATION]
 }
 
@@ -168,8 +168,7 @@ def build_search_from(params):
         'max': max,
         'exact': exact,
         'source': source,
-        'fields': fields,
-        'text': params.get(ADDRESS)  # Raw user input.
+        'fields': fields
     }
 
 

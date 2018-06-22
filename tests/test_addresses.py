@@ -39,7 +39,7 @@ class SearchAddressesTest(SearchEntitiesTest):
             'id',
             'nombre',
             'nomenclatura',
-            'observaciones',
+            'fuente',
             'provincia',
             'tipo',
             'ubicacion'
@@ -49,10 +49,10 @@ class SearchAddressesTest(SearchEntitiesTest):
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""
         fields_lists = [
-            ['altura', 'id', 'nombre', 'observaciones', 'ubicacion'],
-            ['altura', 'id', 'nombre', 'nomenclatura', 'observaciones', 
+            ['altura', 'fuente', 'id', 'nombre', 'ubicacion'],
+            ['altura', 'fuente', 'id', 'nombre', 'nomenclatura',
                 'ubicacion'],
-            ['altura', 'departamento','id', 'nombre', 'observaciones',
+            ['altura', 'departamento', 'fuente', 'id', 'nombre',
                 'ubicacion']
         ]
         fields_results = []

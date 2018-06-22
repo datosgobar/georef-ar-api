@@ -35,6 +35,7 @@ class SearchStreetsTest(SearchEntitiesTest):
         data = self.get_response({'max': 1})[0]
         fields = sorted([
             'departamento',
+            'fuente',
             'id',
             'fin_derecha',
             'fin_izquierda',
@@ -42,7 +43,6 @@ class SearchStreetsTest(SearchEntitiesTest):
             'inicio_izquierda',
             'nombre',
             'nomenclatura',
-            'observaciones',
             'provincia',
             'tipo'
         ])
@@ -51,10 +51,10 @@ class SearchStreetsTest(SearchEntitiesTest):
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""
         fields_lists = [
-            ['id', 'nombre', 'observaciones'],
-            ['id', 'nombre', 'nomenclatura', 'observaciones'],
-            ['departamento', 'id', 'nombre', 'observaciones'],
-            ['id', 'inicio_derecha', 'nombre', 'observaciones'],
+            ['fuente', 'id', 'nombre'],
+            ['fuente', 'id', 'nombre', 'nomenclatura'],
+            ['departamento', 'fuente', 'id', 'nombre'],
+            ['fuente', 'id', 'inicio_derecha', 'nombre'],
         ]
         fields_results = []
 

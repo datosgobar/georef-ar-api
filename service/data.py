@@ -89,7 +89,7 @@ def query_entity(es, index, entity_id=None, name=None, state=None,
     }    
     
     result = es.search(index=index, body=query)
-    return [parse_entity(hit, flatten) for hit in result['hits']['hits']]
+    return [parse_es(hit, flatten, index) for hit in result['hits']['hits']]
 
 
 def query_streets(es, name=None, department=None, state=None, road=None,
@@ -154,9 +154,9 @@ def query_streets(es, name=None, department=None, state=None, road=None,
         'size': max or DEFAULT_MAX,
         '_source': fields
     }
-    
+
     result = es.search(index=index, body=query)
-    return [parse_es(hit) for hit in result['hits']['hits']]
+    return [parse_es(hit, False, index) for hit in result['hits']['hits']]
 
 
 def query_address(es, search_params):
@@ -300,35 +300,32 @@ def build_match_condition(field, value, fuzzy=False, operator='or'):
     return {'match': query}
 
 
-def parse_entity(result, flatten):
+def parse_es(result, flatten, index):
     """Procesa un resultado de ElasticSearch para modificarlo.
 
     Args:
         result (dict): Diccionario con resultado.
         flatten (bool): Bandera para habilitar que el resultado sea aplanado.
-
-    Returns:
-        dict: Resultado modificado.
-    """
-    entity = result['_source']
-    if flatten:
-        get_flatten_result(entity)
-    return entity
-
-
-def parse_es(result):
-    """Procesa un resultado de ElasticSearch para modificarlo.
-
-    Args:
-        result (dict): Diccionario con resultado.
+        index (str): Índice donde el resultado fue encontrado.
 
     Returns:
         dict: Resultado modificado.
     """
     result = result['_source']
-    obs = {SOURCE: 'INDEC'}
-    result[OBS] = obs
-    result.pop(POSTAL_CODE, None)
+    if flatten:
+        get_flatten_result(result)
+
+    if index in [STATES, DEPARTMENTS, MUNICIPALITIES]:
+        source = SOURCE_IGN
+    elif index == SETTLEMENTS:
+        source = SOURCE_BAHRA
+    elif index.startswith(STREETS):
+        source = SOURCE_INDEC
+    else:
+        raise ValueError(
+            'No se pudo determinar la fuente de: {}'.format(index))
+
+    result[SOURCE] = source
     return result
 
 
@@ -374,8 +371,7 @@ def parse_osm(result):
         NAME: result['address'].get('road'),
         ROAD_TYPE: parse_osm_type(result['type']),
         LOCALITY: result['address'].get('city'),
-        STATE: result['address'].get('state'),
-        OBS: {SOURCE: 'OSM'}
+        STATE: result['address'].get('state')
     }
 
 
@@ -426,10 +422,8 @@ def search_es(es, params):
         
         if not loc:
             street[LOCATION] = {LAT: None, LON: None}
-            street[OBS][INFO] = CANNOT_GEOCODE_ADDRESS
         else:
             street[LOCATION] = loc
-            street[OBS][INFO] = ADDRESS_PROCESSED_OK
 
         remove_spatial_data_from(street)
         addresses.append(street)

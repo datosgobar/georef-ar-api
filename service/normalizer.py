@@ -184,7 +184,6 @@ def process_street(request):
         return parser.get_response_for_invalid(request, message=error)
 
     name = request.args.get(NAME)
-    locality = request.args.get(LOCALITY)
     department = request.args.get(DEPT)
     state = request.args.get(STATE)
     road_type = request.args.get(ROAD_TYPE)

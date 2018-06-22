@@ -56,6 +56,7 @@ class SearchLocalityTest(SearchEntitiesTest):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
         fields = sorted([
+            'fuente',
             'id',
             'lat',
             'lon',
@@ -70,12 +71,12 @@ class SearchLocalityTest(SearchEntitiesTest):
     def test_filter_results_fields(self):
         """Los campos de las localidades devueltas deben ser filtrables."""
         fields_lists = [
-            ['id', 'nombre'],
-            ['id', 'lat', 'lon', 'nombre'],
-            ['id', 'lat', 'nombre'],
-            ['id', 'lat', 'nombre', 'provincia'],
-            ['departamento', 'id', 'nombre'],
-            ['id', 'municipio', 'nombre', 'provincia']
+            ['fuente', 'id', 'nombre'],
+            ['fuente', 'id', 'lat', 'lon', 'nombre'],
+            ['fuente', 'id', 'lat', 'nombre'],
+            ['fuente', 'id', 'lat', 'nombre', 'provincia'],
+            ['departamento', 'fuente', 'id', 'nombre'],
+            ['fuente', 'id', 'municipio', 'nombre', 'provincia']
         ]
         fields_results = []
 

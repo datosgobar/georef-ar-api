@@ -305,10 +305,6 @@ MAP_STREET = {
                 'type': 'text',
                 'index': False
             },
-            'codigo_postal': {
-                'type': 'text',
-                'index': False
-            },
             'provincia': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,

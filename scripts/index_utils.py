@@ -148,7 +148,8 @@ def create_index(es, name, ignore):
             data = read_json(file_path)
 
             try:
-                index_entity(es, data, index_name, MAP_STREET)
+                index_entity(es, data, index_name, MAP_STREET,
+                             ['codigo_postal'])
             except IndexExistsException as e:
                 if ignore:
                     print(

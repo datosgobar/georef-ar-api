@@ -65,15 +65,15 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['id', 'lat', 'lon', 'nombre'])
+        fields = sorted(['id', 'lat', 'lon', 'nombre', 'fuente'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de las provincias devueltas deben ser filtrables."""
         fields_lists = [
-            ['id', 'nombre'],
-            ['id', 'lat', 'lon', 'nombre'],
-            ['id', 'lat', 'nombre']
+            ['fuente', 'id', 'nombre'],
+            ['fuente', 'id', 'lat', 'lon', 'nombre'],
+            ['fuente', 'id', 'lat', 'nombre']
         ]
         fields_results = []
 
