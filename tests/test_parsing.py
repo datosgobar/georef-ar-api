@@ -8,17 +8,6 @@ import json
 
 class InputParsingTest(TestCase):
     """Pruebas de procesamiento de parámetros de entrada de la API."""
-    def test_query_with_locality_provided(self):
-        """El parámetro 'localidad' está presente en el request."""
-        with app.test_request_context('?direccion&localidad=Buenos+Aires'):
-            search = parser.build_search_from(flask.request.args)
-            assert search['locality'] == 'Buenos Aires'
-
-    def test_query_with_locality_not_provided(self):
-        """El parámetro 'localidad' no está en el request."""
-        with app.test_request_context('?direccion'):
-            search = parser.build_search_from(flask.request.args)
-            assert search['locality'] is None
 
     def test_query_with_state_provided(self):
         """El parámetro 'provincia' está presente en el request."""

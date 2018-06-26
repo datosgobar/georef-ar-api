@@ -402,6 +402,7 @@ def search_es(es, params):
                             department=params['department'],
                             fields=params['fields'], max=params['max'],
                             exact=params['exact'], number=number)
+
     addresses = []
     for street in streets:
         update_result_with(street, number)
@@ -414,6 +415,9 @@ def search_es(es, params):
             street[LOCATION] = loc
 
         remove_spatial_data_from(street)
+        if params['flatten']:
+            flatten_dict(street)
+
         addresses.append(street)
 
     return addresses

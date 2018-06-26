@@ -32,7 +32,7 @@ ENDPOINT_PARAMS = {
                      FORMAT, EXACT],
     SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, MUN, FLATTEN, MAX,
                   FORMAT, EXACT],
-    ADDRESSES: [ADDRESS, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, EXACT],
+    ADDRESSES: [ADDRESS, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, EXACT, FLATTEN],
     STREETS: [NAME, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, EXACT],
     PLACE: [LAT, LON, FLATTEN]
 }
@@ -124,18 +124,6 @@ def get_fields(args, resource):
     return list(set(args.split(',') + ENDPOINT_OBLIGATORY_FIELDS[resource]))
 
 
-def get_search_from_string(address_str):
-    """Procesa los componentes de una dirección en una cadena de texto.
-
-    Args:
-        address_str (str): Texto que representa una dirección.
-
-    Returns:
-        dict: Parámetros de búsqueda.
-    """
-    return build_search_from({ADDRESS: address_str})
-
-
 def build_search_from(params):
     """Arma un diccionario con los parámetros de búsqueda de una consulta.
 
@@ -148,26 +136,22 @@ def build_search_from(params):
     address = params.get(ADDRESS).split(',')
     road_name, number = get_parts_from(address[0].strip())
     road_type = params.get(ROAD_TYPE)
-    locality = params.get(LOCALITY)
     department = params.get(DEPT)
     state = params.get(STATE)
     max = params.get(MAX)
+    flatten = FLATTEN in params
     exact = EXACT in params
-    source = params.get(SOURCE)
     fields = get_fields(params.get(FIELDS), ADDRESSES)
-    if len(address) > 1:
-        locality = address[1].strip()
 
     return {
         'number': number,
         'road_name': road_name,
         'road_type': road_type,
-        'locality': locality,
         'department': department,
         'state': state,
         'max': max,
         'exact': exact,
-        'source': source,
+        'flatten': flatten,
         'fields': fields
     }
 

@@ -264,8 +264,12 @@ def address_post(request):
             return parser.get_response_for_invalid(request, message=EMPTY_DATA)
         try:
             es = get_elasticsearch()
+
             for address in addresses:
-                search = parser.get_search_from_string(address)
+                search = parser.build_search_from({
+                    ADDRESS: address
+                })
+
                 matches.append({
                     'original': address,
                     'normalizadas': data.query_address(es, search)

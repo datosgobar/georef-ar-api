@@ -30,6 +30,18 @@ class SearchAddressesTest(SearchEntitiesTest):
         data = self.get_response({'direccion': VALID_ADDRESS, 'max': 1})[0]
         self.assertTrue(len(data['id']) == 13)
 
+    def test_flatten_results(self):
+        """Los resultados se deberían poder obtener en formato aplanado."""
+        data = self.get_response({
+            'direccion': VALID_ADDRESS,
+            'max': 1,
+            'aplanar': True
+        })[0]
+
+        self.assertTrue(all([
+            not isinstance(v, dict) for v in data.values()
+        ]) and data)
+
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'direccion': VALID_ADDRESS, 'max': 1})[0]
