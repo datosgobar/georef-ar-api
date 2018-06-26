@@ -6,7 +6,6 @@ Contiene funciones que manejan la lógica de procesamiento
 de los recursos que expone la API.
 """
 
-from functools import wraps
 from service import data, parser
 from service.names import *
 from service.parser import flatten_dict
@@ -334,13 +333,3 @@ def process_place(request):
         abort(500)
 
     return parser.get_response({PLACE: place})
-
-
-def disable_cache(f):
-    @wraps(f)
-    def decorated_func(*args, **kwargs):
-        resp = f(*args, **kwargs)
-        resp.cache_control.no_cache = True
-        return resp
-
-    return decorated_func

@@ -8,6 +8,17 @@ invoca las funciones que procesan dichos recursos.
 
 from service import app, normalizer
 from flask import request
+from functools import wraps
+
+
+def disable_cache(f):
+    @wraps(f)
+    def decorated_func(*args, **kwargs):
+        resp = f(*args, **kwargs)
+        resp.cache_control.no_cache = True
+        return resp
+
+    return decorated_func
 
 
 @app.route('/api/v1.0/provincias', methods=['GET'])
@@ -53,6 +64,6 @@ def get_addresses():
 
 
 @app.route('/api/v1.0/ubicacion', methods=['GET'])
-@normalizer.disable_cache
+@disable_cache
 def get_placement():
     return normalizer.process_place(request)
