@@ -9,8 +9,7 @@ e impactan dicha búsqueda contra las fuentes de datos disponibles.
 import os
 import psycopg2
 import requests
-from collections import defaultdict
-from service.parser import get_flatten_result
+from service.parser import flatten_dict
 from service.names import *
 
 MIN_AUTOCOMPLETE_CHARS = 4
@@ -175,7 +174,7 @@ def query_address(es, search_params):
     return matches
 
 
-def query_place(es, index, lat, lon, flatten=False):
+def query_place(es, index, lat, lon, fields=None):
     """Busca a que entidades políticas (municipios, departamentos, o provincias)
         pertenece una ubicación según parámetros de búsqueda de una consulta.
 
@@ -184,11 +183,14 @@ def query_place(es, index, lat, lon, flatten=False):
         index (str): Nombre del índice sobre el cual realizar la búsqueda.
         lat (str): Latitud correspondiente a una ubicación.
         lon (str): Longitud correspondiente a una ubicación.
-        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
+        fields (list): Campos a incluir en los resultados.
 
     Returns:
         list: Resultados de búsqueda de una ubicación.
     """
+    if not fields:
+        fields = []
+
     query = {
         'query': {
             'bool': {
@@ -205,13 +207,18 @@ def query_place(es, index, lat, lon, flatten=False):
             }
         },
         '_source': {
+            'includes': fields,
             'excludes': [GEOM]
-        }
+        },
+        'size': 1
     }
 
     result = es.search(index=index, body=query)
-    return [parse_place(hit, index, flatten) for hit in result['hits']['hits']]
+    entities = result['hits']['hits']
+    if entities:
+        return parse_es(entities[0], False, index, add_source=False)
 
+    return None
 
 def build_name_condition(field, value, exact=False):
     """Crea una condición de búsqueda por nombre para Elasticsearch.
@@ -300,59 +307,41 @@ def build_match_condition(field, value, fuzzy=False, operator='or'):
     return {'match': query}
 
 
-def parse_es(result, flatten, index):
+def get_index_source(index):
+    """Devuelve la fuente para un índice dado.
+
+    Args:
+        index (str): Nombre del índice.
+    """
+    if index in [STATES, DEPARTMENTS, MUNICIPALITIES]:
+        return SOURCE_IGN
+    elif index == SETTLEMENTS:
+        return SOURCE_BAHRA
+    elif index.startswith(STREETS):
+        return SOURCE_INDEC
+    else:
+        raise ValueError(
+            'No se pudo determinar la fuente de: {}'.format(index))
+
+
+def parse_es(result, flatten, index, add_source=True):
     """Procesa un resultado de ElasticSearch para modificarlo.
 
     Args:
         result (dict): Diccionario con resultado.
         flatten (bool): Bandera para habilitar que el resultado sea aplanado.
         index (str): Índice donde el resultado fue encontrado.
+        add_source (bool): Si es verdadero, agrega la fuente a los resultados.
 
     Returns:
         dict: Resultado modificado.
     """
     result = result['_source']
     if flatten:
-        get_flatten_result(result)
+        flatten_dict(result, max_depth=2)
 
-    if index in [STATES, DEPARTMENTS, MUNICIPALITIES]:
-        source = SOURCE_IGN
-    elif index == SETTLEMENTS:
-        source = SOURCE_BAHRA
-    elif index.startswith(STREETS):
-        source = SOURCE_INDEC
-    else:
-        raise ValueError(
-            'No se pudo determinar la fuente de: {}'.format(index))
-
-    result[SOURCE] = source
-    return result
-
-
-def parse_place(result, index, flatten):
-    """Procesa un resultado de ElasticSearch para modificarlo.
-
-    Args:
-        result (dict): Diccionario con resultado.
-        index (str): Nombre del índice sobre el cual se realizó la búsqueda.
-        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
-
-    Returns:
-        dict: Resultado modificado.
-    """
-    result = result['_source']
-    result = dict(result)
-    if index.startswith(MUNICIPALITIES):
-        add = {MUN: {ID: result[ID], NAME: result[NAME]}}
-    else:
-        add = {DEPT: {ID: result[ID], NAME: result[NAME]}}
-
-    result.update(add)
-    result.pop(ID)
-    result.pop(NAME)
-
-    if flatten:
-        get_flatten_result(result)
+    if add_source:
+        result[SOURCE] = get_index_source(index)
 
     return result
 
@@ -417,9 +406,8 @@ def search_es(es, params):
     for street in streets:
         update_result_with(street, number)
 
-        loc = location(street[GEOM], number, street[START_R], 
-            street[END_L])
-        
+        loc = location(street[GEOM], number, street[START_R], street[END_L])
+
         if not loc:
             street[LOCATION] = {LAT: None, LON: None}
         else:

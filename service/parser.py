@@ -258,16 +258,25 @@ def generate_csv(result):
             first = False
 
 
-def get_flatten_result(result):
-    """ Procesa y retorna los datos aplanados.
+def flatten_dict(d, max_depth=4):
+    """ Aplana un diccionario recursivamente.
+    Lanza un RuntimeError si no se pudo aplanar el diccionario
+    con el número especificado de profundidad.
 
     Args:
-        result (dict): Diccionario con resultados de una consulta.
+        d (dict): Diccionario a aplanar.
+        max_depth (int): Profundidad máxima a alcanzar.
     """
-    for field in list(result):
-        if isinstance(result[field], dict):
-            for key, value in result[field].items():
-                result['_'.join([field, key])] = value
-            del result[field]
+    if max_depth <= 0:
+        raise RuntimeError("Profundidad máxima alcanzada.")
 
-    return result
+    for key in list(d.keys()):
+        v = d[key]
+        if isinstance(v, dict):
+            flatten_dict(v, max_depth - 1)
+
+            for subkey, subval in v.items():
+                flat_key = '_'.join([key, subkey])
+                d[flat_key] = subval
+
+            del d[key]

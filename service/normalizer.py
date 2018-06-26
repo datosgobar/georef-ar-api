@@ -9,6 +9,7 @@ de los recursos que expone la API.
 from functools import wraps
 from service import data, parser
 from service.names import *
+from service.parser import flatten_dict
 from elasticsearch import Elasticsearch, ElasticsearchException
 from flask import g, abort
 
@@ -300,14 +301,39 @@ def process_place(request):
     try:
         es = get_elasticsearch()
         muni_index = MUNICIPALITIES + '-' + GEOM
-        matches = data.query_place(es, muni_index, lat, lon, flatten)
-        if not matches:
-            dept_index = DEPARTMENTS + '-' + GEOM
-            matches = data.query_place(es, dept_index, lat, lon, flatten)
+        dept_index = DEPARTMENTS + '-' + GEOM
+
+        dept = data.query_place(es, dept_index, lat, lon, [ID, NAME, STATE])
+
+        if dept:
+            muni = data.query_place(es, muni_index, lat, lon, [ID, NAME])
+            # Remover la provincia del departamento y colocarla directamente
+            # en el resultado. Haciendo esto se logra evitar una consulta
+            # al índice de provincias.
+            state = dept.pop(STATE)
+
+            place = {
+                MUN: muni,
+                DEPT: dept,
+                STATE: state,
+                LAT: lat,
+                LON: lon
+            }
+
+            if muni:
+                place[SOURCE] = data.get_index_source(MUNICIPALITIES)
+            else:
+                place[SOURCE] = data.get_index_source(DEPARTMENTS)
+
+            if flatten:
+                flatten_dict(place, max_depth=2)
+        else:
+            place = {}
+
     except ElasticsearchException:
         abort(500)
 
-    return parser.get_response({PLACE: matches})
+    return parser.get_response({PLACE: place})
 
 
 def disable_cache(f):
