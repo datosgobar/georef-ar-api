@@ -314,19 +314,24 @@ def process_place(request):
             # en el resultado. Haciendo esto se logra evitar una consulta
             # al índice de provincias.
             state = dept.pop(STATE)
-
-            place = {
-                MUN: muni,
-                DEPT: dept,
-                STATE: state,
-                LAT: lat,
-                LON: lon
-            }
+            place = {}
 
             if muni:
                 place[SOURCE] = data.get_index_source(MUNICIPALITIES)
             else:
+                # Si la municipalidad no fue encontrada, mantener la misma
+                # estructura de datos en la respuesta.
+                muni = {
+                    ID: None,
+                    NAME: None
+                }
                 place[SOURCE] = data.get_index_source(DEPARTMENTS)
+
+            place[MUN] = muni
+            place[DEPT] = dept
+            place[STATE] = state
+            place[LAT] = lat
+            place[LON] = lon
 
             if flatten:
                 flatten_dict(place, max_depth=2)

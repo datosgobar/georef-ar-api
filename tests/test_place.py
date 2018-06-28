@@ -77,7 +77,8 @@ class SearchPlaceTest(SearchEntitiesTest):
         el campo 'municipio' debe tener un valor nulo."""
         place = PLACES_NO_MUNI[0]
         data = self.get_response({'lat': place[0], 'lon': place[1]})
-        self.assertEqual(data['municipio'], None)
+        muni = data['municipio']
+        self.assertTrue(muni['id'] is None and muni['nombre'] is None)
 
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
