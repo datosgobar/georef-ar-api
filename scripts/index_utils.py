@@ -145,7 +145,7 @@ def create_index(es, name, ignore):
         for state_id in STATE_IDS:
             index_name = 'calles-' + state_id
             file_path = os.path.join(base_path, index_name + '.json')
-            data = read_json(file_path)
+            data = read_json(file_path)['vias']
 
             try:
                 index_entity(es, data, index_name, MAP_STREET,
@@ -176,7 +176,7 @@ def create_entity_index(es, file_path, index, mapping, mapping_geom, ignore):
         ignore (bool): Si es verdadero, se ignoran ciertas excepciones lanzadas
     """
 
-    data = read_json(file_path)
+    data = read_json(file_path)['entidades']
 
     try:
         # Crear índice para la entidad sin geometrías
