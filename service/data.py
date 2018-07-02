@@ -83,7 +83,8 @@ def query_entity(es, index, entity_id=None, name=None, state=None,
         'size': max or DEFAULT_MAX,
         'sort': sorts,
         '_source': {
-            'include': fields
+            'include': fields,
+            'exclude': [TIMESTAMP]
         }
     }    
     
@@ -151,7 +152,10 @@ def query_streets(es, name=None, department=None, state=None, road=None,
             }
         },
         'size': max or DEFAULT_MAX,
-        '_source': fields
+        '_source': {
+            'include': fields,
+            'exclude': [TIMESTAMP]
+        },
     }
 
     result = es.search(index=index, body=query)
@@ -208,7 +212,7 @@ def query_place(es, index, lat, lon, fields=None):
         },
         '_source': {
             'includes': fields,
-            'excludes': [GEOM]
+            'excludes': [GEOM, TIMESTAMP]
         },
         'size': 1
     }

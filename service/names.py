@@ -40,6 +40,7 @@ SOURCE = 'fuente'
 INFO = 'info'
 ERROR = 'error'
 MESSAGE = 'mensaje'
+TIMESTAMP = 'timestamp'
 
 # Parameters
 ADDRESS = 'direccion'

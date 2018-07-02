@@ -9,7 +9,14 @@ from elasticsearch_mappings import MAP_STREET
 import argparse
 import json
 import os
-import sys
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 GEOM = '-geometria'
 OPERATIONS = ['indexar', 'borrar', 'listar']
@@ -43,10 +50,6 @@ STATE_IDS = [
 ]
 
 
-class IndexExistsException(Exception):
-    pass
-
-
 class IndexMissingException(Exception):
     pass
 
@@ -65,9 +68,12 @@ def main():
     parser.add_argument('-t', '--timeout', metavar='<seconds>', default=300,
                         type=int, help='Tiempo de espera para transferencias.')
     parser.add_argument('-i', '--ignore', action='store_true',
-                        help='Ignorar errores de índices ya existentes'
-                        ' (creación) o no existentes (borrado).',
+                        help='Ignorar errores de índices no \
+                            existentes (al borrar).',
                         dest='ignore')
+    parser.add_argument('-c', '--create', action='store_true',
+                        help='Crear índices si no existen (al indexar).',
+                        dest='create')
     args = parser.parse_args()
 
     if args.timeout <= 0:
@@ -76,14 +82,18 @@ def main():
     es = Elasticsearch(timeout=args.timeout)
     mode = args.mode[0]
 
+    logger.info('Iniciando en modo: {}...'.format(mode))
+
     if mode == 'listar':
         list_indices(es)
     elif mode == 'indexar':
-        create_index(es, args.name, args.ignore)
+        update_index(es, args.name, args.create)
     elif mode == 'borrar':
         delete_index(es, args.name, args.ignore)
     else:
         raise ValueError('Modo inválido.')
+
+    logger.info('Operación finalizada.')
 
 
 def list_indices(es):
@@ -96,18 +106,18 @@ def list_indices(es):
     """
 
     for index in sorted(es.indices.get_alias('*')):
-        print(index)
+        logger.info(index)
 
 
-def create_index(es, name, ignore):
+def update_index(es, name, create):
     """
-    Crear índices para entidades o vías de circulación.
+    Actualiza índices para entidades o vías de circulación.
 
     Args:
         es (elasticsearch.client.Elasticsearch): Instancia cliente
             Elasticsearch.
         name (str): Nombre de entidad o 'vias'.
-        ignore (bool): Si es verdadero, se ignoran ciertas excepciones lanzadas
+        create (bool): Si es verdadero, se crean los índices si no existen
     """
 
     if name in ENTITY_INDICES:
@@ -122,17 +132,17 @@ def create_index(es, name, ignore):
             file_path = os.path.join(base_path, 'asentamientos.json')
 
         if name == 'provincias':
-            create_entity_index(es, file_path, name, MAP_STATE, MAP_STATE_GEOM,
-                                ignore)
+            update_entity_index(es, file_path, name, MAP_STATE, MAP_STATE_GEOM,
+                                create)
         elif name == 'departamentos':
-            create_entity_index(es, file_path, name, MAP_DEPT, MAP_DEPT_GEOM,
-                                ignore)
+            update_entity_index(es, file_path, name, MAP_DEPT, MAP_DEPT_GEOM,
+                                create)
         elif name == 'municipios':
-            create_entity_index(es, file_path, name, MAP_MUNI, MAP_MUNI_GEOM,
-                                ignore)
+            update_entity_index(es, file_path, name, MAP_MUNI, MAP_MUNI_GEOM,
+                                create)
         elif name == 'bahra':
-            create_entity_index(es, file_path, name, MAP_SETTLEMENT,
-                                MAP_SETTLEMENT_GEOM, ignore)
+            update_entity_index(es, file_path, name, MAP_SETTLEMENT,
+                                MAP_SETTLEMENT_GEOM, create)
         else:
             raise ValueError('Nombre de entidad inválido: {}'.format(name))
 
@@ -145,26 +155,22 @@ def create_index(es, name, ignore):
         for state_id in STATE_IDS:
             index_name = 'calles-' + state_id
             file_path = os.path.join(base_path, index_name + '.json')
-            data = read_json(file_path)['vias']
+            contents = read_json(file_path)
+            data = contents['vias']
+            timestamp = contents['timestamp']
 
-            try:
-                index_entity(es, data, index_name, MAP_STREET,
-                             ['codigo_postal'])
-            except IndexExistsException as e:
-                if ignore:
-                    print(
-                        'Se ignoró la siguiente excepción: {}'.format(repr(e)),
-                        file=sys.stderr)
-                else:
-                    raise
+            if create:
+                create_index(es, index_name, MAP_STREET)
+
+            index_entity(es, data, timestamp, index_name, ['codigo_postal'])
 
     else:
         raise ValueError('Nombre de índice inválido.')
 
 
-def create_entity_index(es, file_path, index, mapping, mapping_geom, ignore):
+def update_entity_index(es, file_path, index, mapping, mapping_geom, create):
     """
-    Crear dos índices para una entidad: con y sin geometrías.
+    Actualiza (y crea) dos índices para una entidad: con y sin geometrías.
 
     Args:
         es (elasticsearch.client.Elasticsearch): Instancia cliente
@@ -173,30 +179,20 @@ def create_entity_index(es, file_path, index, mapping, mapping_geom, ignore):
         index (str): Nombre base del índice a crear.
         mapping (dict): Mapeo Elasticsearch de entidades (sin geometría).
         mapping_geom (dict): Mapeo Elasticsearch de entidades (con geometría).
-        ignore (bool): Si es verdadero, se ignoran ciertas excepciones lanzadas
+        create (bool): Si es verdadero, se crean los índices si no existen
     """
 
-    data = read_json(file_path)['entidades']
+    contents = read_json(file_path)
+    data = contents['entidades']
+    timestamp = contents['timestamp']
 
-    try:
-        # Crear índice para la entidad sin geometrías
-        index_entity(es, data, index, mapping, ['geometria'])
-    except IndexExistsException as e:
-        if ignore:
-            print('Se ignoró la siguiente excepción: {}'.format(repr(e)),
-                  file=sys.stderr)
-        else:
-            raise
+    if create:
+        create_index(es, index, mapping)
+    index_entity(es, data, timestamp, index, ['geometria'])
 
-    try:
-        # Crear índice para la entidad con geometrías
-        index_entity(es, data, index + '-geometria', mapping_geom)
-    except IndexExistsException as e:
-        if ignore:
-            print('Se ignoró la siguiente excepción: {}'.format(repr(e)),
-                  file=sys.stderr)
-        else:
-            raise
+    if create:
+        create_index(es, index + '-geometria', mapping_geom)
+    index_entity(es, data, timestamp, index + '-geometria')
 
 
 def delete_index(es, name, ignore):
@@ -220,9 +216,9 @@ def delete_index(es, name, ignore):
                 delete_entity_index(es, index)
             except IndexMissingException as e:
                 if ignore:
-                    print('Se ignoró la siguiente excepción: {}'.format(
-                        repr(e)),
-                          file=sys.stderr)
+                    logger.warning(
+                        'Se ignoró la siguiente excepción: {}'.format(
+                            repr(e)))
                 else:
                     raise
     elif name == ROAD_INDEX:
@@ -231,9 +227,9 @@ def delete_index(es, name, ignore):
                 delete_road_index(es, state_id)
             except IndexMissingException as e:
                 if ignore:
-                    print('Se ignoró la siguiente excepción: {}'.format(
-                        repr(e)),
-                          file=sys.stderr)
+                    logger.warning(
+                        'Se ignoró la siguiente excepción: {}'.format(
+                            repr(e)))
                 else:
                     raise
     else:
@@ -256,6 +252,8 @@ def delete_entity_index(es, name):
 
     es.indices.delete(name)
 
+    logger.info('Se eliminó el índice {}.'.format(name))
+
 
 def delete_road_index(es, state_id):
     """
@@ -274,6 +272,8 @@ def delete_road_index(es, state_id):
 
     es.indices.delete(index)
 
+    logger.info('Se eliminó el índice {}.'.format(index))
+
 
 def read_json(path):
     """
@@ -288,55 +288,82 @@ def read_json(path):
         return json.load(f)
 
 
-def document_list(data, excludes=None):
+def bulk_update_generator(data, timestamp, excludes=None):
+    if not excludes:
+        excludes = []
+
+    for original_doc in data:
+        doc = {
+            key: original_doc[key]
+            for key in original_doc
+            if key not in excludes
+        }
+        doc['timestamp'] = timestamp
+
+        action = {
+            'update': {
+                '_type': '_doc',
+                '_id': doc['id']
+            }
+        }
+
+        source = {
+            'doc': doc,
+            'doc_as_upsert': True
+        }
+
+        yield action
+        yield source
+
+
+def create_index(es, index, mappings):
     """
-    Transforma una lista de entidades a una lista de documentos listos para
-    ser indexados en Elasticsearch.
-
-    Args:
-        data (list): Lista de entidades a transformar a documentos indexables.
-        excludes (list): Lista de atributos a remover de cada entidad antes de
-            agregar a la lista de documentos.
-    """
-
-    docs = []
-    for i, doc in enumerate(data):
-        docs.append({'index': {'_id': i + 1, '_type': '_doc'}})
-
-        if excludes is None:
-            excludes = []
-
-        docs.append({
-            key: doc[key] for key in doc.keys() if key not in excludes
-        })
-
-    return docs
-
-
-def index_entity(es, data, index, mappings, excludes=None):
-    """
-    Genera índices Elasticsearch para una entidad, comprobando que el índice
-    ya no exista.
+    Asegura que el índice especificado exista.
 
     Args:
         es (elasticsearch.client.Elasticsearch): Instancia cliente
             Elasticsearch.
-        data: Datos a indexar (entidades).
         index (str): Nombre del índice a crear, si no existe.
         mappings (dict): Mapeos de tipos de Elasticsearch.
-        excludes (map): Campos a ignorar completamente al momento de indexar.
     """
 
     if es.indices.exists(index=index):
-        raise IndexExistsException('Index already exists: {}'.format(index))
+        logger.warning('El índice ya existe: {}'.format(index))
+        return
 
     es.indices.create(index=index, body={
         'settings': DEFAULT_SETTINGS,
         'mappings': mappings
     })
 
-    docs = document_list(data, excludes)
-    es.bulk(index=index, body=docs, refresh=True)
+    logger.info('Índice creado: {}'.format(index))
+
+
+def index_entity(es, data, timestamp, index, excludes=None):
+    """
+    Inserta datos en un índice Elasticsearch.
+
+    Args:
+        es (elasticsearch.client.Elasticsearch): Instancia cliente
+            Elasticsearch.
+        data: Datos a indexar (entidades).
+        timestamp (int): Fecha (UNIX epoch UTC) en el que fueron creados
+            los datos.
+        index (str): Nombre del índice a crear, si no existe.
+        excludes (map): Campos a ignorar completamente al momento de indexar.
+    """
+    if not es.indices.exists(index=index):
+        # Si el índice no existe, evitar que se cree automáticamente
+        # con mappings dinámicos, ya que siempre se desea utilizar
+        # mappings explícitos.
+        raise IndexMissingException('No existe el índice: {}'.format(index))
+
+    logger.info('Indexando datos en: {}...'.format(index))
+
+    operations = bulk_update_generator(data, timestamp, excludes)
+    es.bulk(index=index, body=operations, refresh=True)
+
+    logger.info('Terminado.')
 
 
 if __name__ == '__main__':

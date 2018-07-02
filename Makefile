@@ -2,31 +2,31 @@ BASE_CMD = python scripts/index_utils.py
 TIMEOUT = 320
 
 indexar_vias:
-	$(BASE_CMD) indexar -n vias -i -t $(TIMEOUT)
+	$(BASE_CMD) indexar -n vias -c -t $(TIMEOUT)
 
 borrar_vias:
 	$(BASE_CMD) borrar -n vias -i
 
 indexar_provincias:
-	$(BASE_CMD) indexar -n provincias -i -t $(TIMEOUT)
+	$(BASE_CMD) indexar -n provincias -c -t $(TIMEOUT)
 
 borrar_provincias:
 	$(BASE_CMD) borrar -n provincias -i
 
 indexar_departamentos:
-	$(BASE_CMD) indexar -n departamentos -i -t $(TIMEOUT)
+	$(BASE_CMD) indexar -n departamentos -c -t $(TIMEOUT)
 
 borrar_departamentos:
 	$(BASE_CMD) borrar -n departamentos -i
 
 indexar_municipios:
-	$(BASE_CMD) indexar -n municipios -i -t $(TIMEOUT)
+	$(BASE_CMD) indexar -n municipios -c -t $(TIMEOUT)
 
 borrar_municipios:
 	$(BASE_CMD) borrar -n municipios -i
 
 indexar_bahra:
-	$(BASE_CMD) indexar -n bahra -i -t $(TIMEOUT)
+	$(BASE_CMD) indexar -n bahra -c -t $(TIMEOUT)
 
 borrar_bahra:
 	$(BASE_CMD) borrar -n bahra -i

@@ -11,10 +11,17 @@ from elasticsearch_params import NAME_ANALYZER_SYNONYMS
 
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
 
+TIMESTAMP = {
+    'type': 'date',
+    'format': 'epoch_second',
+    'index': False
+}
+
 MAP_STATE = {
     '_doc': {
         'properties': {
             'id': {'type': 'keyword'},
+            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
@@ -36,6 +43,7 @@ MAP_STATE_GEOM = {
     '_doc': {
         'properties': {
             'id': {'type': 'keyword', 'index': False},
+            'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
             'lat': {'type': 'keyword', 'index': False},
             'lon': {'type': 'keyword', 'index': False},
@@ -48,6 +56,7 @@ MAP_DEPT = {
     '_doc': {
         'properties': {
             'id': {'type': 'keyword'},
+            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
@@ -87,6 +96,7 @@ MAP_DEPT_GEOM = {
     '_doc': {
         'properties': {
             'id': {'type': 'keyword', 'index': False},
+            'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
             'lat': {'type': 'keyword', 'index': False},
             'lon': {'type': 'keyword', 'index': False},
@@ -100,6 +110,7 @@ MAP_MUNI = {
     '_doc': {
         'properties': {
             'id': {'type': 'keyword'},
+            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
@@ -157,6 +168,7 @@ MAP_MUNI_GEOM = {
     '_doc': {
         'properties': {
             'id': {'type': 'keyword', 'index': False},
+            'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
             'lat': {'type': 'keyword', 'index': False},
             'lon': {'type': 'keyword', 'index': False},
@@ -171,6 +183,7 @@ MAP_SETTLEMENT = {
     '_doc': {
         'properties': {
             'id': {'type': 'keyword'},
+            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
@@ -247,6 +260,7 @@ MAP_SETTLEMENT_GEOM = {
     '_doc': {
         'properties': {
             'id': {'type': 'keyword', 'index': False},
+            'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
             'tipo': {'type': 'keyword', 'index': False},
             'lat': {'type': 'keyword', 'index': False},
@@ -267,6 +281,7 @@ MAP_STREET = {
                 'index': False
             },
             'id': {'type': 'keyword'},
+            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
