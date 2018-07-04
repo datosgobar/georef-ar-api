@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from elasticsearch import helpers
 from elasticsearch_params import DEFAULT_SETTINGS
 from elasticsearch_mappings import MAP_STATE, MAP_STATE_GEOM
 from elasticsearch_mappings import MAP_DEPT, MAP_DEPT_GEOM
@@ -58,6 +59,10 @@ class InvalidEnvException(Exception):
     pass
 
 
+class BulkOperationException(Exception):
+    pass
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('mode', metavar='<mode>', nargs=1, choices=OPERATIONS,
@@ -82,7 +87,7 @@ def main():
     es = Elasticsearch(timeout=args.timeout)
     mode = args.mode[0]
 
-    logger.info('Iniciando en modo: {}...'.format(mode))
+    logger.info('Iniciando en modo: {}...\n'.format(mode))
 
     if mode == 'listar':
         list_indices(es)
@@ -93,7 +98,7 @@ def main():
     else:
         raise ValueError('Modo inválido.')
 
-    logger.info('Operación finalizada.')
+    logger.info('Operación finalizada.\n')
 
 
 def list_indices(es):
@@ -105,8 +110,11 @@ def list_indices(es):
             Elasticsearch.
     """
 
-    for index in sorted(es.indices.get_alias('*')):
+    indices = sorted(es.indices.get_alias('*'))
+    for index in indices:
         logger.info(index)
+
+    logger.info('\nFin de la lista.\n')
 
 
 def update_index(es, name, create):
@@ -288,7 +296,57 @@ def read_json(path):
         return json.load(f)
 
 
-def bulk_update_generator(data, timestamp, excludes=None):
+def bulk_delete_generator(ids, index):
+    """Crea un generador de operaciones 'delete' para Elasticsearch a partir
+    de una lista de documentos a eliminar.
+
+    Args:
+        ids (list): Lista de documentos a eliminar.
+        index (str): Nombre del índice sobre el cual se realizarán las
+            operaciones.
+    """
+
+    for identifier in ids:
+        action = {
+            '_op_type': 'delete',
+            '_index': index,
+            '_type': '_doc',
+            '_id': identifier
+        }
+
+        yield action
+
+
+UPDATE_SCRIPT = """
+if (ctx.op != "create" && ctx._source.timestamp >= params.document.timestamp) {
+    ctx.op = "none";
+} else {
+    ctx._source = params.document;
+}"""
+
+"""
+Script de actualización de documentos
+Lenguaje: Elasticsearch Painless
+
+Si el documento ya existe, y si su timestamp actual es mayor o igual
+al timestamp a insertar, entonces no realizar ninguna operación.
+Si cualquiera de las dos condiciones falla, actualizar/crear el documento.
+"""
+
+
+def bulk_update_generator(data, timestamp, index, excludes=None):
+    """Crea un generador de operaciones 'update' para Elasticsearch a partir
+    de una lista de documentos a indexar.
+
+    Args:
+        data: Datos a indexar (entidades).
+        timestamp (int): Fecha (UNIX epoch UTC) en el que fueron creados
+            los datos.
+        index (str): Nombre del índice sobre el cual se realizarán las
+            operaciones.
+        excludes (map): Campos a ignorar completamente al momento de indexar.
+    """
+
     if not excludes:
         excludes = []
 
@@ -301,19 +359,24 @@ def bulk_update_generator(data, timestamp, excludes=None):
         doc['timestamp'] = timestamp
 
         action = {
-            'update': {
-                '_type': '_doc',
-                '_id': doc['id']
+            '_op_type': 'update',
+            '_type': '_doc',
+            '_id': doc['id'],
+            '_index': index,
+            '_source': {
+                'scripted_upsert': True,
+                'script': {
+                    'inline': UPDATE_SCRIPT,
+                    'lang': 'painless',
+                    'params': {
+                        'document': doc
+                    }
+                },
+                'upsert': {}
             }
         }
 
-        source = {
-            'doc': doc,
-            'doc_as_upsert': True
-        }
-
         yield action
-        yield source
 
 
 def create_index(es, index, mappings):
@@ -339,16 +402,63 @@ def create_index(es, index, mappings):
     logger.info('Índice creado: {}'.format(index))
 
 
-def index_entity(es, data, timestamp, index, excludes=None):
+def delete_missing_entities(es, data, index):
+    """Elimina documentos que no figuren en 'data' del índice 'index'.
+
+    Args:
+        es (elasticsearch.client.Elasticsearch): Instancia cliente
+            Elasticsearch.
+        data (list): Lista de entidades.
+        index (str): Nombre del índice.
     """
-    Inserta datos en un índice Elasticsearch.
+    ids = [doc['id'] for doc in data]
+
+    response = es.search(index=index, body={
+        'query': {
+            'bool': {
+                'must_not': {'ids': {'values': ids}}
+            }
+        }
+    })
+
+    hits = response['hits']['hits']
+    if not hits:
+        return 0
+
+    missing_ids = [doc['_source']['id'] for doc in hits]
+    operations = bulk_delete_generator(missing_ids, index)
+    _, errors = helpers.bulk(es, operations, raise_on_error=False)
+
+    if errors:
+        logger.error('Errores de eliminado:')
+        logger.error(json.dumps(errors, indent=4, ensure_ascii=False))
+        raise BulkOperationException(
+            'Ocurrieron errores al eliminar documentos.')
+
+    return len(missing_ids)
+
+
+def index_entity(es, data, timestamp, index, excludes=None):
+    """Inserta datos de una entidad en un índice Elasticsearch.
+
+    Los documentos se identifican a través del campo 'id'. En caso de
+    que el documento no exista previamente en el índice, se crea uno nuevo.
+    Si el documento ya existía previamente, se actualiza solo si el documento
+    a insertar tiene un timestamp más reciente.
+
+    Cualquier documento que ya exista en el índice pero que no figure en
+    'data' será eliminado del mismo. Es decir, el parametro 'data' debe
+    contener la totalidad de las entidades que se quieren indexar.
+
+    Un documento solo se actualiza cuando el timestamp recibido es
+    estrictamente mayor al del documento ya indexado.
 
     Args:
         es (elasticsearch.client.Elasticsearch): Instancia cliente
             Elasticsearch.
         data: Datos a indexar (entidades).
         timestamp (int): Fecha (UNIX epoch UTC) en el que fueron creados
-            los datos.
+            los datos.p
         index (str): Nombre del índice a crear, si no existe.
         excludes (map): Campos a ignorar completamente al momento de indexar.
     """
@@ -360,10 +470,42 @@ def index_entity(es, data, timestamp, index, excludes=None):
 
     logger.info('Indexando datos en: {}...'.format(index))
 
-    operations = bulk_update_generator(data, timestamp, excludes)
-    es.bulk(index=index, body=operations, refresh=True)
+    deletions = delete_missing_entities(es, data, index)
 
-    logger.info('Terminado.')
+    operations = bulk_update_generator(data, timestamp, index, excludes)
+    noops, creations, updates, errors = 0, 0, 0, 0
+
+    for ok, response in helpers.streaming_bulk(es, operations,
+                                               raise_on_error=False):
+        if ok:
+            op = response['update']['result']
+            if op == 'noop':
+                noops += 1
+            elif op == 'updated':
+                updates += 1
+            elif op == 'created':
+                creations += 1
+        else:
+            errors += 1
+            identifier = response['update']['_id']
+            error = response['update']['error']
+
+            logger.error(
+                'Error al procesar el documento ID {}:'.format(identifier))
+            logger.error(json.dumps(error, indent=4, ensure_ascii=False))
+
+    logger.info('Resumen:')
+    logger.info(' - Documentos procesados: {}'.format(len(data)))
+    logger.info(' - Documentos creados: {}'.format(creations))
+    logger.info(' - Documentos actualizados: {}'.format(updates))
+    logger.info(' - Documentos sin modificar: {}'.format(noops))
+    logger.info(' - Documentos eliminados: {}'.format(deletions))
+    logger.info(' - Errores: {}'.format(errors))
+
+    if errors:
+        logger.error('Ocurrieron errores al momento de indexar.')
+
+    logger.info('Terminado.\n')
 
 
 if __name__ == '__main__':
