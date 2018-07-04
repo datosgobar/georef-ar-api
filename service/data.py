@@ -122,25 +122,21 @@ def query_streets(es, name=None, department=None, state=None, road=None,
     if road:
         condition = build_match_condition(ROAD_TYPE, road, fuzzy=True)
         terms.append(condition)
-    if department:
-        condition = build_name_condition(DEPT, department, exact)
-        terms.append(condition)
     if number:
         terms.append(build_range_condition(START_R, '<=', number))
         terms.append(build_range_condition(END_L, '>=', number))
+    if department:
+        if department.isdigit():
+            condition = build_match_condition(DEPT_ID, department)
+        else:
+            condition = build_name_condition(DEPT_NAME, department, exact)
+        terms.append(condition)
     if state:
         if state.isdigit():
-            target_state = query_entity(es, STATES, entity_id=state, max=1, 
-                                        exact=exact)
+            condition = build_match_condition(STATE_ID, state)
         else:
-            target_state = query_entity(es, STATES, name=state, max=1, 
-                                        exact=exact)
-
-        if target_state:  # Narrows search to specific index.
-            index = '-'.join([STREETS, target_state[0][ID]])
-        elif not state.isdigit():
-            condition = build_name_condition(STATE, state, exact)
-            terms.append(condition)
+            condition = build_name_condition(STATE_NAME, state, exact)
+        terms.append(condition)
 
     if LOCATION in fields:
         fields.extend([GEOM, START_R, START_L, END_R, END_L])

@@ -320,25 +320,39 @@ MAP_STREET = {
                 'type': 'text',
                 'index': False
             },
-            'provincia': {
-                'type': 'text',
-                'analyzer': NAME_ANALYZER_SYNONYMS,
-                'search_analyzer': NAME_ANALYZER,
-                'fields': {
-                    'exacto': {
-                        'type': 'keyword',
-                        'normalizer': LOWCASE_ASCII_NORMALIZER
+            'departamento': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'id': {'type': 'keyword'},
+                    'nombre': {
+                        'type': 'text',
+                        'analyzer': NAME_ANALYZER_SYNONYMS,
+                        'search_analyzer': NAME_ANALYZER,
+                        'fields': {
+                            'exacto': {
+                                'type': 'keyword',
+                                'normalizer': LOWCASE_ASCII_NORMALIZER
+                            }
+                        }
                     }
                 }
             },
-            'departamento': {
-                'type': 'text',
-                'analyzer': NAME_ANALYZER_SYNONYMS,
-                'search_analyzer': NAME_ANALYZER,
-                'fields': {
-                    'exacto': {
-                        'type': 'keyword',
-                        'normalizer': LOWCASE_ASCII_NORMALIZER
+            'provincia': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'id': {'type': 'keyword'},
+                    'nombre': {
+                        'type': 'text',
+                        'analyzer': NAME_ANALYZER_SYNONYMS,
+                        'search_analyzer': NAME_ANALYZER,
+                        'fields': {
+                            'exacto': {
+                                'type': 'keyword',
+                                'normalizer': LOWCASE_ASCII_NORMALIZER
+                            }
+                        }
                     }
                 }
             }

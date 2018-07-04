@@ -240,8 +240,31 @@ class SearchAddressesTest(SearchEntitiesTest):
 
         self.assertTrue(roadsValid and avenuesValid)
 
-    def test_filter_by_state(self):
-        """Se debe poder filtrar los resultados por provincia."""
+    def test_filter_by_state_name(self):
+        """Se debe poder filtrar los resultados por nombre de provincia."""
+        validations = []
+        
+        states = [
+            ('02', 'CIUDAD AUTÓNOMA DE BUENOS AIRES'),
+            ('06', 'BUENOS AIRES'),
+            ('14', 'CÓRDOBA')
+        ]
+
+        for state_code, state_name in states:
+            res = self.get_response({
+                'direccion': VALID_ADDRESS,
+                'provincia': state_name,
+                'exacto': True
+            })
+
+            validations.append(all(
+                road['provincia']['id'] == state_code for road in res
+            ))
+
+        self.assertTrue(validations and all(validations))
+
+    def test_filter_by_state_id(self):
+        """Se debe poder filtrar los resultados por ID de provincia."""
         validations = []
         
         states = [
@@ -257,28 +280,53 @@ class SearchAddressesTest(SearchEntitiesTest):
             })
 
             validations.append(all(
-                road['provincia'] == state_name for road in res
+                road['provincia']['nombre'] == state_name for road in res
             ))
 
-        assert(validations and all(validations))
-
-    def test_filter_by_department(self):
-        """Se debe poder filtrar los resultados por departamento."""
+        self.assertTrue(validations and all(validations))
+        
+    def test_filter_by_department_name(self):
+        """Se debe poder filtrar los resultados por nombre de departamento."""
         validations = []
-        departments = ['COMUNA 1', 'COMUNA 15', 'ROSARIO']
+        departments = [
+            ('02007', 'COMUNA 1'),
+            ('02105', 'COMUNA 15'),
+            ('66147', 'ROSARIO DE LERMA')
+        ]
 
-        for dept_name in departments:
+        for dept_code, dept_name in departments:
             res = self.get_response({
                 'direccion': 'AV CORRIENTES 1000',
                 'departamento': dept_name,
-                'exacto': 1
+                'exacto': True
             })
 
             validations.append(all(
-                road['departamento'] == dept_name for road in res
+                road['departamento']['id'] == dept_code for road in res
             ))
 
-        assert(validations and all(validations))
+        self.assertTrue(validations and all(validations))
+
+    def test_filter_by_department_id(self):
+        """Se debe poder filtrar los resultados por ID de departamento."""
+        validations = []
+        departments = [
+            ('02007', 'COMUNA 1'),
+            ('02105', 'COMUNA 15'),
+            ('66147', 'ROSARIO DE LERMA')
+        ]
+
+        for dept_code, dept_name in departments:
+            res = self.get_response({
+                'direccion': 'AV CORRIENTES 1000',
+                'departamento': dept_code
+            })
+
+            validations.append(all(
+                road['departamento']['nombre'] == dept_name for road in res
+            ))
+
+        self.assertTrue(validations and all(validations))
 
     def test_batch_search_no_addresses(self):
         """La búsqueda en baches debería fallar si no se pasan direcciones."""
