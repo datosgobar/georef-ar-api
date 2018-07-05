@@ -182,13 +182,11 @@ class SearchAddressesTest(SearchEntitiesTest):
             (['0207701007975'], 'MARCOS SASTR 2600'),
             (['0207701007975'], 'MARCOS SAST 2600'),
             (['0207701007975'], 'MARCOS SAS 2600'),
-            (['0207701007975'], 'MARCOS SA 2600'),
             (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREIRE 2000'),
             (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREIR 2000'),
             (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREI 2000'),
             (['0209101004195', '0208401004195'], 'CAP GRL RAMON FRE 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FR 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON F 2000')
+            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FR 2000')
         ]
 
         self.assert_address_search_id_matches(expected)

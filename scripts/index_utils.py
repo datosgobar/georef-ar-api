@@ -160,17 +160,17 @@ def update_index(es, name, create):
             raise InvalidEnvException(
                 'Valor de entorno no encontrado: VIAS_DATA_DIR')
 
-        for state_id in STATE_IDS:
-            index_name = 'calles-' + state_id
-            file_path = os.path.join(base_path, index_name + '.json')
-            contents = read_json(file_path)
-            data = contents['vias']
-            timestamp = contents['timestamp']
+        index = 'calles'
+        file_path = os.path.join(base_path, index + '.json')
 
-            if create:
-                create_index(es, index_name, MAP_STREET)
+        if create:
+            create_index(es, index, MAP_STREET)
 
-            index_entity(es, data, timestamp, index_name, ['codigo_postal'])
+        contents = read_json(file_path)
+        data = contents['vias']
+        timestamp = contents['timestamp']
+
+        index_entity(es, data, timestamp, index, ['codigo_postal'])
 
     else:
         raise ValueError('Nombre de índice inválido.')
@@ -230,16 +230,15 @@ def delete_index(es, name, ignore):
                 else:
                     raise
     elif name == ROAD_INDEX:
-        for state_id in STATE_IDS:
-            try:
-                delete_road_index(es, state_id)
-            except IndexMissingException as e:
-                if ignore:
-                    logger.warning(
-                        'Se ignoró la siguiente excepción: {}'.format(
-                            repr(e)))
-                else:
-                    raise
+        try:
+            delete_entity_index(es, 'calles')
+        except IndexMissingException as e:
+            if ignore:
+                logger.warning(
+                    'Se ignoró la siguiente excepción: {}'.format(
+                        repr(e)))
+            else:
+                raise
     else:
         raise ValueError('Nombre de índice inválido.')
 
@@ -261,26 +260,6 @@ def delete_entity_index(es, name):
     es.indices.delete(name)
 
     logger.info('Se eliminó el índice {}.'.format(name))
-
-
-def delete_road_index(es, state_id):
-    """
-    Borra índice de vías de circulación para una provincia.
-
-    Args:
-        es (elasticsearch.client.Elasticsearch): Instancia cliente
-            Elasticsearch.
-        state_id (str): Código INDEC de la provincia.
-    """
-
-    index = 'calles-' + state_id
-    if not es.indices.exists(index=index):
-        raise IndexMissingException(
-            'El índice especificado no existe: {}'.format(index))
-
-    es.indices.delete(index)
-
-    logger.info('Se eliminó el índice {}.'.format(index))
 
 
 def read_json(path):

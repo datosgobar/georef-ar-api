@@ -114,7 +114,7 @@ def query_streets(es, name=None, department=None, state=None, road=None,
     if not fields:
         fields = []
 
-    index = STREETS + '-*'  # Search in all indexes by default.
+    index = STREETS
     terms = []
     if name:
         condition = build_name_condition(NAME, name, exact)
@@ -317,7 +317,7 @@ def get_index_source(index):
         return SOURCE_IGN
     elif index == SETTLEMENTS:
         return SOURCE_BAHRA
-    elif index.startswith(STREETS):
+    elif index == STREETS:
         return SOURCE_INDEC
     else:
         raise ValueError(
