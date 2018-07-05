@@ -108,11 +108,19 @@ class SearchStreetsTest(SearchEntitiesTest):
 
         assert(validations and all(validations))
 
+    def test_flatten_results(self):
+        """Los resultados se deberían poder obtener en formato aplanado."""
+        data = self.get_response({'max': 1, 'aplanar': True})[0]
+
+        self.assertTrue(all([
+            not isinstance(v, dict) for v in data.values()
+        ]) and data)
+
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""
         params = ['nombre', 'tipo', 'departamento', 'provincia', 'max',
-            'campos']
+                  'campos']
         self.assert_empty_params_return_400(params)
 
     def test_unknown_param_returns_400(self):

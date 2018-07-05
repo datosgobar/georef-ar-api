@@ -189,13 +189,15 @@ def process_street(request):
     road_type = request.args.get(ROAD_TYPE)
     max = request.args.get(MAX)
     exact = EXACT in request.args
+    flatten = FLATTEN in request.args
     fields = parser.get_fields(request.args.get(FIELDS), STREETS)
 
     try:
         es = get_elasticsearch()
         matches = data.query_streets(es, name=name, department=department,
                                      state=state, road=road_type, max=max,
-                                     fields=fields, exact=exact)
+                                     fields=fields, exact=exact,
+                                     flatten=flatten)
     except ElasticsearchException:
         abort(500)
 

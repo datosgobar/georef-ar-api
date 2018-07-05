@@ -93,7 +93,8 @@ def query_entity(es, index, entity_id=None, name=None, state=None,
 
 
 def query_streets(es, name=None, department=None, state=None, road=None,
-                  max=None, fields=None, exact=False, number=None):
+                  max=None, fields=None, exact=False, number=None,
+                  flatten=False):
     """Busca calles según parámetros de búsqueda de una consulta.
 
     Args:
@@ -104,6 +105,7 @@ def query_streets(es, name=None, department=None, state=None, road=None,
         road (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
+        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
             'department'.)
@@ -155,7 +157,7 @@ def query_streets(es, name=None, department=None, state=None, road=None,
     }
 
     result = es.search(index=index, body=query)
-    return [parse_es(hit, False, index) for hit in result['hits']['hits']]
+    return [parse_es(hit, flatten, index) for hit in result['hits']['hits']]
 
 
 def query_address(es, search_params):
@@ -401,7 +403,8 @@ def search_es(es, params):
                             state=params['state'],
                             department=params['department'],
                             fields=params['fields'], max=params['max'],
-                            exact=params['exact'], number=number)
+                            exact=params['exact'], number=number,
+                            flatten=params['flatten'])
 
     addresses = []
     for street in streets:
@@ -416,7 +419,7 @@ def search_es(es, params):
 
         remove_spatial_data_from(street)
         if params['flatten']:
-            flatten_dict(street)
+            flatten_dict(street, max_depth=2)
 
         addresses.append(street)
 
