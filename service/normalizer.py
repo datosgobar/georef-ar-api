@@ -36,18 +36,18 @@ def process_state(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
-    state_id = request.args.get(ID)
-    name = request.args.get(NAME)
-    max = request.args.get(MAX) or 24
-    exact = EXACT in request.args
-    order = request.args.get(ORDER)
-    fields = parser.get_fields(request.args.get(FIELDS), STATES)
+    params = {
+        'entity_id': request.args.get(ID),
+        'name': request.args.get(NAME),
+        'max': request.args.get(MAX) or 24,
+        'exact': EXACT in request.args,
+        'order': request.args.get(ORDER),
+        'fields': parser.get_fields(request.args.get(FIELDS), STATES)
+    }
 
     try:
         es = get_elasticsearch()
-        matches = data.query_entity(es, STATES, entity_id=state_id, name=name,
-                                    order=order, fields=fields, max=max,
-                                    exact=exact)
+        matches = data.query_entities(es, STATES, [params])[0]
     except ElasticsearchException:
         abort(500)
 
@@ -70,21 +70,20 @@ def process_department(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
-    dept_id = request.args.get(ID)
-    name = request.args.get(NAME)
-    state = request.args.get(STATE)
-    max = request.args.get(MAX) or format_request['max']
-    exact = EXACT in request.args
-    order = request.args.get(ORDER)
-    fields = parser.get_fields(request.args.get(FIELDS), DEPARTMENTS)
-    flatten = FLATTEN in request.args or format_request['convert']
+    params = {
+        'entity_id': request.args.get(ID),
+        'name': request.args.get(NAME),
+        'state': request.args.get(STATE),
+        'max': request.args.get(MAX) or format_request['max'],
+        'exact': EXACT in request.args,
+        'order': request.args.get(ORDER),
+        'fields': parser.get_fields(request.args.get(FIELDS), DEPARTMENTS),
+        # 'flatten': FLATTEN in request.args or format_request['convert']
+    }
 
     try:
         es = get_elasticsearch()
-        matches = data.query_entity(es, DEPARTMENTS, entity_id=dept_id,
-                                    name=name, state=state, flatten=flatten,
-                                    order=order, fields=fields, max=max,
-                                    exact=exact)
+        matches = data.query_entities(es, DEPARTMENTS, [params])[0]
     except ElasticsearchException:
         abort(500)
 
@@ -107,23 +106,21 @@ def process_municipality(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
-    municipality_id = request.args.get(ID)
-    name = request.args.get(NAME)
-    department = request.args.get(DEPT)
-    state = request.args.get(STATE)
-    max = request.args.get(MAX) or format_request['max']
-    exact = EXACT in request.args
-    order = request.args.get(ORDER)
-    fields = parser.get_fields(request.args.get(FIELDS), MUNICIPALITIES)
-    flatten = FLATTEN in request.args or format_request['convert']
+    params = {
+        'entity_id': request.args.get(ID),
+        'name': request.args.get(NAME),
+        'department': request.args.get(DEPT),
+        'state': request.args.get(STATE),
+        'max': request.args.get(MAX) or format_request['max'],
+        'exact': EXACT in request.args,
+        'order': request.args.get(ORDER),
+        'fields': parser.get_fields(request.args.get(FIELDS), MUNICIPALITIES),
+        # 'flatten': FLATTEN in request.args or format_request['convert']
+    }
 
     try:
         es = get_elasticsearch()
-        matches = data.query_entity(es, MUNICIPALITIES,
-                                entity_id=municipality_id, name=name,
-                                department=department, state=state,
-                                flatten=flatten, order=order, fields=fields,
-                                max=max, exact=exact)
+        matches = data.query_entities(es, MUNICIPALITIES, [params])[0]
     except ElasticsearchException:
         abort(500)
 
@@ -146,24 +143,22 @@ def process_locality(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
-    locality_id = request.args.get(ID)
-    name = request.args.get(NAME)
-    state = request.args.get(STATE)
-    department = request.args.get(DEPT)
-    municipality = request.args.get(MUN)
-    exact = EXACT in request.args
-    order = request.args.get(ORDER)
-    fields = parser.get_fields(request.args.get(FIELDS), SETTLEMENTS)
-    flatten = FLATTEN in request.args or format_request['convert']
-    max = request.args.get(MAX) or format_request['max']
+    params = {
+        'entity_id': request.args.get(ID),
+        'name': request.args.get(NAME),
+        'state': request.args.get(STATE),
+        'department': request.args.get(DEPT),
+        'municipality': request.args.get(MUN),
+        'exact': EXACT in request.args,
+        'order': request.args.get(ORDER),
+        'fields': parser.get_fields(request.args.get(FIELDS), SETTLEMENTS),
+        # 'flatten': FLATTEN in request.args or format_request['convert'],
+        'max': request.args.get(MAX) or format_request['max']
+    }
 
     try:
         es = get_elasticsearch()
-        matches = data.query_entity(es, SETTLEMENTS, entity_id=locality_id,
-                                    name=name, municipality=municipality,
-                                    department=department, state=state,
-                                    max=max, order=order, fields=fields,
-                                    flatten=flatten, exact=exact)
+        matches = data.query_entities(es, SETTLEMENTS, [params])[0]
     except ElasticsearchException:
         abort(500)
 
@@ -183,26 +178,26 @@ def process_street(request):
     if not valid_request:
         return parser.get_response_for_invalid(request, message=error)
 
-    name = request.args.get(NAME)
-    department = request.args.get(DEPT)
-    state = request.args.get(STATE)
-    road_type = request.args.get(ROAD_TYPE)
-    max = request.args.get(MAX)
-    exact = EXACT in request.args
-    flatten = FLATTEN in request.args
-    fields = parser.get_fields(request.args.get(FIELDS), STREETS)
+    params = {
+        'road_name': request.args.get(NAME),
+        'department': request.args.get(DEPT),
+        'state': request.args.get(STATE),
+        'road_type': request.args.get(ROAD_TYPE),
+        'max': request.args.get(MAX),
+        'exact': EXACT in request.args,
+        # 'flatten': FLATTEN in request.args,
+        'fields': parser.get_fields(request.args.get(FIELDS), STREETS)
+    }
 
     try:
         es = get_elasticsearch()
-        matches = data.query_streets(es, name=name, department=department,
-                                     state=state, road=road_type, max=max,
-                                     fields=fields, exact=exact,
-                                     flatten=flatten)
+        matches = data.query_streets(es, [params])[0]
     except ElasticsearchException:
         abort(500)
 
-    for street in matches: street.pop(GEOM, None)
-        
+    for street in matches:
+        street.pop(GEOM, None)
+
     return parser.get_response({STREETS: matches})
 
 
@@ -305,13 +300,20 @@ def process_place(request):
 
     try:
         es = get_elasticsearch()
-        muni_index = MUNICIPALITIES + '-' + GEOM
-        dept_index = DEPARTMENTS + '-' + GEOM
-
-        dept = data.query_place(es, dept_index, lat, lon, [ID, NAME, STATE])
+        params = {
+            'lat': lat,
+            'lon': lon,
+            'fields': [ID, NAME, STATE]
+        }
+        dept = data.query_places(es, DEPARTMENTS, [params])[0]
 
         if dept:
-            muni = data.query_place(es, muni_index, lat, lon, [ID, NAME])
+            params = {
+                'lat': lat,
+                'lon': lon,
+                'fields': [ID, NAME]
+            }
+            muni = data.query_places(es, MUNICIPALITIES, [params])[0]
             # Remover la provincia del departamento y colocarla directamente
             # en el resultado. Haciendo esto se logra evitar una consulta
             # al índice de provincias.

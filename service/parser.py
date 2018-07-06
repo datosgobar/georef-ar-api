@@ -151,7 +151,7 @@ def build_search_from(params):
         'state': state,
         'max': max,
         'exact': exact,
-        'flatten': flatten,
+        # 'flatten': flatten,
         'fields': fields
     }
 

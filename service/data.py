@@ -8,7 +8,6 @@ e impactan dicha búsqueda contra las fuentes de datos disponibles.
 
 import os
 import psycopg2
-import requests
 from service.parser import flatten_dict
 from service.names import *
 
@@ -16,15 +15,99 @@ MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_MAX = 10
 
 
-def query_entity(es, index, entity_id=None, name=None, state=None,
-                 department=None, municipality=None, max=None, order=None,
-                 fields=None, flatten=False, exact=False):
+def run_queries(es, index, queries):
+    """TODO: Docs
+    """
+    body = []
+    for query in queries:
+        # No es necesario especificar el índice por
+        # query ya que se ejecutan todas en el mismo
+        # índice.
+        body.append({})
+        body.append(query)
+
+    results = es.msearch(body=body, index=index)
+
+    responses = []
+    for response in results['responses']:
+        hits = [hit['_source'] for hit in response['hits']['hits']]
+        responses.append(hits)
+
+    return responses
+
+
+def query_entities(es, index, params_list):
     """Busca entidades políticas (localidades, departamentos, o provincias)
-        según parámetros de búsqueda de una consulta.
+    según parámetros de una o más consultas.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
-        index (str): Nombre del índice sobre el cual realizar la búsqueda.
+        index (str): Nombre del índice sobre el cual realizar las búsquedas.
+        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_entity_query' para más
+            detalles.
+
+    Returns:
+        list: Resultados de búsqueda de entidades.
+    """
+
+    queries = (build_entity_query(**params) for params in params_list)
+    return run_queries(es, index, queries)
+
+
+def query_streets(es, params_list):
+    """Busca vías de circulación según parámetros de una o más consultas.
+
+    Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
+        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_streets_query' para más
+            detalles.
+
+    Returns:
+        list: Resultados de búsqueda de entidades.
+    """
+
+    queries = (build_streets_query(**params) for params in params_list)
+    return run_queries(es, STREETS, queries)
+
+
+def query_places(es, index, params_list):
+    """Busca entidades políticas que contengan un punto dato, según
+    parámetros de una o más consultas.
+
+    Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
+        index (str): Nombre del índice sobre el cual realizar las búsquedas.
+        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_places_query' para más
+            detalles.
+
+    Returns:
+        list: Resultados de búsqueda de entidades.
+    """
+
+    index += '-' + GEOM # Utilizar índices con geometrías
+    queries = (build_places_query(**params) for params in params_list)
+    results = run_queries(es, index, queries)
+
+    # Ya que solo puede existir una entidad por punto (para un tipo dado
+    # de entidad), modificar los resultados para que el resultado de cada
+    # consulta esté compuesto de exactamente una entidad, o el valor None.
+    return [
+        result[0] if result else None
+        for result in results
+    ]
+
+
+def build_entity_query(entity_id=None, name=None, state=None,
+                       department=None, municipality=None, max=None,
+                       order=None, fields=None, exact=False):
+    """Construye una query con Elasticsearch DSL para entidades políticas
+    (localidades, departamentos, o provincias) según parámetros de búsqueda
+    de una consulta.
+
+    Args:
         entity_id (str): ID de la entidad.
         name (str): Nombre del tipo de entidad (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
@@ -33,13 +116,12 @@ def query_entity(es, index, entity_id=None, name=None, state=None,
         max (int): Limita la cantidad de resultados (opcional).
         order (str): Campo por el cual ordenar los resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
-        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'department',
-            'municipality' o 'state'.)
+            'municipality' o 'state'.) (opcional).
 
     Returns:
-        list: Resultados de búsqueda de entidades.
+        dict: Query construida para Elasticsearch.
     """
     if not fields:
         fields = []
@@ -74,7 +156,8 @@ def query_entity(es, index, entity_id=None, name=None, state=None,
     if order:
         if ID in order: sorts[ID] = {'order': 'asc'}
         if NAME in order: sorts[NAME + EXACT_SUFFIX] = {'order': 'asc'}
-    query = {
+
+    return {
         'query': {
             'bool': {
                 'must': terms
@@ -86,43 +169,38 @@ def query_entity(es, index, entity_id=None, name=None, state=None,
             'include': fields,
             'exclude': [TIMESTAMP]
         }
-    }    
-    
-    result = es.search(index=index, body=query)
-    return [parse_es(hit, flatten, index) for hit in result['hits']['hits']]
+    }
 
 
-def query_streets(es, name=None, department=None, state=None, road=None,
-                  max=None, fields=None, exact=False, number=None,
-                  flatten=False):
-    """Busca calles según parámetros de búsqueda de una consulta.
+def build_streets_query(road_name=None, department=None, state=None, road_type=None,
+                        max=None, fields=None, exact=False, number=None):
+    """Construye una query con Elasticsearch DSL para vías de circulación
+    según parámetros de búsqueda de una consulta.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
-        name (str): Nombre de la calle para filtrar (opcional).
-        department (str): Nombre de departamento para filtrar (opcional).
-        state (str / int): ID o nombre de provincia para filtrar (opcional).
-        road (str): Nombre del tipo de camino para filtrar (opcional).
+        road_name (str): Nombre de la calle para filtrar (opcional).
+        department (str): ID o nombre de departamento para filtrar (opcional).
+        state (str): ID o nombre de provincia para filtrar (opcional).
+        road_type (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
-        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
-            'department'.)
+            'department'.) (opcional).
 
     Returns:
-        list: Resultados de búsqueda de calles.
+        dict: Query construida para Elasticsearch.
     """
     if not fields:
         fields = []
 
-    index = STREETS
     terms = []
-    if name:
-        condition = build_name_condition(NAME, name, exact)
+    if road_name:
+        condition = build_name_condition(NAME, road_name, exact)
         terms.append(condition)
-    if road:
-        condition = build_match_condition(ROAD_TYPE, road, fuzzy=True)
+    if road_type:
+        condition = build_match_condition(ROAD_TYPE, road_type, fuzzy=True)
         terms.append(condition)
     if number:
         terms.append(build_range_condition(START_R, '<=', number))
@@ -143,7 +221,7 @@ def query_streets(es, name=None, department=None, state=None, road=None,
     if LOCATION in fields:
         fields.extend([GEOM, START_R, START_L, END_R, END_L])
 
-    query = {
+    return {
         'query': {
             'bool': {
                 'must': terms
@@ -153,47 +231,26 @@ def query_streets(es, name=None, department=None, state=None, road=None,
         '_source': {
             'include': fields,
             'exclude': [TIMESTAMP]
-        },
+        }
     }
 
-    result = es.search(index=index, body=query)
-    return [parse_es(hit, flatten, index) for hit in result['hits']['hits']]
 
-
-def query_address(es, search_params):
-    """Busca direcciones para los parámetros de una consulta.
+def build_places_query(lat, lon, fields=None):
+    """Construye una query con Elasticsearch DSL para entidades en una
+    ubicación según parámetros de búsqueda de una consulta.
 
     Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        search_params (dict): Diccionario con parámetros de búsqueda.
-
+        lat (float): Latitud del punto.
+        lon (float): Longitud del punto.
+        fields (list): Campos a devolver en los resultados (opcional).
     Returns:
-        list: Resultados de búsqueda de una dirección.
+        dict: Query construida para Elasticsearch.
     """
-    matches = search_es(es, search_params)
-    if not matches and search_params.get('source') == 'osm':
-        matches = search_osm(search_params)
-    return matches
 
-
-def query_place(es, index, lat, lon, fields=None):
-    """Busca a que entidades políticas (municipios, departamentos, o provincias)
-        pertenece una ubicación según parámetros de búsqueda de una consulta.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        index (str): Nombre del índice sobre el cual realizar la búsqueda.
-        lat (str): Latitud correspondiente a una ubicación.
-        lon (str): Longitud correspondiente a una ubicación.
-        fields (list): Campos a incluir en los resultados.
-
-    Returns:
-        list: Resultados de búsqueda de una ubicación.
-    """
     if not fields:
         fields = []
 
-    query = {
+    return {
         'query': {
             'bool': {
                 'filter': {
@@ -215,12 +272,6 @@ def query_place(es, index, lat, lon, fields=None):
         'size': 1
     }
 
-    result = es.search(index=index, body=query)
-    entities = result['hits']['hits']
-    if entities:
-        return parse_es(entities[0], False, index, add_source=False)
-
-    return None
 
 def build_name_condition(field, value, exact=False):
     """Crea una condición de búsqueda por nombre para Elasticsearch.
@@ -291,6 +342,7 @@ def build_range_condition(field, operator, value):
         }
     }
 
+
 def build_match_condition(field, value, fuzzy=False, operator='or'):
     """Crea una condición 'Match' para Elasticsearch.
 
@@ -326,68 +378,7 @@ def get_index_source(index):
             'No se pudo determinar la fuente de: {}'.format(index))
 
 
-def parse_es(result, flatten, index, add_source=True):
-    """Procesa un resultado de ElasticSearch para modificarlo.
-
-    Args:
-        result (dict): Diccionario con resultado.
-        flatten (bool): Bandera para habilitar que el resultado sea aplanado.
-        index (str): Índice donde el resultado fue encontrado.
-        add_source (bool): Si es verdadero, agrega la fuente a los resultados.
-
-    Returns:
-        dict: Resultado modificado.
-    """
-    result = result['_source']
-    if flatten:
-        flatten_dict(result, max_depth=2)
-
-    if add_source:
-        result[SOURCE] = get_index_source(index)
-
-    return result
-
-
-def parse_osm(result):
-    """Procesa un resultado de OpenStreetMap para modificar información.
-
-    Args:
-        result (dict): Diccionario con resultado.
-
-    Returns:
-        dict: Resultados modificado.
-    """
-    return {
-        FULL_NAME: result['display_name'],
-        NAME: result['address'].get('road'),
-        ROAD_TYPE: parse_osm_type(result['type']),
-        LOCALITY: result['address'].get('city'),
-        STATE: result['address'].get('state')
-    }
-
-
-def parse_osm_type(osm_type):
-    """Convierte un tipo de resultado de OpenStreetMap a un tipo de georef.
-
-    Args:
-        osm_type (str): Tipo de resultado de OpenStreetMap.
-
-    Returns:
-        str: Tipo de resultado de georef.
-    """
-    if osm_type == 'residential':
-        return 'CALLE'
-    elif osm_type == 'secondary':
-        return 'AVENIDA'
-    elif osm_type == 'motorway':
-        return 'AUTOPISTA'
-    elif osm_type == 'house':
-        return 'CALLE_ALTURA'
-    else:
-        return 'SIN_CLASIFICAR'
-
-
-def search_es(es, params):
+def query_address(es, params): # TODO: Combinar con query_streets
     """Busca en ElasticSearch con los parámetros de una consulta.
 
     Args:
@@ -398,13 +389,7 @@ def search_es(es, params):
         list: Resultados de búsqueda de una dirección.
     """
     number = params['number']
-    streets = query_streets(es, name=params['road_name'],
-                            road=params['road_type'],
-                            state=params['state'],
-                            department=params['department'],
-                            fields=params['fields'], max=params['max'],
-                            exact=params['exact'], number=number,
-                            flatten=params['flatten'])
+    streets = query_streets(es, [params])[0]
 
     addresses = []
     for street in streets:
@@ -418,46 +403,12 @@ def search_es(es, params):
             street[LOCATION] = loc
 
         remove_spatial_data_from(street)
-        if params['flatten']:
-            flatten_dict(street, max_depth=2)
+        # if params['flatten']:
+        #     flatten_dict(street, max_depth=2)
 
         addresses.append(street)
 
     return addresses
-
-
-def search_osm(params):
-    """Busca en OpenStreetMap para los parámetros de una consulta.
-
-    Args:
-        params (dict): Diccionario con parámetros de búsqueda.
-
-    Returns:
-        list: Resultados de búsqueda de una dirección.
-    """
-    url = os.environ.get('OSM_API_URL')
-    query = params['road_name']
-    if params.get('number'):
-        query += ' %s' % params['number']
-    if params.get('locality'):
-        query += ', %s' % params['locality']
-    if params.get('state'):
-        query += ', %s' % params['state']
-
-    params = {
-        'q': query,
-        'format': 'json',
-        'countrycodes': 'ar',
-        'addressdetails': 1,
-        'limit': params.get('max') or 15
-    }
-    try:
-        result = requests.get(url, params=params).json()
-    except requests.RequestException as error:
-        return []
-
-    return [parse_osm(match) for match in result
-            if match['class'] == 'highway' or match['type'] == 'house']
 
 
 def update_result_with(address, number):
