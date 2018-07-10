@@ -9,7 +9,7 @@ con los que operan los módulos de la API.
 from flask import jsonify, make_response, request, Response
 from geojson import Feature, FeatureCollection, Point, Polygon
 from service.names import *
-import re
+from service import params
 import os
 
 
@@ -23,52 +23,6 @@ REQUEST_INVALID = {
         'info': 'https://github.com/datosgobar/georef-api'
     }
 }
-
-
-ENDPOINT_PARAMS = {
-    STATES: [ID, NAME, ORDER, FIELDS, MAX, FORMAT, EXACT],
-    DEPARTMENTS: [ID, NAME, STATE, ORDER, FIELDS, FLATTEN, MAX, FORMAT, EXACT],
-    MUNICIPALITIES: [ID, NAME, DEPT, STATE, ORDER, FIELDS, FLATTEN, MAX, 
-                     FORMAT, EXACT],
-    SETTLEMENTS: [ID, NAME, DEPT, STATE, ORDER, FIELDS, MUN, FLATTEN, MAX,
-                  FORMAT, EXACT],
-    ADDRESSES: [ADDRESS, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, EXACT, FLATTEN],
-    STREETS: [NAME, ROAD_TYPE, DEPT, STATE, FIELDS, MAX, EXACT, FLATTEN],
-    PLACE: [LAT, LON, FLATTEN]
-}
-
-ENDPOINT_OBLIGATORY_FIELDS = {
-    STATES: [ID, NAME],
-    DEPARTMENTS: [ID, NAME],
-    MUNICIPALITIES: [ID, NAME],
-    SETTLEMENTS: [ID, NAME],
-    STREETS: [ID, NAME],
-    ADDRESSES: [ID, NAME, DOOR_NUM, GEOM, START_R, START_L, END_R, END_L,
-        LOCATION]
-}
-
-NONEMPTY_PARAMS = set([ID, NAME, ORDER, FIELDS, MAX, FORMAT, STATE, DEPT, MUN,
-    LOCALITY, ADDRESS, ROAD_TYPE, LAT, LON, SOURCE])
-
-
-def validate_params(request, resource):
-    """Controla que una consulta sea válida para procesar.
- 
-    Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
-        resource: (str): Nombre del recurso a validar.
- 
-    Returns:
-        (bool, str): Si una consulta es válida o no, y un mensaje si hay error.
-    """
-    for param in request.args:
-        if param not in ENDPOINT_PARAMS[resource]:
-            return False, INVALID_PARAM.format(param=param, res=resource)
-
-        if param in NONEMPTY_PARAMS and not request.args[param]:
-            return False, EMPTY_PARAM.format(param=param) 
-
-    return True, None
 
 
 def get_url_rule(request):
@@ -108,70 +62,6 @@ def get_url_rule(request):
             format_request['max'] = request.args.get(MAX)
     return True, format_request, ''
 
-
-def get_fields(args, resource):
-    """Devuelve los campos a mostrar pedidos en la consulta.
-
-    Args:
-        args (str or None): valores del parámetro "campos".
-
-    Returns:
-        list: campos para filtrar la búsqueda.
-    """
-    if not args:
-        return []
-    
-    return list(set(args.split(',') + ENDPOINT_OBLIGATORY_FIELDS[resource]))
-
-
-def build_search_from(params):
-    """Arma un diccionario con los parámetros de búsqueda de una consulta.
-
-    Args:
-        params (dict): Parámetros de la consulta HTTP.
-
-    Returns:
-        dict: Parámetros de búsqueda.
-    """
-    address = params.get(ADDRESS).split(',')
-    road_name, number = get_parts_from(address[0].strip())
-    road_type = params.get(ROAD_TYPE)
-    department = params.get(DEPT)
-    state = params.get(STATE)
-    max = params.get(MAX)
-    flatten = FLATTEN in params
-    exact = EXACT in params
-    fields = get_fields(params.get(FIELDS), ADDRESSES)
-
-    return {
-        'number': number,
-        'road_name': road_name,
-        'road_type': road_type,
-        'department': department,
-        'state': state,
-        'max': max,
-        'exact': exact,
-        # 'flatten': flatten,
-        'fields': fields
-    }
-
-
-def get_parts_from(address):
-    """Analiza una dirección para separar en calle y altura.
-
-    Args:
-        address (str): Texto con la calle y altura de una dirección.
-
-    Returns:
-        tuple: Tupla con calle y altura de una dirección.
-    """
-    match = re.search(r'(\s[0-9]+?)$', address)
-    number = int(match.group(1)) if match else None
-    if number == 0:
-        number = None
-    road_name = re.sub(r'(\s[0-9]+?)$', r'', address)
-
-    return road_name.strip(), number
 
 
 def get_response(result, format_request=None):

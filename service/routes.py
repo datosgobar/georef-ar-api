@@ -21,39 +21,27 @@ def disable_cache(f):
     return decorated_func
 
 
-@app.route('/api/v1.0/provincias', methods=['GET'])
-@app.route('/api/v1.0/provincias.csv', methods=['GET'])
-@app.route('/api/v1.0/provincias.json', methods=['GET'])
-@app.route('/api/v1.0/provincias.geojson', methods=['GET'])
+@app.route('/api/v1.0/provincias', methods=['GET', 'POST'])
 def get_states():
     return normalizer.process_state(request)
 
 
-@app.route('/api/v1.0/departamentos', methods=['GET'])
-@app.route('/api/v1.0/departamentos.csv', methods=['GET'])
-@app.route('/api/v1.0/departamentos.json', methods=['GET'])
-@app.route('/api/v1.0/departamentos.geojson', methods=['GET'])
+@app.route('/api/v1.0/departamentos', methods=['GET', 'POST'])
 def get_departments():
     return normalizer.process_department(request)
 
 
-@app.route('/api/v1.0/municipios', methods=['GET'])
-@app.route('/api/v1.0/municipios.csv', methods=['GET'])
-@app.route('/api/v1.0/municipios.json', methods=['GET'])
-@app.route('/api/v1.0/municipios.geojson', methods=['GET'])
+@app.route('/api/v1.0/municipios', methods=['GET', 'POST'])
 def get_municipalities():
     return normalizer.process_municipality(request)
 
 
-@app.route('/api/v1.0/localidades', methods=['GET'])
-@app.route('/api/v1.0/localidades.csv', methods=['GET'])
-@app.route('/api/v1.0/localidades.json', methods=['GET'])
-@app.route('/api/v1.0/localidades.geojson', methods=['GET'])
+@app.route('/api/v1.0/localidades', methods=['GET', 'POST'])
 def get_localities():
     return normalizer.process_locality(request)
 
 
-@app.route('/api/v1.0/calles', methods=['GET'])
+@app.route('/api/v1.0/calles', methods=['GET', 'POST'])
 def get_streets():
     return normalizer.process_street(request)
 
@@ -63,7 +51,7 @@ def get_addresses():
     return normalizer.process_address(request)
 
 
-@app.route('/api/v1.0/ubicacion', methods=['GET'])
+@app.route('/api/v1.0/ubicacion', methods=['GET', 'POST'])
 @disable_cache
 def get_placement():
     return normalizer.process_place(request)

@@ -15,6 +15,7 @@ DEPARTMENTS = 'departamentos'
 MUNICIPALITIES = 'municipios'
 STATES = 'provincias'
 PLACE = 'ubicacion'
+PLACES = 'ubicaciones'
 
 # Fields
 ID = 'id'
@@ -41,6 +42,7 @@ INFO = 'info'
 ERROR = 'error'
 MESSAGE = 'mensaje'
 TIMESTAMP = 'timestamp'
+LOCALITY_TYPE = 'tipo'
 
 # Parameters
 ADDRESS = 'direccion'
@@ -50,6 +52,9 @@ FLATTEN = 'aplanar'
 MAX = 'max'
 FORMAT = 'formato'
 EXACT = 'exacto'
+
+# Results
+RESULTS = 'resultados'
 
 # Elasticsearch
 STATE_ID = 'provincia.id'

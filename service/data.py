@@ -8,7 +8,6 @@ e impactan dicha búsqueda contra las fuentes de datos disponibles.
 
 import os
 import psycopg2
-from service.parser import flatten_dict
 from service.names import *
 
 MIN_AUTOCOMPLETE_CHARS = 4
@@ -98,6 +97,39 @@ def query_places(es, index, params_list):
         result[0] if result else None
         for result in results
     ]
+
+
+def query_addresses(es, params_list):
+    """Busca direcciones según parámetros de una o más consultas.
+
+    Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
+        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_streets_query' para más
+            detalles. Se agrega el parámetro 'number'.
+
+    Returns:
+        list: Resultados de búsqueda de entidades.
+    """
+
+    queries = (build_streets_query(**params) for params in params_list)
+    responses = run_queries(es, STREETS, queries)
+
+    for response, query in zip(responses, queries):
+        number = query['number']
+
+        for street in response:
+            update_result_with(street, number)
+
+            loc = location(street[GEOM], number, street[START_R], street[END_L])
+            if not loc:
+                street[LOCATION] = {LAT: None, LON: None}
+            else:
+                street[LOCATION] = loc
+
+            remove_spatial_data_from(street)
+
+    return responses
 
 
 def build_entity_query(entity_id=None, name=None, state=None,
@@ -376,39 +408,6 @@ def get_index_source(index):
     else:
         raise ValueError(
             'No se pudo determinar la fuente de: {}'.format(index))
-
-
-def query_address(es, params): # TODO: Combinar con query_streets
-    """Busca en ElasticSearch con los parámetros de una consulta.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        params (dict): Diccionario con parámetros de búsqueda.
-
-    Returns:
-        list: Resultados de búsqueda de una dirección.
-    """
-    number = params['number']
-    streets = query_streets(es, [params])[0]
-
-    addresses = []
-    for street in streets:
-        update_result_with(street, number)
-
-        loc = location(street[GEOM], number, street[START_R], street[END_L])
-
-        if not loc:
-            street[LOCATION] = {LAT: None, LON: None}
-        else:
-            street[LOCATION] = loc
-
-        remove_spatial_data_from(street)
-        # if params['flatten']:
-        #     flatten_dict(street, max_depth=2)
-
-        addresses.append(street)
-
-    return addresses
 
 
 def update_result_with(address, number):

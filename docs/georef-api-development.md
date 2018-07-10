@@ -62,8 +62,6 @@ CREATE EXTENSION postgis;
  
     export FLASK_APP=service/__init__.py
     export FLASK_DEBUG=1
-
-    export OSM_API_URL='http://nominatim.openstreetmap.org/search'
     ```
 
 - Cargar funciones en PostgreSQL:

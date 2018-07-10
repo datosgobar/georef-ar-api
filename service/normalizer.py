@@ -6,7 +6,7 @@ Contiene funciones que manejan la lógica de procesamiento
 de los recursos que expone la API.
 """
 
-from service import data, parser
+from service import data, parser, params
 from service.names import *
 from service.parser import flatten_dict
 from elasticsearch import Elasticsearch, ElasticsearchException
@@ -20,6 +20,49 @@ def get_elasticsearch():
     return g.elasticsearch
 
 
+def translate_keys(d, translations):
+    return {
+        translations.get(key, key): value
+        for key, value in d.items()
+    }
+
+
+def parse_params(request, name, param_parser):
+    if request.method == 'GET':
+        params_list = [request.args]
+    else:
+        params_list = request.json.get(name)
+        if not params_list:
+            abort(400)  # TODO: Manejo de erroes apropiado
+
+    return param_parser.parse_params_dict_list(params_list)
+
+
+def queries_from_params(request, name, param_parser, key_translations):
+    parse_results = parse_params(request, name, param_parser)
+    queries = []
+
+    for parsed_params, errors in parse_results:
+        # TODO: Manejo de errores de params
+        parsed_params.pop(FLATTEN, None)  # TODO: Manejo de flatten
+        query = translate_keys(parsed_params, key_translations)
+        queries.append(query)
+
+    try:
+        es = get_elasticsearch()
+        responses = data.query_entities(es, name, queries)
+    except ElasticsearchException:
+        abort(500)
+
+    # TODO: Manejo de SOURCE
+        
+    if request.method == 'GET':
+        return parser.get_response({name: responses[0]})
+    else:
+        responses = [{name: matches} for matches in responses]
+        return parser.get_response({RESULTS: responses})
+
+
 def process_state(request):
     """Procesa una consulta de tipo GET para normalizar provincias.
 
@@ -29,33 +72,17 @@ def process_state(request):
     Returns:
         Resultado de la consulta como objeto flask.Response.
     """
-    valid_rule, format_request, error = parser.get_url_rule(request)
-    if not valid_rule:
-        return parser.get_response_for_invalid(request, message=error)
-    valid_request, error = parser.validate_params(request, STATES)
-    if not valid_request:
-        return parser.get_response_for_invalid(request, message=error)
-
-    params = {
-        'entity_id': request.args.get(ID),
-        'name': request.args.get(NAME),
-        'max': request.args.get(MAX) or 24,
-        'exact': EXACT in request.args,
-        'order': request.args.get(ORDER),
-        'fields': parser.get_fields(request.args.get(FIELDS), STATES)
-    }
-
-    try:
-        es = get_elasticsearch()
-        matches = data.query_entities(es, STATES, [params])[0]
-    except ElasticsearchException:
-        abort(500)
-
-    return parser.get_response({STATES: matches}, format_request)
+    return process_entity(request, STATES, params.PARAMS_STATES, {
+            ID: 'entity_id',
+            NAME: 'name',
+            EXACT: 'exact',
+            ORDER: 'order',
+            FIELDS: 'fields'
+    })
 
 
 def process_department(request):
-    """Procesa una consulta de tipo GET para normalizar departamentos.
+    """Procesa una consulta de tipo GET para normalizar provincias.
 
     Args:
         request (flask.Request): Objeto con información de la consulta HTTP.
@@ -63,31 +90,14 @@ def process_department(request):
     Returns:
         Resultado de la consulta como objeto flask.Response.
     """
-    valid_rule, format_request, error = parser.get_url_rule(request)
-    if not valid_rule:
-        return parser.get_response_for_invalid(request, message=error)
-    valid_request, error = parser.validate_params(request, DEPARTMENTS)
-    if not valid_request:
-        return parser.get_response_for_invalid(request, message=error)
-
-    params = {
-        'entity_id': request.args.get(ID),
-        'name': request.args.get(NAME),
-        'state': request.args.get(STATE),
-        'max': request.args.get(MAX) or format_request['max'],
-        'exact': EXACT in request.args,
-        'order': request.args.get(ORDER),
-        'fields': parser.get_fields(request.args.get(FIELDS), DEPARTMENTS),
-        # 'flatten': FLATTEN in request.args or format_request['convert']
-    }
-
-    try:
-        es = get_elasticsearch()
-        matches = data.query_entities(es, DEPARTMENTS, [params])[0]
-    except ElasticsearchException:
-        abort(500)
-
-    return parser.get_response({DEPARTMENTS: matches}, format_request)
+    return process_entity(request, DEPARTMENTS, params.PARAMS_DEPARTMENTS, {
+            ID: 'entity_id',
+            NAME: 'name',
+            STATE: 'state',
+            EXACT: 'exact',
+            ORDER: 'order',
+            FIELDS: 'fields'
+    })
 
 
 def process_municipality(request):
@@ -99,32 +109,15 @@ def process_municipality(request):
     Returns:
         Resultado de la consulta como objeto flask.Response.
     """
-    valid_rule, format_request, error = parser.get_url_rule(request)
-    if not valid_rule:
-        return parser.get_response_for_invalid(request, message=error)
-    valid_request, error = parser.validate_params(request, MUNICIPALITIES)
-    if not valid_request:
-        return parser.get_response_for_invalid(request, message=error)
-
-    params = {
-        'entity_id': request.args.get(ID),
-        'name': request.args.get(NAME),
-        'department': request.args.get(DEPT),
-        'state': request.args.get(STATE),
-        'max': request.args.get(MAX) or format_request['max'],
-        'exact': EXACT in request.args,
-        'order': request.args.get(ORDER),
-        'fields': parser.get_fields(request.args.get(FIELDS), MUNICIPALITIES),
-        # 'flatten': FLATTEN in request.args or format_request['convert']
-    }
-
-    try:
-        es = get_elasticsearch()
-        matches = data.query_entities(es, MUNICIPALITIES, [params])[0]
-    except ElasticsearchException:
-        abort(500)
-
-    return parser.get_response({MUNICIPALITIES: matches}, format_request)
+    return process_entity(request, MUNICIPALITIES, params.PARAMS_MUNICIPALITIES, {
+            ID: 'entity_id',
+            NAME: 'name',
+            STATE: 'state',
+            DEPT: 'department',
+            EXACT: 'exact',
+            ORDER: 'order',
+            FIELDS: 'fields'
+    })
 
 
 def process_locality(request):
@@ -136,33 +129,16 @@ def process_locality(request):
     Returns:
         Resultado de la consulta como objeto flask.Response.
     """
-    valid_rule, format_request, error = parser.get_url_rule(request)
-    if not valid_rule:
-        return parser.get_response_for_invalid(request, message=error)
-    valid_request, error = parser.validate_params(request, SETTLEMENTS)
-    if not valid_request:
-        return parser.get_response_for_invalid(request, message=error)
-
-    params = {
-        'entity_id': request.args.get(ID),
-        'name': request.args.get(NAME),
-        'state': request.args.get(STATE),
-        'department': request.args.get(DEPT),
-        'municipality': request.args.get(MUN),
-        'exact': EXACT in request.args,
-        'order': request.args.get(ORDER),
-        'fields': parser.get_fields(request.args.get(FIELDS), SETTLEMENTS),
-        # 'flatten': FLATTEN in request.args or format_request['convert'],
-        'max': request.args.get(MAX) or format_request['max']
-    }
-
-    try:
-        es = get_elasticsearch()
-        matches = data.query_entities(es, SETTLEMENTS, [params])[0]
-    except ElasticsearchException:
-        abort(500)
-
-    return parser.get_response({LOCALITIES: matches}, format_request)
+    return process_entity(request, LOCALITIES, params.PARAMS_LOCALITIES, {
+            ID: 'entity_id',
+            NAME: 'name',
+            STATE: 'state',
+            DEPT: 'department',
+            MUN: 'municipality',
+            EXACT: 'exact',
+            ORDER: 'order',
+            FIELDS: 'fields'
+    })
 
 
 def process_street(request):
@@ -174,31 +150,15 @@ def process_street(request):
     Returns:
         Resultado de la consulta como objeto flask.Response.
     """
-    valid_request, error = parser.validate_params(request, STREETS)
-    if not valid_request:
-        return parser.get_response_for_invalid(request, message=error)
+    return process_entity(request, STREETS, params.PARAMS_STREETS, {
+            NAME: 'road_name',
+            STATE: 'state',
+            DEPT: 'department',
+            EXACT: 'exact',
+            FIELDS: 'fields'
+    })
 
-    params = {
-        'road_name': request.args.get(NAME),
-        'department': request.args.get(DEPT),
-        'state': request.args.get(STATE),
-        'road_type': request.args.get(ROAD_TYPE),
-        'max': request.args.get(MAX),
-        'exact': EXACT in request.args,
-        # 'flatten': FLATTEN in request.args,
-        'fields': parser.get_fields(request.args.get(FIELDS), STREETS)
-    }
-
-    try:
-        es = get_elasticsearch()
-        matches = data.query_streets(es, [params])[0]
-    except ElasticsearchException:
-        abort(500)
-
-    for street in matches:
-        street.pop(GEOM, None)
-
-    return parser.get_response({STREETS: matches})
+    # TODO: Remover geometria?
 
 
 def process_address(request):
@@ -210,71 +170,72 @@ def process_address(request):
     Returns:
         Resultado de una de las funciones invocadas según el tipo de Request.
     """
-    if request.method == 'GET':
-        return address_get(request)
-    return address_post(request)
+    parse_results = parse_params(request, ADDRESSES, params.PARAMS_ADDRESSES)
 
+    queries = []
+    for parsed_params, errors in parse_results:
+        road_name, number = parsed_params.pop(ADDRESS)
+        print(road_name, number)
+        parsed_params['road_name'] = road_name
+        parsed_params['number'] = number
 
-def address_get(request):
-    """Procesa una consulta de tipo GET para normalizar direcciones.
+        parsed_params.pop(FLATTEN, None)  # TODO: Manejar flatten
 
-    Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
-
-    Returns:
-        Resultado de la consulta como objeto flask.Response.
-    """
-    valid_request, error = parser.validate_params(request, ADDRESSES)
-    if not valid_request:
-        return parser.get_response_for_invalid(request, message=error)
-    if not request.args.get(ADDRESS):
-        return parser.get_response_for_invalid(request,
-                                               message=ADDRESS_REQUIRED)
-    search = parser.build_search_from(request.args)
-    if search['number'] is None:
-        return parser.get_response_for_invalid(request, message=NUMBER_REQUIRED)
+        queries.append(translate_keys(parsed_params, {
+            DEPT: 'department',
+            STATE: 'state',
+            EXACT: 'exact',
+            FIELDS: 'fields',
+            ROAD_TYPE: 'road_type'
+        }))
 
     try:
         es = get_elasticsearch()
-        matches = data.query_address(es, search)
+        responses = data.query_addresses(es, queries)
     except ElasticsearchException:
         abort(500)
 
-    return parser.get_response({ADDRESSES: matches})
+    # TODO: Manejo de SOURCE
+
+    if request.method == 'GET':
+        return parser.get_response({ADDRESSES: responses[0]})
+    else:
+        responses = [{ADDRESSES: matches} for matches in responses]
+        return parser.get_response({RESULTS: responses})
 
 
-def address_post(request):
-    """Procesa una consulta de tipo POST para normalizar direcciones.
+def build_place_result(query, dept, muni):
+    empty_entity = {
+        ID: None,
+        NAME: None
+    }
 
-    Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
+    if not dept:
+        state = empty_entity.copy()
+        dept = empty_entity.copy()
+        muni = empty_entity.copy()
+    else:
+        # Remover la provincia del departamento y colocarla directamente
+        # en el resultado. Haciendo esto se logra evitar una consulta
+        # al índice de provincias.
+        state = dept.pop(STATE)
+        muni = muni or empty_entity.copy()
 
-    Returns:
-        Resultado de la consulta como objeto flask.Response.
-    """
-    matches = []
-    json_data = request.get_json()
+    place = {
+        STATE: state,
+        DEPT: dept,
+        MUN: muni,
+        LAT: query['lat'],
+        LON: query['lon']
+    }
 
-    if json_data:
-        addresses = json_data.get(ADDRESSES)
-        if not addresses:
-            return parser.get_response_for_invalid(request, message=EMPTY_DATA)
-        try:
-            es = get_elasticsearch()
+    if query[FIELDS]:
+        place = {key: place[key] for key in place if key in query[FIELDS]}
 
-            for address in addresses:
-                search = parser.build_search_from({
-                    ADDRESS: address
-                })
+    if query[FLATTEN]:
+        parser.flatten_dict(place)
 
-                matches.append({
-                    'original': address,
-                    'normalizadas': data.query_address(es, search)
-                })
-        except ElasticsearchException:
-            abort(500)
-
-    return parser.get_response({ADDRESSES: matches})
+    return place
 
 
 def process_place(request):
@@ -286,63 +247,46 @@ def process_place(request):
     Returns:
         Resultado de una de las funciones invocadas según el tipo de Request.
     """
-    valid_request, error = parser.validate_params(request, PLACE)
-    if not valid_request:
-        return parser.get_response_for_invalid(request, message=error)
-    if not request.args.get(LAT):
-        return parser.get_response_for_invalid(request, message=LAT_REQUIRED)
-    if not request.args.get(LON):
-        return parser.get_response_for_invalid(request, message=LON_REQUIRED)
+    parse_results = parse_params(request, PLACES, params.PARAMS_PLACE)
+    queries = []
 
-    lat = request.args.get(LAT)
-    lon = request.args.get(LON)
-    flatten = FLATTEN in request.args
+    for parsed_params, errors in parse_results:
+        # TODO: Manejo de errores de params
+        queries.append(parsed_params)
 
     try:
         es = get_elasticsearch()
-        params = {
-            'lat': lat,
-            'lon': lon,
-            'fields': [ID, NAME, STATE]
-        }
-        dept = data.query_places(es, DEPARTMENTS, [params])[0]
+        dept_queries = []
+        for query in queries:
+            dept_queries.append({
+                'lat': query['lat'],
+                'lon': query['lon'],
+                'fields': [ID, NAME, STATE]
+            })
+            
+        departments = data.query_places(es, DEPARTMENTS, dept_queries)
 
-        if dept:
-            params = {
-                'lat': lat,
-                'lon': lon,
+        muni_queries = []
+        for query in queries:
+            muni_queries.append({
+                'lat': query['lat'],
+                'lon': query['lon'],
                 'fields': [ID, NAME]
-            }
-            muni = data.query_places(es, MUNICIPALITIES, [params])[0]
-            # Remover la provincia del departamento y colocarla directamente
-            # en el resultado. Haciendo esto se logra evitar una consulta
-            # al índice de provincias.
-            state = dept.pop(STATE)
-            place = {}
+            })
 
-            if muni:
-                place[SOURCE] = data.get_index_source(MUNICIPALITIES)
-            else:
-                # Si la municipalidad no fue encontrada, mantener la misma
-                # estructura de datos en la respuesta.
-                muni = {
-                    ID: None,
-                    NAME: None
-                }
-                place[SOURCE] = data.get_index_source(DEPARTMENTS)
+        munis = data.query_places(es, MUNICIPALITIES, muni_queries)
 
-            place[MUN] = muni
-            place[DEPT] = dept
-            place[STATE] = state
-            place[LAT] = lat
-            place[LON] = lon
-
-            if flatten:
-                flatten_dict(place, max_depth=2)
-        else:
-            place = {}
+        places = []
+        for query, dept, muni in zip(queries, departments, munis):
+            places.append(build_place_result(query, dept, muni))
 
     except ElasticsearchException:
         abort(500)
 
-    return parser.get_response({PLACE: place})
+    # TODO: Manejo de SOURCE
+
+    if request.method == 'GET':
+        return parser.get_response({PLACE: places[0]})
+    else:
+        responses = [{PLACE: place} for place in places]
+        return parser.get_response({RESULTS: responses})
