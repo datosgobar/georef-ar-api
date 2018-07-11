@@ -14,11 +14,11 @@ MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_MAX = 10
 
 
-def run_queries(es, index, queries):
+def run_dsl_queries(es, index, dsl_queries):
     """TODO: Docs
     """
     body = []
-    for query in queries:
+    for query in dsl_queries:
         # No es necesario especificar el índice por
         # query ya que se ejecutan todas en el mismo
         # índice.
@@ -35,51 +35,34 @@ def run_queries(es, index, queries):
     return responses
 
 
-def query_entities(es, index, params_list):
+def query_entities(es, index, queries):
     """Busca entidades políticas (localidades, departamentos, o provincias)
     según parámetros de una o más consultas.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
         index (str): Nombre del índice sobre el cual realizar las búsquedas.
-        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_entity_query' para más
+        queries (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_entity_dsl_query' para más
             detalles.
 
     Returns:
         list: Resultados de búsqueda de entidades.
     """
 
-    queries = (build_entity_query(**params) for params in params_list)
-    return run_queries(es, index, queries)
+    dsl_queries = (build_entity_dsl_query(**query) for query in queries)
+    return run_dsl_queries(es, index, dsl_queries)
 
 
-def query_streets(es, params_list):
-    """Busca vías de circulación según parámetros de una o más consultas.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_streets_query' para más
-            detalles.
-
-    Returns:
-        list: Resultados de búsqueda de entidades.
-    """
-
-    queries = (build_streets_query(**params) for params in params_list)
-    return run_queries(es, STREETS, queries)
-
-
-def query_places(es, index, params_list):
+def query_places(es, index, queries):
     """Busca entidades políticas que contengan un punto dato, según
     parámetros de una o más consultas.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
         index (str): Nombre del índice sobre el cual realizar las búsquedas.
-        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_places_query' para más
+        queries (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_place_dsl_query' para más
             detalles.
 
     Returns:
@@ -87,8 +70,8 @@ def query_places(es, index, params_list):
     """
 
     index += '-' + GEOM # Utilizar índices con geometrías
-    queries = (build_places_query(**params) for params in params_list)
-    results = run_queries(es, index, queries)
+    dsl_queries = (build_place_dsl_query(**query) for query in queries)
+    results = run_dsl_queries(es, index, dsl_queries)
 
     # Ya que solo puede existir una entidad por punto (para un tipo dado
     # de entidad), modificar los resultados para que el resultado de cada
@@ -99,27 +82,51 @@ def query_places(es, index, params_list):
     ]
 
 
-def query_addresses(es, params_list):
-    """Busca direcciones según parámetros de una o más consultas.
+def query_streets(es, queries):
+    """Busca vías de circulación según parámetros de una o más consultas.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
-        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_streets_query' para más
-            detalles. Se agrega el parámetro 'number'.
+        queries (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_streets_dsl_query' para más
+            detalles.
 
     Returns:
         list: Resultados de búsqueda de entidades.
     """
 
-    queries = (build_streets_query(**params) for params in params_list)
-    responses = run_queries(es, STREETS, queries)
+    dsl_queries = (build_streets_dsl_query(**query) for query in queries)
+    return run_dsl_queries(es, STREETS, dsl_queries)
+
+
+def query_addresses(es, queries):
+    """Busca direcciones según parámetros de una o más consultas.
+
+    Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
+        queries (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_streets_dsl_query' para más
+            detalles. Se hace uso obligatorio del parámetro 'number'.
+
+    Returns:
+        list: Resultados de búsqueda de entidades.
+    """
+
+    dsl_queries = (build_streets_dsl_query(**query) for query in queries)
+    responses = run_dsl_queries(es, STREETS, dsl_queries)
 
     for response, query in zip(responses, queries):
         number = query['number']
 
         for street in response:
-            update_result_with(street, number)
+            if FULL_NAME in query['fields']:
+                # Agregar altura a la nomenclatura
+                parts = street[FULL_NAME].split(',')
+                parts[0] += ' {}'.format(number)
+                street[FULL_NAME] = ','.join(parts)
+
+            if DOOR_NUM in query['fields']:
+                street[DOOR_NUM] = number
 
             loc = location(street[GEOM], number, street[START_R], street[END_L])
             if not loc:
@@ -127,12 +134,12 @@ def query_addresses(es, params_list):
             else:
                 street[LOCATION] = loc
 
-            remove_spatial_data_from(street)
+            remove_spatial_data(street)
 
     return responses
 
 
-def build_entity_query(entity_id=None, name=None, state=None,
+def build_entity_dsl_query(entity_id=None, name=None, state=None,
                        department=None, municipality=None, max=None,
                        order=None, fields=None, exact=False):
     """Construye una query con Elasticsearch DSL para entidades políticas
@@ -204,8 +211,9 @@ def build_entity_query(entity_id=None, name=None, state=None,
     }
 
 
-def build_streets_query(road_name=None, department=None, state=None, road_type=None,
-                        max=None, fields=None, exact=False, number=None):
+def build_streets_dsl_query(road_name=None, department=None, state=None,
+                        road_type=None, max=None, fields=None, exact=False,
+                        number=None, excludes=None):
     """Construye una query con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
@@ -217,6 +225,7 @@ def build_streets_query(road_name=None, department=None, state=None, road_type=N
         road_type (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
+        excludes (list): Campos a no incluir en los resultados (opcional).
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
             'department'.) (opcional).
@@ -227,6 +236,12 @@ def build_streets_query(road_name=None, department=None, state=None, road_type=N
     if not fields:
         fields = []
 
+    if not excludes:
+        excludes = []
+
+    if TIMESTAMP not in excludes:
+        excludes.append(TIMESTAMP)
+        
     terms = []
     if road_name:
         condition = build_name_condition(NAME, road_name, exact)
@@ -262,12 +277,12 @@ def build_streets_query(road_name=None, department=None, state=None, road_type=N
         'size': max or DEFAULT_MAX,
         '_source': {
             'include': fields,
-            'exclude': [TIMESTAMP]
+            'exclude': excludes
         }
     }
 
 
-def build_places_query(lat, lon, fields=None):
+def build_place_dsl_query(lat, lon, fields=None):
     """Construye una query con Elasticsearch DSL para entidades en una
     ubicación según parámetros de búsqueda de una consulta.
 
@@ -410,21 +425,7 @@ def get_index_source(index):
             'No se pudo determinar la fuente de: {}'.format(index))
 
 
-def update_result_with(address, number):
-    """Agrega la altura a la dirección y a la nomenclatura.
-
-    Args:
-        address (dict): Dirección.
-        number (int): Número de puerta o altura.
-    """
-    if FULL_NAME in address:
-        parts = address[FULL_NAME].split(',')
-        parts[0] += ' %s' % str(number)
-        address[FULL_NAME] = ','.join(parts)
-    address[DOOR_NUM] = number
-
-
-def remove_spatial_data_from(address):
+def remove_spatial_data(address):
     """Remueve los campos de límites y geometría de una dirección procesada.
 
     Args:

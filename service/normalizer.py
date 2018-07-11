@@ -6,9 +6,8 @@ Contiene funciones que manejan la lógica de procesamiento
 de los recursos que expone la API.
 """
 
-from service import data, parser, params
+from service import data, parser, params, formatter
 from service.names import *
-from service.parser import flatten_dict
 from elasticsearch import Elasticsearch, ElasticsearchException
 from flask import g, abort
 
@@ -20,42 +19,52 @@ def get_elasticsearch():
     return g.elasticsearch
 
 
-def translate_keys(d, translations):
+def translate_keys(d, translations, ignore=None):
+    if not ignore:
+        ignore = []
+
     return {
         translations.get(key, key): value
         for key, value in d.items()
+        if key not in ignore
     }
 
 
 def parse_params(request, name, param_parser):
     if request.method == 'GET':
         params_list = [request.args]
+        param_source = 'querystring'
     else:
         params_list = request.json.get(name)
-        if not params_list:
-            abort(400)  # TODO: Manejo de erroes apropiado
+        param_source = 'body'
 
-    return param_parser.parse_params_dict_list(params_list)
+    return param_parser.parse_params_dict_list(params_list, param_source)
 
 
-def queries_from_params(request, name, param_parser, key_translations):
-    parse_results = parse_params(request, name, param_parser)
+def process_entity(request, name, param_parser, key_translations, index=None):
+    if not index:
+        index = name
+
+    parse_results, errors = parse_params(request, name, param_parser)
+
+    if any(errors):
+        return formatter.create_param_error_response(request, errors)
+
     queries = []
 
-    for parsed_params, errors in parse_results:
-        # TODO: Manejo de errores de params
-        parsed_params.pop(FLATTEN, None)  # TODO: Manejo de flatten
-        query = translate_keys(parsed_params, key_translations)
+    for parsed_params in parse_results:
+        query = translate_keys(parsed_params, key_translations,
+                               ignore=[FLATTEN, FORMAT])
         queries.append(query)
 
     try:
         es = get_elasticsearch()
-        responses = data.query_entities(es, name, queries)
+        responses = data.query_entities(es, index, queries)
     except ElasticsearchException:
         abort(500)
 
     # TODO: Manejo de SOURCE
-        
+
     if request.method == 'GET':
         return parser.get_response({name: responses[0]})
     else:
@@ -138,7 +147,7 @@ def process_locality(request):
             EXACT: 'exact',
             ORDER: 'order',
             FIELDS: 'fields'
-    })
+    }, index=SETTLEMENTS)
 
 
 def process_street(request):
@@ -150,15 +159,39 @@ def process_street(request):
     Returns:
         Resultado de la consulta como objeto flask.Response.
     """
-    return process_entity(request, STREETS, params.PARAMS_STREETS, {
+    parse_results, errors = parse_params(request, STREETS,
+                                         params.PARAMS_STREETS)
+
+    if any(errors):
+        return formatter.create_param_error_response(request, errors)
+
+    queries = []
+    for parsed_params in parse_results:
+        query = translate_keys(parsed_params, {
             NAME: 'road_name',
             STATE: 'state',
             DEPT: 'department',
             EXACT: 'exact',
-            FIELDS: 'fields'
-    })
+            FIELDS: 'fields',
+            ROAD_TYPE: 'road_type'
+        }, ignore=[FLATTEN, FORMAT])
 
-    # TODO: Remover geometria?
+        query['excludes'] = [GEOM]
+        queries.append(query)
+
+    try:
+        es = get_elasticsearch()
+        responses = data.query_streets(es, queries)
+    except ElasticsearchException:
+        abort(500)
+
+    # TODO: Manejo de SOURCE
+
+    if request.method == 'GET':
+        return parser.get_response({ADDRESSES: responses[0]})
+    else:
+        responses = [{ADDRESSES: matches} for matches in responses]
+        return parser.get_response({RESULTS: responses})
 
 
 def process_address(request):
@@ -170,16 +203,17 @@ def process_address(request):
     Returns:
         Resultado de una de las funciones invocadas según el tipo de Request.
     """
-    parse_results = parse_params(request, ADDRESSES, params.PARAMS_ADDRESSES)
+    parse_results, errors = parse_params(request, ADDRESSES,
+                                         params.PARAMS_ADDRESSES)
+
+    if any(errors):
+        return formatter.create_param_error_response(request, errors)
 
     queries = []
-    for parsed_params, errors in parse_results:
+    for parsed_params in parse_results:
         road_name, number = parsed_params.pop(ADDRESS)
-        print(road_name, number)
         parsed_params['road_name'] = road_name
         parsed_params['number'] = number
-
-        parsed_params.pop(FLATTEN, None)  # TODO: Manejar flatten
 
         queries.append(translate_keys(parsed_params, {
             DEPT: 'department',
@@ -187,7 +221,7 @@ def process_address(request):
             EXACT: 'exact',
             FIELDS: 'fields',
             ROAD_TYPE: 'road_type'
-        }))
+        }, ignore=[FLATTEN, FORMAT]))
 
     try:
         es = get_elasticsearch()
@@ -232,9 +266,6 @@ def build_place_result(query, dept, muni):
     if query[FIELDS]:
         place = {key: place[key] for key in place if key in query[FIELDS]}
 
-    if query[FLATTEN]:
-        parser.flatten_dict(place)
-
     return place
 
 
@@ -247,12 +278,16 @@ def process_place(request):
     Returns:
         Resultado de una de las funciones invocadas según el tipo de Request.
     """
-    parse_results = parse_params(request, PLACES, params.PARAMS_PLACE)
+    parse_results, errors = parse_params(request, PLACES, params.PARAMS_PLACE)
+
+    if any(errors):
+        return formatter.create_param_error_response(request, errors)
+
     queries = []
 
-    for parsed_params, errors in parse_results:
-        # TODO: Manejo de errores de params
-        queries.append(parsed_params)
+    for parsed_params in parse_results:
+        query = translate_keys(parsed_params, {}, ignore=[FLATTEN, FORMAT])
+        queries.append(query)
 
     try:
         es = get_elasticsearch()

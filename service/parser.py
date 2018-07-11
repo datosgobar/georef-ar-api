@@ -101,22 +101,6 @@ def get_response(result, format_request=None):
     else:
         return make_response(jsonify(result), 200)
 
-
-def get_response_for_invalid(request, message=None):
-    """Genera una respuesta para consultas inválidas.
-
-    Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
-        message (str): Mensaje de error opcional.
-
-    Returns:
-        flask.Response: Respuesta de la API en formato JSON.
-    """
-    if message is not None:
-        REQUEST_INVALID[ERROR][MESSAGE] = message
-    return make_response(jsonify(REQUEST_INVALID), 400)
-
-
 def generate_csv(result):
     """ Generar datos en formato CSV
 
@@ -131,26 +115,3 @@ def generate_csv(result):
             yield ';'.join(str(v) for v in dict(row).values()) + '\n'
             first = False
 
-
-def flatten_dict(d, max_depth=4):
-    """ Aplana un diccionario recursivamente.
-    Lanza un RuntimeError si no se pudo aplanar el diccionario
-    con el número especificado de profundidad.
-
-    Args:
-        d (dict): Diccionario a aplanar.
-        max_depth (int): Profundidad máxima a alcanzar.
-    """
-    if max_depth <= 0:
-        raise RuntimeError("Profundidad máxima alcanzada.")
-
-    for key in list(d.keys()):
-        v = d[key]
-        if isinstance(v, dict):
-            flatten_dict(v, max_depth - 1)
-
-            for subkey, subval in v.items():
-                flat_key = '_'.join([key, subkey])
-                d[flat_key] = subval
-
-            del d[key]
