@@ -1,5 +1,5 @@
-import service.names as N
-
+from service import strings
+from service import names as N
 from flask import make_response, jsonify
 
 
@@ -51,9 +51,36 @@ def create_param_error_response(request, errors):
     }), 400)
 
 
-def create_es_error_response():
-    return make_response(jsonify({}), 500)
+def create_es_error_response(request):
+    return make_response(jsonify({
+        'error': strings.INTERNAL_ERROR
+    }), 500)
 
 
-def create_ok_response(request, params_list, name, results):
-    pass
+def create_json_response(request, params_list, name, results, list_results):
+    results_formatted = []
+    for result, params in zip(results, params_list):
+        if params.get(N.FLATTEN, False):
+            if list_results:
+                for match in result:
+                    flatten_dict(match, max_depth=2)
+            else:
+                flatten_dict(result, max_depth=2)
+
+        results_formatted.append({name: result})
+
+    if request.method == 'GET':
+        return make_response(jsonify(results_formatted[0]))
+    else:
+        return make_response(jsonify({N.RESULTS: results_formatted}))
+
+
+def create_ok_response(request, params_list, name, results, list_results=True):
+    if request.method == 'GET':
+        fmt = params_list[0][N.FORMAT]
+    else:
+        fmt = 'json'
+
+    if fmt == 'json':
+        return create_json_response(request, params_list, name, results,
+                                    list_results)

@@ -6,10 +6,10 @@ Contiene funciones que manejan la lógica de procesamiento
 de los recursos que expone la API.
 """
 
-from service import data, parser, params, formatter
+from service import data, params, formatter
 from service.names import *
 from elasticsearch import Elasticsearch, ElasticsearchException
-from flask import g, abort
+from flask import g
 
 
 def get_elasticsearch():
@@ -61,15 +61,11 @@ def process_entity(request, name, param_parser, key_translations, index=None):
         es = get_elasticsearch()
         responses = data.query_entities(es, index, queries)
     except ElasticsearchException:
-        abort(500)
+        return formatter.create_es_error_response(request)
 
     # TODO: Manejo de SOURCE
-
-    if request.method == 'GET':
-        return parser.get_response({name: responses[0]})
-    else:
-        responses = [{name: matches} for matches in responses]
-        return parser.get_response({RESULTS: responses})
+    return formatter.create_ok_response(request, parse_results, name,
+                                        responses)
 
 
 def process_state(request):
@@ -183,15 +179,12 @@ def process_street(request):
         es = get_elasticsearch()
         responses = data.query_streets(es, queries)
     except ElasticsearchException:
-        abort(500)
+        return formatter.create_es_error_response(request)
 
     # TODO: Manejo de SOURCE
 
-    if request.method == 'GET':
-        return parser.get_response({ADDRESSES: responses[0]})
-    else:
-        responses = [{ADDRESSES: matches} for matches in responses]
-        return parser.get_response({RESULTS: responses})
+    return formatter.create_ok_response(request, parse_results, STREETS,
+                                        responses)
 
 
 def process_address(request):
@@ -227,15 +220,11 @@ def process_address(request):
         es = get_elasticsearch()
         responses = data.query_addresses(es, queries)
     except ElasticsearchException:
-        abort(500)
+        return formatter.create_es_error_response(request)
 
     # TODO: Manejo de SOURCE
-
-    if request.method == 'GET':
-        return parser.get_response({ADDRESSES: responses[0]})
-    else:
-        responses = [{ADDRESSES: matches} for matches in responses]
-        return parser.get_response({RESULTS: responses})
+    return formatter.create_ok_response(request, parse_results, ADDRESSES,
+                                        responses)
 
 
 def build_place_result(query, dept, muni):
@@ -316,12 +305,8 @@ def process_place(request):
             places.append(build_place_result(query, dept, muni))
 
     except ElasticsearchException:
-        abort(500)
+        return formatter.create_es_error_response(request)
 
     # TODO: Manejo de SOURCE
-
-    if request.method == 'GET':
-        return parser.get_response({PLACE: places[0]})
-    else:
-        responses = [{PLACE: place} for place in places]
-        return parser.get_response({RESULTS: responses})
+    return formatter.create_ok_response(request, parse_results, PLACE, places,
+                                        list_results=False)
