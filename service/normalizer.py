@@ -63,6 +63,11 @@ def process_entity(request, name, param_parser, key_translations, index=None):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
+    source = data.get_index_source(index)
+    for response in responses:
+        for match in response:
+            match[SOURCE] = source
+    
     return formatter.create_ok_response(request, parse_results, name,
                                         responses)
 
@@ -180,6 +185,11 @@ def process_street(request):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
+    source = data.get_index_source(STREETS)
+    for response in responses:
+        for match in response:
+            match[SOURCE] = source
+    
     return formatter.create_ok_response(request, parse_results, STREETS,
                                         responses)
 
@@ -219,6 +229,11 @@ def process_address(request):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
+    source = data.get_index_source(STREETS)
+    for response in responses:
+        for match in response:
+            match[SOURCE] = source
+    
     return formatter.create_ok_response(request, parse_results, ADDRESSES,
                                         responses)
 
@@ -228,24 +243,27 @@ def build_place_result(query, dept, muni):
         ID: None,
         NAME: None
     }
-
+    
     if not dept:
         state = empty_entity.copy()
         dept = empty_entity.copy()
         muni = empty_entity.copy()
+        source = None
     else:
         # Remover la provincia del departamento y colocarla directamente
         # en el resultado. Haciendo esto se logra evitar una consulta
         # al índice de provincias.
         state = dept.pop(STATE)
         muni = muni or empty_entity.copy()
+        source = data.get_index_source(DEPARTMENTS)
 
     place = {
         STATE: state,
         DEPT: dept,
         MUN: muni,
         LAT: query['lat'],
-        LON: query['lon']
+        LON: query['lon'],
+        SOURCE: source
     }
 
     if query[FIELDS]:

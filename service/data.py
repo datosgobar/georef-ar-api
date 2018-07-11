@@ -414,7 +414,7 @@ def get_index_source(index):
     """
     if index in [STATES, DEPARTMENTS, MUNICIPALITIES]:
         return SOURCE_IGN
-    elif index == SETTLEMENTS:
+    elif index in [SETTLEMENTS, LOCALITIES]:
         return SOURCE_BAHRA
     elif index == STREETS:
         return SOURCE_INDEC
