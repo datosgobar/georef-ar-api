@@ -10,4 +10,6 @@ INT_VAL_ERROR = 'El parámetro no es un número entero.'
 FLOAT_VAL_ERROR = 'El parámetro no es un número real.'
 INVALID_CHOICE = 'El parámetro debe tomar uno de los siguientes valores: {}'
 EMPTY_BULK = 'Se requiere de al menos una operación a realizar.'
-INTERNAL_ERROR = 'Ocurrió un error de servidor interno al procesar la petición.'
+INTERNAL_ERROR = 'Ocurrió un error de servidor interno al procesar la \
+                  petición.'
+INVALID_LOCATION = 'El parámetro debe ser especificado en el HTTP \'{}\'.'

@@ -1,5 +1,6 @@
 from service import strings
 from service import names as N
+import geojson
 from flask import make_response, jsonify, Response
 
 CSV_SEP = ';'
@@ -80,11 +81,31 @@ def create_csv_response(request, name, result):
     }))
 
 
-def create_json_response(request, params_list, name, results, list_results):
+def create_geojson_response(request, results, iterable_results):
+    if iterable_results:
+        items = results[0]
+    else:
+        items = results
+
+    features = []
+    for item in items:
+        if N.LAT in item and N.LON in item:
+            lat = item.pop(N.LAT)
+            lon = item.pop(N.LON)
+
+            # TODO: Cambiar tipos de datos de LAT y LON en índices
+            point = geojson.Point((float(lat), float(lon)))
+            features.append(geojson.Feature(geometry=point, properties=item))
+
+    return make_response(jsonify(geojson.FeatureCollection(features)))
+
+
+def create_json_response(request, params_list, name, results,
+                         iterable_results):
     results_formatted = []
     for result, params in zip(results, params_list):
         if params.get(N.FLATTEN, False):
-            if list_results:
+            if iterable_results:
                 for match in result:
                     flatten_dict(match, max_depth=2)
             else:
@@ -98,18 +119,23 @@ def create_json_response(request, params_list, name, results, list_results):
         return make_response(jsonify({N.RESULTS: results_formatted}))
 
 
-def create_ok_response(request, params_list, name, results, list_results=True):
+def create_ok_response(request, params_list, name, results,
+                       iterable_results=True):
     if request.method == 'GET':
         fmt = params_list[0][N.FORMAT]
     else:
         fmt = 'json'
 
+    # TODO: Manejo de campo 'source'
+
     if fmt == 'json':
         return create_json_response(request, params_list, name, results,
-                                    list_results)
+                                    iterable_results)
     elif fmt == 'csv':
-        if not list_results:
+        if not iterable_results:
             raise RuntimeError(
                 'Se requieren datos iterables para crear una respuesta CSV.')
 
         return create_csv_response(request, name, results[0])
+    elif fmt == 'geojson':
+        return create_geojson_response(request, results, iterable_results)

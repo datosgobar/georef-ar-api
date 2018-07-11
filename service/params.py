@@ -55,7 +55,8 @@ class Parameter:
                 return self.default
         else:
             if self.source != 'any' and from_source != self.source:
-                raise InvalidLocationException()
+                raise InvalidLocationException(strings.INVALID_LOCATION.format(
+                    self.source))
 
         parsed = self._parse_value(val)
 
@@ -166,9 +167,9 @@ class ParameterSet():
             except ValueError as e:
                 errors[param_name] = ParamError(ParamErrorType.VALUE_ERROR,
                                                 str(e), from_source)
-            except InvalidLocationException:
+            except InvalidLocationException as e:
                 errors[param_name] = ParamError(
-                    ParamErrorType.INVALID_LOCATION, None, from_source)
+                    ParamErrorType.INVALID_LOCATION, str(e), from_source)
             except InvalidChoiceException as e:
                 errors[param_name] = ParamError(ParamErrorType.INVALID_CHOICE,
                                                 str(e), from_source)

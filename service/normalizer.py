@@ -63,7 +63,6 @@ def process_entity(request, name, param_parser, key_translations, index=None):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
-    # TODO: Manejo de SOURCE
     return formatter.create_ok_response(request, parse_results, name,
                                         responses)
 
@@ -181,8 +180,6 @@ def process_street(request):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
-    # TODO: Manejo de SOURCE
-
     return formatter.create_ok_response(request, parse_results, STREETS,
                                         responses)
 
@@ -222,7 +219,6 @@ def process_address(request):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
-    # TODO: Manejo de SOURCE
     return formatter.create_ok_response(request, parse_results, ADDRESSES,
                                         responses)
 
@@ -307,6 +303,5 @@ def process_place(request):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
-    # TODO: Manejo de SOURCE
     return formatter.create_ok_response(request, parse_results, PLACE, places,
-                                        list_results=False)
+                                        iterable_results=False)

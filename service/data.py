@@ -15,8 +15,6 @@ DEFAULT_MAX = 10
 
 
 def run_dsl_queries(es, index, dsl_queries):
-    """TODO: Docs
-    """
     body = []
     for query in dsl_queries:
         # No es necesario especificar el índice por
