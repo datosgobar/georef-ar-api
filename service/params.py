@@ -293,6 +293,6 @@ PARAMS_PLACE = ParameterSet({
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.STATE],
                                optionals=[N.DEPT, N.MUN, N.LAT, N.LON]),
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
+    N.FORMAT: StrParameter(default='json', choices=['json', 'geojson'],
                            source='querystring')
 })

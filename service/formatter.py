@@ -1,6 +1,8 @@
 from service import strings
 from service import names as N
-from flask import make_response, jsonify
+from flask import make_response, jsonify, Response
+
+CSV_SEP = ';'
 
 
 def flatten_dict(d, max_depth=3):
@@ -57,6 +59,27 @@ def create_es_error_response(request):
     }), 500)
 
 
+def create_csv_response(request, name, result):
+    def csv_generator():
+        first = result[0]
+        flatten_dict(first, max_depth=2)
+        keys = sorted(first.keys())
+
+        yield '{}\n'.format(CSV_SEP.join(keys))
+        
+        for match in result:
+            flatten_dict(match, max_depth=2)
+            values = (str(match[key]) for key in keys)
+
+            yield '{}\n'.format(CSV_SEP.join(values))
+
+    resp = Response(csv_generator(), mimetype='text/csv')
+    return make_response((resp, {
+        'Content-Disposition': 'attachment; filename={}.csv'.format(
+            name.lower())
+    }))
+
+
 def create_json_response(request, params_list, name, results, list_results):
     results_formatted = []
     for result, params in zip(results, params_list):
@@ -84,3 +107,9 @@ def create_ok_response(request, params_list, name, results, list_results=True):
     if fmt == 'json':
         return create_json_response(request, params_list, name, results,
                                     list_results)
+    elif fmt == 'csv':
+        if not list_results:
+            raise RuntimeError(
+                'Se requieren datos iterables para crear una respuesta CSV.')
+
+        return create_csv_response(request, name, results[0])
