@@ -22,6 +22,7 @@ LOCALITIES = [
     (['26021030009'], 'BARRIO MANANTIAL ROSALES'),
 ]
 
+
 class SearchLocalityTest(SearchEntitiesTest):
     """Pruebas de búsqueda de localidades (índice de asentamientos)."""
 
@@ -265,6 +266,81 @@ class SearchLocalityTest(SearchEntitiesTest):
         """El parametro aplanar deberia aplanar los resultados devueltos."""
         self.assert_flat_results()
 
+    def test_bulk_empty_400(self):
+        """La búsqueda bulk vacía debería retornar un error 400."""
+        status = self.get_response(method='POST', body={}, status_only=True)
+        self.assertEqual(status, 400)
+
+    def test_bulk_response_len(self):
+        """La longitud de la respuesta bulk debería ser igual a la cantidad
+        de queries envíadas."""
+        req_len = random.randint(10, 20)
+        query = {
+            'nombre': 'BARRIO'
+        }
+
+        body = {
+            'localidades': [query] * req_len
+        }
+
+        results = self.get_response(method='POST', body=body)
+        self.assertEqual(len(results), req_len)
+        
+    def test_bulk_basic(self):
+        """La búsqueda de una query sin parámetros debería funcionar
+        correctamente."""
+        results = self.get_response(method='POST', body={
+            'localidades': [{}]
+        })
+
+        first = results[0]
+        self.assertTrue(len(results) == 1 and len(first['localidades']) == 10)
+
+    def test_bulk_equivalent(self):
+        """Los resultados de una query envíada vía bulk deberían ser idénticos a
+        los resultados de una query individual (GET)."""
+        queries = [
+            {
+                'nombre': 'BARRIO'
+            },
+            {
+                'id': '06756010003'
+            },
+            {
+                'max': 2
+            },
+            {
+                'campos': 'id,nombre'
+            },
+            {
+                'provincia': '06'
+            },
+            {
+                'departamento': '14007'
+            },
+            {
+                'municipio': '620133'
+            },
+            {
+                'orden': 'nombre'
+            },
+            {
+                'exacto': True,
+                'nombre': 'BARRIO MANANTIAL ROSALES'
+            }
+        ]
+
+        individual_results = []
+        for query in queries:
+            individual_results.append({
+                'localidades': self.get_response(params=query)
+            })
+
+        bulk_results = self.get_response(method='POST', body={
+            'localidades': queries
+        })
+
+        self.assertEqual(individual_results, bulk_results)
 
 if __name__ == '__main__':
     unittest.main()

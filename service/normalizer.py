@@ -242,6 +242,7 @@ def build_addresses_result(result, query, source):
         geom = street.pop(GEOM)
 
         if not fields or LOCATION in fields:
+            # TODO: Manejar errores en base de datos (excepciones)
             loc = data.street_number_location(get_postgres_db(), geom,
                                               number, start_r, end_l)
             street[LOCATION] = loc

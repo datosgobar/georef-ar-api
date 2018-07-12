@@ -1,3 +1,4 @@
+import random
 from . import SearchEntitiesTest
 
 PLACES = [
@@ -29,6 +30,7 @@ PLACES_NO_MUNI = [
         'departamento': '30113'
     })
 ]
+
 
 class SearchPlaceTest(SearchEntitiesTest):
     """Pruebas de búsqueda por ubicación."""
@@ -112,6 +114,67 @@ class SearchPlaceTest(SearchEntitiesTest):
         self.assertTrue(all([
             not isinstance(v, dict) for v in resp.values()
         ]) and resp)
+
+    def test_bulk_empty_400(self):
+        """La búsqueda bulk vacía debería retornar un error 400."""
+        status = self.get_response(method='POST', body={}, status_only=True)
+        self.assertEqual(status, 400)
+
+    def test_bulk_response_len(self):
+        """La longitud de la respuesta bulk debería ser igual a la cantidad
+        de queries envíadas."""
+        req_len = random.randint(10, 20)
+        place = PLACES[0]
+
+        query = {
+            'lat': place[0],
+            'lon': place[1]
+        }
+
+        body = {
+            'ubicaciones': [query] * req_len
+        }
+
+        results = self.get_response(method='POST', body=body)
+        self.assertEqual(len(results), req_len)
+
+    def test_bulk_equivalent(self):
+        """Los resultados de una query envíada vía bulk deberían ser idénticos a
+        los resultados de una query individual (GET)."""
+        place = PLACES[0]
+        
+        queries = [
+            {
+                'lat': place[0],
+                'lon': place[1]
+            },
+            {
+                'lat': 0,
+                'lon': 0
+            },
+            {
+                'lat': place[0],
+                'lon': place[1],
+                'aplanar': True
+            },
+            {
+                'lat': place[0],
+                'lon': place[1],
+                'campos': 'lat,lon'
+            }
+        ]
+
+        individual_results = []
+        for query in queries:
+            individual_results.append({
+                'ubicacion': self.get_response(params=query)
+            })
+
+        bulk_results = self.get_response(method='POST', body={
+            'ubicaciones': queries
+        })
+
+        self.assertEqual(individual_results, bulk_results)
 
 
 if __name__ == '__main__':

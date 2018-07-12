@@ -26,6 +26,7 @@ class ParamErrorType(Enum):
     PARAM_REQUIRED = 1003
     EMPTY_BULK = 1004
     INVALID_LOCATION = 1005
+    REPEATED = 1006
 
 
 ParamError = namedtuple('ParamError', ['error_type', 'message', 'source'])
@@ -155,8 +156,24 @@ class ParameterSet():
     def parse_params_dict(self, received, from_source):
         parsed, errors = {}, {}
 
+        is_multi_dict = hasattr(received, 'getlist')
+
         for param_name, param in self.params.items():
-            received_val = received.get(param_name, None)
+            if is_multi_dict:
+                received_vals = received.getlist(param_name)
+            else:
+                received_vals = [received.get(param_name)]
+
+            # Comprobar que ningún parámetro esté repetido
+            if not received_vals:
+                received_val = None
+            elif len(received_vals) > 1:
+                errors[param_name] = ParamError(ParamErrorType.REPEATED,
+                                                strings.REPEATED_ERROR,
+                                                from_source)
+                continue
+            else:
+                received_val = received_vals[0]
 
             try:
                 parsed_val = param.get_value(received_val, from_source)

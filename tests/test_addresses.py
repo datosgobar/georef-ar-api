@@ -1,7 +1,8 @@
 import unittest
+import random
 from . import SearchEntitiesTest
 
-VALID_ADDRESS = 'Corrientes 1000'
+COMMON_ADDRESS = 'Corrientes 1000'
 
 
 class SearchAddressesTest(SearchEntitiesTest):
@@ -18,7 +19,7 @@ class SearchAddressesTest(SearchEntitiesTest):
         results_lengths = [
             len(self.get_response({
                 'max': length,
-                'direccion': VALID_ADDRESS
+                'direccion': COMMON_ADDRESS
             }))
             for length in lengths
         ]
@@ -27,13 +28,13 @@ class SearchAddressesTest(SearchEntitiesTest):
 
     def test_id_length(self):
         """El ID de la entidad debe tener la longitud correcta."""
-        data = self.get_response({'direccion': VALID_ADDRESS, 'max': 1})[0]
+        data = self.get_response({'direccion': COMMON_ADDRESS, 'max': 1})[0]
         self.assertTrue(len(data['id']) == 13)
 
     def test_flatten_results(self):
         """Los resultados se deberían poder obtener en formato aplanado."""
         data = self.get_response({
-            'direccion': VALID_ADDRESS,
+            'direccion': COMMON_ADDRESS,
             'max': 1,
             'aplanar': True
         })[0]
@@ -44,7 +45,7 @@ class SearchAddressesTest(SearchEntitiesTest):
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
-        data = self.get_response({'direccion': VALID_ADDRESS, 'max': 1})[0]
+        data = self.get_response({'direccion': COMMON_ADDRESS, 'max': 1})[0]
         fields = sorted([
             'altura',
             'departamento',
@@ -72,7 +73,7 @@ class SearchAddressesTest(SearchEntitiesTest):
         for fields in fields_lists:
             data = self.get_response({
                 'campos': ','.join(fields),
-                'direccion': VALID_ADDRESS,
+                'direccion': COMMON_ADDRESS,
                 'max': 1
             })
             fields_results.append(sorted(data[0].keys()))
@@ -225,12 +226,12 @@ class SearchAddressesTest(SearchEntitiesTest):
         """Se debe poder especificar el tipo de calle en la búsqueda."""
         roads = self.get_response({
             'tipo': 'calle',
-            'direccion': VALID_ADDRESS
+            'direccion': COMMON_ADDRESS
         })
 
         avenues = self.get_response({
             'tipo': 'avenida',
-            'direccion': VALID_ADDRESS
+            'direccion': COMMON_ADDRESS
         })
 
         roadsValid = roads and all(road['tipo'] == 'CALLE' for road in roads)
@@ -250,7 +251,7 @@ class SearchAddressesTest(SearchEntitiesTest):
 
         for state_code, state_name in states:
             res = self.get_response({
-                'direccion': VALID_ADDRESS,
+                'direccion': COMMON_ADDRESS,
                 'provincia': state_name,
                 'exacto': True
             })
@@ -273,7 +274,7 @@ class SearchAddressesTest(SearchEntitiesTest):
 
         for state_code, state_name in states:
             res = self.get_response({
-                'direccion': VALID_ADDRESS,
+                'direccion': COMMON_ADDRESS,
                 'provincia': state_code
             })
 
@@ -336,6 +337,75 @@ class SearchAddressesTest(SearchEntitiesTest):
     def test_unknown_param_returns_400(self):
         """El endpoint no debe aceptar parámetros desconocidos."""
         self.assert_unknown_param_returns_400()
+
+    def test_bulk_empty_400(self):
+        """La búsqueda bulk vacía debería retornar un error 400."""
+        status = self.get_response(method='POST', body={}, status_only=True)
+        self.assertEqual(status, 400)
+
+    def test_bulk_response_len(self):
+        """La longitud de la respuesta bulk debería ser igual a la cantidad
+        de queries envíadas."""
+        req_len = random.randint(10, 20)
+        query = {
+            'direccion': COMMON_ADDRESS
+        }
+
+        body = {
+            'direcciones': [query] * req_len
+        }
+
+        results = self.get_response(method='POST', body=body)
+        self.assertEqual(len(results), req_len)
+
+    def test_bulk_equivalent(self):
+        """Los resultados de una query envíada vía bulk deberían ser idénticos a
+        los resultados de una query individual (GET)."""
+        queries = [
+            {
+                'direccion': COMMON_ADDRESS
+            },
+            {
+                'direccion': COMMON_ADDRESS,
+                'tipo': 'avenida'
+            },
+            {
+                'direccion': COMMON_ADDRESS,
+                'max': 3
+            },
+            {
+                'direccion': COMMON_ADDRESS,
+                'campos': 'nombre,tipo'
+            },
+            {
+                'direccion': COMMON_ADDRESS,
+                'provincia': '14'
+            },
+            {
+                'direccion': COMMON_ADDRESS,
+                'departamento': '06805'
+            },
+            {
+                'direccion': COMMON_ADDRESS,
+                'exacto': True
+            },
+            {
+                'direccion': COMMON_ADDRESS,
+                'aplanar': True
+            }
+        ]
+
+        individual_results = []
+        for query in queries:
+            individual_results.append({
+                'direcciones': self.get_response(params=query)
+            })
+
+        bulk_results = self.get_response(method='POST', body={
+            'direcciones': queries
+        })
+
+        self.assertEqual(individual_results, bulk_results)
 
 
 if __name__ == '__main__':

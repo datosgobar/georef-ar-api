@@ -1,4 +1,5 @@
 import unittest
+import random
 from . import SearchEntitiesTest
 
 
@@ -126,6 +127,76 @@ class SearchStreetsTest(SearchEntitiesTest):
     def test_unknown_param_returns_400(self):
         """El endpoint no debe aceptar parámetros desconocidos."""
         self.assert_unknown_param_returns_400()
+
+    def test_bulk_empty_400(self):
+        """La búsqueda bulk vacía debería retornar un error 400."""
+        status = self.get_response(method='POST', body={}, status_only=True)
+        self.assertEqual(status, 400)
+
+    def test_bulk_response_len(self):
+        """La longitud de la respuesta bulk debería ser igual a la cantidad
+        de queries envíadas."""
+        req_len = random.randint(10, 20)
+        query = {
+            'nombre': 'SANTA FE'
+        }
+
+        body = {
+            'calles': [query] * req_len
+        }
+
+        results = self.get_response(method='POST', body=body)
+        self.assertEqual(len(results), req_len)
+        
+    def test_bulk_basic(self):
+        """La búsqueda de una query sin parámetros debería funcionar
+        correctamente."""
+        results = self.get_response(method='POST', body={
+            'calles': [{}]
+        })
+
+        first = results[0]
+        self.assertTrue(len(results) == 1 and len(first['calles']) == 10)
+
+    def test_bulk_equivalent(self):
+        """Los resultados de una query envíada vía bulk deberían ser idénticos a
+        los resultados de una query individual (GET)."""
+        queries = [
+            {
+                'nombre': 'CORRIENTES'
+            },
+            {
+                'tipo': 'avenida'
+            },
+            {
+                'max': 3
+            },
+            {
+                'campos': 'nombre,tipo'
+            },
+            {
+                'provincia': '02'
+            },
+            {
+                'departamento': '06805'
+            },
+            {
+                'exacto': True,
+                'nombre': 'LISANDRO DE LA TORRE'
+            }
+        ]
+
+        individual_results = []
+        for query in queries:
+            individual_results.append({
+                'calles': self.get_response(params=query)
+            })
+
+        bulk_results = self.get_response(method='POST', body={
+            'calles': queries
+        })
+
+        self.assertEqual(individual_results, bulk_results)
 
 
 if __name__ == '__main__':

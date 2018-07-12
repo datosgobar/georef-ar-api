@@ -3,6 +3,7 @@ from service import app
 import json
 import urllib
 
+
 def asciifold(text):
     conv = {
         'Á': 'A',
@@ -15,26 +16,33 @@ def asciifold(text):
 
     return text.upper().translate(text.maketrans(conv))
 
+
 class SearchEntitiesTest(TestCase):
     def setUp(self):
         app.testing = True
         self.app = app.test_client()
 
-    def get_response(self, params=None, method='GET'):
+    def get_response(self, params=None, method='GET', body=None,
+                     status_only=False):
         if not params:
             params = {}
 
+        query = self.endpoint + '?' + urllib.parse.urlencode(params)
+
         if method == 'GET':
-            query = self.endpoint + '?' + urllib.parse.urlencode(params)
             response = self.app.get(query)
         elif method == 'POST':
-            response = self.app.post(self.endpoint, json=params)
+            response = self.app.post(query, json=body)
         else:
             raise ValueError('Método desconocido.')
 
-        if response.status_code != 200:
-            raise Exception('El request no devolvió código 200.')
-        return json.loads(response.data)[self.entity]
+        if status_only:
+            return response.status_code
+        elif response.status_code != 200:
+            raise Exception('La petición no devolvió código 200.')
+
+        key = self.entity if method == 'GET' else 'resultados'
+        return json.loads(response.data)[key]
 
     def assert_unknown_param_returns_400(self):
         response = self.app.get(self.endpoint + '?foo=bar')
