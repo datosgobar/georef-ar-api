@@ -155,7 +155,6 @@ class ParameterSet():
 
     def parse_params_dict(self, received, from_source):
         parsed, errors = {}, {}
-
         is_multi_dict = hasattr(received, 'getlist')
 
         for param_name, param in self.params.items():
@@ -208,9 +207,24 @@ class ParameterSet():
                                     strings.EMPTY_BULK, from_source)}
             ]
 
+        if not isinstance(received, list):
+            return [], [
+                {'json': ParamError(ParamErrorType.VALUE_ERROR,
+                                    strings.INVALID_BULK, from_source)}
+            ]
+
         results, results_errors = [], []
         for param_dict in received:
-            parsed, errors = self.parse_params_dict(param_dict, from_source)
+            if not hasattr(param_dict, 'get'):
+                parsed, errors = {}, {
+                    'json': ParamError(ParamErrorType.VALUE_ERROR,
+                                       strings.INVALID_BULK_ENTRY,
+                                       from_source)
+                }
+                
+            else:
+                parsed, errors = self.parse_params_dict(param_dict, from_source)
+
             results.append(parsed)
             results_errors.append(errors)
 
