@@ -19,6 +19,23 @@ def get_elasticsearch():
     return g.elasticsearch
 
 
+def get_index_source(index):
+    """Devuelve la fuente para un índice dado.
+
+    Args:
+        index (str): Nombre del índice.
+    """
+    if index in [STATES, DEPARTMENTS, MUNICIPALITIES]:
+        return SOURCE_IGN
+    elif index in [SETTLEMENTS, LOCALITIES]:
+        return SOURCE_BAHRA
+    elif index == STREETS:
+        return SOURCE_INDEC
+    else:
+        raise ValueError(
+            'No se pudo determinar la fuente de: {}'.format(index))
+
+
 def translate_keys(d, translations, ignore=None):
     if not ignore:
         ignore = []
@@ -63,11 +80,11 @@ def process_entity(request, name, param_parser, key_translations, index=None):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
-    source = data.get_index_source(index)
+    source = get_index_source(index)
     for response in responses:
         for match in response:
             match[SOURCE] = source
-    
+
     return formatter.create_ok_response(request, parse_results, name,
                                         responses)
 
@@ -185,7 +202,7 @@ def process_street(request):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
-    source = data.get_index_source(STREETS)
+    source = get_index_source(STREETS)
     for response in responses:
         for match in response:
             match[SOURCE] = source
@@ -229,7 +246,7 @@ def process_address(request):
     except ElasticsearchException:
         return formatter.create_es_error_response(request)
 
-    source = data.get_index_source(STREETS)
+    source = get_index_source(STREETS)
     for response in responses:
         for match in response:
             match[SOURCE] = source
@@ -255,7 +272,7 @@ def build_place_result(query, dept, muni):
         # al índice de provincias.
         state = dept.pop(STATE)
         muni = muni or empty_entity.copy()
-        source = data.get_index_source(DEPARTMENTS)
+        source = get_index_source(DEPARTMENTS)
 
     place = {
         STATE: state,

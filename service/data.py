@@ -406,23 +406,6 @@ def build_match_condition(field, value, fuzzy=False, operator='or'):
     return {'match': query}
 
 
-def get_index_source(index):
-    """Devuelve la fuente para un índice dado.
-
-    Args:
-        index (str): Nombre del índice.
-    """
-    if index in [STATES, DEPARTMENTS, MUNICIPALITIES]:
-        return SOURCE_IGN
-    elif index in [SETTLEMENTS, LOCALITIES]:
-        return SOURCE_BAHRA
-    elif index == STREETS:
-        return SOURCE_INDEC
-    else:
-        raise ValueError(
-            'No se pudo determinar la fuente de: {}'.format(index))
-
-
 def remove_spatial_data(address):
     """Remueve los campos de límites y geometría de una dirección procesada.
 

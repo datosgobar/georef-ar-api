@@ -163,7 +163,8 @@ class ParameterSet():
                 parsed[param_name] = parsed_val
             except ParameterRequiredException:
                 errors[param_name] = ParamError(ParamErrorType.PARAM_REQUIRED,
-                                                None, from_source)
+                                                strings.MISSING_ERROR,
+                                                from_source)
             except ValueError as e:
                 errors[param_name] = ParamError(ParamErrorType.VALUE_ERROR,
                                                 str(e), from_source)
@@ -177,7 +178,8 @@ class ParameterSet():
         for param_name in received:
             if param_name not in self.params:
                 errors[param_name] = ParamError(ParamErrorType.UNKNOWN_PARAM,
-                                                None, from_source)
+                                                strings.UNKNOWN_ERROR,
+                                                from_source)
 
         return parsed, errors
 

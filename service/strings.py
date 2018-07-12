@@ -13,3 +13,5 @@ EMPTY_BULK = 'Se requiere de al menos una operación a realizar.'
 INTERNAL_ERROR = 'Ocurrió un error de servidor interno al procesar la \
                   petición.'
 INVALID_LOCATION = 'El parámetro debe ser especificado en el HTTP \'{}\'.'
+MISSING_ERROR = 'El parámetro es obligatorio.'
+UNKNOWN_ERROR = 'El parámetro especificado no existe.'
