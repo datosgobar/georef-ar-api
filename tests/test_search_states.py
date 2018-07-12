@@ -1,4 +1,3 @@
-from service import app
 from . import SearchEntitiesTest, asciifold
 
 
@@ -44,7 +43,7 @@ class SearchStatesTest(SearchEntitiesTest):
 
     def test_max_results_returned(self):
         """La cantidad máxima de resultados debe ser configurable."""
-        lengths = [0, 5, 20]
+        lengths = [1, 5, 20, 24]
         results_lengths = [
             len(self.get_response({'max': length}))
             for length in lengths
@@ -234,10 +233,6 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_unknown_param_returns_400(self):
         """El endpoint no debe aceptar parámetros desconocidos."""
         self.assert_unknown_param_returns_400()
-
-    def test_formats(self):
-        """El endpoint debe tener distintos formatos de respuesta."""
-        self.assert_formats_ok()
 
 
 if __name__ == '__main__':

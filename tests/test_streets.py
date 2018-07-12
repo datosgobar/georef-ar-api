@@ -1,6 +1,6 @@
 import unittest
-from service import app
 from . import SearchEntitiesTest
+
 
 class SearchStreetsTest(SearchEntitiesTest):
     """

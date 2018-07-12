@@ -6,8 +6,6 @@ Contiene funciones que procesan los parámetros de búsqueda de una consulta
 e impactan dicha búsqueda contra las fuentes de datos disponibles.
 """
 
-import os
-import psycopg2
 from service.names import *
 
 MIN_AUTOCOMPLETE_CHARS = 4
@@ -95,46 +93,6 @@ def query_streets(es, queries):
 
     dsl_queries = (build_streets_dsl_query(**query) for query in queries)
     return run_dsl_queries(es, STREETS, dsl_queries)
-
-
-def query_addresses(es, queries):
-    """Busca direcciones según parámetros de una o más consultas.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        queries (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_streets_dsl_query' para más
-            detalles. Se hace uso obligatorio del parámetro 'number'.
-
-    Returns:
-        list: Resultados de búsqueda de entidades.
-    """
-
-    dsl_queries = (build_streets_dsl_query(**query) for query in queries)
-    responses = run_dsl_queries(es, STREETS, dsl_queries)
-
-    for response, query in zip(responses, queries):
-        number = query['number']
-
-        for street in response:
-            if FULL_NAME in query['fields']:
-                # Agregar altura a la nomenclatura
-                parts = street[FULL_NAME].split(',')
-                parts[0] += ' {}'.format(number)
-                street[FULL_NAME] = ','.join(parts)
-
-            if DOOR_NUM in query['fields']:
-                street[DOOR_NUM] = number
-
-            loc = location(street[GEOM], number, street[START_R], street[END_L])
-            if not loc:
-                street[LOCATION] = {LAT: None, LON: None}
-            else:
-                street[LOCATION] = loc
-
-            remove_spatial_data(street)
-
-    return responses
 
 
 def build_entity_dsl_query(entity_id=None, name=None, state=None,
@@ -262,9 +220,6 @@ def build_streets_dsl_query(road_name=None, department=None, state=None,
         else:
             condition = build_name_condition(STATE_NAME, state, exact)
         terms.append(condition)
-
-    if LOCATION in fields:
-        fields.extend([GEOM, START_R, START_L, END_R, END_L])
 
     return {
         'query': {
@@ -406,35 +361,11 @@ def build_match_condition(field, value, fuzzy=False, operator='or'):
     return {'match': query}
 
 
-def remove_spatial_data(address):
-    """Remueve los campos de límites y geometría de una dirección procesada.
-
-    Args:
-        address (dict): Dirección.
-    """
-    address.pop(START_R, None)
-    address.pop(START_L, None)
-    address.pop(END_R, None)
-    address.pop(END_L, None)
-    address.pop(GEOM, None)
-
-
-def get_db_connection():
-    """Se conecta a una base de datos especificada en variables de entorno.
-
-    Returns:
-        connection: Conexión a base de datos.
-    """
-    return psycopg2.connect(host=os.environ.get('GEOREF_API_DB_HOST'),
-                            dbname=os.environ.get('GEOREF_API_DB_NAME'),
-                            user=os.environ.get('GEOREF_API_DB_USER'),
-                            password=os.environ.get('GEOREF_API_DB_PASS'))
-
-
-def location(geom, number, start, end):
+def street_number_location(connection, geom, number, start, end):
     """Obtiene las coordenadas de un punto dentro de un tramo de calle.
 
     Args:
+        connection (psycopg2.connection): Conexión a base de datos.
         geom (str): Geometría de un tramo de calle.
         number (int or None): Número de puerta o altura.
         start (int): Numeración inicial del tramo de calle.
@@ -443,18 +374,19 @@ def location(geom, number, start, end):
     Returns:
         dict: Coordenadas del punto.
     """
-    if not number:
-        return None
-
     args = geom, number, start, end
     query = """SELECT geocodificar('%s', %s, %s, %s);""" % args
-    connection = get_db_connection()
 
     with connection.cursor() as cursor:
         cursor.execute(query)
-        location = cursor.fetchall()[0][0]  # Query returns single row and col.
+        location = cursor.fetchall()[0][0]
+
     if location['code']:
         lat, lon = location['result'].split(',')
-        return {LAT: lat, LON: lon}
+    else:
+        lat, lon = None, None
 
-    return None
+    return {
+        LAT: lat,
+        LON: lon
+    }

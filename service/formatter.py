@@ -35,7 +35,7 @@ def format_params_error_dict(error_dict):
     for param_name, param_error in error_dict.items():
         results.append({
             'nombre_parametro': param_name,
-            'codigo_error': param_error.error_type.value,
+            'codigo_interno': param_error.error_type.value,
             'mensaje': param_error.message,
             'ubicacion': param_error.source
         })
@@ -54,9 +54,15 @@ def create_param_error_response(request, errors):
     }), 400)
 
 
-def create_es_error_response(request):
+def create_internal_error_response(request):
+    errors = [
+        {
+            'mensaje': strings.INTERNAL_ERROR
+        }
+    ]
+
     return make_response(jsonify({
-        'error': strings.INTERNAL_ERROR
+        'errores': errors
     }), 500)
 
 

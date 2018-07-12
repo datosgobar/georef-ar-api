@@ -1,10 +1,8 @@
 import random
 import unittest
-from service import app
 from . import SearchEntitiesTest, asciifold
 from .test_search_states import STATES
-from .test_search_departments import DEPARTMENTS
-from .test_search_municipalities import MUNICIPALITIES
+
 
 LOCALITIES = [
     (['06840010015'], 'VILLA RAFFO'),
@@ -34,7 +32,7 @@ class SearchLocalityTest(SearchEntitiesTest):
 
     def test_max_results_returned(self):
         """La cantidad máxima de resultados debe ser configurable."""
-        lengths = [0, 5, 25, 50]
+        lengths = [1, 5, 25, 50]
         results_lengths = [
             len(self.get_response({'max': length}))
             for length in lengths
@@ -262,10 +260,6 @@ class SearchLocalityTest(SearchEntitiesTest):
     def test_unknown_param_returns_400(self):
         """El endpoint no debe aceptar parámetros desconocidos."""
         self.assert_unknown_param_returns_400()
-
-    def test_formats(self):
-        """El endpoint debe tener distintos formatos de respuesta."""
-        self.assert_formats_ok()
 
     def test_flat_results(self):
         """El parametro aplanar deberia aplanar los resultados devueltos."""

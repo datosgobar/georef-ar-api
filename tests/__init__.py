@@ -40,11 +40,6 @@ class SearchEntitiesTest(TestCase):
         response = self.app.get(self.endpoint + '?foo=bar')
         self.assertEqual(response.status_code, 400)
 
-    def assert_formats_ok(self):
-        for fmt in ['.json', '.csv', '.geojson']:
-            response = self.app.get(self.endpoint + fmt)
-            self.assertEqual(response.status_code, 200)
-
     def assert_flat_results(self):
         resp = self.get_response({'aplanar': 1, 'max': 1})
         self.assertTrue(all([

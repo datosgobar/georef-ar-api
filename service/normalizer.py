@@ -10,6 +10,8 @@ from service import data, params, formatter
 from service.names import *
 from elasticsearch import Elasticsearch, ElasticsearchException
 from flask import g
+import os
+import psycopg2
 
 
 def get_elasticsearch():
@@ -17,6 +19,17 @@ def get_elasticsearch():
         g.elasticsearch = Elasticsearch()
 
     return g.elasticsearch
+
+
+def get_postgres_db():
+    if 'postgres' not in g:
+        g.postgres = psycopg2.connect(
+            host=os.environ.get('GEOREF_API_DB_HOST'),
+            dbname=os.environ.get('GEOREF_API_DB_NAME'),
+            user=os.environ.get('GEOREF_API_DB_USER'),
+            password=os.environ.get('GEOREF_API_DB_PASS'))
+
+    return g.postgres
 
 
 def get_index_source(index):
@@ -78,7 +91,7 @@ def process_entity(request, name, param_parser, key_translations, index=None):
         es = get_elasticsearch()
         responses = data.query_entities(es, index, queries)
     except ElasticsearchException:
-        return formatter.create_es_error_response(request)
+        return formatter.create_internal_error_response(request)
 
     source = get_index_source(index)
     for response in responses:
@@ -200,15 +213,40 @@ def process_street(request):
         es = get_elasticsearch()
         responses = data.query_streets(es, queries)
     except ElasticsearchException:
-        return formatter.create_es_error_response(request)
+        return formatter.create_internal_error_response(request)
 
     source = get_index_source(STREETS)
     for response in responses:
         for match in response:
             match[SOURCE] = source
-    
+
     return formatter.create_ok_response(request, parse_results, STREETS,
                                         responses)
+
+
+def build_addresses_result(result, query, source):
+    fields = query['fields']
+    number = query['number']
+
+    for street in result:
+        if not fields or FULL_NAME in fields:
+            parts = street[FULL_NAME].split(',')
+            parts[0] += ' {}'.format(number)
+            street[FULL_NAME] = ','.join(parts)
+
+        if not fields or DOOR_NUM in fields:
+            street[DOOR_NUM] = number
+
+        start_r = street.pop(START_R)
+        end_l = street.pop(END_L)
+        geom = street.pop(GEOM)
+
+        if not fields or LOCATION in fields:
+            loc = data.street_number_location(get_postgres_db(), geom,
+                                              number, start_r, end_l)
+            street[LOCATION] = loc
+
+        street[SOURCE] = source
 
 
 def process_address(request):
@@ -232,25 +270,32 @@ def process_address(request):
         parsed_params['road_name'] = road_name
         parsed_params['number'] = number
 
-        queries.append(translate_keys(parsed_params, {
+        query = translate_keys(parsed_params, {
             DEPT: 'department',
             STATE: 'state',
             EXACT: 'exact',
             FIELDS: 'fields',
             ROAD_TYPE: 'road_type'
-        }, ignore=[FLATTEN, FORMAT]))
+        }, ignore=[FLATTEN, FORMAT])
+
+        if query['fields']:
+            query['fields'].extend([GEOM, START_R, END_L])
+
+        query['excludes'] = [START_L, END_R]
+            
+        queries.append(query)
 
     try:
         es = get_elasticsearch()
-        responses = data.query_addresses(es, queries)
+        responses = data.query_streets(es, queries)
     except ElasticsearchException:
-        return formatter.create_es_error_response(request)
+        return formatter.create_internal_error_response(request)
 
     source = get_index_source(STREETS)
-    for response in responses:
-        for match in response:
-            match[SOURCE] = source
-    
+
+    for response, query in zip(responses, queries):
+        build_addresses_result(response, query, source)
+        
     return formatter.create_ok_response(request, parse_results, ADDRESSES,
                                         responses)
 
@@ -336,7 +381,7 @@ def process_place(request):
             places.append(build_place_result(query, dept, muni))
 
     except ElasticsearchException:
-        return formatter.create_es_error_response(request)
+        return formatter.create_internal_error_response(request)
 
     return formatter.create_ok_response(request, parse_results, PLACE, places,
                                         iterable_results=False)

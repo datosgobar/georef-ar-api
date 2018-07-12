@@ -70,7 +70,17 @@ class SearchPlaceTest(SearchEntitiesTest):
         """No se deberían encontrar resultados cuando se utilizan coordenadas
         erroneas."""
         data = self.get_response({'lat': 0, 'lon': 0})
-        self.assertEqual(data, {})
+        empty_entity = {
+            'id': None,
+            'nombre': None
+        }
+
+        validations = [
+            data[field] == empty_entity
+            for field in ['departamento', 'municipio', 'provincia']
+        ]
+        
+        self.assertTrue(validations and all(validations))
 
     def test_no_muni(self):
         """Cuando se especifican coordenadas que no contienen un municipio,
