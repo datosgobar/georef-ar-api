@@ -7,8 +7,7 @@ install:
 - sudo apt-get update -qq
 - sudo apt-get install -y openvpn
 script:
-- python -m unittest tests/test_normalization.py
-- python -m unittest tests/test_parsing.py
+- python -m unittest tests/test_params.py
 deploy:
   - provider: script
     skip_cleanup: true
