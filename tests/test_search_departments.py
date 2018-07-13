@@ -31,6 +31,7 @@ DEPARTMENTS = [
     (['50035', '74049', '06413'], 'JUNÍN')
 ]
 
+
 class SearchDepartmentsTest(SearchEntitiesTest):
     """Pruebas de búsqueda de departamentos."""
 
@@ -84,7 +85,7 @@ class SearchDepartmentsTest(SearchEntitiesTest):
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
         data = [
-            asciifold(dep['nombre']) 
+            asciifold(dep['nombre'])
             for dep
             in self.get_response({'orden': 'nombre', 'max': 25})
         ]
@@ -107,7 +108,7 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         self.assert_name_search_id_matches(DEPARTMENTS, exact=True)
 
     def test_name_exact_search_ignores_case(self):
-        """La búsqueda por nombre exacto debe ignorar mayúsculas y 
+        """La búsqueda por nombre exacto debe ignorar mayúsculas y
         minúsculas."""
         expected = [
             (['90091'], 'SIMOCA'),
@@ -155,10 +156,10 @@ class SearchDepartmentsTest(SearchEntitiesTest):
             (['90021'], 'HICLIGASTA'),       # -1 caracteres (de 8+)
             (['90021'], 'cCHICLIGASTA'),     # +1 caracteres (de 8+)
             (['90021'], 'ccCHICLIGASTA'),    # +2 caracteres (de 8+)
-            (['78042'], 'GALLANES'),     # -2 caracteres (de 8+)
-            (['78042'], 'AGALLANES'),    # -1 caracteres (de 8+)
-            (['78042'], 'mMAGALLANES'),  # +1 caracteres (de 8+)
-            (['78042'], 'mMAGALLANESs'), # +2 caracteres (de 8+)
+            (['78042'], 'GALLANES'),      # -2 caracteres (de 8+)
+            (['78042'], 'AGALLANES'),     # -1 caracteres (de 8+)
+            (['78042'], 'mMAGALLANES'),   # +1 caracteres (de 8+)
+            (['78042'], 'mMAGALLANESs'),  # +2 caracteres (de 8+)
             (['54063'], 'GUAZÚ'),         # -1 caracteres (de 4-7)
             (['54063'], 'iIGUAZÚ')        # +1 caracteres (de 4-7)
         ]
@@ -254,7 +255,7 @@ class SearchDepartmentsTest(SearchEntitiesTest):
 
         results = self.get_response(method='POST', body=body)
         self.assertEqual(len(results), req_len)
-        
+
     def test_bulk_basic(self):
         """La búsqueda de una query sin parámetros debería funcionar
         correctamente."""
@@ -305,5 +306,39 @@ class SearchDepartmentsTest(SearchEntitiesTest):
 
         self.assertEqual(individual_results, bulk_results)
 
+    def test_json_format(self):
+        """Por default, los resultados de una query deberían estar en
+        formato JSON."""
+        default_response = self.get_response()
+        json_response = self.get_response({'formato': 'json'})
+        self.assertEqual(default_response, json_response)
+
+    def test_csv_format(self):
+        """Se debería poder obtener resultados en formato
+        CSV (sin parámetros)."""
+        self.assert_valid_csv()
+
+    def test_csv_format_query(self):
+        """Se debería poder obtener resultados en formato
+        CSV (con parámetros)."""
+        self.assert_valid_csv({
+            'nombre': 'TRES',
+            'campos': 'nombre,provincia'
+        })
+
+    def test_geojson_format(self):
+        """Se debería poder obtener resultados en formato
+        GEOJSON (sin parámetros)."""
+        self.assert_valid_geojson()
+
+    def test_geojson_format_query(self):
+        """Se debería poder obtener resultados en formato
+        GEOJSON (con parámetros)."""
+        self.assert_valid_geojson({
+            'nombre': 'BELGRANO',
+            'max': 10
+        })
+
+        
 if __name__ == '__main__':
     unittest.main()

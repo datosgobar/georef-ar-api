@@ -176,6 +176,32 @@ class SearchPlaceTest(SearchEntitiesTest):
 
         self.assertEqual(individual_results, bulk_results)
 
+    def test_json_format(self):
+        """Por default, los resultados de una query deberían estar en
+        formato JSON."""
+        place = PLACES[1]
+
+        default_response = self.get_response({
+            'lat': place[0],
+            'lon': place[1]
+        })
+        json_response = self.get_response({
+            'formato': 'json',
+            'lat': place[0],
+            'lon': place[1]
+        })
+        self.assertEqual(default_response, json_response)
+
+    def test_geojson_format_query(self):
+        """Se debería poder obtener resultados en formato
+        GEOJSON (con parámetros)."""
+        place = PLACES[1]
+
+        self.assert_valid_geojson({
+            'lat': place[0],
+            'lon': place[1]
+        })
+
 
 if __name__ == '__main__':
     unittest.main()

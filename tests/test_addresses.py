@@ -407,6 +407,23 @@ class SearchAddressesTest(SearchEntitiesTest):
 
         self.assertEqual(individual_results, bulk_results)
 
+    def test_json_format(self):
+        """Por default, los resultados de una query deberían estar en
+        formato JSON."""
+        default_response = self.get_response({'direccion': COMMON_ADDRESS})
+        json_response = self.get_response({
+            'formato': 'json',
+            'direccion': COMMON_ADDRESS
+        })
+        self.assertEqual(default_response, json_response)
+
+    def test_csv_format_query(self):
+        """Se debería poder obtener resultados en formato
+        CSV (con parámetros)."""
+        self.assert_valid_csv({
+            'direccion': COMMON_ADDRESS,
+            'campos': 'nombre,tipo,ubicacion'
+        })
 
 if __name__ == '__main__':
     unittest.main()

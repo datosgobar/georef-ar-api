@@ -1,7 +1,9 @@
 from unittest import TestCase
-from service import app
+from service import app, formatter
 import json
 import urllib
+import csv
+import geojson
 
 
 def asciifold(text):
@@ -48,6 +50,36 @@ class SearchEntitiesTest(TestCase):
         response = self.app.get(self.endpoint + '?foo=bar')
         self.assertEqual(response.status_code, 400)
 
+    def assert_valid_csv(self, params=None):
+        if not params:
+            params = {}
+
+        params['formato'] = 'csv'
+
+        query = self.endpoint + '?' + urllib.parse.urlencode(params)
+        response = self.app.get(query)
+        text = response.data.decode()
+
+        dialect = csv.Sniffer().sniff(text)
+        has_header = csv.Sniffer().has_header(text)
+        row_count = len(text.splitlines()) - 1
+
+        self.assertTrue(all([dialect.delimiter == formatter.CSV_SEP,
+                             has_header,
+                             row_count > 0]))
+
+    def assert_valid_geojson(self, params=None):
+        if not params:
+            params = {}
+
+        params['formato'] = 'geojson'
+
+        query = self.endpoint + '?' + urllib.parse.urlencode(params)
+        response = self.app.get(query)
+        geodata = geojson.loads(response.data.decode())
+
+        self.assertTrue(len(geodata['features']) > 0)
+
     def assert_flat_results(self):
         resp = self.get_response({'aplanar': 1, 'max': 1})
         self.assertTrue(all([
@@ -72,4 +104,3 @@ class SearchEntitiesTest(TestCase):
             statuses.append(response.status_code)
 
         self.assertListEqual([400] * len(params), statuses)
-            

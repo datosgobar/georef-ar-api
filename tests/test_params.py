@@ -238,6 +238,12 @@ class ParamParsingTest(TestCase):
             'calles': []
         })
 
+    def test_address_param(self):
+        """Un parámetro de dirección sin altura no debería ser válido."""
+        self.assert_errors_match('/direcciones?direccion=SANTA FE', {
+            (T.VALUE_ERROR.value, 'direccion')
+        })
+
     def assert_errors_match(self, url, errors_set, body=None):
         url = self.url_base + url
         if body:

@@ -198,6 +198,26 @@ class SearchStreetsTest(SearchEntitiesTest):
 
         self.assertEqual(individual_results, bulk_results)
 
+    def test_json_format(self):
+        """Por default, los resultados de una query deberían estar en
+        formato JSON."""
+        default_response = self.get_response()
+        json_response = self.get_response({'formato': 'json'})
+        self.assertEqual(default_response, json_response)
+
+    def test_csv_format(self):
+        """Se debería poder obtener resultados en formato
+        CSV (sin parámetros)."""
+        self.assert_valid_csv()
+
+    def test_csv_format_query(self):
+        """Se debería poder obtener resultados en formato
+        CSV (con parámetros)."""
+        self.assert_valid_csv({
+            'nombre': 'SANTA FE',
+            'campos': 'nombre,id,tipo'
+        })
+
 
 if __name__ == '__main__':
     unittest.main()
