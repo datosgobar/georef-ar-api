@@ -24,7 +24,7 @@ class ParamParsingTest(TestCase):
         }
 
         self.assert_errors_match('/provincias', [
-            {(T.EMPTY_BULK.value, 'json')}
+            {(T.EMPTY_BULK.value, 'body')}
         ], body=body)
 
     def test_bulk_invalid_type(self):
@@ -35,7 +35,7 @@ class ParamParsingTest(TestCase):
         }
 
         self.assert_errors_match('/departamentos', [
-            {(T.VALUE_ERROR.value, 'json')}
+            {(T.VALUE_ERROR.value, 'body')}
         ], body=body)
 
     def test_bulk_invalid_item_type(self):
@@ -47,7 +47,7 @@ class ParamParsingTest(TestCase):
 
         self.assert_errors_match('/municipios', [
             set(),
-            {(T.VALUE_ERROR.value, 'json')}
+            {(T.VALUE_ERROR.value, 'body')}
         ], body=body)
 
     def test_unknown_param(self):
@@ -227,6 +227,16 @@ class ParamParsingTest(TestCase):
                 (T.VALUE_ERROR.value, 'departamento')
             }
         ], body=body)
+
+    def test_bulk_querystring_error(self):
+        """En bulk, no se deberían aceptar parámetros vía querystring."""
+        self.assert_errors_match('/calles?foo=bar', [
+            {
+                (T.INVALID_LOCATION.value, 'querystring')
+            }
+        ], body={
+            'calles': []
+        })
 
     def assert_errors_match(self, url, errors_set, body=None):
         url = self.url_base + url

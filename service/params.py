@@ -199,36 +199,48 @@ class ParameterSet():
 
         return parsed, errors
 
-    def parse_params_dict_list(self, received, from_source):
-        if not received and from_source == 'body':
-            # No aceptar una lista vacía de operaciones bulk
+    def parse_post_params(self, qs_params, body_params):
+        if qs_params:
+            # No aceptar parámetros de querystring en bulk
             return [], [
-                {'json': ParamError(ParamErrorType.EMPTY_BULK,
-                                    strings.EMPTY_BULK, from_source)}
+                {'querystring': ParamError(ParamErrorType.INVALID_LOCATION,
+                                           strings.BULK_QS_INVALID,
+                                           'querystring')}
+            ]
+        
+        if not isinstance(body_params, list):
+            # No aceptar operaciones bulk que no sean listas
+            return [], [
+                {'body': ParamError(ParamErrorType.VALUE_ERROR,
+                                    strings.INVALID_BULK, 'body')}
             ]
 
-        if not isinstance(received, list):
+        if not body_params:
+            # No aceptar una lista vacía de operaciones bulk
             return [], [
-                {'json': ParamError(ParamErrorType.VALUE_ERROR,
-                                    strings.INVALID_BULK, from_source)}
+                {'body': ParamError(ParamErrorType.EMPTY_BULK,
+                                    strings.EMPTY_BULK, 'body')}
             ]
 
         results, results_errors = [], []
-        for param_dict in received:
+        for param_dict in body_params:
             if not hasattr(param_dict, 'get'):
                 parsed, errors = {}, {
-                    'json': ParamError(ParamErrorType.VALUE_ERROR,
+                    'body': ParamError(ParamErrorType.VALUE_ERROR,
                                        strings.INVALID_BULK_ENTRY,
-                                       from_source)
+                                       'body')
                 }
-                
             else:
-                parsed, errors = self.parse_params_dict(param_dict, from_source)
+                parsed, errors = self.parse_params_dict(param_dict, 'body')
 
             results.append(parsed)
             results_errors.append(errors)
 
         return results, results_errors
+
+    def parse_get_params(self, qs_params):
+        parsed, errors = self.parse_params_dict(qs_params, 'querystring')
+        return [parsed], [errors]
 
 
 PARAMS_STATES = ParameterSet({

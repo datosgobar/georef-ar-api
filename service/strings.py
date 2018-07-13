@@ -11,6 +11,8 @@ FLOAT_VAL_ERROR = 'El parámetro no es un número real.'
 INVALID_CHOICE = 'El parámetro debe tomar uno de los siguientes valores: {}'
 EMPTY_BULK = 'Se requiere de al menos una operación a realizar.'
 INVALID_BULK = 'Las operaciones deben estar contenidas en una lista.'
+BULK_QS_INVALID = 'No se permiten parámetros vía query string en operaciones \
+bulk.'
 INVALID_BULK_ENTRY = 'Las operaciones bulk deben ser de tipo objeto.'
 INTERNAL_ERROR = 'Ocurrió un error interno de servidor al procesar la \
 petición.'

@@ -132,8 +132,6 @@ def create_ok_response(request, params_list, name, results,
     else:
         fmt = 'json'
 
-    # TODO: Manejo de campo 'source'
-
     if fmt == 'json':
         return create_json_response(request, params_list, name, results,
                                     iterable_results)

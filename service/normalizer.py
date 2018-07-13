@@ -61,14 +61,13 @@ def translate_keys(d, translations, ignore=None):
 
 
 def parse_params(request, name, param_parser):
-    if request.method == 'GET':
-        params_list = [request.args]
-        param_source = 'querystring'
+    if request.method == 'POST':
+        body_params = request.json.get(name)
+        return param_parser.parse_post_params(request.args, body_params)
+    elif request.method == 'GET':
+        return param_parser.parse_get_params(request.args)
     else:
-        params_list = request.json.get(name)
-        param_source = 'body'
-
-    return param_parser.parse_params_dict_list(params_list, param_source)
+        raise RuntimeError('Método HTTP no válido.')
 
 
 def process_entity(request, name, param_parser, key_translations, index=None):
