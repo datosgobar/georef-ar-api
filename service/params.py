@@ -207,7 +207,7 @@ class ParameterSet():
                                            strings.BULK_QS_INVALID,
                                            'querystring')}
             ]
-        
+
         if not isinstance(body_params, list):
             # No aceptar operaciones bulk que no sean listas
             return [], [
@@ -222,7 +222,7 @@ class ParameterSet():
                                     strings.EMPTY_BULK, 'body')}
             ]
 
-        results, results_errors = [], []
+        results, errors_list = [], []
         for param_dict in body_params:
             if not hasattr(param_dict, 'get'):
                 parsed, errors = {}, {
@@ -234,13 +234,12 @@ class ParameterSet():
                 parsed, errors = self.parse_params_dict(param_dict, 'body')
 
             results.append(parsed)
-            results_errors.append(errors)
+            errors_list.append(errors)
 
-        return results, results_errors
+        return results, errors_list
 
     def parse_get_params(self, qs_params):
-        parsed, errors = self.parse_params_dict(qs_params, 'querystring')
-        return [parsed], [errors]
+        return self.parse_params_dict(qs_params, 'querystring')
 
 
 PARAMS_STATES = ParameterSet({

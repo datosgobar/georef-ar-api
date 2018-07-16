@@ -43,11 +43,16 @@ def format_params_error_dict(error_dict):
     return results
 
 
-def create_param_error_response(request, errors):
-    if request.method == 'GET':
-        errors_fmt = format_params_error_dict(errors[0])
-    else:
-        errors_fmt = [format_params_error_dict(d) for d in errors]
+def create_param_error_response_single(errors):
+    errors_fmt = format_params_error_dict(errors)
+
+    return make_response(jsonify({
+        'errores': errors_fmt
+    }), 400)
+
+
+def create_param_error_response_bulk(errors):
+    errors_fmt = [format_params_error_dict(d) for d in errors]
 
     return make_response(jsonify({
         'errores': errors_fmt
@@ -66,7 +71,7 @@ def create_internal_error_response(request):
     }), 500)
 
 
-def create_csv_response(request, name, result):
+def create_csv_response(name, result):
     def csv_generator():
         first = result[0]
         flatten_dict(first, max_depth=2)
@@ -87,11 +92,11 @@ def create_csv_response(request, name, result):
     }))
 
 
-def create_geojson_response(request, results, iterable_results):
-    if iterable_results:
-        items = results[0]
+def create_geojson_response(result, iterable_result):
+    if iterable_result:
+        items = result
     else:
-        items = results
+        items = [result]
 
     features = []
     for item in items:
@@ -106,40 +111,45 @@ def create_geojson_response(request, results, iterable_results):
     return make_response(jsonify(geojson.FeatureCollection(features)))
 
 
-def create_json_response(request, params_list, name, results,
-                         iterable_results):
-    results_formatted = []
-    for result, params in zip(results, params_list):
-        if params.get(N.FLATTEN, False):
-            if iterable_results:
-                for match in result:
-                    flatten_dict(match, max_depth=2)
-            else:
-                flatten_dict(result, max_depth=2)
+def format_result_json(name, result, fmt, iterable_result):
+    if fmt.get(N.FLATTEN, False):
+        if iterable_result:
+            for match in result:
+                flatten_dict(match, max_depth=2)
+        else:
+            flatten_dict(result, max_depth=2)
 
-        results_formatted.append({name: result})
-
-    if request.method == 'GET':
-        return make_response(jsonify(results_formatted[0]))
-    else:
-        return make_response(jsonify({N.RESULTS: results_formatted}))
+    return {name: result}
 
 
-def create_ok_response(request, params_list, name, results,
-                       iterable_results=True):
-    if request.method == 'GET':
-        fmt = params_list[0][N.FORMAT]
-    else:
-        fmt = 'json'
+def create_json_response_single(name, result, fmt, iterable_result):
+    json_response = format_result_json(name, result, fmt, iterable_result)
+    return make_response(jsonify(json_response))
 
-    if fmt == 'json':
-        return create_json_response(request, params_list, name, results,
-                                    iterable_results)
-    elif fmt == 'csv':
-        if not iterable_results:
+
+def create_json_response_bulk(name, results, formats, iterable_result):
+    json_results = [
+        format_result_json(name, result, fmt, iterable_result)
+        for result, fmt in zip(results, formats)
+    ]
+
+    return make_response(jsonify({
+        N.RESULTS: json_results
+    }))
+
+
+def create_ok_response(name, result, fmt, iterable_result=True):
+    if fmt[N.FORMAT] == 'json':
+        return create_json_response_single(name, result, fmt, iterable_result)
+    elif fmt[N.FORMAT] == 'csv':
+        if not iterable_result:
             raise RuntimeError(
                 'Se requieren datos iterables para crear una respuesta CSV.')
 
-        return create_csv_response(request, name, results[0])
-    elif fmt == 'geojson':
-        return create_geojson_response(request, results, iterable_results)
+        return create_csv_response(name, result)
+    elif fmt[N.FORMAT] == 'geojson':
+        return create_geojson_response(result, iterable_result)
+
+
+def create_ok_response_bulk(name, results, formats, iterable_result=True):
+    return create_json_response_bulk(name, results, formats, iterable_result)

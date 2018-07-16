@@ -60,45 +60,82 @@ def translate_keys(d, translations, ignore=None):
     }
 
 
-def parse_params(request, name, param_parser):
-    if request.method == 'POST':
-        body_params = request.json.get(name)
-        return param_parser.parse_post_params(request.args, body_params)
-    elif request.method == 'GET':
-        return param_parser.parse_get_params(request.args)
-    else:
-        raise RuntimeError('Método HTTP no válido.')
+def process_entity_single(request, name, param_parser, key_translations,
+                          index):
+    qs_params, errors = param_parser.parse_get_params(request.args)
+
+    if errors:
+        return formatter.create_param_error_response_single(errors)
+
+    # Construir query a partir de parámetros
+    query = translate_keys(qs_params, key_translations,
+                           ignore=[FLATTEN, FORMAT])
+
+    # Construir reglas de formato a partir de parámetros
+    fmt = {
+        key: qs_params[key]
+        for key in [FLATTEN, FIELDS, FORMAT]
+        if key in qs_params
+    }
+
+    es = get_elasticsearch()
+    result = data.query_entities(es, index, [query])[0]
+
+    source = get_index_source(index)
+    for match in result:
+        match[SOURCE] = source
+
+    return formatter.create_ok_response(name, result, fmt)
+
+
+def process_entity_bulk(request, name, param_parser, key_translations, index):
+    body_params, errors = param_parser.parse_post_params(
+        request.args, request.json.get(name))
+
+    if any(errors):
+        return formatter.create_param_error_response_bulk(errors)
+
+    queries = []
+    formats = []
+    for parsed_params in body_params:
+        # Construir query a partir de parámetros
+        query = translate_keys(parsed_params, key_translations,
+                               ignore=[FLATTEN, FORMAT])
+
+        # Construir reglas de formato a partir de parámetros
+        fmt = {
+            key: parsed_params[key]
+            for key in [FLATTEN, FIELDS]
+            if key in parsed_params
+        }
+
+        queries.append(query)
+        formats.append(fmt)
+
+    es = get_elasticsearch()
+    results = data.query_entities(es, index, queries)
+
+    source = get_index_source(index)
+    for result in results:
+        for match in result:
+            match[SOURCE] = source
+
+    return formatter.create_ok_response_bulk(name, results, formats)
 
 
 def process_entity(request, name, param_parser, key_translations, index=None):
     if not index:
         index = name
 
-    parse_results, errors = parse_params(request, name, param_parser)
-
-    if any(errors):
-        return formatter.create_param_error_response(request, errors)
-
-    queries = []
-
-    for parsed_params in parse_results:
-        query = translate_keys(parsed_params, key_translations,
-                               ignore=[FLATTEN, FORMAT])
-        queries.append(query)
-
     try:
-        es = get_elasticsearch()
-        responses = data.query_entities(es, index, queries)
+        if request.method == 'GET':
+            return process_entity_single(request, name, param_parser,
+                                         key_translations, index)
+        else:
+            return process_entity_bulk(request, name, param_parser,
+                                       key_translations, index)
     except ElasticsearchException:
         return formatter.create_internal_error_response(request)
-
-    source = get_index_source(index)
-    for response in responses:
-        for match in response:
-            match[SOURCE] = source
-
-    return formatter.create_ok_response(request, parse_results, name,
-                                        responses)
 
 
 def process_state(request):
@@ -179,6 +216,72 @@ def process_locality(request):
     }, index=SETTLEMENTS)
 
 
+def build_street_query_format(parsed_params):
+    # Construir query a partir de parámetros
+    query = translate_keys(parsed_params, {
+        NAME: 'road_name',
+        STATE: 'state',
+        DEPT: 'department',
+        EXACT: 'exact',
+        FIELDS: 'fields',
+        ROAD_TYPE: 'road_type'
+    }, ignore=[FLATTEN, FORMAT])
+
+    query['excludes'] = [GEOM]
+
+    # Construir reglas de formato a partir de parámetros
+    fmt = {
+        key: parsed_params[key]
+        for key in [FLATTEN, FIELDS, FORMAT]
+        if key in parsed_params
+    }
+
+    return query, fmt
+
+
+def process_street_single(request):
+    qs_params, errors = params.PARAMS_STREETS.parse_get_params(request.args)
+
+    if errors:
+        return formatter.create_param_error_response_single(errors)
+
+    query, fmt = build_street_query_format(qs_params)
+
+    es = get_elasticsearch()
+    result = data.query_streets(es, [query])[0]
+
+    source = get_index_source(STREETS)
+    for match in result:
+        match[SOURCE] = source
+
+    return formatter.create_ok_response(STREETS, result, fmt)
+
+
+def process_street_bulk(request):
+    body_params, errors = params.PARAMS_STREETS.parse_post_params(
+        request.args, request.json.get(STREETS))
+
+    if any(errors):
+        return formatter.create_param_error_response_bulk(errors)
+
+    queries = []
+    formats = []
+    for parsed_params in body_params:
+        query, fmt = build_street_query_format(parsed_params)
+        queries.append(query)
+        formats.append(fmt)
+
+    es = get_elasticsearch()
+    results = data.query_streets(es, queries)
+
+    source = get_index_source(STREETS)
+    for result in results:
+        for match in result:
+            match[SOURCE] = source
+
+    return formatter.create_ok_response_bulk(STREETS, results, formats)
+
+
 def process_street(request):
     """Procesa una consulta de tipo GET para normalizar calles.
 
@@ -188,39 +291,13 @@ def process_street(request):
     Returns:
         Resultado de la consulta como objeto flask.Response.
     """
-    parse_results, errors = parse_params(request, STREETS,
-                                         params.PARAMS_STREETS)
-
-    if any(errors):
-        return formatter.create_param_error_response(request, errors)
-
-    queries = []
-    for parsed_params in parse_results:
-        query = translate_keys(parsed_params, {
-            NAME: 'road_name',
-            STATE: 'state',
-            DEPT: 'department',
-            EXACT: 'exact',
-            FIELDS: 'fields',
-            ROAD_TYPE: 'road_type'
-        }, ignore=[FLATTEN, FORMAT])
-
-        query['excludes'] = [GEOM]
-        queries.append(query)
-
     try:
-        es = get_elasticsearch()
-        responses = data.query_streets(es, queries)
+        if request.method == 'GET':
+            return process_street_single(request)
+        else:
+            return process_street_bulk(request)
     except ElasticsearchException:
         return formatter.create_internal_error_response(request)
-
-    source = get_index_source(STREETS)
-    for response in responses:
-        for match in response:
-            match[SOURCE] = source
-
-    return formatter.create_ok_response(request, parse_results, STREETS,
-                                        responses)
 
 
 def build_addresses_result(result, query, source):
@@ -249,55 +326,92 @@ def build_addresses_result(result, query, source):
         street[SOURCE] = source
 
 
+def build_address_query_format(parsed_params):
+    # Construir query a partir de parámetros
+    road_name, number = parsed_params.pop(ADDRESS)
+    parsed_params['road_name'] = road_name
+    parsed_params['number'] = number
+
+    query = translate_keys(parsed_params, {
+        DEPT: 'department',
+        STATE: 'state',
+        EXACT: 'exact',
+        FIELDS: 'fields',
+        ROAD_TYPE: 'road_type'
+    }, ignore=[FLATTEN, FORMAT])
+
+    if query['fields']:
+        query['fields'].extend([GEOM, START_R, END_L])
+
+    query['excludes'] = [START_L, END_R]
+
+    # Construir reglas de formato a partir de parámetros
+    fmt = {
+        key: parsed_params[key]
+        for key in [FLATTEN, FIELDS, FORMAT]
+        if key in parsed_params
+    }
+
+    return query, fmt
+
+
+def process_address_single(request):
+    qs_params, errors = params.PARAMS_ADDRESSES.parse_get_params(request.args)
+
+    if errors:
+        return formatter.create_param_error_response_single(errors)
+
+    query, fmt = build_address_query_format(qs_params)
+
+    es = get_elasticsearch()
+    result = data.query_streets(es, [query])[0]
+
+    source = get_index_source(STREETS)
+    build_addresses_result(result, query, source)
+
+    return formatter.create_ok_response(ADDRESSES, result, fmt)
+
+
+def process_address_bulk(request):
+    body_params, errors = params.PARAMS_ADDRESSES.parse_post_params(
+        request.args, request.json.get(ADDRESSES))
+
+    if any(errors):
+        return formatter.create_param_error_response_bulk(errors)
+
+    queries = []
+    formats = []
+    for parsed_params in body_params:
+        query, fmt = build_address_query_format(parsed_params)
+        queries.append(query)
+        formats.append(fmt)
+
+    es = get_elasticsearch()
+    results = data.query_streets(es, queries)
+
+    source = get_index_source(STREETS)
+    for result, query in zip(results, queries):
+        build_addresses_result(result, query, source)
+
+    return formatter.create_ok_response_bulk(ADDRESSES, results, formats)
+
+
 def process_address(request):
-    """Procesa una consulta para normalizar direcciones.
+    """Procesa una consulta de tipo GET para normalizar direcciones.
 
     Args:
         request (flask.Request): Objeto con información de la consulta HTTP.
 
     Returns:
-        Resultado de una de las funciones invocadas según el tipo de Request.
+        Resultado de la consulta como objeto flask.Response.
     """
-    parse_results, errors = parse_params(request, ADDRESSES,
-                                         params.PARAMS_ADDRESSES)
-
-    if any(errors):
-        return formatter.create_param_error_response(request, errors)
-
-    queries = []
-    for parsed_params in parse_results:
-        road_name, number = parsed_params.pop(ADDRESS)
-        parsed_params['road_name'] = road_name
-        parsed_params['number'] = number
-
-        query = translate_keys(parsed_params, {
-            DEPT: 'department',
-            STATE: 'state',
-            EXACT: 'exact',
-            FIELDS: 'fields',
-            ROAD_TYPE: 'road_type'
-        }, ignore=[FLATTEN, FORMAT])
-
-        if query['fields']:
-            query['fields'].extend([GEOM, START_R, END_L])
-
-        query['excludes'] = [START_L, END_R]
-            
-        queries.append(query)
-
     try:
-        es = get_elasticsearch()
-        responses = data.query_streets(es, queries)
+        if request.method == 'GET':
+            return process_address_single(request)
+        else:
+            return process_address_bulk(request)
     except ElasticsearchException:
         return formatter.create_internal_error_response(request)
-
-    source = get_index_source(STREETS)
-
-    for response, query in zip(responses, queries):
-        build_addresses_result(response, query, source)
-        
-    return formatter.create_ok_response(request, parse_results, ADDRESSES,
-                                        responses)
 
 
 def build_place_result(query, dept, muni):
@@ -334,6 +448,84 @@ def build_place_result(query, dept, muni):
     return place
 
 
+def build_place_query_format(parsed_params):
+    # Construir query a partir de parámetros
+    query = translate_keys(parsed_params, {}, ignore=[FLATTEN, FORMAT])
+
+    # Construir reglas de formato a partir de parámetros
+    fmt = {
+        key: parsed_params[key]
+        for key in [FLATTEN, FIELDS, FORMAT]
+        if key in parsed_params
+    }
+
+    return query, fmt
+
+
+def process_place_queries(es, queries):
+    dept_queries = []
+    for query in queries:
+        dept_queries.append({
+            'lat': query['lat'],
+            'lon': query['lon'],
+            'fields': [ID, NAME, STATE]
+        })
+
+    departments = data.query_places(es, DEPARTMENTS, dept_queries)
+
+    muni_queries = []
+    for query in queries:
+        muni_queries.append({
+            'lat': query['lat'],
+            'lon': query['lon'],
+            'fields': [ID, NAME]
+        })
+
+    munis = data.query_places(es, MUNICIPALITIES, muni_queries)
+
+    places = []
+    for query, dept, muni in zip(queries, departments, munis):
+        places.append(build_place_result(query, dept, muni))
+
+    return places
+
+
+def process_place_single(request):
+    qs_params, errors = params.PARAMS_PLACE.parse_get_params(request.args)
+
+    if errors:
+        return formatter.create_param_error_response_single(errors)
+
+    query, fmt = build_place_query_format(qs_params)
+
+    es = get_elasticsearch()
+    result = process_place_queries(es, [query])[0]
+
+    return formatter.create_ok_response(PLACE, result, fmt,
+                                        iterable_result=False)
+
+
+def process_place_bulk(request):
+    body_params, errors = params.PARAMS_PLACE.parse_post_params(
+        request.args, request.json.get(PLACES))
+
+    if any(errors):
+        return formatter.create_param_error_response_bulk(errors)
+
+    queries = []
+    formats = []
+    for parsed_params in body_params:
+        query, fmt = build_place_query_format(parsed_params)
+        queries.append(query)
+        formats.append(fmt)
+
+    es = get_elasticsearch()
+    results = process_place_queries(es, queries)
+
+    return formatter.create_ok_response_bulk(PLACE, results, formats,
+                                             iterable_result=False)
+
+
 def process_place(request):
     """Procesa una consulta para georreferenciar una ubicación.
 
@@ -343,45 +535,10 @@ def process_place(request):
     Returns:
         Resultado de una de las funciones invocadas según el tipo de Request.
     """
-    parse_results, errors = parse_params(request, PLACES, params.PARAMS_PLACE)
-
-    if any(errors):
-        return formatter.create_param_error_response(request, errors)
-
-    queries = []
-
-    for parsed_params in parse_results:
-        query = translate_keys(parsed_params, {}, ignore=[FLATTEN, FORMAT])
-        queries.append(query)
-
     try:
-        es = get_elasticsearch()
-        dept_queries = []
-        for query in queries:
-            dept_queries.append({
-                'lat': query['lat'],
-                'lon': query['lon'],
-                'fields': [ID, NAME, STATE]
-            })
-            
-        departments = data.query_places(es, DEPARTMENTS, dept_queries)
-
-        muni_queries = []
-        for query in queries:
-            muni_queries.append({
-                'lat': query['lat'],
-                'lon': query['lon'],
-                'fields': [ID, NAME]
-            })
-
-        munis = data.query_places(es, MUNICIPALITIES, muni_queries)
-
-        places = []
-        for query, dept, muni in zip(queries, departments, munis):
-            places.append(build_place_result(query, dept, muni))
-
+        if request.method == 'GET':
+            return process_place_single(request)
+        else:
+            return process_place_bulk(request)
     except ElasticsearchException:
         return formatter.create_internal_error_response(request)
-
-    return formatter.create_ok_response(request, parse_results, PLACE, places,
-                                        iterable_results=False)
