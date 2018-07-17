@@ -109,6 +109,13 @@ class SearchStreetsTest(SearchEntitiesTest):
 
         assert(validations and all(validations))
 
+    def test_id_search(self):
+        """Se debería poder buscar calles por ID."""
+        identifier = '8208416001280'
+        data = self.get_response({'id': identifier})[0]
+
+        self.assertEqual(identifier, data['id'])
+
     def test_flatten_results(self):
         """Los resultados se deberían poder obtener en formato aplanado."""
         data = self.get_response({'max': 1, 'aplanar': True})[0]
@@ -170,6 +177,9 @@ class SearchStreetsTest(SearchEntitiesTest):
             },
             {
                 'max': 3
+            },
+            {
+                'id': '8208416001280'
             },
             {
                 'campos': 'nombre,tipo'

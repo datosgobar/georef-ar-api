@@ -219,6 +219,7 @@ def process_locality(request):
 def build_street_query_format(parsed_params):
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
+        ID: 'street_id',
         NAME: 'road_name',
         STATE: 'state',
         DEPT: 'department',

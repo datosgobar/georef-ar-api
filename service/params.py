@@ -317,6 +317,7 @@ PARAMS_ADDRESSES = ParameterSet({
 })
 
 PARAMS_STREETS = ParameterSet({
+    N.ID: StrParameter(),
     N.NAME: StrParameter(),
     N.ROAD_TYPE: StrParameter(),
     N.STATE: StrParameter(),

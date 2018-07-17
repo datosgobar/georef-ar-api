@@ -167,14 +167,15 @@ def build_entity_dsl_query(entity_id=None, name=None, state=None,
     }
 
 
-def build_streets_dsl_query(road_name=None, department=None, state=None,
-                        road_type=None, max=None, fields=None, exact=False,
-                        number=None, excludes=None):
+def build_streets_dsl_query(street_id=None, road_name=None, department=None,
+                            state=None, road_type=None, max=None, fields=None,
+                            exact=False, number=None, excludes=None):
     """Construye una query con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
+        street_id (str): ID de la calle a buscar.
         road_name (str): Nombre de la calle para filtrar (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
@@ -197,8 +198,11 @@ def build_streets_dsl_query(road_name=None, department=None, state=None,
 
     if TIMESTAMP not in excludes:
         excludes.append(TIMESTAMP)
-        
+
     terms = []
+    if street_id:
+        condition = build_match_condition(ID, street_id)
+        terms.append(condition)
     if road_name:
         condition = build_name_condition(NAME, road_name, exact)
         terms.append(condition)
