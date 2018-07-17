@@ -17,14 +17,28 @@ class ParamParsingTest(TestCase):
     def tearDown(self):
         data.run_dsl_queries = self.original_run_dsl_queries
 
+    def test_bulk_no_json(self):
+        """No se deberían aceptar operaciones bulk cuando el body HTTP
+        no contiene JSON."""
+        self.assert_errors_match('/provincias', [
+            {(T.INVALID_BULK.value, 'body')}
+        ], method='POST')
+
+    def test_bulk_empty_json(self):
+        """No se deberían aceptar operaciones bulk cuando el body HTTP
+        contiene JSON vacío."""
+        self.assert_errors_match('/calles', [
+            {(T.INVALID_BULK.value, 'body')}
+        ], method='POST', body={})
+        
     def test_bulk_empty(self):
         """No se deberían aceptar operaciones bulk vacías."""
         body = {
             'provincias': []
         }
 
-        self.assert_errors_match('/provincias', [
-            {(T.EMPTY_BULK.value, 'body')}
+        self.assert_errors_match('/municipios', [
+            {(T.INVALID_BULK.value, 'body')}
         ], body=body)
 
     def test_bulk_invalid_type(self):
@@ -35,7 +49,7 @@ class ParamParsingTest(TestCase):
         }
 
         self.assert_errors_match('/departamentos', [
-            {(T.VALUE_ERROR.value, 'body')}
+            {(T.INVALID_BULK.value, 'body')}
         ], body=body)
 
     def test_bulk_invalid_item_type(self):
@@ -47,7 +61,7 @@ class ParamParsingTest(TestCase):
 
         self.assert_errors_match('/municipios', [
             set(),
-            {(T.VALUE_ERROR.value, 'body')}
+            {(T.INVALID_BULK_ENTRY.value, 'body')}
         ], body=body)
 
     def test_unknown_param(self):
@@ -244,17 +258,22 @@ class ParamParsingTest(TestCase):
             (T.VALUE_ERROR.value, 'direccion')
         })
 
-    def assert_errors_match(self, url, errors_set, body=None):
+    def assert_errors_match(self, url, errors_set, body=None, method=None):
         url = self.url_base + url
-        if body:
+        if not method:
+            method = 'POST' if body else 'GET'
+        
+        if method == 'POST':
             resp = self.app.post(url, json=body)
-        else:
+        elif method == 'GET':
             resp = self.app.get(url)
+        else:
+            raise ValueError('Método HTTP desconocido.')
 
         if resp.status_code == 200:
             raise Exception('La petición no devolvió errores.')
 
-        if body:
+        if method == 'POST':
             resp_errors = []
             for errors in resp.json['errores']:
                 query_errors = {

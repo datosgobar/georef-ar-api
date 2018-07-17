@@ -9,8 +9,8 @@ STRLIST_EMPTY = 'La lista no contiene valores.'
 INT_VAL_ERROR = 'El parámetro no es un número entero.'
 FLOAT_VAL_ERROR = 'El parámetro no es un número real.'
 INVALID_CHOICE = 'El parámetro debe tomar uno de los siguientes valores: {}'
-EMPTY_BULK = 'Se requiere de al menos una operación a realizar.'
-INVALID_BULK = 'Las operaciones deben estar contenidas en una lista.'
+INVALID_BULK = 'Las operaciones deben estar contenidas en una lista de longitud \
+1 o más.'
 BULK_QS_INVALID = 'No se permiten parámetros vía query string en operaciones \
 bulk.'
 INVALID_BULK_ENTRY = 'Las operaciones bulk deben ser de tipo objeto.'

@@ -24,9 +24,10 @@ class ParamErrorType(Enum):
     VALUE_ERROR = 1001
     INVALID_CHOICE = 1002
     PARAM_REQUIRED = 1003
-    EMPTY_BULK = 1004
+    INVALID_BULK = 1004
     INVALID_LOCATION = 1005
     REPEATED = 1006
+    INVALID_BULK_ENTRY = 1007
 
 
 ParamError = namedtuple('ParamError', ['error_type', 'message', 'source'])
@@ -208,25 +209,19 @@ class ParameterSet():
                                            'querystring')}
             ]
 
-        if not isinstance(body_params, list):
-            # No aceptar operaciones bulk que no sean listas
+        if not body_params or not isinstance(body_params, list):
+            # No aceptar operaciones bulk que no sean listas, y no
+            # aceptar listas vacías.
             return [], [
-                {'body': ParamError(ParamErrorType.VALUE_ERROR,
+                {'body': ParamError(ParamErrorType.INVALID_BULK,
                                     strings.INVALID_BULK, 'body')}
-            ]
-
-        if not body_params:
-            # No aceptar una lista vacía de operaciones bulk
-            return [], [
-                {'body': ParamError(ParamErrorType.EMPTY_BULK,
-                                    strings.EMPTY_BULK, 'body')}
             ]
 
         results, errors_list = [], []
         for param_dict in body_params:
             if not hasattr(param_dict, 'get'):
                 parsed, errors = {}, {
-                    'body': ParamError(ParamErrorType.VALUE_ERROR,
+                    'body': ParamError(ParamErrorType.INVALID_BULK_ENTRY,
                                        strings.INVALID_BULK_ENTRY,
                                        'body')
                 }

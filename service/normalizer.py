@@ -90,7 +90,7 @@ def process_entity_single(request, name, param_parser, key_translations,
 
 def process_entity_bulk(request, name, param_parser, key_translations, index):
     body_params, errors = param_parser.parse_post_params(
-        request.args, request.json.get(name))
+        request.args, request.json and request.json.get(name))
 
     if any(errors):
         return formatter.create_param_error_response_bulk(errors)
@@ -260,7 +260,7 @@ def process_street_single(request):
 
 def process_street_bulk(request):
     body_params, errors = params.PARAMS_STREETS.parse_post_params(
-        request.args, request.json.get(STREETS))
+        request.args, request.json and request.json.get(STREETS))
 
     if any(errors):
         return formatter.create_param_error_response_bulk(errors)
@@ -375,7 +375,7 @@ def process_address_single(request):
 
 def process_address_bulk(request):
     body_params, errors = params.PARAMS_ADDRESSES.parse_post_params(
-        request.args, request.json.get(ADDRESSES))
+        request.args, request.json and request.json.get(ADDRESSES))
 
     if any(errors):
         return formatter.create_param_error_response_bulk(errors)
@@ -508,7 +508,7 @@ def process_place_single(request):
 
 def process_place_bulk(request):
     body_params, errors = params.PARAMS_PLACE.parse_post_params(
-        request.args, request.json.get(PLACES))
+        request.args, request.json and request.json.get(PLACES))
 
     if any(errors):
         return formatter.create_param_error_response_bulk(errors)
