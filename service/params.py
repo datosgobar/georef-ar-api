@@ -5,6 +5,9 @@ import re
 from enum import Enum, unique
 from collections import namedtuple
 
+# TODO: Mover a archivo de configuración
+MAX_BULK_LEN = 100
+
 
 class ParameterRequiredException(Exception):
     pass
@@ -28,6 +31,7 @@ class ParamErrorType(Enum):
     INVALID_LOCATION = 1005
     REPEATED = 1006
     INVALID_BULK_ENTRY = 1007
+    INVALID_BULK_LEN = 1008
 
 
 ParamError = namedtuple('ParamError', ['error_type', 'message', 'source'])
@@ -215,6 +219,13 @@ class ParameterSet():
             return [], [
                 {'body': ParamError(ParamErrorType.INVALID_BULK,
                                     strings.INVALID_BULK, 'body')}
+            ]
+
+        if len(body_params) > MAX_BULK_LEN:
+            return [], [
+                {'body': ParamError(
+                    ParamErrorType.INVALID_BULK_LEN,
+                    strings.BULK_LEN_ERROR.format(MAX_BULK_LEN), 'body')}
             ]
 
         results, errors_list = [], []

@@ -258,6 +258,18 @@ class ParamParsingTest(TestCase):
             (T.VALUE_ERROR.value, 'direccion')
         })
 
+    def test_max_bulk_len(self):
+        """Debería haber un máximo de operaciones bulk posibles."""
+        body = {
+            'calles': [{}] * 101
+        }
+
+        self.assert_errors_match('/calles', [
+            {
+                (T.INVALID_BULK_LEN.value, 'body')
+            }
+        ], body=body)
+
     def assert_errors_match(self, url, errors_set, body=None, method=None):
         url = self.url_base + url
         if not method:
