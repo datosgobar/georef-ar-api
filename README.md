@@ -36,3 +36,17 @@ $ git add ...
 $ git commit -m "..."
 $ git push origin gh-pages
 ```
+
+## Herramientas
+
+Para validar el archivo `openapi.json` desde la consola de comandos, seguir las siguientes instrucciones:
+
+1. Instalar las dependencias:
+```bash
+$ npm install --global swagger-cli
+```
+
+2. Ejecutar la herramienta de validación:
+```
+$ swagger-cli validate docs/openapi.json
+```
