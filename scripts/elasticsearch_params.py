@@ -56,8 +56,8 @@ DEFAULT_SETTINGS = {
                 'filter': [
                     'lowercase',
                     'asciifolding',
-                    SPANISH_STOP_FILTER,
-                    NAME_SYNONYMS_FILTER
+                    NAME_SYNONYMS_FILTER,
+                    SPANISH_STOP_FILTER
                 ]
             }
         }
