@@ -8,26 +8,19 @@ de los recursos que expone la API.
 
 from service import data, params, formatter
 from service.names import *
-from elasticsearch import Elasticsearch, ElasticsearchException
 from flask import g
-import os
-import psycopg2
 
 
 def get_elasticsearch():
     if 'elasticsearch' not in g:
-        g.elasticsearch = Elasticsearch()
+        g.elasticsearch = data.elasticsearch_connection()
 
     return g.elasticsearch
 
 
 def get_postgres_db():
     if 'postgres' not in g:
-        g.postgres = psycopg2.connect(
-            host=os.environ.get('GEOREF_API_DB_HOST'),
-            dbname=os.environ.get('GEOREF_API_DB_NAME'),
-            user=os.environ.get('GEOREF_API_DB_USER'),
-            password=os.environ.get('GEOREF_API_DB_PASS'))
+        g.postgres = data.postgres_db_connection()
 
     return g.postgres
 
@@ -134,7 +127,7 @@ def process_entity(request, name, param_parser, key_translations, index=None):
         else:
             return process_entity_bulk(request, name, param_parser,
                                        key_translations, index)
-    except ElasticsearchException:
+    except data.DataConnectionException:
         return formatter.create_internal_error_response(request)
 
 
@@ -297,7 +290,7 @@ def process_street(request):
             return process_street_single(request)
         else:
             return process_street_bulk(request)
-    except ElasticsearchException:
+    except data.DataConnectionException:
         return formatter.create_internal_error_response(request)
 
 
@@ -319,7 +312,6 @@ def build_addresses_result(result, query, source):
         geom = street.pop(GEOM)
 
         if not fields or LOCATION in fields:
-            # TODO: Manejar errores en base de datos (excepciones)
             loc = data.street_number_location(get_postgres_db(), geom,
                                               number, start_r, end_l)
             street[LOCATION] = loc
@@ -411,7 +403,7 @@ def process_address(request):
             return process_address_single(request)
         else:
             return process_address_bulk(request)
-    except ElasticsearchException:
+    except data.DataConnectionException:
         return formatter.create_internal_error_response(request)
 
 
@@ -541,5 +533,5 @@ def process_place(request):
             return process_place_single(request)
         else:
             return process_place_bulk(request)
-    except ElasticsearchException:
+    except data.DataConnectionException:
         return formatter.create_internal_error_response(request)

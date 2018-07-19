@@ -6,10 +6,46 @@ Contiene funciones que procesan los parámetros de búsqueda de una consulta
 e impactan dicha búsqueda contra las fuentes de datos disponibles.
 """
 
+import os
+import elasticsearch
+import logging
+import psycopg2
+import psycopg2.extras
 from service.names import *
+
 
 MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_MAX = 10
+
+logger = logging.getLogger('georef')
+
+
+class DataConnectionException(Exception):
+    pass
+
+
+def postgres_db_connection():
+    try:
+        db = psycopg2.connect(
+            connection_factory=psycopg2.extras.LoggingConnection,
+            host=os.environ.get('GEOREF_API_DB_HOST'),
+            dbname=os.environ.get('GEOREF_API_DB_NAME'),
+            user=os.environ.get('GEOREF_API_DB_USER'),
+            password=os.environ.get('GEOREF_API_DB_PASS'))
+
+        db.initialize(logging.getLogger('psycopg2'))
+        return db
+    except psycopg2.Error as e:
+        logger.error('Error al conectarse a la base de datos PostgreSQL:')
+        logger.error(e)
+        raise DataConnectionException()
+
+
+def elasticsearch_connection():
+    try:
+        return elasticsearch.Elasticsearch()
+    except elasticsearch.ElasticsearchException:
+        raise DataConnectionException()
 
 
 def run_dsl_queries(es, index, dsl_queries):
@@ -21,10 +57,20 @@ def run_dsl_queries(es, index, dsl_queries):
         body.append({})
         body.append(query)
 
-    results = es.msearch(body=body, index=index)
+    try:
+        results = es.msearch(body=body, index=index)
+    except elasticsearch.ElasticsearchException:
+        raise DataConnectionException()
 
     responses = []
     for response in results['responses']:
+        error = response.get('error')
+        if error:
+            logger.error('Ocurrió un error en la query Elasticsearch.msearch:')
+            logger.error('Tipo: {}, causa: {}'.format(error['type'],
+                                                      error['reason']))
+            raise DataConnectionException()
+
         hits = [hit['_source'] for hit in response['hits']['hits']]
         responses.append(hits)
 
@@ -381,9 +427,14 @@ def street_number_location(connection, geom, number, start, end):
     args = geom, number, start, end
     query = """SELECT geocodificar('%s', %s, %s, %s);""" % args
 
-    with connection.cursor() as cursor:
-        cursor.execute(query)
-        location = cursor.fetchall()[0][0]
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            location = cursor.fetchall()[0][0]
+    except psycopg2.Error as e:
+        logger.error('Ocurrieron errores en la consulta SQL:')
+        logger.error(e)
+        raise DataConnectionException()
 
     if location['code']:
         lat, lon = location['result'].split(',')

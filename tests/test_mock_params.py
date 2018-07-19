@@ -1,6 +1,5 @@
 from unittest import TestCase
-from unittest.mock import Mock
-from service import app, data
+from service import app
 from service.params import ParamErrorType as T
 
 
@@ -10,12 +9,6 @@ class ParamParsingTest(TestCase):
 
         self.app = app.test_client()
         self.url_base = '/api/v1.0'
-
-        self.original_run_dsl_queries = data.run_dsl_queries
-        data.run_dsl_queries = Mock(return_value=[[]])
-
-    def tearDown(self):
-        data.run_dsl_queries = self.original_run_dsl_queries
 
     def test_bulk_no_json(self):
         """No se deberían aceptar operaciones bulk cuando el body HTTP
@@ -30,7 +23,7 @@ class ParamParsingTest(TestCase):
         self.assert_errors_match('/calles', [
             {(T.INVALID_BULK.value, 'body')}
         ], method='POST', body={})
-        
+
     def test_bulk_empty(self):
         """No se deberían aceptar operaciones bulk vacías."""
         body = {
