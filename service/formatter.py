@@ -252,7 +252,12 @@ def create_json_response_bulk(name, results, formats, iterable_result):
 
 
 def filter_result_fields(result, fields_dict, max_depth=3):
-    """TODO: Docs
+    """Remueve campos de un resultado recursivamente de acuerdo a las
+    especificaciones de un diccionario de campos.
+
+    Args:
+        result (dict): Resultado con valores a filtrar.
+        fields_dict (dict): Diccionario especificando cuáles campos mantener.
     """
     if max_depth <= 0:
         raise RuntimeError('Profundidad máxima alcanzada.')
@@ -273,6 +278,14 @@ def filter_result_fields(result, fields_dict, max_depth=3):
 
 
 def format_result_fields(result, fmt, iterable_result):
+    """Aplica el parámetro de formato 'campos' a un resultado.
+
+    Args:
+        result (dict): Resultado con valores a filtrar.
+        fmt (dict): Parámetros de formato.
+        iterable_result (bool): Verdadero si el resultado es iterable.
+
+    """
     fields_dict = fields_list_to_dict(fmt[N.FIELDS])
     if iterable_result:
         for item in result:
@@ -282,12 +295,30 @@ def format_result_fields(result, fmt, iterable_result):
 
 
 def format_results_fields(results, formats, iterable_result):
+    """Aplica el parámetro de formato 'campos' a varios resultados.
+
+    Args:
+        results (list): Resultados con valores a filtrar.
+        formats (list): Lista de parámetros de formato.
+        iterable_result (bool): Verdadero si todos los resultados son
+            iterables.
+
+    """
     for result, fmt in zip(results, formats):
         format_result_fields(result, fmt, iterable_result)
 
 
 def fields_list_to_dict(fields):
-    """TODO: Docs
+    """Convierte una lista de campos (potencialmente, campos anidados separados
+    con puntos) en un diccionario de uno o más niveles conteniendo 'True' por
+    cada campo procesado.
+
+    Args:
+        fields (dict): Lista de campos.
+
+    Returns:
+        dict: Diccionario de campos.
+
     """
     fields_dict = {}
     for field in fields:
