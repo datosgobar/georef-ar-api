@@ -1,7 +1,9 @@
+"""Módulo '__init__' de georef-api
+
+Crea la aplicación Flask de la API de Georef.
+"""
+
 from flask import Flask
-import logging.config
-import json
-import os
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False

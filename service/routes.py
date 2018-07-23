@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Módulo 'routes' de georef-api
 
 Declara las rutas de los recursos que expone la API e
@@ -12,6 +10,13 @@ from functools import wraps
 
 
 def disable_cache(f):
+    """Dada una función que maneja una request HTTP, modifica los valores de
+    los headers para deshabilitar el cacheo de respuestas.
+
+    Args:
+    f (function): Función utilizada para manejar un endpoint HTTP de flask.
+
+    """
     @wraps(f)
     def decorated_func(*args, **kwargs):
         resp = f(*args, **kwargs)

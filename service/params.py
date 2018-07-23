@@ -1,3 +1,9 @@
+"""Módulo 'params' de georef-api
+
+Contiene clases utilizadas para leer y validar parámetros recibidos en requests
+HTTP.
+"""
+
 import service.names as N
 from service import strings
 
@@ -10,19 +16,41 @@ MAX_BULK_LEN = 100
 
 
 class ParameterRequiredException(Exception):
+    """Excepción lanzada cuando se detecta la ausencia de un parámetro
+    requerido.
+
+    """
+
     pass
 
 
 class InvalidChoiceException(Exception):
+    """Excepción lanzada cuando un parámetro no tiene como valor uno de los
+    valores permitidos.
+
+    """
+
     pass
 
 
 class InvalidLocationException(Exception):
+    """Excepción lanzada cuando se recibe un parámetro en la parte incorrecta de
+    una request HTTP (por ejemplo, query string en vez de body).
+
+    """
+
     pass
 
 
 @unique
 class ParamErrorType(Enum):
+    """Códigos de error para cada tipo de error de parámetro.
+
+    Nota: En caso de agregar un nuevo error, no reemplazar un valor existente,
+    crear uno nuevo.
+
+    """
+
     UNKNOWN_PARAM = 1000
     VALUE_ERROR = 1001
     INVALID_CHOICE = 1002
@@ -35,11 +63,43 @@ class ParamErrorType(Enum):
 
 
 ParamError = namedtuple('ParamError', ['error_type', 'message', 'source'])
+"""La clase ParamError representa toda la información conocida sobre un error
+de parámetro.
+"""
 
 
 class Parameter:
+    """Representa un parámetro cuyo valor es recibido a través de una request
+    HTTP.
+
+    La clase se encarga de validar el valor recibido vía HTTP (en forma de
+    string), comprobando también que el valor haya sido recibido (en caso de
+    ser un parámetro requerido).
+
+    Attributes:
+        choices (list): Lista de valores permitidos (o None si se permite
+            cualquier valor).
+        required (bool): Verdadero si el parámetro es requerido.
+        default: Valor que debería tomar el parámetro en caso de no haber sido
+            recibido.
+        source (str): Ubicación permitida del parámetro en el request HTTP.
+
+    """
+
     def __init__(self, required=False, default=None, choices=None,
                  source='any'):
+        """Inicializa un objeto Parameter.
+
+        Args:
+            choices (list): Lista de valores permitidos (o None si se permite
+                cualquier valor).
+            required (bool): Verdadero si el parámetro es requerido.
+            default: Valor que debería tomar el parámetro en caso de no haber
+                sido recibido.
+            source (str): Ubicación permitida del parámetro en el request HTTP
+                (querystring, body o any).
+
+        """
         if required and default is not None:
             raise ValueError(strings.OBLIGATORY_NO_DEFAULT)
 
@@ -54,6 +114,21 @@ class Parameter:
             raise ValueError(strings.DEFAULT_INVALID_CHOICE)
 
     def get_value(self, val, from_source):
+        """Toma un valor 'val' recibido desde una request HTTP, y devuelve el
+        verdadero valor (con tipo apropiado) resultante de acuerdo a las
+        propiedades del objeto Parameter.
+
+        Args:
+            val (str): String recibido desde la request HTTP, o None si no se
+                recibió un valor.
+            from_source (str): Ubicación de la request HTTP donde se recibió el
+                valor.
+
+        Returns:
+            El valor del parámetro resultante, cuyo tipo depende de las reglas
+            definidas por el objeto Parameter y sus subclases.
+
+        """
         if val is None:
             if self.required:
                 raise ParameterRequiredException()
@@ -73,13 +148,44 @@ class Parameter:
         return parsed
 
     def _value_in_choices(self, val):
+        """Comprueba que un valor esté dentro de los valores permitidos del
+        objeto Parameter. El valor ya debería estar parseado y tener el tipo
+        apropiado.
+
+        Args:
+            val: Valor a comprobar si está contenido dentro de los valores
+                permitidos.
+
+        Returns:
+            bool: Verdadero si el valor está contenido dentro de los valores
+                permitidos
+
+        """
         return val in self.choices
 
     def _parse_value(self, val):
+        """Parsea un valor de tipo string y devuelve el resultado con el tipo
+        apropiado.
+
+        Args:
+            val (str): Valor a parsear.
+
+        Returns:
+            El valor parseado.
+
+        """
         raise NotImplementedError()
 
 
 class StrParameter(Parameter):
+    """Representa un parámetro de tipo string no vacío.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de StrParameter.
+
+    """
+
     def _parse_value(self, val):
         if not val:
             raise ValueError(strings.STRING_EMPTY)
@@ -88,8 +194,16 @@ class StrParameter(Parameter):
 
 
 class BoolParameter(Parameter):
-    def __init__(self, required=False, default=False):
-        super().__init__(required, default, [True, False])
+    """Representa un parámetro de tipo booleano.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de BoolParameter.
+
+    """
+
+    def __init__(self):
+        super().__init__(False, False, [True, False])
 
     def _parse_value(self, val):
         # Cualquier valor recibido (no nulo) es verdadero
@@ -97,6 +211,15 @@ class BoolParameter(Parameter):
 
 
 class StrListParameter(Parameter):
+    """Representa un parámetro de tipo lista de strings.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de StrListParameter. Se define también el método
+    _value_in_choices para modificar su comportamiento original.
+
+    """
+
     def __init__(self, required=False, constants=None, optionals=None):
         self.constants = set(constants) if constants else set()
 
@@ -120,6 +243,14 @@ class StrListParameter(Parameter):
 
 
 class IntParameter(Parameter):
+    """Representa un parámetro de tipo entero.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de IntParameter.
+
+    """
+
     def _parse_value(self, val):
         try:
             return int(val)
@@ -128,6 +259,14 @@ class IntParameter(Parameter):
 
 
 class FloatParameter(Parameter):
+    """Representa un parámetro de tipo float.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de FloatParameter.
+
+    """
+
     def _parse_value(self, val):
         try:
             return float(val)
@@ -136,6 +275,14 @@ class FloatParameter(Parameter):
 
 
 class AddressParameter(Parameter):
+    """Representa un parámetro de tipo dirección de calle.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de AddressParameter.
+
+    """
+
     def __init__(self):
         super().__init__(required=True)
 
@@ -155,10 +302,44 @@ class AddressParameter(Parameter):
 
 
 class ParameterSet():
+    """Representa un conjunto de parámetros HTTP.
+
+    Se utiliza para representar todos los parámetros aceptados por un cierto
+    endpoint HTTP.
+
+    Attributes:
+        params (dict): Diccionario de parámetros aceptados, siendo las keys
+            los nombres de los parámetros que se debe usar al especificarlos, y
+            los valores objetos de tipo Parameter.
+
+    """
+
     def __init__(self, params):
+        """Inicializa un objeto de tipo ParameterSet.
+
+        Args:
+            params (dict): Ver atributo 'params'.
+
+        """
         self.params = params
 
     def parse_params_dict(self, received, from_source):
+        """Parsea parámetros (clave-valor) recibidos en una request HTTP,
+        utilizando el conjunto de parámetros internos.
+
+        Args:
+            received (dict): Parámetros recibidos sin procesar.
+            from_source (str): Ubicación dentro de la request HTTP donde fueron
+                recibidos los parámetros.
+
+        Returns:
+            tuple: Tupla de resultados y errores. Los resultados consisten de
+                un diccionario conteniendo como clave el nombre del parámetro,
+                y como valor el valor parseado y validado, con su tipo
+                apropiado. Los errores consisten de un diccionario conteniendo
+                como clave el nombre del parámetro recibido, y como valor un
+                objeto de tipo ParamError, especificando el error.
+        """
         parsed, errors = {}, {}
         is_multi_dict = hasattr(received, 'getlist')
 
@@ -205,6 +386,21 @@ class ParameterSet():
         return parsed, errors
 
     def parse_post_params(self, qs_params, body_params):
+        """Parsea parámetros (clave-valor) recibidos en una request HTTP
+        POST utilizando el conjunto de parámetros internos.
+
+        Args:
+            qs_params (dict): Parámetros recibidos en el query string.
+            body_params (list): Lista de diccionarios, cada uno representando
+                un conjunto de parámetros recibidos en el body del request
+                HTTP.
+
+        Returns:
+            tuple: Tupla de dos listas: una lista de conjuntos de parámetros
+                parseados, y una lista de conjuntos de errores de parseo. Los
+                elementos de ambas listas provinenen de 'parse_param_dict'.
+
+        """
         if qs_params:
             # No aceptar parámetros de querystring en bulk
             return [], [
@@ -245,6 +441,16 @@ class ParameterSet():
         return results, errors_list
 
     def parse_get_params(self, qs_params):
+        """Parsea parámetros (clave-valor) recibidos en una request HTTP GET
+        utilizando el conjunto de parámetros internos.
+
+        Args:
+            qs_params (dict): Parámetros recibidos en el query string.
+
+        Returns:
+            tuple: Valor de retorno de 'parse_dict_params'.
+
+        """
         return self.parse_params_dict(qs_params, 'querystring')
 
 

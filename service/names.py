@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Módulo 'names' de georef-api
 
 Declara los nombres que usa la API para campos,

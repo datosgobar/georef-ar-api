@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Módulo 'normalizer' de georef-api
 
 Contiene funciones que manejan la lógica de procesamiento
@@ -12,6 +10,17 @@ from flask import g
 
 
 def get_elasticsearch():
+    """Devuelve la conexión a Elasticsearch activa para la sesión
+    de flask. La conexión es creada si no existía.
+
+    Returns:
+        Elasticsearch: conexión a Elasticsearch.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    """
     if 'elasticsearch' not in g:
         g.elasticsearch = data.elasticsearch_connection()
 
@@ -19,6 +28,17 @@ def get_elasticsearch():
 
 
 def get_postgres_db():
+    """Devuelve la conexión a PostgreSQL activa para la sesión
+    de flask. La conexión es creada si no existía.
+
+    Returns:
+        psycopg2.connection: conexión a PostgreSQL.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    """
     if 'postgres' not in g:
         g.postgres = data.postgres_db_connection()
 
@@ -30,6 +50,10 @@ def get_index_source(index):
 
     Args:
         index (str): Nombre del índice.
+
+    Returns:
+        str: Nombre de la fuente.
+
     """
     if index in [STATES, DEPARTMENTS, MUNICIPALITIES]:
         return SOURCE_IGN
@@ -43,6 +67,19 @@ def get_index_source(index):
 
 
 def translate_keys(d, translations, ignore=None):
+    """Cambia las keys del diccionario 'd', utilizando las traducciones
+    especificadas en 'translations'. Devuelve los resultados en un nuevo
+    diccionario.
+
+    Args:
+        d (dict): Diccionario a modificar.
+        translations (dict): Traducciones de keys (key anterior => key nueva.)
+        ignore (list): Keys de 'd' a no agregar al nuevo diccionario devuelto.
+
+    Returns:
+        dict: Diccionario con las keys modificadas.
+
+    """
     if not ignore:
         ignore = []
 
@@ -55,6 +92,26 @@ def translate_keys(d, translations, ignore=None):
 
 def process_entity_single(request, name, param_parser, key_translations,
                           index):
+    """Procesa una request GET para consultar datos de una entidad.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET de flask.
+        name (str): Nombre de la entidad.
+        param_parser (ParameterSet): Objeto utilizado para parsear los
+            parámetros.
+        key_translations (dict): Traducciones de keys a utilizar para convertir
+            el diccionario de parámetros del usuario a un diccionario
+            representando una query a Elasticsearch.
+        index (str): Nombre del índice a consultar.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     qs_params, errors = param_parser.parse_get_params(request.args)
 
     if errors:
@@ -82,6 +139,26 @@ def process_entity_single(request, name, param_parser, key_translations,
 
 
 def process_entity_bulk(request, name, param_parser, key_translations, index):
+    """Procesa una request POST para consultar datos de una lista de entidades.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request POST de flask.
+        name (str): Nombre de la entidad.
+        param_parser (ParameterSet): Objeto utilizado para parsear los
+            parámetros.
+        key_translations (dict): Traducciones de keys a utilizar para convertir
+            los diccionarios de parámetros del usuario a una lista de
+            diccionarios representando las queries a Elasticsearch.
+        index (str): Nombre del índice a consultar.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     body_params, errors = param_parser.parse_post_params(
         request.args, request.json and request.json.get(name))
 
@@ -117,6 +194,24 @@ def process_entity_bulk(request, name, param_parser, key_translations, index):
 
 
 def process_entity(request, name, param_parser, key_translations, index=None):
+    """Procesa una request GET o POST para consultar datos de una entidad.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+    En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+        name (str): Nombre de la entidad.
+        param_parser (ParameterSet): Objeto utilizado para parsear los
+            parámetros.
+        key_translations (dict): Traducciones de keys a utilizar para convertir
+            los diccionarios de parámetros del usuario a una lista de
+            diccionarios representando las queries a Elasticsearch.
+        index (str): Nombre del índice a consultar. Por defecto, se utiliza
+            el nombre de la entidad.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     if not index:
         index = name
 
@@ -132,13 +227,14 @@ def process_entity(request, name, param_parser, key_translations, index=None):
 
 
 def process_state(request):
-    """Procesa una consulta de tipo GET para normalizar provincias.
+    """Procesa una request GET o POST para consultar datos de provincias.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
     Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
+        request (flask.Request): Request GET o POST de flask.
 
     Returns:
-        Resultado de la consulta como objeto flask.Response.
+        flask.Response: respuesta HTTP
     """
     return process_entity(request, STATES, params.PARAMS_STATES, {
             ID: 'entity_id',
@@ -150,13 +246,14 @@ def process_state(request):
 
 
 def process_department(request):
-    """Procesa una consulta de tipo GET para normalizar provincias.
+    """Procesa una request GET o POST para consultar datos de departamentos.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
     Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
+        request (flask.Request): Request GET o POST de flask.
 
     Returns:
-        Resultado de la consulta como objeto flask.Response.
+        flask.Response: respuesta HTTP
     """
     return process_entity(request, DEPARTMENTS, params.PARAMS_DEPARTMENTS, {
             ID: 'entity_id',
@@ -169,13 +266,14 @@ def process_department(request):
 
 
 def process_municipality(request):
-    """Procesa una consulta de tipo GET para normalizar municipios.
+    """Procesa una request GET o POST para consultar datos de municipios.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
     Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
+        request (flask.Request): Request GET o POST de flask.
 
     Returns:
-        Resultado de la consulta como objeto flask.Response.
+        flask.Response: respuesta HTTP
     """
     return process_entity(request, MUNICIPALITIES, params.PARAMS_MUNICIPALITIES, {
             ID: 'entity_id',
@@ -189,13 +287,14 @@ def process_municipality(request):
 
 
 def process_locality(request):
-    """Procesa una consulta de tipo GET para normalizar localidades.
+    """Procesa una request GET o POST para consultar datos de localidades.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
     Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
+        request (flask.Request): Request GET o POST de flask.
 
     Returns:
-        Resultado de la consulta como objeto flask.Response.
+        flask.Response: respuesta HTTP
     """
     return process_entity(request, LOCALITIES, params.PARAMS_LOCALITIES, {
             ID: 'entity_id',
@@ -210,6 +309,18 @@ def process_locality(request):
 
 
 def build_street_query_format(parsed_params):
+    """Construye dos diccionarios a partir de parámetros de consulta
+    recibidos, el primero representando la query a Elasticsearch a
+    realizar y el segundo representando las propiedades de formato
+    (presentación) que se le debe dar a los datos obtenidos de la misma.
+
+    Args:
+        parsed_params (dict): Parámetros de una consulta para el índice de
+            calles.
+
+    Returns:
+        tuple: diccionario de query y diccionario de formato
+    """
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
         ID: 'street_id',
@@ -234,6 +345,19 @@ def build_street_query_format(parsed_params):
 
 
 def process_street_single(request):
+    """Procesa una request GET para consultar datos de calles.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET de flask.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     qs_params, errors = params.PARAMS_STREETS.parse_get_params(request.args)
 
     if errors:
@@ -252,6 +376,19 @@ def process_street_single(request):
 
 
 def process_street_bulk(request):
+    """Procesa una request POST para consultar datos de calles.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request POST de flask.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     body_params, errors = params.PARAMS_STREETS.parse_post_params(
         request.args, request.json and request.json.get(STREETS))
 
@@ -277,13 +414,15 @@ def process_street_bulk(request):
 
 
 def process_street(request):
-    """Procesa una consulta de tipo GET para normalizar calles.
+    """Procesa una request GET o POST para consultar datos de calles.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+    En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
 
     Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
+        request (flask.Request): Request GET o POST de flask.
 
     Returns:
-        Resultado de la consulta como objeto flask.Response.
+        flask.Response: respuesta HTTP
     """
     try:
         if request.method == 'GET':
@@ -295,6 +434,17 @@ def process_street(request):
 
 
 def build_addresses_result(result, query, source):
+    """Construye resultados para una consulta al endpoint de direcciones.
+    Modifica los resultados contenidos en la lista 'result', agregando
+    ubicación, altura y nomenclatura con altura.
+
+    Args:
+        result (list): Resultados de una búsqueda al índice de calles.
+            (lista de calles).
+        query (dict): Query utilizada para obtener los resultados.
+        source (str): Nombre de la fuente de los datos.
+
+    """
     fields = query['fields']
     number = query['number']
 
@@ -320,6 +470,18 @@ def build_addresses_result(result, query, source):
 
 
 def build_address_query_format(parsed_params):
+    """Construye dos diccionarios a partir de parámetros de consulta
+    recibidos, el primero representando la query a Elasticsearch a
+    realizar y el segundo representando las propiedades de formato
+    (presentación) que se le debe dar a los datos obtenidos de la misma.
+
+    Args:
+        parsed_params (dict): Parámetros de una consulta normalización de
+            una dirección.
+
+    Returns:
+        tuple: diccionario de query y diccionario de formato
+    """
     # Construir query a partir de parámetros
     road_name, number = parsed_params.pop(ADDRESS)
     parsed_params['road_name'] = road_name
@@ -349,6 +511,19 @@ def build_address_query_format(parsed_params):
 
 
 def process_address_single(request):
+    """Procesa una request GET para normalizar una dirección.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET de flask.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     qs_params, errors = params.PARAMS_ADDRESSES.parse_get_params(request.args)
 
     if errors:
@@ -366,6 +541,19 @@ def process_address_single(request):
 
 
 def process_address_bulk(request):
+    """Procesa una request POST para normalizar lote de direcciones.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request POST de flask.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     body_params, errors = params.PARAMS_ADDRESSES.parse_post_params(
         request.args, request.json and request.json.get(ADDRESSES))
 
@@ -390,13 +578,16 @@ def process_address_bulk(request):
 
 
 def process_address(request):
-    """Procesa una consulta de tipo GET para normalizar direcciones.
+    """Procesa una request GET o POST para normalizar lote de direcciones.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+    En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
 
     Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
+        request (flask.Request): Request GET o POST de flask.
 
     Returns:
-        Resultado de la consulta como objeto flask.Response.
+        flask.Response: respuesta HTTP
+
     """
     try:
         if request.method == 'GET':
@@ -408,11 +599,24 @@ def process_address(request):
 
 
 def build_place_result(query, dept, muni):
+    """Construye un resultado para una consulta al endpoint de ubicación.
+
+    Args:
+        query (dict): Query utilizada para obtener los resultados.
+        dept (dict): Departamento encontrado en la ubicación especificada.
+            Puede ser None.
+        muni (dict): Municipio encontrado en la ubicación especificada. Puede
+            ser None.
+
+    Returns:
+        dict: Resultado de ubicación con los campos apropiados
+
+    """
     empty_entity = {
         ID: None,
         NAME: None
     }
-    
+
     if not dept:
         state = empty_entity.copy()
         dept = empty_entity.copy()
@@ -442,6 +646,17 @@ def build_place_result(query, dept, muni):
 
 
 def build_place_query_format(parsed_params):
+    """Construye dos diccionarios a partir de parámetros de consulta
+    recibidos, el primero representando la query a Elasticsearch a
+    realizar y el segundo representando las propiedades de formato
+    (presentación) que se le debe dar a los datos obtenidos de la misma.
+
+    Args:
+        parsed_params (dict): Parámetros de una consulta para una ubicación.
+
+    Returns:
+        tuple: diccionario de query y diccionario de formato
+    """
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {}, ignore=[FLATTEN, FORMAT])
 
@@ -456,6 +671,18 @@ def build_place_query_format(parsed_params):
 
 
 def process_place_queries(es, queries):
+    """Dada una lista de queries de ubicación, construye las queries apropiadas
+    a índices de departamentos y municipios, y las ejecuta utilizando
+    Elasticsearch.
+
+    Args:
+        es (Elasticsearch): Conexión a Elasticsearch.
+        queries (list): Lista de queries de ubicación
+
+    Returns:
+        list: Resultados de ubicaciones con los campos apropiados
+
+    """
     dept_queries = []
     for query in queries:
         dept_queries.append({
@@ -484,6 +711,19 @@ def process_place_queries(es, queries):
 
 
 def process_place_single(request):
+    """Procesa una request GET para obtener entidades en un punto.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET de flask.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     qs_params, errors = params.PARAMS_PLACE.parse_get_params(request.args)
 
     if errors:
@@ -499,6 +739,19 @@ def process_place_single(request):
 
 
 def process_place_bulk(request):
+    """Procesa una request POST para obtener entidades en varios puntos.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request POST de flask.
+
+    Raises:
+        data.DataConnectionException: En caso de ocurrir un error de
+            conexión con la capa de manejo de datos.
+
+    Returns:
+        flask.Response: respuesta HTTP
+    """
     body_params, errors = params.PARAMS_PLACE.parse_post_params(
         request.args, request.json and request.json.get(PLACES))
 
@@ -520,13 +773,17 @@ def process_place_bulk(request):
 
 
 def process_place(request):
-    """Procesa una consulta para georreferenciar una ubicación.
+    """Procesa una request GET o POST para obtener entidades en una o varias
+    ubicaciones.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+    En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
 
     Args:
-        request (flask.Request): Objeto con información de la consulta HTTP.
+        request (flask.Request): Request GET o POST de flask.
 
     Returns:
-        Resultado de una de las funciones invocadas según el tipo de Request.
+        flask.Response: respuesta HTTP
+
     """
     try:
         if request.method == 'GET':

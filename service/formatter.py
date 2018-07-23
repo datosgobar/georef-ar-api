@@ -1,3 +1,9 @@
+"""Módulo 'formatter' de georef-api
+
+Contiene funciones que establecen la presentación de los datos obtenidos desde
+las consultas a los índices o a la base de datos.
+"""
+
 from service import strings
 from service import names as N
 import geojson
@@ -7,13 +13,14 @@ CSV_SEP = ';'
 
 
 def flatten_dict(d, max_depth=3):
-    """ Aplana un diccionario recursivamente.
+    """Aplana un diccionario recursivamente. Modifica el diccionario original.
     Lanza un RuntimeError si no se pudo aplanar el diccionario
     con el número especificado de profundidad.
 
     Args:
         d (dict): Diccionario a aplanar.
         max_depth (int): Profundidad máxima a alcanzar.
+
     """
     if max_depth <= 0:
         raise RuntimeError("Profundidad máxima alcanzada.")
@@ -31,6 +38,17 @@ def flatten_dict(d, max_depth=3):
 
 
 def format_params_error_dict(error_dict):
+    """Toma un diccionario de errores de parámetros y les da una estructura
+    apropiada para ser incluidos en una respuesta HTTP con contenido JSON.
+
+    Args:
+        error_dict (dict): Diccionario de errores.
+
+    Returns:
+        list: Lista de errores, cada elemento corresponde a un ítem del
+            diccionario recibido.
+
+    """
     results = []
     for param_name, param_error in error_dict.items():
         results.append({
@@ -44,6 +62,16 @@ def format_params_error_dict(error_dict):
 
 
 def create_param_error_response_single(errors):
+    """Toma un diccionario de errores de parámetros y devuelve una respuesta
+    HTTP 400 con contenido JSON detallando los errores.
+
+    Args:
+        errors (dict): Diccionario de errores.
+
+    Returns:
+        flask.Response: Respuesta HTTP con errores.
+
+    """
     errors_fmt = format_params_error_dict(errors)
 
     return make_response(jsonify({
@@ -52,6 +80,16 @@ def create_param_error_response_single(errors):
 
 
 def create_param_error_response_bulk(errors):
+    """Toma una lista de diccionarios de errores de parámetros y devuelve una
+    respuesta HTTP 400 con contenido JSON detallando todos los errores.
+
+    Args:
+        errors (list): Lista de diccionarios de errores.
+
+    Returns:
+        flask.Response: Respuesta HTTP con errores.
+
+    """
     errors_fmt = [format_params_error_dict(d) for d in errors]
 
     return make_response(jsonify({
@@ -60,6 +98,16 @@ def create_param_error_response_bulk(errors):
 
 
 def create_internal_error_response(request):
+    """Toma una lista de diccionarios de errores de parámetros y devuelve una
+    respuesta HTTP 400 con contenido JSON detallando todos los errores.
+
+    Args:
+        errors (list): Lista de diccionarios de errores.
+
+    Returns:
+        flask.Response: Respuesta HTTP con errores.
+
+    """
     errors = [
         {
             'mensaje': strings.INTERNAL_ERROR
@@ -72,13 +120,24 @@ def create_internal_error_response(request):
 
 
 def create_csv_response(name, result):
+    """Toma un resultado (iterable) de una consulta, y devuelve una respuesta
+    HTTP 200 con el resultado en formato CSV.
+
+    Args:
+        name (str): Nombre de la entidad que fue consultada.
+        result (list): Lista de entidades.
+
+    Returns:
+        flask.Response: Respuesta HTTP con contenido CSV.
+
+    """
     def csv_generator():
         first = result[0]
         flatten_dict(first, max_depth=2)
         keys = sorted(first.keys())
 
         yield '{}\n'.format(CSV_SEP.join(keys))
-        
+
         for match in result:
             flatten_dict(match, max_depth=2)
             values = (str(match[key]) for key in keys)
@@ -93,6 +152,19 @@ def create_csv_response(name, result):
 
 
 def create_geojson_response(result, iterable_result):
+    """Toma un resultado de una consulta, y devuelve una respuesta
+    HTTP 200 con el resultado en formato GeoJSON.
+
+    Args:
+        result (list, dict): Entidad o lista de entidades.
+        iterable_result (bool): Verdadero si el resultado es iterable. Si no lo
+            es, internamente se crea una lista de un elemento con el resultado
+            adentro.
+
+    Returns:
+        flask.Response: Respuesta HTTP con contenido GeoJSON.
+
+    """
     if iterable_result:
         items = result
     else:
@@ -112,6 +184,19 @@ def create_geojson_response(result, iterable_result):
 
 
 def format_result_json(name, result, fmt, iterable_result):
+    """Toma el resultado de una consulta, y la devuelve con una estructura
+    apropiada para ser convertida a JSON.
+
+    Args:
+        name (str): Nombre de la entidad consultada.
+        result (list, dict): Entidad o lista de entidades.
+        fmt (dict): Parámetros de formato.
+        iterable_result (bool): Verdadero si el resultado es iterable.
+
+    Returns:
+        dict: Resultados con esctructura y formato apropiados.
+
+    """
     if fmt.get(N.FLATTEN, False):
         if iterable_result:
             for match in result:
@@ -123,11 +208,38 @@ def format_result_json(name, result, fmt, iterable_result):
 
 
 def create_json_response_single(name, result, fmt, iterable_result):
+    """Toma un resultado de una consulta, y devuelve una respuesta
+    HTTP 200 con el resultado en formato JSON.
+
+    Args:
+        name (str): Nombre de la entidad consultada.
+        result (list, dict): Entidad o lista de entidades.
+        fmt (dict): Parámetros de formato.
+        iterable_result (bool): Verdadero si el resultado es iterable.
+
+    Returns:
+        flask.Response: Respuesta HTTP con contenido JSON.
+
+    """
     json_response = format_result_json(name, result, fmt, iterable_result)
     return make_response(jsonify(json_response))
 
 
 def create_json_response_bulk(name, results, formats, iterable_result):
+    """Toma una lista de resultados de una consulta o más, y devuelve una
+    respuesta HTTP 200 con los resultados en formato JSON.
+
+    Args:
+        name (str): Nombre de la entidad consultada.
+        results (list): Lista de resultados.
+        formats (list): Lista de parámetros de formato por consulta.
+        iterable_result (bool): Verdadero si todos los resultados son
+            iterables.
+
+    Returns:
+        flask.Response: Respuesta HTTP con contenido JSON.
+
+    """
     json_results = [
         format_result_json(name, result, fmt, iterable_result)
         for result, fmt in zip(results, formats)
@@ -139,6 +251,19 @@ def create_json_response_bulk(name, results, formats, iterable_result):
 
 
 def create_ok_response(name, result, fmt, iterable_result=True):
+    """Toma un resultado de una consulta, y devuelve una respuesta
+    HTTP 200 con el resultado en el formato especificado.
+
+    Args:
+        name (str): Nombre de la entidad consultada.
+        result (list, dict): Entidad o lista de entidades.
+        fmt (dict): Parámetros de formato.
+        iterable_result (bool): Verdadero si el resultado es iterable.
+
+    Returns:
+        flask.Response: Respuesta HTTP 200.
+
+    """
     if fmt[N.FORMAT] == 'json':
         return create_json_response_single(name, result, fmt, iterable_result)
     elif fmt[N.FORMAT] == 'csv':
@@ -152,4 +277,18 @@ def create_ok_response(name, result, fmt, iterable_result=True):
 
 
 def create_ok_response_bulk(name, results, formats, iterable_result=True):
+    """Toma una lista de resultados de una consulta o más, y devuelve una
+    respuesta HTTP 200 con los resultados en formato JSON.
+
+    Args:
+        name (str): Nombre de la entidad consultada.
+        results (list): Lista de resultados.
+        formats (list): Lista de parámetros de formato por consulta.
+        iterable_result (bool): Verdadero si todos los resultados son
+            iterables.
+
+    Returns:
+        flask.Response: Respuesta HTTP 200.
+
+    """
     return create_json_response_bulk(name, results, formats, iterable_result)
