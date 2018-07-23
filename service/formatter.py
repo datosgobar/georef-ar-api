@@ -9,7 +9,9 @@ from service import names as N
 import geojson
 from flask import make_response, jsonify, Response
 
-CSV_SEP = ';'
+CSV_SEP = ','
+CSV_ESCAPE = '"'
+CSV_NEWLINE = '\n'
 FLAT_DICT_SEP = '_'
 
 
@@ -138,13 +140,29 @@ def create_csv_response(name, result, fmt):
             field.replace('.', FLAT_DICT_SEP) for field in fmt[N.FIELDS]
         ])
 
-        yield '{}\n'.format(CSV_SEP.join(keys))
+        yield '{}{}'.format(CSV_SEP.join(keys), CSV_NEWLINE)
 
         for match in result:
             flatten_dict(match, max_depth=2)
-            values = (str(match[key]) for key in keys)
 
-            yield '{}\n'.format(CSV_SEP.join(values))
+            values = []
+            for key in keys:
+                val = str(match[key])
+
+                escape = False
+                if CSV_SEP in val or CSV_NEWLINE in val:
+                    escape = True
+
+                if CSV_ESCAPE in val:
+                    val = val.replace('"', '""')
+                    escape = True
+
+                if escape:
+                    values.append('{}{}{}'.format(CSV_ESCAPE, val, CSV_ESCAPE))
+                else:
+                    values.append(val)
+
+            yield '{}{}'.format(CSV_SEP.join(values), CSV_NEWLINE)
 
     resp = Response(csv_generator(), mimetype='text/csv')
     return make_response((resp, {
