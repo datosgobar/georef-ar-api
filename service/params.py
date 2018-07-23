@@ -250,12 +250,22 @@ class IntParameter(Parameter):
     validación propias de IntParameter.
 
     """
+    def __init__(self, required=False, default=None, choices=None,
+                 source='any', lower_limit=None):
+        self.lower_limit = lower_limit
+        super().__init__(required, default, choices, source)
 
     def _parse_value(self, val):
         try:
-            return int(val)
+            int_val = int(val)
         except ValueError:
             raise ValueError(strings.INT_VAL_ERROR)
+
+        if self.lower_limit is not None and int_val < self.lower_limit:
+            raise ValueError(
+                strings.INT_VAL_SMALL.format(self.lower_limit))
+
+        return int_val
 
 
 class FloatParameter(Parameter):
@@ -460,7 +470,7 @@ PARAMS_STATES = ParameterSet({
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.LAT, N.LON]),
-    N.MAX: IntParameter(default=24),
+    N.MAX: IntParameter(default=24, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
                            source='querystring')
@@ -474,7 +484,7 @@ PARAMS_DEPARTMENTS = ParameterSet({
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.LAT, N.LON, N.STATE]),
-    N.MAX: IntParameter(default=10),
+    N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
                            source='querystring')
@@ -489,7 +499,7 @@ PARAMS_MUNICIPALITIES = ParameterSet({
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.LAT, N.LON, N.STATE, N.DEPT]),
-    N.MAX: IntParameter(default=10),
+    N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
                            source='querystring')
@@ -506,7 +516,7 @@ PARAMS_LOCALITIES = ParameterSet({
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.LAT, N.LON, N.STATE, N.DEPT, N.MUN,
                                           N.LOCALITY_TYPE]),
-    N.MAX: IntParameter(default=10),
+    N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
                            source='querystring')
@@ -522,7 +532,7 @@ PARAMS_ADDRESSES = ParameterSet({
                                           N.DOOR_NUM, N.SOURCE],
                                optionals=[N.STATE, N.DEPT, N.ROAD_TYPE,
                                           N.FULL_NAME]),
-    N.MAX: IntParameter(default=10),
+    N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv'],
                            source='querystring')
@@ -539,7 +549,7 @@ PARAMS_STREETS = ParameterSet({
                                optionals=[N.START_R, N.START_L, N.END_R,
                                           N.END_L, N.STATE, N.DEPT,
                                           N.FULL_NAME, N.ROAD_TYPE]),
-    N.MAX: IntParameter(default=10),
+    N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv'],
                            source='querystring')

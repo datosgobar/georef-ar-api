@@ -1,6 +1,15 @@
 from unittest import TestCase
 from service import app
 from service.params import ParamErrorType as T
+from random import choice
+
+ENDPOINTS = [
+    '/provincias',
+    '/departamentos',
+    '/municipios',
+    '/localidades',
+    '/calles'
+]
 
 
 class ParamParsingTest(TestCase):
@@ -181,6 +190,20 @@ class ParamParsingTest(TestCase):
             (T.VALUE_ERROR.value, 'max')
         })
 
+    def test_invalid_int_param(self):
+        """Los parámtros de tipo int no deberían aceptar strings que no
+        representen números."""
+        self.assert_errors_match(choice(ENDPOINTS) + '?max=foobar', {
+            (T.VALUE_ERROR.value, 'max')
+        })
+
+    def test_small_int_param(self):
+        """Los parámtros de tipo int no deberían aceptar strings que
+        representen números debajo de los límites establecidos."""
+        self.assert_errors_match(choice(ENDPOINTS) + '?max=-10', {
+            (T.VALUE_ERROR.value, 'max')
+        })
+
     def test_empty_float_param(self):
         """Los parámtros de tipo float no deberían aceptar strings
         vacíos."""
@@ -221,7 +244,7 @@ class ParamParsingTest(TestCase):
                 }
             ]
         }
-        
+
         self.assert_errors_match('/direcciones', [
             set(),
             {
