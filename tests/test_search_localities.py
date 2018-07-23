@@ -2,6 +2,7 @@ import random
 import unittest
 from . import SearchEntitiesTest, asciifold
 from .test_search_states import STATES
+from service import formatter
 
 
 LOCALITIES = [
@@ -73,14 +74,15 @@ class SearchLocalityTest(SearchEntitiesTest):
             ['fuente', 'id', 'nombre'],
             ['fuente', 'id', 'lat', 'lon', 'nombre'],
             ['fuente', 'id', 'lat', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre', 'provincia'],
-            ['departamento', 'fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'municipio', 'nombre', 'provincia']
+            ['fuente', 'id', 'lat', 'nombre', 'provincia.id'],
+            ['departamento.id', 'fuente', 'id', 'nombre'],
+            ['fuente', 'id', 'municipio.id', 'nombre', 'provincia.nombre']
         ]
         fields_results = []
 
         for fields in fields_lists:
             data = self.get_response({'campos': ','.join(fields), 'max': 1})
+            formatter.flatten_dict(data[0], sep='.')
             fields_results.append(sorted(data[0].keys()))
 
         self.assertListEqual(fields_lists, fields_results)
@@ -359,7 +361,7 @@ class SearchLocalityTest(SearchEntitiesTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'nombre': 'BARRIO',
-            'campos': 'nombre,provincia,lat'
+            'campos': 'nombre,provincia.id,lat'
         })
 
     def test_geojson_format(self):

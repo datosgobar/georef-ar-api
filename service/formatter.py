@@ -10,9 +10,10 @@ import geojson
 from flask import make_response, jsonify, Response
 
 CSV_SEP = ';'
+FLAT_DICT_SEP = '_'
 
 
-def flatten_dict(d, max_depth=3):
+def flatten_dict(d, max_depth=3, sep=FLAT_DICT_SEP):
     """Aplana un diccionario recursivamente. Modifica el diccionario original.
     Lanza un RuntimeError si no se pudo aplanar el diccionario
     con el número especificado de profundidad.
@@ -28,10 +29,10 @@ def flatten_dict(d, max_depth=3):
     for key in list(d.keys()):
         v = d[key]
         if isinstance(v, dict):
-            flatten_dict(v, max_depth - 1)
+            flatten_dict(v, max_depth - 1, sep)
 
             for subkey, subval in v.items():
-                flat_key = '_'.join([key, subkey])
+                flat_key = sep.join([key, subkey])
                 d[flat_key] = subval
 
             del d[key]
@@ -250,6 +251,56 @@ def create_json_response_bulk(name, results, formats, iterable_result):
     }))
 
 
+def filter_result_fields(result, fields_dict, max_depth=3):
+    """TODO: Docs
+    """
+    if max_depth <= 0:
+        raise RuntimeError('Profundidad máxima alcanzada.')
+
+    for key in list(result.keys()):
+        value = result[key]
+        field = fields_dict.get(key)
+
+        if not field:
+            del result[key]
+        elif isinstance(field, dict):
+            if not isinstance(value, dict):
+                raise RuntimeError(
+                    'No se puede especificar la presencia de sub-campos ' +
+                    'para valores no diccionarios.')
+
+            filter_result_fields(value, fields_dict[key], max_depth - 1)
+
+
+def format_result_fields(result, fmt, iterable_result):
+    fields_dict = fields_list_to_dict(fmt[N.FIELDS])
+    if iterable_result:
+        for item in result:
+            filter_result_fields(item, fields_dict)
+    else:
+        filter_result_fields(result, fields_dict)
+
+
+def format_results_fields(results, formats, iterable_result):
+    for result, fmt in zip(results, formats):
+        format_result_fields(result, fmt, iterable_result)
+
+
+def fields_list_to_dict(fields):
+    """TODO: Docs
+    """
+    fields_dict = {}
+    for field in fields:
+        parts = field.split('.')
+        current = fields_dict
+        for part in parts[:-1]:
+            current = current.setdefault(part, {})
+
+        current[parts[-1]] = True
+
+    return fields_dict
+
+
 def create_ok_response(name, result, fmt, iterable_result=True):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en el formato especificado.
@@ -264,6 +315,8 @@ def create_ok_response(name, result, fmt, iterable_result=True):
         flask.Response: Respuesta HTTP 200.
 
     """
+    format_result_fields(result, fmt, iterable_result)
+
     if fmt[N.FORMAT] == 'json':
         return create_json_response_single(name, result, fmt, iterable_result)
     elif fmt[N.FORMAT] == 'csv':
@@ -291,4 +344,5 @@ def create_ok_response_bulk(name, results, formats, iterable_result=True):
         flask.Response: Respuesta HTTP 200.
 
     """
+    format_results_fields(results, formats, iterable_result)
     return create_json_response_bulk(name, results, formats, iterable_result)

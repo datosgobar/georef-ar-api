@@ -1,6 +1,7 @@
 import unittest
 import random
 from . import SearchEntitiesTest
+from service import formatter
 
 COMMON_ADDRESS = 'Corrientes 1000'
 
@@ -62,11 +63,12 @@ class SearchAddressesTest(SearchEntitiesTest):
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""
         fields_lists = [
-            ['altura', 'fuente', 'id', 'nombre', 'ubicacion'],
+            ['altura', 'fuente', 'id', 'nombre', 'ubicacion.lat',
+             'ubicacion.lon'],
             ['altura', 'fuente', 'id', 'nombre', 'nomenclatura',
-                'ubicacion'],
-            ['altura', 'departamento', 'fuente', 'id', 'nombre',
-                'ubicacion']
+                'ubicacion.lat', 'ubicacion.lon'],
+            ['altura', 'departamento.id', 'fuente', 'id', 'nombre',
+                'ubicacion.lat', 'ubicacion.lon']
         ]
         fields_results = []
 
@@ -76,6 +78,7 @@ class SearchAddressesTest(SearchEntitiesTest):
                 'direccion': COMMON_ADDRESS,
                 'max': 1
             })
+            formatter.flatten_dict(data[0], sep='.')
             fields_results.append(sorted(data[0].keys()))
 
         self.assertListEqual(fields_lists, fields_results)
@@ -422,7 +425,7 @@ class SearchAddressesTest(SearchEntitiesTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'direccion': COMMON_ADDRESS,
-            'campos': 'nombre,tipo,ubicacion'
+            'campos': 'nombre,tipo,ubicacion.lat'
         })
 
 if __name__ == '__main__':

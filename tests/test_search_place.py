@@ -1,4 +1,5 @@
 import random
+from service import formatter
 from . import SearchEntitiesTest
 
 PLACES = [
@@ -41,7 +42,7 @@ class SearchPlaceTest(SearchEntitiesTest):
         super().setUp()
 
     def test_default_results_fields(self):
-        """Las entidades devueltas deben tener los campos default."""
+        """La ubicación devuelta debe tener los campos default."""
         place = PLACES[0]
         data = self.get_response({'lat': place[0], 'lon': place[1]})
         fields = sorted([
@@ -53,6 +54,31 @@ class SearchPlaceTest(SearchEntitiesTest):
             'lon'
         ])
         self.assertListEqual(fields, sorted(data.keys()))
+
+    def test_filter_results_fields(self):
+        """Los campos de la ubicación devuelta deben ser filtrables."""
+        place = PLACES[0]
+        fields_lists = [
+            ['fuente', 'provincia.id', 'provincia.nombre'],
+            ['fuente', 'lat', 'provincia.id', 'provincia.nombre'],
+            ['fuente', 'lon', 'provincia.id', 'provincia.nombre'],
+            ['departamento.id', 'fuente', 'lat', 'lon', 'provincia.id',
+             'provincia.nombre'],
+            ['fuente', 'lon', 'municipio.id', 'provincia.id',
+             'provincia.nombre']
+        ]
+        fields_results = []
+
+        for fields in fields_lists:
+            data = self.get_response({
+                'campos': ','.join(fields),
+                'lat': place[0],
+                'lon': place[1]
+            })
+            formatter.flatten_dict(data, sep='.')
+            fields_results.append(sorted(data.keys()))
+
+        self.assertListEqual(fields_lists, fields_results)
 
     def test_valid_coordinates(self):
         """Se deberían encontrar resultados para coordenadas válidas."""
@@ -81,7 +107,7 @@ class SearchPlaceTest(SearchEntitiesTest):
             data[field] == empty_entity
             for field in ['departamento', 'municipio', 'provincia']
         ]
-        
+
         self.assertTrue(validations and all(validations))
 
     def test_no_muni(self):

@@ -1,4 +1,5 @@
 import unittest
+from service import formatter
 import random
 from . import SearchEntitiesTest, asciifold
 
@@ -81,13 +82,14 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
             ['fuente', 'id', 'nombre'],
             ['fuente', 'id', 'lat', 'lon', 'nombre'],
             ['fuente', 'id', 'lat', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre', 'provincia'],
-            ['departamento', 'fuente', 'id', 'nombre']
+            ['fuente', 'id', 'lat', 'nombre', 'provincia.id'],
+            ['departamento.nombre', 'fuente', 'id', 'nombre']
         ]
         fields_results = []
 
         for fields in fields_lists:
             data = self.get_response({'campos': ','.join(fields), 'max': 1})
+            formatter.flatten_dict(data[0], sep='.')
             fields_results.append(sorted(data[0].keys()))
 
         self.assertListEqual(fields_lists, fields_results)
@@ -354,7 +356,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'nombre': 'VIAMONTE',
-            'campos': 'nombre,departamento'
+            'campos': 'nombre,departamento.nombre'
         })
 
     def test_geojson_format(self):

@@ -1,4 +1,5 @@
 import unittest
+from service import formatter
 import random
 from . import SearchEntitiesTest
 
@@ -6,7 +7,7 @@ from . import SearchEntitiesTest
 class SearchStreetsTest(SearchEntitiesTest):
     """
     Pruebas de búsqueda de calles.
-    
+
     Ir al archivo test_addresses.py para ver los tests de búsqueda de calles
     por dirección (nombre + altura).
     """
@@ -54,7 +55,7 @@ class SearchStreetsTest(SearchEntitiesTest):
         fields_lists = [
             ['fuente', 'id', 'nombre'],
             ['fuente', 'id', 'nombre', 'nomenclatura'],
-            ['departamento', 'fuente', 'id', 'nombre'],
+            ['departamento.nombre', 'fuente', 'id', 'nombre'],
             ['fuente', 'id', 'inicio_derecha', 'nombre'],
         ]
         fields_results = []
@@ -64,6 +65,7 @@ class SearchStreetsTest(SearchEntitiesTest):
                 'campos': ','.join(fields),
                 'max': 1
             })
+            formatter.flatten_dict(data[0], sep='.')
             fields_results.append(sorted(data[0].keys()))
 
         self.assertListEqual(fields_lists, fields_results)

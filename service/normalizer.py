@@ -449,19 +449,19 @@ def build_addresses_result(result, query, source):
     number = query['number']
 
     for street in result:
-        if not fields or FULL_NAME in fields:
+        if FULL_NAME in fields:
             parts = street[FULL_NAME].split(',')
             parts[0] += ' {}'.format(number)
             street[FULL_NAME] = ','.join(parts)
 
-        if not fields or DOOR_NUM in fields:
+        if DOOR_NUM in fields:
             street[DOOR_NUM] = number
 
         start_r = street.pop(START_R)
         end_l = street.pop(END_L)
         geom = street.pop(GEOM)
 
-        if not fields or LOCATION in fields:
+        if LOCATION_LAT in fields or LOCATION_LON in fields:
             loc = data.street_number_location(get_postgres_db(), geom,
                                               number, start_r, end_l)
             street[LOCATION] = loc
@@ -495,9 +495,7 @@ def build_address_query_format(parsed_params):
         ROAD_TYPE: 'road_type'
     }, ignore=[FLATTEN, FORMAT])
 
-    if query['fields']:
-        query['fields'].extend([GEOM, START_R, END_L])
-
+    query['fields'].extend([GEOM, START_R, END_L])
     query['excludes'] = [START_L, END_R]
 
     # Construir reglas de formato a partir de parámetros
@@ -638,9 +636,6 @@ def build_place_result(query, dept, muni):
         LON: query['lon'],
         SOURCE: source
     }
-
-    if query[FIELDS]:
-        place = {key: place[key] for key in place if key in query[FIELDS]}
 
     return place
 

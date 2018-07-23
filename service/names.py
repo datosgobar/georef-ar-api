@@ -28,7 +28,6 @@ DEPT = 'departamento'
 MUN = 'municipio'
 LOCALITY = 'localidad'
 GEOM = 'geometria'
-LOCATION = 'ubicacion'
 LAT = 'lat'
 LON = 'lon'
 END_R = 'fin_derecha'
@@ -41,6 +40,9 @@ ERROR = 'error'
 MESSAGE = 'mensaje'
 TIMESTAMP = 'timestamp'
 LOCALITY_TYPE = 'tipo'
+LOCATION = 'ubicacion'
+LOCATION_LAT = 'ubicacion.lat'
+LOCATION_LON = 'ubicacion.lon'
 
 # Parameters
 ADDRESS = 'direccion'
@@ -61,20 +63,7 @@ DEPT_ID = 'departamento.id'
 DEPT_NAME = 'departamento.nombre'
 MUN_ID = 'municipio.id'
 MUN_NAME = 'municipio.nombre'
-
 EXACT_SUFFIX = '.exacto'
-
-# Messages
-WRONG_QUERY = 'El request tiene parámetros inválidos o está incompleto.'
-ADDRESS_REQUIRED = 'El parámetro \'direccion\' es obligatorio.'
-ADDRESS_PROCESSED_OK = '¡Encontramos la dirección!'
-CANNOT_GEOCODE_ADDRESS = 'Esta altura no puede ser geocodificada.'
-NUMBER_REQUIRED = 'Falta la altura en el parámetro \'direccion\'.'
-EMPTY_DATA = 'No hay direcciones en el cuerpo del request.'
-INVALID_PARAM = 'El parámetro \'{param}\' no es válido para el recurso /{res}.'
-EMPTY_PARAM = 'El parámetro \'{param}\' no puede estar vacío.'
-LAT_REQUIRED = 'El parámetro \'lat\' es obligatorio.'
-LON_REQUIRED = 'El parámetro \'lon\' es obligatorio.'
 
 # Fuentes
 SOURCE_INDEC = 'INDEC'

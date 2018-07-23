@@ -222,10 +222,10 @@ class StrListParameter(Parameter):
 
     def __init__(self, required=False, constants=None, optionals=None):
         self.constants = set(constants) if constants else set()
-
         optionals = set(optionals) if optionals else set()
+        all_values = self.constants | optionals
 
-        super().__init__(required, [], self.constants | optionals)
+        super().__init__(required, list(all_values), all_values)
 
     def _value_in_choices(self, val):
         # La variable val es de tipo set o list, self.choices es de tipo set:
@@ -483,7 +483,8 @@ PARAMS_DEPARTMENTS = ParameterSet({
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.LAT, N.LON, N.STATE]),
+                               optionals=[N.LAT, N.LON, N.STATE_ID,
+                                          N.STATE_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
@@ -498,7 +499,9 @@ PARAMS_MUNICIPALITIES = ParameterSet({
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.LAT, N.LON, N.STATE, N.DEPT]),
+                               optionals=[N.LAT, N.LON, N.STATE_ID,
+                                          N.STATE_NAME, N.DEPT_ID,
+                                          N.DEPT_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
@@ -514,7 +517,9 @@ PARAMS_LOCALITIES = ParameterSet({
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.LAT, N.LON, N.STATE, N.DEPT, N.MUN,
+                               optionals=[N.LAT, N.LON, N.STATE_ID,
+                                          N.STATE_NAME, N.DEPT_ID, N.DEPT_NAME,
+                                          N.MUN_ID, N.MUN_NAME,
                                           N.LOCALITY_TYPE]),
     N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
@@ -528,9 +533,11 @@ PARAMS_ADDRESSES = ParameterSet({
     N.STATE: StrParameter(),
     N.DEPT: StrParameter(),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.LOCATION,
-                                          N.DOOR_NUM, N.SOURCE],
-                               optionals=[N.STATE, N.DEPT, N.ROAD_TYPE,
+    N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.LOCATION_LAT,
+                                          N.LOCATION_LON, N.DOOR_NUM,
+                                          N.SOURCE],
+                               optionals=[N.STATE_ID, N.STATE_NAME, N.DEPT_ID,
+                                          N.DEPT_NAME, N.ROAD_TYPE,
                                           N.FULL_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
@@ -547,8 +554,9 @@ PARAMS_STREETS = ParameterSet({
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.START_R, N.START_L, N.END_R,
-                                          N.END_L, N.STATE, N.DEPT,
-                                          N.FULL_NAME, N.ROAD_TYPE]),
+                                          N.END_L, N.STATE_ID, N.STATE_NAME,
+                                          N.DEPT_ID, N.DEPT_NAME, N.FULL_NAME,
+                                          N.ROAD_TYPE]),
     N.MAX: IntParameter(default=10, lower_limit=1),
     N.EXACT: BoolParameter(),
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv'],
@@ -559,8 +567,9 @@ PARAMS_PLACE = ParameterSet({
     N.LAT: FloatParameter(required=True),
     N.LON: FloatParameter(required=True),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.STATE, N.SOURCE],
-                               optionals=[N.DEPT, N.MUN, N.LAT, N.LON]),
+    N.FIELDS: StrListParameter(constants=[N.STATE_ID, N.STATE_NAME, N.SOURCE],
+                               optionals=[N.DEPT_ID, N.DEPT_NAME, N.MUN_ID,
+                                          N.MUN_NAME, N.LAT, N.LON]),
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson'],
                            source='querystring')
 })
