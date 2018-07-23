@@ -62,7 +62,7 @@ class SearchEntitiesTest(TestCase):
 
         dialect = csv.Sniffer().sniff(text)
         has_header = csv.Sniffer().has_header(text)
-        row_count = len(text.splitlines()) - 1
+        row_count = len(text.splitlines())
 
         self.assertTrue(all([dialect.delimiter == formatter.CSV_SEP,
                              has_header,

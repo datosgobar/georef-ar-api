@@ -428,5 +428,12 @@ class SearchAddressesTest(SearchEntitiesTest):
             'campos': 'nombre,tipo,ubicacion.lat'
         })
 
+    def test_empty_csv_valid(self):
+        """Una consulta CSV con respuesta vacía debería ser CSV válido."""
+        self.assert_valid_csv({
+            'direccion': 'foobarfoobar 100'
+        })
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -491,11 +491,10 @@ def build_address_query_format(parsed_params):
         DEPT: 'department',
         STATE: 'state',
         EXACT: 'exact',
-        FIELDS: 'fields',
         ROAD_TYPE: 'road_type'
-    }, ignore=[FLATTEN, FORMAT])
+    }, ignore=[FLATTEN, FORMAT, FIELDS])
 
-    query['fields'].extend([GEOM, START_R, END_L])
+    query['fields'] = parsed_params[FIELDS] + [GEOM, START_R, END_L]
     query['excludes'] = [START_L, END_R]
 
     # Construir reglas de formato a partir de parámetros

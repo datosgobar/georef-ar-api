@@ -254,7 +254,7 @@ class SearchStatesTest(SearchEntitiesTest):
 
         results = self.get_response(method='POST', body=body)
         self.assertEqual(len(results), req_len)
-        
+
     def test_bulk_basic(self):
         """La búsqueda de una query sin parámetros debería funcionar
         correctamente."""
@@ -322,6 +322,12 @@ class SearchStatesTest(SearchEntitiesTest):
             'campos': 'id,lat'
         })
 
+    def test_empty_csv_valid(self):
+        """Una consulta CSV con respuesta vacía debería ser CSV válido."""
+        self.assert_valid_csv({
+            'nombre': 'foobarfoobar'
+        })
+
     def test_geojson_format(self):
         """Se debería poder obtener resultados en formato
         GEOJSON (sin parámetros)."""
@@ -335,6 +341,6 @@ class SearchStatesTest(SearchEntitiesTest):
             'max': 10
         })
 
-        
+
 if __name__ == '__main__':
     unittest.main()

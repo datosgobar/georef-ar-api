@@ -120,22 +120,23 @@ def create_internal_error_response(request):
     }), 500)
 
 
-def create_csv_response(name, result):
+def create_csv_response(name, result, fmt):
     """Toma un resultado (iterable) de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato CSV.
 
     Args:
         name (str): Nombre de la entidad que fue consultada.
         result (list): Lista de entidades.
+        fmt (dict): Parámetros de formato.
 
     Returns:
         flask.Response: Respuesta HTTP con contenido CSV.
 
     """
     def csv_generator():
-        first = result[0]
-        flatten_dict(first, max_depth=2)
-        keys = sorted(first.keys())
+        keys = sorted([
+            field.replace('.', FLAT_DICT_SEP) for field in fmt[N.FIELDS]
+        ])
 
         yield '{}\n'.format(CSV_SEP.join(keys))
 
@@ -355,7 +356,7 @@ def create_ok_response(name, result, fmt, iterable_result=True):
             raise RuntimeError(
                 'Se requieren datos iterables para crear una respuesta CSV.')
 
-        return create_csv_response(name, result)
+        return create_csv_response(name, result, fmt)
     elif fmt[N.FORMAT] == 'geojson':
         return create_geojson_response(result, iterable_result)
 
