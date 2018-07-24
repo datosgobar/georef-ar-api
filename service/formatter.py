@@ -147,14 +147,15 @@ def create_csv_response(name, result, fmt):
 
             values = []
             for key in keys:
-                val = str(match[key])
+                original_val = match[key]
+                val = str(original_val) if original_val is not None else ''
 
                 escape = False
                 if CSV_SEP in val or CSV_NEWLINE in val:
                     escape = True
 
                 if CSV_ESCAPE in val:
-                    val = val.replace('"', '""')
+                    val = val.replace(CSV_ESCAPE, CSV_ESCAPE * 2)
                     escape = True
 
                 if escape:
