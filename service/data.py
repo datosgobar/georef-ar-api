@@ -488,7 +488,8 @@ def street_number_location(connection, geom, number, start, end):
         raise DataConnectionException()
 
     if location['code']:
-        lat, lon = location['result'].split(',')
+        parts = location['result'].split(',')
+        lat, lon = float(parts[0]), float(parts[1])
     else:
         lat, lon = None, None
 
