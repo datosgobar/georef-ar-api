@@ -223,7 +223,7 @@ def process_entity(request, name, param_parser, key_translations, index=None):
             return process_entity_bulk(request, name, param_parser,
                                        key_translations, index)
     except data.DataConnectionException:
-        return formatter.create_internal_error_response(request)
+        return formatter.create_internal_error_response()
 
 
 def process_state(request):
@@ -430,7 +430,7 @@ def process_street(request):
         else:
             return process_street_bulk(request)
     except data.DataConnectionException:
-        return formatter.create_internal_error_response(request)
+        return formatter.create_internal_error_response()
 
 
 def build_addresses_result(result, query, source):
@@ -592,7 +592,7 @@ def process_address(request):
         else:
             return process_address_bulk(request)
     except data.DataConnectionException:
-        return formatter.create_internal_error_response(request)
+        return formatter.create_internal_error_response()
 
 
 def build_place_result(query, dept, muni):
@@ -785,4 +785,4 @@ def process_place(request):
         else:
             return process_place_bulk(request)
     except data.DataConnectionException:
-        return formatter.create_internal_error_response(request)
+        return formatter.create_internal_error_response()

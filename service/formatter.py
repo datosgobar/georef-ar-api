@@ -100,15 +100,29 @@ def create_param_error_response_bulk(errors):
     }), 400)
 
 
-def create_internal_error_response(request):
-    """Toma una lista de diccionarios de errores de parámetros y devuelve una
-    respuesta HTTP 400 con contenido JSON detallando todos los errores.
-
-    Args:
-        errors (list): Lista de diccionarios de errores.
+def create_404_error_response():
+    """Retorna un error HTTP con código 404.
 
     Returns:
-        flask.Response: Respuesta HTTP con errores.
+        flask.Response: Respuesta HTTP con error 404.
+
+    """
+    errors = [
+        {
+            'mensaje': strings.NOT_FOUND
+        }
+    ]
+
+    return make_response(jsonify({
+        'errores': errors
+    }), 404)
+
+
+def create_internal_error_response():
+    """Retorna un error HTTP con código 500.
+
+    Returns:
+        flask.Response: Respuesta HTTP con error 500.
 
     """
     errors = [

@@ -4,7 +4,7 @@ Declara las rutas de los recursos que expone la API e
 invoca las funciones que procesan dichos recursos.
 """
 
-from service import app, normalizer
+from service import app, normalizer, formatter
 from flask import request
 from functools import wraps
 
@@ -24,6 +24,11 @@ def disable_cache(f):
         return resp
 
     return decorated_func
+
+
+@app.errorhandler(404)
+def handle_404(e):
+    return formatter.create_404_error_response()
 
 
 @app.route('/api/v1.0/provincias', methods=['GET', 'POST'])
