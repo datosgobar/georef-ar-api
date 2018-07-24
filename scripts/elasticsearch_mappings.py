@@ -33,8 +33,8 @@ MAP_STATE = {
                     }
                 }
             },
-            'lat': {'type': 'keyword'},
-            'lon': {'type': 'keyword'}
+            'lat': {'type': 'float', 'index': False},
+            'lon': {'type': 'float', 'index': False}
         }
     }
 }
@@ -45,8 +45,8 @@ MAP_STATE_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'lat': {'type': 'keyword', 'index': False},
-            'lon': {'type': 'keyword', 'index': False},
+            'lat': {'type': 'float', 'index': False},
+            'lon': {'type': 'float', 'index': False},
             'geometria': {'type': 'geo_shape'}
         }
     }
@@ -68,8 +68,8 @@ MAP_DEPT = {
                     }
                 }
             },
-            'lat': {'type': 'keyword'},
-            'lon': {'type': 'keyword'},
+            'lat': {'type': 'float', 'index': False},
+            'lon': {'type': 'float', 'index': False},
             'provincia': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -98,8 +98,8 @@ MAP_DEPT_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'lat': {'type': 'keyword', 'index': False},
-            'lon': {'type': 'keyword', 'index': False},
+            'lat': {'type': 'float', 'index': False},
+            'lon': {'type': 'float', 'index': False},
             'provincia': {'type': 'object', 'enabled': False},
             'geometria': {'type': 'geo_shape'}
         }
@@ -122,8 +122,8 @@ MAP_MUNI = {
                     }
                 }
             },
-            'lat': {'type': 'keyword'},
-            'lon': {'type': 'keyword'},
+            'lat': {'type': 'float', 'index': False},
+            'lon': {'type': 'float', 'index': False},
             'departamento': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -170,8 +170,8 @@ MAP_MUNI_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'lat': {'type': 'keyword', 'index': False},
-            'lon': {'type': 'keyword', 'index': False},
+            'lat': {'type': 'float', 'index': False},
+            'lon': {'type': 'float', 'index': False},
             'departamento': {'type': 'object', 'enabled': False},
             'provincia': {'type': 'object', 'enabled': False},
             'geometria': {'type': 'geo_shape'}
@@ -196,8 +196,8 @@ MAP_SETTLEMENT = {
                 }
             },
             'tipo': {'type': 'keyword'},
-            'lat': {'type': 'keyword'},
-            'lon': {'type': 'keyword'},
+            'lat': {'type': 'float', 'index': False},
+            'lon': {'type': 'float', 'index': False},
             'municipio': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -263,8 +263,8 @@ MAP_SETTLEMENT_GEOM = {
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
             'tipo': {'type': 'keyword', 'index': False},
-            'lat': {'type': 'keyword', 'index': False},
-            'lon': {'type': 'keyword', 'index': False},
+            'lat': {'type': 'float', 'index': False},
+            'lon': {'type': 'float', 'index': False},
             'municipio': {'type': 'object', 'enabled': False},
             'departamento': {'type': 'object', 'enabled': False},
             'provincia': {'type': 'object', 'enabled': False},
@@ -302,16 +302,10 @@ MAP_STREET = {
                 'type': 'integer'
             },
             'inicio_izquierda': {
-                'type': 'integer',
-                # Solo START_R y END_L son necesarias para la busqueda de
-                # calles por altura.
-                'index': False
+                'type': 'integer'
             },
             'fin_derecha': {
-                'type': 'integer',
-                # Solo START_R y END_L son necesarias para la busqueda de
-                # calles por altura.
-                'index': False
+                'type': 'integer'
             },
             'fin_izquierda': {
                 'type': 'integer'

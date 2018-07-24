@@ -196,8 +196,7 @@ def create_geojson_response(result, iterable_result):
             lat = item.pop(N.LAT)
             lon = item.pop(N.LON)
 
-            # TODO: Cambiar tipos de datos de LAT y LON en índices
-            point = geojson.Point((float(lat), float(lon)))
+            point = geojson.Point((lat, lon))
             features.append(geojson.Feature(geometry=point, properties=item))
 
     return make_response(jsonify(geojson.FeatureCollection(features)))
