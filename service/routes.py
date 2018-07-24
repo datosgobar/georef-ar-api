@@ -5,7 +5,7 @@ invoca las funciones que procesan dichos recursos.
 """
 
 from service import app, normalizer, formatter
-from flask import request
+from flask import request, Blueprint
 from functools import wraps
 
 
@@ -14,7 +14,10 @@ def disable_cache(f):
     los headers para deshabilitar el cacheo de respuestas.
 
     Args:
-    f (function): Función utilizada para manejar un endpoint HTTP de flask.
+        f (function): Función utilizada para manejar un endpoint HTTP de flask.
+
+    Returns:
+        function: Endpoint con decorador aplicado.
 
     """
     @wraps(f)
@@ -31,37 +34,48 @@ def handle_404(e):
     return formatter.create_404_error_response()
 
 
-@app.route('/api/v1.0/provincias', methods=['GET', 'POST'])
+# API v1.0
+bp_v1_0 = Blueprint('georef_v1.0', __name__)
+
+
+@bp_v1_0.route('/provincias', methods=['GET', 'POST'])
 def get_states():
     return normalizer.process_state(request)
 
 
-@app.route('/api/v1.0/departamentos', methods=['GET', 'POST'])
+@bp_v1_0.route('/departamentos', methods=['GET', 'POST'])
 def get_departments():
     return normalizer.process_department(request)
 
 
-@app.route('/api/v1.0/municipios', methods=['GET', 'POST'])
+@bp_v1_0.route('/municipios', methods=['GET', 'POST'])
 def get_municipalities():
     return normalizer.process_municipality(request)
 
 
-@app.route('/api/v1.0/localidades', methods=['GET', 'POST'])
+@bp_v1_0.route('/localidades', methods=['GET', 'POST'])
 def get_localities():
     return normalizer.process_locality(request)
 
 
-@app.route('/api/v1.0/calles', methods=['GET', 'POST'])
+@bp_v1_0.route('/calles', methods=['GET', 'POST'])
 def get_streets():
     return normalizer.process_street(request)
 
 
-@app.route('/api/v1.0/direcciones', methods=['GET', 'POST'])
+@bp_v1_0.route('/direcciones', methods=['GET', 'POST'])
 def get_addresses():
     return normalizer.process_address(request)
 
 
-@app.route('/api/v1.0/ubicacion', methods=['GET', 'POST'])
+@bp_v1_0.route('/ubicacion', methods=['GET', 'POST'])
 @disable_cache
 def get_placement():
     return normalizer.process_place(request)
+
+
+# Última versión de la API
+app.register_blueprint(bp_v1_0, url_prefix='/api')
+
+# v1.0
+app.register_blueprint(bp_v1_0, url_prefix='/api/v1.0')
