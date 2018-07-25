@@ -15,6 +15,11 @@
             "name": "Recursos"
         }
     ],
+    "servers": [
+	{
+	    "url": "http://apis.datos.gob.ar/georef/api"
+	}
+    ],
     "externalDocs": {
         "url": "https://github.com/datosgobar/georef-api"
     },
@@ -45,12 +50,12 @@
                         "example": "SANTA FE"
                     },
                     "lat": {
-                        "type": "string",
-                        "example": "-30.706927"
+                        "type": "number",
+                        "example": -30.706927
                     },
                     "lon": {
-                        "type": "string",
-                        "example": "-60.558832"
+                        "type": "number",
+                        "example": -60.558832
                     },
 		    "fuente": {
 			"type": "string",
@@ -130,12 +135,12 @@
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
                     "lat": {
-                        "type": "string",
-                        "example": "-33.127856"
+                        "type": "number",
+                        "example": -33.127856
                     },
                     "lon": {
-                        "type": "string",
-                        "example": "-62.526029"
+                        "type": "number",
+                        "example": -62.526029
                     },
 		    "fuente": {
 			"type": "string",
@@ -237,12 +242,12 @@
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
                     "lat": {
-                        "type": "string",
-                        "example": "-32.851319"
+                        "type": "number",
+                        "example": -32.851319
                     },
                     "lon": {
-                        "type": "string",
-                        "example": "-60.704006"
+                        "type": "number",
+                        "example": -60.704006
                     },
 		    "fuente": {
 			"type": "string",
@@ -359,12 +364,12 @@
                         ]
                     },
                     "lat": {
-                        "type": "string",
-                        "example": "32.861364"
+                        "type": "number",
+                        "example": -32.861364
                     },
                     "lon": {
-                        "type": "string",
-                        "example": "60.706216"
+                        "type": "number",
+                        "example": -60.706216
                     },
 		    "fuente": {
 			"type": "string",
@@ -469,19 +474,6 @@
                     "tipo": {
                         "type": "string",
                         "example": "CALLE"
-                    },
-                    "ubicacion": {
-                        "type": "object",
-                        "properties": {
-                            "lat": {
-                                "type": "string",
-                                "example": "-32.8551545123465"
-                            },
-                            "lon": {
-                                "type": "string",
-                                "example": "-60.6976366829111"
-                            }
-                        }
                     },
 		    "fuente": {
 			"type": "string",
@@ -809,7 +801,8 @@
 	    "param_tipo_calle": {
 		"type": "string",
 		"minLength": 1,
-		"example": "CALLE"
+		"example": "calle",
+		"enum": ["calle", "avenida", "pasaje"]
 	    },
 	    "param_direccion": {
 		"type": "string",
@@ -932,7 +925,7 @@
             },
             "campos": {
                 "name": "campos",
-                "description": "Campos a incluir en la respuesta separados por comas, sin espacios. Algunos campos siempre serán incluidos, incluso si no se agregaron en la lista.",
+                "description": "Campos a incluir en la respuesta separados por comas, sin espacios. Algunos campos siempre serán incluidos, incluso si no se agregaron en la lista. Para incluir campos de sub-entidades, separar los nombres con un punto, por ejemplo: `provincia.id`.",
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_campos"
@@ -1012,7 +1005,7 @@
             },
 	    "lat": {
                 "name": "lat",
-                "description": "Latitud del punto.",
+                "description": "Latitud del punto, en forma de número real con grados decimales.",
                 "in": "query",
                 "required": true,
                 "schema": {
@@ -1022,7 +1015,7 @@
 	    },
             "lon": {
                 "name": "lon",
-                "description": "Longitud del punto.",
+                "description": "Longitud del punto, en forma de número real con grados decimales.",
                 "in": "query",
                 "required": true,
                 "schema": {
