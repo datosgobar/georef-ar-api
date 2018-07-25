@@ -46,7 +46,7 @@ git pull origin ${BRANCH}
 echo '- Actualizando dependencias...'
 pip install --upgrade --force-reinstall -r requirements.txt
 echo '- Reiniciando servicio...'
-sudo service georef-api restart
+sudo systemctl restart georef-api
 echo 'Listo.'
 "
 
