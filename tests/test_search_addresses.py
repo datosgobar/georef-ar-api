@@ -68,7 +68,7 @@ class SearchAddressesTest(SearchEntitiesTest):
             ['altura', 'fuente', 'id', 'nombre', 'nomenclatura',
                 'ubicacion.lat', 'ubicacion.lon'],
             ['altura', 'departamento.id', 'fuente', 'id', 'nombre',
-                'ubicacion.lat', 'ubicacion.lon']
+                'ubicacion.lat']
         ]
         fields_results = []
 
