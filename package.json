@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/datosgobar/georef-api#readme",
   "dependencies": {
-    "swagger-ui-dist": "^3.12.0",
+    "swagger-ui-dist": "^3.17.5",
     "swagger-ui-themes": "^3.0.0"
   },
   "devDependencies": {
