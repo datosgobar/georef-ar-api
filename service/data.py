@@ -6,6 +6,8 @@ base de datos PostgreSQL.
 
 import os
 import elasticsearch
+from elasticsearch_dsl import Search, MultiSearch
+from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
 import logging
 import psycopg2
 import psycopg2.extras
@@ -14,6 +16,7 @@ from service import names as N
 
 MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_MAX = 10
+DEFAULT_FUZZINESS = 'AUTO:4,8'
 
 logger = logging.getLogger('georef')
 
@@ -68,79 +71,68 @@ def elasticsearch_connection():
         raise DataConnectionException()
 
 
-def run_dsl_queries(es, index, dsl_queries):
-    """Ejecuta una lista de queries Elasticsearch en formato Elasticsearch
-    Query DSL. Internamente, se utiliza la función MultiSearch.
+def run_searches(es, index, searches):
+    """Ejecuta una lista de búsquedas Elasticsearch. Internamente, se utiliza
+    la función MultiSearch.
 
     Args:
         es (Elasticsearch): Conexión a Elasticsearch.
         index (str): Nombre del índice sobre el cual se deberían ejecutar las
             queries.
-        dsl_queries (list): Lista de queries en formato Query DSL.
+        searches (list): Lista de búsquedas, de tipo Search.
 
     Raises:
-        DataConnectionException: si ocurrió un error al ejecutar las queries.
+        DataConnectionException: si ocurrió un error al ejecutar las búsquedas.
 
     Returns:
-        Elasticsearch: Conexión a Elasticsearch.
+        list: Lista de resultados, cada resultado contiene una lista de 'hits'
+            (documentos encontrados).
 
     """
-    body = []
-    for query in dsl_queries:
-        # No es necesario especificar el índice por
-        # query ya que se ejecutan todas en el mismo
-        # índice.
-        body.append({})
-        body.append(query)
+    ms = MultiSearch(index=index, using=es)
+
+    for search in searches:
+        ms = ms.add(search)
 
     try:
-        results = es.msearch(body=body, index=index)
+        responses = ms.execute(raise_on_error=True)
+
+        return [
+            [hit.to_dict() for hit in response.hits]
+            for response in responses
+        ]
     except elasticsearch.ElasticsearchException:
         raise DataConnectionException()
 
-    responses = []
-    for response in results['responses']:
-        error = response.get('error')
-        if error:
-            logger.error('Ocurrió un error en la query Elasticsearch.msearch:')
-            logger.error('Tipo: {}, causa: {}'.format(error['type'],
-                                                      error['reason']))
-            raise DataConnectionException()
 
-        hits = [hit['_source'] for hit in response['hits']['hits']]
-        responses.append(hits)
-
-    return responses
-
-
-def query_entities(es, index, queries):
+def search_entities(es, index, params_list):
     """Busca entidades políticas (localidades, departamentos, o provincias)
     según parámetros de una o más consultas.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
         index (str): Nombre del índice sobre el cual realizar las búsquedas.
-        queries (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_entity_dsl_query' para más
+        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_entity_search' para más
             detalles.
 
     Returns:
         list: Resultados de búsqueda de entidades.
 
     """
-    dsl_queries = (build_entity_dsl_query(**query) for query in queries)
-    return run_dsl_queries(es, index, dsl_queries)
+    searches = (build_entity_search(**params) for params in params_list)
+    return run_searches(es, index, searches)
 
 
-def query_places(es, index, queries):
+def search_places(es, index, params_list):
     """Busca entidades políticas que contengan un punto dato, según
     parámetros de una o más consultas.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
         index (str): Nombre del índice sobre el cual realizar las búsquedas.
-        queries (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_place_dsl_query' para más
+        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_place_search' para más
             detalles.
 
     Returns:
@@ -148,8 +140,8 @@ def query_places(es, index, queries):
 
     """
     index += '-' + N.GEOM  # Utilizar índices con geometrías
-    dsl_queries = (build_place_dsl_query(**query) for query in queries)
-    results = run_dsl_queries(es, index, dsl_queries)
+    searches = (build_place_search(**params) for params in params_list)
+    results = run_searches(es, index, searches)
 
     # Ya que solo puede existir una entidad por punto (para un tipo dado
     # de entidad), modificar los resultados para que el resultado de cada
@@ -160,32 +152,32 @@ def query_places(es, index, queries):
     ]
 
 
-def query_streets(es, queries):
+def search_streets(es, params_list):
     """Busca vías de circulación según parámetros de una o más consultas.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
-        queries (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_streets_dsl_query' para más
+        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_streets_search' para más
             detalles.
 
     Returns:
-        list: Resultados de búsqueda de entidades.
+        list: Resultados de búsqueda de vías de circulación.
 
     """
-    dsl_queries = (build_streets_dsl_query(**query) for query in queries)
-    return run_dsl_queries(es, N.STREETS, dsl_queries)
+    searches = (build_streets_search(**params) for params in params_list)
+    return run_searches(es, N.STREETS, searches)
 
 
-def build_entity_dsl_query(entity_id=None, name=None, state=None,
-                           department=None, municipality=None, max=None,
-                           order=None, fields=None, exact=False):
-    """Construye una query con Elasticsearch DSL para entidades políticas
+def build_entity_search(entity_id=None, name=None, state=None,
+                        department=None, municipality=None, max=None,
+                        order=None, fields=None, exact=False):
+    """Construye una búsqueda con Elasticsearch DSL para entidades políticas
     (localidades, departamentos, o provincias) según parámetros de búsqueda
     de una consulta.
 
     Args:
-        entity_id (str): ID de la entidad.
+        entity_id (str): ID de la entidad (opcional).
         name (str): Nombre del tipo de entidad (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
@@ -198,70 +190,56 @@ def build_entity_dsl_query(entity_id=None, name=None, state=None,
             'municipality' o 'state'.) (opcional).
 
     Returns:
-        dict: Query construida para Elasticsearch.
+        Search: Búsqueda de tipo Search.
 
     """
     if not fields:
         fields = []
 
-    terms = []
-    sorts = {}
+    s = Search()
 
     if entity_id:
-        condition = build_match_condition(N.ID, entity_id)
-        terms.append(condition)
+        s = s.query(build_match_query(N.ID, entity_id))
+
     if name:
-        condition = build_name_condition(N.NAME, name, exact)
-        terms.append(condition)
+        s = s.query(build_name_query(N.NAME, name, exact))
+
     if municipality:
         if municipality.isdigit():
-            condition = build_match_condition(N.MUN_ID, municipality)
+            s = s.query(build_match_query(N.MUN_ID, municipality))
         else:
-            condition = build_name_condition(N.MUN_NAME, municipality, exact)
-        terms.append(condition)
+            s = s.query(build_name_query(N.MUN_NAME, municipality, exact))
+
     if department:
         if department.isdigit():
-            condition = build_match_condition(N.DEPT_ID, department)
+            s = s.query(build_match_query(N.DEPT_ID, department))
         else:
-            condition = build_name_condition(N.DEPT_NAME, department, exact)
-        terms.append(condition)
+            s = s.query(build_name_query(N.DEPT_NAME, department, exact))
+
     if state:
         if state.isdigit():
-            condition = build_match_condition(N.STATE_ID, state)
+            s = s.query(build_match_query(N.STATE_ID, state))
         else:
-            condition = build_name_condition(N.STATE_NAME, state, exact)
-        terms.append(condition)
+            s = s.query(build_name_query(N.STATE_NAME, state, exact))
+
     if order:
-        if N.ID in order:
-            sorts[N.ID] = {'order': 'asc'}
+        if order == N.NAME:
+            order += N.EXACT_SUFFIX
+        s = s.sort(order)
 
-        if N.NAME in order:
-            sorts[N.NAME + N.EXACT_SUFFIX] = {'order': 'asc'}
-
-    return {
-        'query': {
-            'bool': {
-                'must': terms
-            }
-        },
-        'size': max or DEFAULT_MAX,
-        'sort': sorts,
-        '_source': {
-            'include': fields,
-            'exclude': [N.TIMESTAMP]
-        }
-    }
+    s = s.source(include=fields, exclude=[N.TIMESTAMP])
+    return s[:(max or DEFAULT_MAX)]
 
 
-def build_streets_dsl_query(street_id=None, road_name=None, department=None,
-                            state=None, road_type=None, max=None, fields=None,
-                            exact=False, number=None, excludes=None):
-    """Construye una query con Elasticsearch DSL para vías de circulación
+def build_streets_search(street_id=None, road_name=None, department=None,
+                         state=None, road_type=None, max=None, fields=None,
+                         exact=False, number=None, excludes=None):
+    """Construye una búsqueda con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
-        street_id (str): ID de la calle a buscar.
+        street_id (str): ID de la calle a buscar (opcional).
         road_name (str): Nombre de la calle para filtrar (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
@@ -274,7 +252,7 @@ def build_streets_dsl_query(street_id=None, road_name=None, department=None,
             'department'.) (opcional).
 
     Returns:
-        dict: Query construida para Elasticsearch.
+        Search: Búsqueda de tipo Search.
 
     """
     if not fields:
@@ -286,48 +264,39 @@ def build_streets_dsl_query(street_id=None, road_name=None, department=None,
     if N.TIMESTAMP not in excludes:
         excludes.append(N.TIMESTAMP)
 
-    terms = []
+    s = Search()
+
     if street_id:
-        condition = build_match_condition(N.ID, street_id)
-        terms.append(condition)
+        s = s.query(build_match_query(N.ID, street_id))
+
     if road_name:
-        condition = build_name_condition(N.NAME, road_name, exact)
-        terms.append(condition)
+        s = s.query(build_name_query(N.NAME, road_name, exact))
+
     if road_type:
-        condition = build_match_condition(N.ROAD_TYPE, road_type, fuzzy=True)
-        terms.append(condition)
+        s = s.query(build_match_query(N.ROAD_TYPE, road_type, fuzzy=True))
+
     if number:
-        terms.append(build_range_condition(N.START_R, '<=', number))
-        terms.append(build_range_condition(N.END_L, '>=', number))
+        s = s.query(build_range_query(N.START_R, '<=', number))
+        s = s.query(build_range_query(N.END_L, '>=', number))
+
     if department:
         if department.isdigit():
-            condition = build_match_condition(N.DEPT_ID, department)
+            s = s.query(build_match_query(N.DEPT_ID, department))
         else:
-            condition = build_name_condition(N.DEPT_NAME, department, exact)
-        terms.append(condition)
+            s = s.query(build_name_query(N.DEPT_NAME, department, exact))
+
     if state:
         if state.isdigit():
-            condition = build_match_condition(N.STATE_ID, state)
+            s = s.query(build_match_query(N.STATE_ID, state))
         else:
-            condition = build_name_condition(N.STATE_NAME, state, exact)
-        terms.append(condition)
+            s = s.query(build_name_query(N.STATE_NAME, state, exact))
 
-    return {
-        'query': {
-            'bool': {
-                'must': terms
-            }
-        },
-        'size': max or DEFAULT_MAX,
-        '_source': {
-            'include': fields,
-            'exclude': excludes
-        }
-    }
+    s = s.source(include=fields, exclude=[N.TIMESTAMP])
+    return s[:(max or DEFAULT_MAX)]
 
 
-def build_place_dsl_query(lat, lon, fields=None):
-    """Construye una query con Elasticsearch DSL para entidades en una
+def build_place_search(lat, lon, fields=None):
+    """Construye una búsqueda con Elasticsearch DSL para entidades en una
     ubicación según parámetros de búsqueda de una consulta.
 
     Args:
@@ -336,36 +305,27 @@ def build_place_dsl_query(lat, lon, fields=None):
         fields (list): Campos a devolver en los resultados (opcional).
 
     Returns:
-        dict: Query construida para Elasticsearch.
+        Search: Búsqueda de tipo Search.
 
     """
     if not fields:
         fields = []
 
-    return {
-        'query': {
-            'bool': {
-                'filter': {
-                    'geo_shape': {
-                        N.GEOM: {
-                            'shape': {
-                                'type': 'point',
-                                'coordinates': [lon, lat]
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        '_source': {
-            'includes': fields,
-            'excludes': [N.GEOM, N.TIMESTAMP]
-        },
-        'size': 1
+    s = Search()
+
+    options = {
+        'shape': {
+            'type': 'point',
+            'coordinates': [lon, lat]
+        }
     }
 
+    s = s.query(GeoShape(**{N.GEOM: options}))
+    s = s.source(include=fields, exclude=[N.GEOM, N.TIMESTAMP])
+    return s[:1]
 
-def build_name_condition(field, value, exact=False):
+
+def build_name_query(field, value, exact=False):
     """Crea una condición de búsqueda por nombre para Elasticsearch.
        Las entidades con nombres son, por el momento, las provincias, los
        departamentos, los municipios, las localidades y las calles.
@@ -376,25 +336,23 @@ def build_name_condition(field, value, exact=False):
         exact (bool): Activar modo de búsqueda exacta.
 
     Returns:
-        dict: Condición para Elasticsearch.
+        Query: Condición para Elasticsearch.
 
     """
     if exact:
         field += N.EXACT_SUFFIX
-        terms = [build_match_condition(field, value, False)]
+        return build_match_query(field, value, False)
     else:
-        terms = [build_match_condition(field, value, True, operator='and')]
+        match_query = build_match_query(field, value, True, operator='and')
+
         if len(value.strip()) >= MIN_AUTOCOMPLETE_CHARS:
-            terms.append(build_match_phrase_prefix_condition(field, value))
-
-    return {
-        'bool': {
-            'should': terms
-        }
-    }
+            prefix_query = build_match_phrase_prefix_query(field, value)
+            return prefix_query | match_query
+        else:
+            return match_query
 
 
-def build_match_phrase_prefix_condition(field, value):
+def build_match_phrase_prefix_query(field, value):
     """Crea una condición 'Match Phrase Prefix' para Elasticsearch.
 
     Args:
@@ -402,23 +360,25 @@ def build_match_phrase_prefix_condition(field, value):
         value (str): Valor de comparación.
 
     Returns:
-        dict: Condición para Elasticsearch.
+        Query: Condición para Elasticsearch.
 
     """
-    return {
-        'match_phrase_prefix': {
-            field: value
-        }
+    options = {
+        'query': value
     }
+    return MatchPhrasePrefix(**{field: options})
 
 
-def build_range_condition(field, operator, value):
+def build_range_query(field, operator, value):
     """Crea una condición 'Range' para Elasticsearch.
 
     Args:
         field (str): Campo de la condición.
         value (int): Número contra el que se debería comparar el campo.
         operator (str): Operador a utilizar (>, =>, <, =<)
+
+    Returns:
+        Query: Condición Range para Elasticsearch
 
     """
     if operator == '<':
@@ -432,16 +392,11 @@ def build_range_condition(field, operator, value):
     else:
         raise ValueError('Invalid operator.')
 
-    return {
-        'range': {
-            field: {
-                es_operator: value
-            }
-        }
-    }
+    options = {es_operator: value}
+    return Range(**{field: options})
 
 
-def build_match_condition(field, value, fuzzy=False, operator='or'):
+def build_match_query(field, value, fuzzy=False, operator='or'):
     """Crea una condición 'Match' para Elasticsearch.
 
     Args:
@@ -451,14 +406,18 @@ def build_match_condition(field, value, fuzzy=False, operator='or'):
         operator (bool): Operador a utilizar para conectar clausulas 'term'
 
     Returns:
-        dict: Condición para Elasticsearch.
+        Query: Condición para Elasticsearch.
 
     """
-    query = {field: {'query': value, 'operator': operator}}
-    if fuzzy:
-        query[field]['fuzziness'] = 'AUTO:4,8'
+    options = {
+        'query': value,
+        'operator': operator
+    }
 
-    return {'match': query}
+    if fuzzy:
+        options['fuzziness'] = DEFAULT_FUZZINESS
+
+    return Match(**{field: options})
 
 
 def street_number_location(connection, geom, number, start, end):

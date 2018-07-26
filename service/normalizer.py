@@ -129,7 +129,7 @@ def process_entity_single(request, name, param_parser, key_translations,
     }
 
     es = get_elasticsearch()
-    result = data.query_entities(es, index, [query])[0]
+    result = data.search_entities(es, index, [query])[0]
 
     source = get_index_source(index)
     for match in result:
@@ -183,7 +183,7 @@ def process_entity_bulk(request, name, param_parser, key_translations, index):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = data.query_entities(es, index, queries)
+    results = data.search_entities(es, index, queries)
 
     source = get_index_source(index)
     for result in results:
@@ -366,7 +366,7 @@ def process_street_single(request):
     query, fmt = build_street_query_format(qs_params)
 
     es = get_elasticsearch()
-    result = data.query_streets(es, [query])[0]
+    result = data.search_streets(es, [query])[0]
 
     source = get_index_source(STREETS)
     for match in result:
@@ -403,7 +403,7 @@ def process_street_bulk(request):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = data.query_streets(es, queries)
+    results = data.search_streets(es, queries)
 
     source = get_index_source(STREETS)
     for result in results:
@@ -529,7 +529,7 @@ def process_address_single(request):
     query, fmt = build_address_query_format(qs_params)
 
     es = get_elasticsearch()
-    result = data.query_streets(es, [query])[0]
+    result = data.search_streets(es, [query])[0]
 
     source = get_index_source(STREETS)
     build_addresses_result(result, query, source)
@@ -565,7 +565,7 @@ def process_address_bulk(request):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = data.query_streets(es, queries)
+    results = data.search_streets(es, queries)
 
     source = get_index_source(STREETS)
     for result, query in zip(results, queries):
@@ -685,7 +685,7 @@ def process_place_queries(es, queries):
             'fields': [ID, NAME, STATE]
         })
 
-    departments = data.query_places(es, DEPARTMENTS, dept_queries)
+    departments = data.search_places(es, DEPARTMENTS, dept_queries)
 
     muni_queries = []
     for query in queries:
@@ -695,7 +695,7 @@ def process_place_queries(es, queries):
             'fields': [ID, NAME]
         })
 
-    munis = data.query_places(es, MUNICIPALITIES, muni_queries)
+    munis = data.search_places(es, MUNICIPALITIES, muni_queries)
 
     places = []
     for query, dept, muni in zip(queries, departments, munis):
