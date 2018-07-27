@@ -234,6 +234,30 @@ class ParamParsingTest(TestCase):
             {(T.INVALID_SET.value, 'max')}
         ], body=body)
 
+    def test_bulk_int_compound_param_individual_error(self):
+        """En bulk, el parámetro 'max' debe realizar validaciones a nivel
+        conjunto de valores, sólo si no existen errores a nivel consulta
+        individuales."""
+        body = {
+            'municipios': [
+                {
+                    'max': 6000
+                },
+                {
+                    'max': 1000
+                },
+                {
+                    'max': "foobar"
+                }
+            ]
+        }
+
+        self.assert_errors_match('/municipios', [
+            {(T.VALUE_ERROR.value, 'max')},
+            set(),
+            {(T.VALUE_ERROR.value, 'max')}
+        ], body=body)
+
     def test_empty_float_param(self):
         """Los parámtros de tipo float no deberían aceptar strings
         vacíos."""

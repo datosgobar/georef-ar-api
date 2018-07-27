@@ -459,7 +459,7 @@ class EndpointParameters():
             results.append(parsed)
             errors_list.append(errors)
 
-        if not any(errors):
+        if not any(errors_list):
             for name, param in self.post_body_params.items():
                 try:
                     # Validar conjuntos de parámetros bajo el mismo nombre
@@ -471,9 +471,8 @@ class EndpointParameters():
                     # Si la validación no fue exitosa, crear un error y
                     # agregarlo al conjunto de errores de cada consulta que lo
                     # utilizó.
-                    for result, errors in zip(results, errors_list):
-                        if name in result:
-                            errors[name] = error
+                    for errors in errors_list:
+                        errors[name] = error
 
         return results, errors_list
 
