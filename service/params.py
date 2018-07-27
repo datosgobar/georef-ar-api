@@ -12,7 +12,8 @@ from enum import Enum, unique
 from collections import namedtuple
 
 # TODO: Mover a archivo de configuración
-MAX_BULK_LEN = 100
+MAX_BULK_LEN = 5000
+MAX_SIZE_LEN = 5000
 
 
 class ParameterRequiredException(Exception):
@@ -27,15 +28,6 @@ class ParameterRequiredException(Exception):
 class InvalidChoiceException(Exception):
     """Excepción lanzada cuando un parámetro no tiene como valor uno de los
     valores permitidos.
-
-    """
-
-    pass
-
-
-class InvalidLocationException(Exception):
-    """Excepción lanzada cuando se recibe un parámetro en la parte incorrecta de
-    una request HTTP (por ejemplo, query string en vez de body).
 
     """
 
@@ -60,6 +52,7 @@ class ParamErrorType(Enum):
     REPEATED = 1006
     INVALID_BULK_ENTRY = 1007
     INVALID_BULK_LEN = 1008
+    INVALID_SET = 1009
 
 
 ParamError = namedtuple('ParamError', ['error_type', 'message', 'source'])
@@ -82,12 +75,10 @@ class Parameter:
         required (bool): Verdadero si el parámetro es requerido.
         default: Valor que debería tomar el parámetro en caso de no haber sido
             recibido.
-        source (str): Ubicación permitida del parámetro en el request HTTP.
 
     """
 
-    def __init__(self, required=False, default=None, choices=None,
-                 source='any'):
+    def __init__(self, required=False, default=None, choices=None):
         """Inicializa un objeto Parameter.
 
         Args:
@@ -96,8 +87,6 @@ class Parameter:
             required (bool): Verdadero si el parámetro es requerido.
             default: Valor que debería tomar el parámetro en caso de no haber
                 sido recibido.
-            source (str): Ubicación permitida del parámetro en el request HTTP
-                (querystring, body o any).
 
         """
         if required and default is not None:
@@ -106,14 +95,13 @@ class Parameter:
         self.choices = choices
         self.required = required
         self.default = default
-        self.source = source
 
         if choices and \
            default is not None \
            and not self._value_in_choices(default):
             raise ValueError(strings.DEFAULT_INVALID_CHOICE)
 
-    def get_value(self, val, from_source):
+    def get_value(self, val):
         """Toma un valor 'val' recibido desde una request HTTP, y devuelve el
         verdadero valor (con tipo apropiado) resultante de acuerdo a las
         propiedades del objeto Parameter.
@@ -134,10 +122,6 @@ class Parameter:
                 raise ParameterRequiredException()
             else:
                 return self.default
-        else:
-            if self.source != 'any' and from_source != self.source:
-                raise InvalidLocationException(strings.INVALID_LOCATION.format(
-                    self.source))
 
         parsed = self._parse_value(val)
 
@@ -146,6 +130,25 @@ class Parameter:
                 strings.INVALID_CHOICE.format(', '.join(self.choices)))
 
         return parsed
+
+    def validate_values(self, vals):
+        """Comprueba que una serie de valores (ya con los tipos apropiados)
+        sean válidos como conjunto. Este método se utiliza durante el parseo
+        del body en requests POST, para validar uno o más valores como
+        conjunto. Por ejemplo, el parámetro 'max' establece que la suma de
+        todos los parámetros max recibidos no pueden estar por debajo o por
+        encima de ciertos valores.
+
+        Args:
+            vals (list): Lista de valores a validar en conjunto.
+
+        Raises:
+            ValueError: Si la validación no fue exitosa.
+
+        """
+        # Por default, un parámetro no realiza validaciones a nivel conjunto
+        # de valores.
+        pass
 
     def _value_in_choices(self, val):
         """Comprueba que un valor esté dentro de los valores permitidos del
@@ -247,13 +250,15 @@ class IntParameter(Parameter):
 
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
     nuevamente el método '_parse_value' para implementar lógica de parseo y
-    validación propias de IntParameter.
+    validación propias de IntParameter, y 'valid_values' para validar uno
+    o más parámetros 'max' recibidos en conjunto.
 
     """
     def __init__(self, required=False, default=None, choices=None,
-                 source='any', lower_limit=None):
+                 lower_limit=None, upper_limit=None):
         self.lower_limit = lower_limit
-        super().__init__(required, default, choices, source)
+        self.upper_limit = upper_limit
+        super().__init__(required, default, choices)
 
     def _parse_value(self, val):
         try:
@@ -262,10 +267,17 @@ class IntParameter(Parameter):
             raise ValueError(strings.INT_VAL_ERROR)
 
         if self.lower_limit is not None and int_val < self.lower_limit:
-            raise ValueError(
-                strings.INT_VAL_SMALL.format(self.lower_limit))
+            raise ValueError(strings.INT_VAL_SMALL.format(self.lower_limit))
+
+        if self.upper_limit is not None and int_val > self.upper_limit:
+            raise ValueError(strings.INT_VAL_BIG.format(self.upper_limit))
 
         return int_val
+
+    def validate_values(self, vals):
+        if sum(vals) > self.upper_limit:
+            raise ValueError(
+                strings.INT_VAL_BIG_GLOBAL.format(self.upper_limit))
 
 
 class FloatParameter(Parameter):
@@ -285,7 +297,7 @@ class FloatParameter(Parameter):
 
 
 class AddressParameter(Parameter):
-    """Representa un parámetro de tipo dirección de calle.
+    """Representa un parámetro de tipo dirección de calle (nombre y altura).
 
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
     nuevamente el método '_parse_value' para implementar lógica de parseo y
@@ -311,34 +323,42 @@ class AddressParameter(Parameter):
         return road_name.strip(), number
 
 
-class ParameterSet():
-    """Representa un conjunto de parámetros HTTP.
-
-    Se utiliza para representar todos los parámetros aceptados por un cierto
-    endpoint HTTP.
+class EndpointParameters():
+    """Representa un conjunto de parámetros para un endpoint HTTP.
 
     Attributes:
-        params (dict): Diccionario de parámetros aceptados, siendo las keys
-            los nombres de los parámetros que se debe usar al especificarlos, y
-            los valores objetos de tipo Parameter.
+        get_qs_params (dict): Diccionario de parámetros aceptados vía
+            querystring en requests GET, siendo las keys los nombres de los
+            parámetros que se debe usar al especificarlos, y los valores
+            objetos de tipo Parameter.
+
+        shared_params (dict): Similar a 'get_qs_params', pero contiene
+            parámetros aceptados vía querystring en requests GET Y parámetros
+            aceptados vía body en requests POST (compartidos).
 
     """
 
-    def __init__(self, params):
-        """Inicializa un objeto de tipo ParameterSet.
+    def __init__(self, shared_params=None, get_qs_params=None):
+        """Inicializa un objeto de tipo EndpointParameters.
 
         Args:
-            params (dict): Ver atributo 'params'.
+            get_qs_params (dict): Ver atributo 'get_qs_params'.
+            shared_params (dict): Ver atributo 'shared_params'.
 
         """
-        self.params = params
+        shared_params = shared_params or {}
+        get_qs_params = get_qs_params or {}
 
-    def parse_params_dict(self, received, from_source):
+        self.get_qs_params = {**get_qs_params, **shared_params}
+        self.post_body_params = shared_params
+
+    def parse_params_dict(self, params, received, from_source):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP,
-        utilizando el conjunto de parámetros internos.
+        utilizando el conjunto 'params' de parámetros.
 
         Args:
-            received (dict): Parámetros recibidos sin procesar.
+            params (dict): Diccionario de objetos Parameter (nombre-Parameter).
+            received (dict): Parámetros recibidos sin procesar (nombre-valor).
             from_source (str): Ubicación dentro de la request HTTP donde fueron
                 recibidos los parámetros.
 
@@ -349,30 +369,22 @@ class ParameterSet():
                 apropiado. Los errores consisten de un diccionario conteniendo
                 como clave el nombre del parámetro recibido, y como valor un
                 objeto de tipo ParamError, especificando el error.
+
         """
         parsed, errors = {}, {}
         is_multi_dict = hasattr(received, 'getlist')
 
-        for param_name, param in self.params.items():
-            if is_multi_dict:
-                received_vals = received.getlist(param_name)
-            else:
-                received_vals = [received.get(param_name)]
+        for param_name, param in params.items():
+            received_val = received.get(param_name)
 
-            # Comprobar que ningún parámetro esté repetido
-            if not received_vals:
-                received_val = None
-            elif len(received_vals) > 1:
+            if is_multi_dict and len(received.getlist(param_name)) > 1:
                 errors[param_name] = ParamError(ParamErrorType.REPEATED,
                                                 strings.REPEATED_ERROR,
                                                 from_source)
                 continue
-            else:
-                received_val = received_vals[0]
 
             try:
-                parsed_val = param.get_value(received_val, from_source)
-                parsed[param_name] = parsed_val
+                parsed[param_name] = param.get_value(received_val)
             except ParameterRequiredException:
                 errors[param_name] = ParamError(ParamErrorType.PARAM_REQUIRED,
                                                 strings.MISSING_ERROR,
@@ -380,15 +392,12 @@ class ParameterSet():
             except ValueError as e:
                 errors[param_name] = ParamError(ParamErrorType.VALUE_ERROR,
                                                 str(e), from_source)
-            except InvalidLocationException as e:
-                errors[param_name] = ParamError(
-                    ParamErrorType.INVALID_LOCATION, str(e), from_source)
             except InvalidChoiceException as e:
                 errors[param_name] = ParamError(ParamErrorType.INVALID_CHOICE,
                                                 str(e), from_source)
 
         for param_name in received:
-            if param_name not in self.params:
+            if param_name not in params:
                 errors[param_name] = ParamError(ParamErrorType.UNKNOWN_PARAM,
                                                 strings.UNKNOWN_ERROR,
                                                 from_source)
@@ -397,7 +406,8 @@ class ParameterSet():
 
     def parse_post_params(self, qs_params, body_params):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP
-        POST utilizando el conjunto de parámetros internos.
+        POST utilizando el conjunto de parámetros internos. Se parsean por
+        separado los parámetros querystring y los parámetros de body.
 
         Args:
             qs_params (dict): Parámetros recibidos en el query string.
@@ -443,10 +453,27 @@ class ParameterSet():
                                        'body')
                 }
             else:
-                parsed, errors = self.parse_params_dict(param_dict, 'body')
+                parsed, errors = self.parse_params_dict(self.post_body_params,
+                                                        param_dict, 'body')
 
             results.append(parsed)
             errors_list.append(errors)
+
+        if not any(errors):
+            for name, param in self.post_body_params.items():
+                try:
+                    # Validar conjuntos de parámetros bajo el mismo nombre
+                    param.validate_values(result[name] for result in results)
+                except ValueError as e:
+                    error = ParamError(ParamErrorType.INVALID_SET, str(e),
+                                       'body')
+
+                    # Si la validación no fue exitosa, crear un error y
+                    # agregarlo al conjunto de errores de cada consulta que lo
+                    # utilizó.
+                    for result, errors in zip(results, errors_list):
+                        if name in result:
+                            errors[name] = error
 
         return results, errors_list
 
@@ -461,22 +488,23 @@ class ParameterSet():
             tuple: Valor de retorno de 'parse_dict_params'.
 
         """
-        return self.parse_params_dict(qs_params, 'querystring')
+        return self.parse_params_dict(self.get_qs_params, qs_params,
+                                      'querystring')
 
 
-PARAMS_STATES = ParameterSet({
+PARAMS_STATES = EndpointParameters(shared_params={
     N.ID: StrParameter(),
     N.NAME: StrParameter(),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.LAT, N.LON]),
-    N.MAX: IntParameter(default=24, lower_limit=1),
-    N.EXACT: BoolParameter(),
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
-                           source='querystring')
+    N.MAX: IntParameter(default=24, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
 })
 
-PARAMS_DEPARTMENTS = ParameterSet({
+PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.ID: StrParameter(),
     N.NAME: StrParameter(),
     N.STATE: StrParameter(),
@@ -485,13 +513,13 @@ PARAMS_DEPARTMENTS = ParameterSet({
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.LAT, N.LON, N.STATE_ID,
                                           N.STATE_NAME]),
-    N.MAX: IntParameter(default=10, lower_limit=1),
-    N.EXACT: BoolParameter(),
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
-                           source='querystring')
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
 })
 
-PARAMS_MUNICIPALITIES = ParameterSet({
+PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.ID: StrParameter(),
     N.NAME: StrParameter(),
     N.STATE: StrParameter(),
@@ -502,13 +530,13 @@ PARAMS_MUNICIPALITIES = ParameterSet({
                                optionals=[N.LAT, N.LON, N.STATE_ID,
                                           N.STATE_NAME, N.DEPT_ID,
                                           N.DEPT_NAME]),
-    N.MAX: IntParameter(default=10, lower_limit=1),
-    N.EXACT: BoolParameter(),
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
-                           source='querystring')
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
 })
 
-PARAMS_LOCALITIES = ParameterSet({
+PARAMS_LOCALITIES = EndpointParameters(shared_params={
     N.ID: StrParameter(),
     N.NAME: StrParameter(),
     N.STATE: StrParameter(),
@@ -521,13 +549,13 @@ PARAMS_LOCALITIES = ParameterSet({
                                           N.STATE_NAME, N.DEPT_ID, N.DEPT_NAME,
                                           N.MUN_ID, N.MUN_NAME,
                                           N.LOCALITY_TYPE]),
-    N.MAX: IntParameter(default=10, lower_limit=1),
-    N.EXACT: BoolParameter(),
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'],
-                           source='querystring')
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
 })
 
-PARAMS_ADDRESSES = ParameterSet({
+PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
     N.ROAD_TYPE: StrParameter(),
     N.STATE: StrParameter(),
@@ -539,13 +567,13 @@ PARAMS_ADDRESSES = ParameterSet({
                                           N.DEPT_NAME, N.ROAD_TYPE,
                                           N.FULL_NAME, N.LOCATION_LAT,
                                           N.LOCATION_LON]),
-    N.MAX: IntParameter(default=10, lower_limit=1),
-    N.EXACT: BoolParameter(),
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv'],
-                           source='querystring')
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'csv'])
 })
 
-PARAMS_STREETS = ParameterSet({
+PARAMS_STREETS = EndpointParameters(shared_params={
     N.ID: StrParameter(),
     N.NAME: StrParameter(),
     N.ROAD_TYPE: StrParameter(),
@@ -557,19 +585,19 @@ PARAMS_STREETS = ParameterSet({
                                           N.END_L, N.STATE_ID, N.STATE_NAME,
                                           N.DEPT_ID, N.DEPT_NAME, N.FULL_NAME,
                                           N.ROAD_TYPE]),
-    N.MAX: IntParameter(default=10, lower_limit=1),
-    N.EXACT: BoolParameter(),
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv'],
-                           source='querystring')
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'csv'])
 })
 
-PARAMS_PLACE = ParameterSet({
+PARAMS_PLACE = EndpointParameters(shared_params={
     N.LAT: FloatParameter(required=True),
     N.LON: FloatParameter(required=True),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.STATE_ID, N.STATE_NAME, N.SOURCE],
                                optionals=[N.DEPT_ID, N.DEPT_NAME, N.MUN_ID,
-                                          N.MUN_NAME, N.LAT, N.LON]),
-    N.FORMAT: StrParameter(default='json', choices=['json', 'geojson'],
-                           source='querystring')
+                                          N.MUN_NAME, N.LAT, N.LON])
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'geojson'])
 })

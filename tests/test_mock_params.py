@@ -145,7 +145,7 @@ class ParamParsingTest(TestCase):
         }
 
         self.assert_errors_match('/municipios', [
-            {(T.INVALID_LOCATION.value, 'formato')}
+            {(T.UNKNOWN_PARAM.value, 'formato')}
         ], body=body)
 
     def test_invalid_choice_param(self):
@@ -203,6 +203,36 @@ class ParamParsingTest(TestCase):
         self.assert_errors_match(choice(ENDPOINTS) + '?max=-10', {
             (T.VALUE_ERROR.value, 'max')
         })
+
+    def test_big_int_param(self):
+        """Los parámtros de tipo int no deberían aceptar strings que
+        representen números por encima de los límites establecidos."""
+        self.assert_errors_match(choice(ENDPOINTS) + '?max=5001', {
+            (T.VALUE_ERROR.value, 'max')
+        })
+
+    def test_bulk_int_compound_param(self):
+        """En bulk, el parámetro 'max' debe realizar validaciones a nivel
+        conjunto de valores."""
+        body = {
+            'municipios': [
+                {
+                    'max': 4000
+                },
+                {
+                    'max': 1000
+                },
+                {
+                    'max': 1
+                }
+            ]
+        }
+
+        self.assert_errors_match('/municipios', [
+            {(T.INVALID_SET.value, 'max')},
+            {(T.INVALID_SET.value, 'max')},
+            {(T.INVALID_SET.value, 'max')}
+        ], body=body)
 
     def test_empty_float_param(self):
         """Los parámtros de tipo float no deberían aceptar strings
@@ -277,7 +307,7 @@ class ParamParsingTest(TestCase):
     def test_max_bulk_len(self):
         """Debería haber un máximo de operaciones bulk posibles."""
         body = {
-            'calles': [{}] * 101
+            'calles': [{}] * 5001
         }
 
         self.assert_errors_match('/calles', [
@@ -290,7 +320,7 @@ class ParamParsingTest(TestCase):
         url = self.url_base + url
         if not method:
             method = 'POST' if body else 'GET'
-        
+
         if method == 'POST':
             resp = self.app.post(url, json=body)
         elif method == 'GET':

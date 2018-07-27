@@ -14,17 +14,19 @@ STRLIST_EMPTY = 'La lista no contiene valores.'
 INT_VAL_ERROR = 'El parámetro no es un número entero.'
 FLOAT_VAL_ERROR = 'El parámetro no es un número real.'
 INVALID_CHOICE = 'El parámetro debe tomar uno de los siguientes valores: {}.'
-INVALID_BULK = 'Las operaciones deben estar contenidas en una lista de longitud \
-1 o más.'
+INVALID_BULK = 'Las operaciones deben estar contenidas en una lista de \
+longitud 1 o más.'
 BULK_QS_INVALID = 'No se permiten parámetros vía query string en operaciones \
 bulk.'
 INVALID_BULK_ENTRY = 'Las operaciones bulk deben ser de tipo objeto.'
 INTERNAL_ERROR = 'Ocurrió un error interno de servidor al procesar la \
 petición.'
-INVALID_LOCATION = 'El parámetro debe ser especificado en el HTTP \'{}\'.'
 MISSING_ERROR = 'El parámetro es obligatorio.'
 UNKNOWN_ERROR = 'El parámetro especificado no existe.'
 REPEATED_ERROR = 'El parámetro está repetido.'
 BULK_LEN_ERROR = 'El número máximo de operaciones bulk es: {}.'
 INT_VAL_SMALL = 'El número debe ser igual o mayor que {}.'
+INT_VAL_BIG = 'El número debe ser menor o igual que {}.'
+INT_VAL_BIG_GLOBAL = 'La suma de parámetros \'max\' debe ser menor o igual \
+que {}.'
 NOT_FOUND = 'No se encontró la URL especificada.'
