@@ -6,7 +6,8 @@ de los recursos que expone la API.
 
 from service import data, params, formatter
 from service.names import *
-from flask import g
+from flask import current_app
+from contextlib import contextmanager
 
 
 def get_elasticsearch():
@@ -21,28 +22,47 @@ def get_elasticsearch():
             conexión con la capa de manejo de datos.
 
     """
-    if 'elasticsearch' not in g:
-        g.elasticsearch = data.elasticsearch_connection()
+    if not hasattr(current_app, 'elasticsearch'):
+        current_app.elasticsearch = data.elasticsearch_connection(
+            hosts=current_app.config['ES_HOSTS'],
+            sniff=current_app.config['ES_SNIFF'],
+            sniffer_timeout=current_app.config['ES_SNIFFER_TIMEOUT']
+        )
 
-    return g.elasticsearch
+    return current_app.elasticsearch
 
 
-def get_postgres_db():
-    """Devuelve la conexión a PostgreSQL activa para la sesión
-    de flask. La conexión es creada si no existía.
+def get_postgres_db_connection_pool():
+    """Devuelve la pool de conexiones a PostgreSQL activa para la sesión
+    de flask. La pool es creada si no existía.
 
     Returns:
-        psycopg2.connection: conexión a PostgreSQL.
+        psycopg2.pool.ThreadedConnectionPool: Pool de conexiones.
 
     Raises:
         data.DataConnectionException: En caso de ocurrir un error de
             conexión con la capa de manejo de datos.
 
     """
-    if 'postgres' not in g:
-        g.postgres = data.postgres_db_connection()
+    if not hasattr(current_app, 'postgres_pool'):
+        current_app.postgres_pool = data.postgres_db_connection_pool(
+            name=current_app.config['SQL_DB_NAME'],
+            host=current_app.config['SQL_DB_HOST'],
+            user=current_app.config['SQL_DB_USER'],
+            password=current_app.config['SQL_DB_PASS'],
+            maxconn=current_app.config['SQL_DB_MAX_CONNECTIONS']
+        )
 
-    return g.postgres
+    return current_app.postgres_pool
+
+
+@contextmanager
+def get_postgres_db_connection(pool):
+    connection = pool.getconn()
+    try:
+        yield connection
+    finally:
+        pool.putconn(connection)
 
 
 def get_index_source(index):
@@ -447,26 +467,28 @@ def build_addresses_result(result, query, source):
     """
     fields = query['fields']
     number = query['number']
+    pool = get_postgres_db_connection_pool()
 
-    for street in result:
-        if FULL_NAME in fields:
-            parts = street[FULL_NAME].split(',')
-            parts[0] += ' {}'.format(number)
-            street[FULL_NAME] = ','.join(parts)
+    with get_postgres_db_connection(pool) as connection:
+        for street in result:
+            if FULL_NAME in fields:
+                parts = street[FULL_NAME].split(',')
+                parts[0] += ' {}'.format(number)
+                street[FULL_NAME] = ','.join(parts)
 
-        if DOOR_NUM in fields:
-            street[DOOR_NUM] = number
+            if DOOR_NUM in fields:
+                street[DOOR_NUM] = number
 
-        start_r = street.pop(START_R)
-        end_l = street.pop(END_L)
-        geom = street.pop(GEOM)
+            start_r = street.pop(START_R)
+            end_l = street.pop(END_L)
+            geom = street.pop(GEOM)
 
-        if LOCATION_LAT in fields or LOCATION_LON in fields:
-            loc = data.street_number_location(get_postgres_db(), geom,
-                                              number, start_r, end_l)
-            street[LOCATION] = loc
+            if LOCATION_LAT in fields or LOCATION_LON in fields:
+                loc = data.street_number_location(connection, geom, number,
+                                                  start_r, end_l)
+                street[LOCATION] = loc
 
-        street[SOURCE] = source
+            street[SOURCE] = source
 
 
 def build_address_query_format(parsed_params):

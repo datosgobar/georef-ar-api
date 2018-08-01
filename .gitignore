@@ -59,9 +59,7 @@ db.sqlite3
 .idea/
 .vscode/
 
+# Georef
 environment.sh
+georef.cfg
 logging.ini
-
-# migraciones
-migrations/
-

@@ -4,13 +4,11 @@ Contiene funciones que ejecutan consultas a índices de Elasticsearch, o a la
 base de datos PostgreSQL.
 """
 
-import os
 import elasticsearch
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
 import logging
-import psycopg2
-import psycopg2.extras
+import psycopg2.pool
 from service import names as N
 
 
@@ -29,34 +27,42 @@ class DataConnectionException(Exception):
     pass
 
 
-def postgres_db_connection():
-    """Crea una conexión a la base de datos PostgreSQL.
+def postgres_db_connection_pool(host, name, user, password, maxconn):
+    """Crea una pool de conexiones a la base de datos PostgreSQL.
+
+    Args:
+        host (str): Host de la base de datos.
+        name (str): Nombre de la base de datos.
+        user (str): Usuario de la base de datos.
+        password (str): Contraseña de la base de datos.
+        maxconn (int): Número máximo de conexiones a crear.
 
     Raises:
         DataConnectionException: si la conexión no pudo ser establecida.
 
     Returns:
-        psycopg2.connection: Conexión a la base de datos SQL.
+        psycopg2.pool.ThreadedConnectionPool: Pool de conexiones a la base de
+            datos SQL.
 
     """
     try:
-        db = psycopg2.connect(
-            connection_factory=psycopg2.extras.LoggingConnection,
-            host=os.environ.get('GEOREF_API_DB_HOST'),
-            dbname=os.environ.get('GEOREF_API_DB_NAME'),
-            user=os.environ.get('GEOREF_API_DB_USER'),
-            password=os.environ.get('GEOREF_API_DB_PASS'))
-
-        db.initialize(logging.getLogger('psycopg2'))
-        return db
+        return psycopg2.pool.ThreadedConnectionPool(1, maxconn, host=host,
+                                                    dbname=name, user=user,
+                                                    password=password)
     except psycopg2.Error as e:
-        logger.error('Error al conectarse a la base de datos PostgreSQL:')
+        logger.error(
+            'Error al crear pool de conexiones a la base de datos PostgreSQL:')
         logger.error(e)
         raise DataConnectionException()
 
 
-def elasticsearch_connection():
+def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
     """Crea una conexión a Elasticsearch.
+
+    Args:
+        hosts (list): Lista de nodos Elasticsearch a los cuales conectarse.
+        sniff (bool): Activa la función de sniffing, la cual permite descubrir
+            nuevos nodos en un cluster y conectarse a ellos.
 
     Raises:
         DataConnectionException: si la conexión no pudo ser establecida.
@@ -66,7 +72,16 @@ def elasticsearch_connection():
 
     """
     try:
-        return elasticsearch.Elasticsearch()
+        options = {
+            'hosts': hosts
+        }
+
+        if sniff:
+            options['sniff_on_start'] = True
+            options['sniff_on_connection_fail'] = True
+            options['sniffer_timeout'] = sniffer_timeout
+
+        return elasticsearch.Elasticsearch(**options)
     except elasticsearch.ElasticsearchException:
         raise DataConnectionException()
 
