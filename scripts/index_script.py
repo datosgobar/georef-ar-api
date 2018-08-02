@@ -218,16 +218,7 @@ def delete_indices(es, indices):
     logger.info('Los índices fueron eliminados exitosamente.')
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--timeout', metavar='<seconds>', default=300,
-                        type=int, help='Tiempo de espera para transferencias.')
-    parser.add_argument('-c', '--config', metavar='<path>', required=True)
-    args = parser.parse_args()
-
-    app = Flask(__name__)
-    app.config.from_pyfile(args.config, silent=False)
-
+def run_index(app, es):
     indices = [
         GeorefIndex('provincias', app.config['STATES_FILE'], MAP_STATE,
                     ['geometria']),
@@ -249,7 +240,6 @@ def main():
                     ['codigo_postal'], docs_key='vias')
     ]
 
-    es = Elasticsearch(timeout=args.timeout)
     alias_ops = []
     old_indices = []
 
@@ -269,6 +259,51 @@ def main():
     update_aliases(es, alias_ops)
     delete_indices(es, old_indices)
     logger.info('')
+
+
+def run_info(es):
+    logger.info('INDICES:')
+    for line in es.cat.indices(v=True).splitlines():
+        logger.info(line)
+    logger.info('')
+
+    logger.info('ALIASES:')
+    for line in es.cat.aliases(v=True).splitlines():
+        logger.info(line)
+    logger.info('')
+
+    logger.info('NODES:')
+    for line in es.cat.nodes(v=True).splitlines():
+        logger.info(line)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--timeout', metavar='<seconds>', default=300,
+                        type=int, help='Tiempo de espera para transferencias.')
+    parser.add_argument('-c', '--config', metavar='<path>', required=True)
+    parser.add_argument('-i', '--info', action='store_true')
+    args = parser.parse_args()
+
+    app = Flask(__name__)
+    app.config.from_pyfile(args.config, silent=False)
+
+    options = {
+        'hosts': app.config['ES_HOSTS'],
+        'timeout': args.timeout
+    }
+
+    if app.config['ES_SNIFF']:
+        options['sniff_on_start'] = True
+        options['sniff_on_connection_fail'] = True
+        options['sniffer_timeout'] = app.config['ES_SNIFFER_TIMEOUT']
+
+    es = Elasticsearch(**options)
+
+    if args.info:
+        run_info(es)
+    else:
+        run_index(app, es)
 
 
 if __name__ == '__main__':

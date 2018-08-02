@@ -7,7 +7,7 @@ install:
 - sudo apt-get update -qq
 - sudo apt-get install -y openvpn
 script:
-- python -m unittest tests/test_mock*.py
+- make test_mock
 deploy:
   - provider: script
     skip_cleanup: true
