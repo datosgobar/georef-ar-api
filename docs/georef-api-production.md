@@ -49,7 +49,7 @@ CREATE EXTENSION postgis;
 
 - Copiar el archivo de configuración de logs:
 
-    `(venv) $ cp docs/config/logging.example.ini logging.ini`
+    `(venv) $ cp config/logging.example.ini config/logging.ini`
 	
 - Completar el archivo `config/logging.ini` con los datos apropiados.
     
@@ -75,7 +75,7 @@ Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más s
 
 - Opcionalmente, aplicar las configuraciones recomendadas. El valor de `node.name` debe ser único por nodo.
 
-    `$ sudo vi /etc/elasticsearch/elasticsearch.yml`
+    `$ sudo $EDITOR /etc/elasticsearch/elasticsearch.yml`
 
     ```
     cluster.name: georef-api

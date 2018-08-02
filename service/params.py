@@ -11,9 +11,8 @@ import re
 from enum import Enum, unique
 from collections import namedtuple
 
-# TODO: Mover a archivo de configuración
 MAX_BULK_LEN = 5000
-MAX_SIZE_LEN = 5000
+MAX_SIZE_LEN = MAX_BULK_LEN
 
 
 class ParameterRequiredException(Exception):

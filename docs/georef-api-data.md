@@ -1,17 +1,17 @@
 # Modelo de datos para Georef API
 
-Los datos utilizados por la API están separados en dos grupos: **entidades** y **vías de circulación**. El grupo de entidades está compuesto por cuatro (4) archivos `.json`, los cuales contienen provincias, departamentos, municipios y asentamientos. Por el otro lado, el grupo de las vías está compuesto por veinticuatro (24) archivos `.json`, los cuales detallan las vías de circulación de cada provincia y la Ciudad Autónoma de Buenos Aires (CABA).
+Los archivos de datos de Georef consisten de cinco (5) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, asentamientos y vías de circulación (calles).
 
 ## Fuentes
 Los datos utilizados por Georef API fueron obtenidos a través de un proceso de ETL. Los orígenes de los datos procesados son:
 - Entidades: [Portal de datos abiertos](http://datos.gob.ar/dataset/unidades-territoriales)
 - Vías de circulación: [Portal de geoservicios de INDEC](https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas)
 
-## Entidades
-A continuación se detallan, a través de ejemplos, los esquemas de los archivos `.json` para las entidades:
+## Archivos
+A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas:
 
 ### Provincias
-El archivo de datos de provincias debe llamarse `provincias.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
+El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
 	"timestamp": "1532435389", // Fecha de creación de los datos
@@ -32,7 +32,7 @@ El archivo de datos de provincias debe llamarse `provincias.json` y tener format
 ```
 
 ### Departamentos
-El archivo de datos de departamentos debe llamarse `departamentos.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
+El archivo de datos de departamentos debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
 	"timestamp": "1532435389", // Fecha de creación de los datos
@@ -57,7 +57,7 @@ El archivo de datos de departamentos debe llamarse `departamentos.json` y tener 
 ```
 
 ### Municipios
-El archivo de datos de municipios debe llamarse `municipios.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
+El archivo de datos de municipios debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
 	"timestamp": "1532435389", // Fecha de creación de los datos
@@ -86,7 +86,7 @@ El archivo de datos de municipios debe llamarse `municipios.json` y tener format
 ```
 
 ### Asentamientos
-El archivo de datos de asentamientos debe llamarse `asentamientos.json` y tener formato JSON. El esquema de datos debe ser el siguiente:
+El archivo de datos de asentamientos debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
 	"timestamp": "1532435389", // Fecha de creación de los datos
@@ -119,8 +119,8 @@ El archivo de datos de asentamientos debe llamarse `asentamientos.json` y tener 
 }
 ```
 
-## Vías de Circulación
-Cada archivo de vías de circulación debe llamarse `calles-XX.json`, donde `XX` es el código INDEC de dos dígitos de la provincia o CABA. El esquema de datos de cada archivo debe ser el siguiente:
+### Vías de Circulación
+El archivo de datos de vías de circulación debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
 	"timestamp": "1532435389", // Fecha de creación de los datos
