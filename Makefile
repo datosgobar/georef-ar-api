@@ -1,5 +1,5 @@
-CFG_PATH = config/georef.cfg
-TIMEOUT = 320
+CFG_PATH ?= config/georef.cfg
+TIMEOUT ?= 320
 
 
 check_config_file:
