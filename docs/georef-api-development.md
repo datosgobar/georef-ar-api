@@ -6,7 +6,6 @@
 - [Python >=3.6.x](https://www.python.org/downloads/)
 - [PostgreSQL 9.6](https://www.postgresql.org/download/)
 - [PostGIS 2.3](http://postgis.net/install/)
-- `wget`
 
 ## Datos
 
@@ -43,31 +42,14 @@ CREATE EXTENSION postgis;
  
 - Instalar dependencias con `pip`:
     
-    `(venv)$ pip3 install -r requirements.txt`
+    `(venv) $ pip3 install -r requirements.txt`
 
-- Copiar las variables de entorno:
+- Copiar el archivo de configuración:
 
-    `(venv)$ cp environment.example.sh environment.sh`
+    `(venv) $ cp config/georef.example.cfg config/georef.cfg`
     
-- Completar el archivo `environment.sh` con los datos correspondientes:
+- Completar el archivo `config/georef.cfg` con los datos apropiados.
 
-    ```bash
-    export GEOREF_API_DB_HOST= # Dirección de la base de datos PostgreSQL
-    export GEOREF_API_DB_NAME= # Nombre de la base de datos (por ejemplo, 'georef_api')
-    export GEOREF_API_DB_USER= # Usuario de la base de datos
-    export GEOREF_API_DB_PASS= # Contraseña del usuario de la base de datos
- 
-    export ENTIDADES_DATA_DIR= # /directorio/datos/de/entidades
-    export VIAS_DATA_DIR= # /directorio/datos/de/vias
- 
-    export FLASK_APP=service/__init__.py
-    export FLASK_DEBUG=1
-    ```
-
-- Cargar funciones en PostgreSQL:
-
-    `(venv)$ python3 scripts/functions_load.py`
- 
 ### Elasticsearch
 
 - Instalar el entorno de ejecución para Java:
@@ -80,42 +62,45 @@ CREATE EXTENSION postgis;
 
     `$ tar -xzvf elasticsearch-6.2.0.tar.gz`
 
-- Levantar el servicio de Elasticsearch:
+- Iniciar Elasticsearch:
 
     `$ cd directorio/a/elasticsearch/bin/ && ./elasticseach`
   
-- Probar el servicio:
+- Probar el servicio local:
 
     `$ curl -X GET 'http://localhost:9200'`
     
+### Archivos de datos
+
+- Se debe contar con los archivos de datos para entidades y calles mencionados al comienzo de la guía, y sus rutas deben estar configuradas en el archivo `config/georef.cfg`.
+
+- Adicionalmente, se debe crear un archivo `georef_synonyms.txt`, en la ubicación del archivo de configuración de Elasticsearch (`$ES_HOME/config`). El archivo contiene la base de sinónimos utilizados al momento de indexar documentos. Su contenido puede ser vacío.
+
+### Cargar las funciones SQL
+
+- Cargar las funciones SQL necesarias para el funcionamiento de la API:
+
+	`(venv) $ make load_sql`
+
 ### Crear los índices
-
-- Importar variables de entorno:
     
-    `(venv)$ . environment.sh`
-    
-- Generar índices de entidades. Se debe contar con los archivos de datos para entidades mencionados al comienzo de la guía, y sus directorios deben estar en las variables de entorno (vía el archivo `environment.sh`).
+- Generar índices de entidades y calles.
 
-    `(venv)$ make indexar_todos`
+    `(venv) $ make index`
         
-- Listar los índices creados:
+- Listar los índices creados, y otros datos adicionales:
 
-    `(venv)$ make listar_indices`
+    `(venv) $ make index_stats`
 
 ## Correr API 
 
 - Correr `georef-api`, utilizando un servidor de prueba (no apto para producción):
     
-    `(venv)$ flask run`
+    `(venv) $ make start_dev_server`
 
 ## Pruebas
 
-- Pruebas unitarias:
+- Pruebas unitarias (los servicios Elasticsearch y PostgreSQL deben estar activos y con los datos apropiados cargados):
 
-    `(venv) $ python -m unittest`
-  
-- Consumir la API mediante la herramienta CURL:
+    `(venv) $ make test_all`
 
-    `$ curl localhost:5000/api/v1.0/direcciones?direccion=cabral+500`
-  
-    `$ curl localhost:5000/api/v1.0/provincias`

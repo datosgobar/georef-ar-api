@@ -7,10 +7,13 @@ check_config_file:
 		(echo "No existe el archivo de configuración $(CFG_PATH)." && exit 1)
 
 index: check_config_file
-	python scripts/index_script.py -t $(TIMEOUT) -c ../$(CFG_PATH)
+	python scripts/utils_script.py -m index -t $(TIMEOUT) -c ../$(CFG_PATH)
 
 index_stats: check_config_file
-	python scripts/index_script.py -i -c ../$(CFG_PATH)
+	python scripts/utils_script.py -m index_stats -t $(TIMEOUT) -i -c ../$(CFG_PATH)
+
+load_sql: check_config_file
+	python scripts/utils_script.py -m run_sql -c ../$(CFG_PATH) -s scripts/function_geocodificar.sql
 
 start_dev_server: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \

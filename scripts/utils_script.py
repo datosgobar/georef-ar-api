@@ -6,6 +6,7 @@ from elasticsearch_mappings import MAP_DEPT, MAP_DEPT_GEOM
 from elasticsearch_mappings import MAP_MUNI, MAP_MUNI_GEOM
 from elasticsearch_mappings import MAP_SETTLEMENT, MAP_SETTLEMENT_GEOM
 from elasticsearch_mappings import MAP_STREET
+import psycopg2
 
 from flask import Flask
 import argparse
@@ -26,6 +27,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 SEPARATOR_WIDTH = 60
+ACTIONS = ['index', 'index_stats', 'run_sql']
 
 
 def print_log_separator(l, message):
@@ -277,33 +279,61 @@ def run_info(es):
         logger.info(line)
 
 
+def run_sql(app, script):
+    try:
+        conn = psycopg2.connect(host=app.config['SQL_DB_HOST'],
+                                dbname=app.config['SQL_DB_NAME'],
+                                user=app.config['SQL_DB_USER'],
+                                password=app.config['SQL_DB_PASS'])
+
+        sql = script.read()
+        with conn:
+            with conn.cursor() as cursor:
+                cursor.execute(sql)
+
+        conn.close()
+        logger.info('El script SQL fue ejecutado correctamente.')
+    except psycopg2.Error as e:
+        logger.error('Ocurrió un error al ejecutar el script SQL:')
+        logger.error(e)
+
+
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--mode', metavar='<action>', required=True,
+                        choices=ACTIONS)
     parser.add_argument('-t', '--timeout', metavar='<seconds>', default=300,
-                        type=int, help='Tiempo de espera para transferencias.')
+                        type=int,
+                        help='Tiempo de espera para transfer. Elasticsearch.')
     parser.add_argument('-c', '--config', metavar='<path>', required=True)
+    parser.add_argument('-s', '--script', metavar='<path>',
+                        type=argparse.FileType())
     parser.add_argument('-i', '--info', action='store_true')
     args = parser.parse_args()
 
     app = Flask(__name__)
     app.config.from_pyfile(args.config, silent=False)
 
-    options = {
-        'hosts': app.config['ES_HOSTS'],
-        'timeout': args.timeout
-    }
+    if args.mode in ['index', 'index_stats']:
+        options = {
+            'hosts': app.config['ES_HOSTS'],
+            'timeout': args.timeout
+        }
 
-    if app.config['ES_SNIFF']:
-        options['sniff_on_start'] = True
-        options['sniff_on_connection_fail'] = True
-        options['sniffer_timeout'] = app.config['ES_SNIFFER_TIMEOUT']
+        if app.config['ES_SNIFF']:
+            options['sniff_on_start'] = True
+            options['sniff_on_connection_fail'] = True
+            options['sniffer_timeout'] = app.config['ES_SNIFFER_TIMEOUT']
 
-    es = Elasticsearch(**options)
+        es = Elasticsearch(**options)
 
-    if args.info:
-        run_info(es)
-    else:
-        run_index(app, es)
+        if args.mode == 'index':
+            run_index(app, es)
+        else:
+            run_info(es)
+
+    elif args.mode == 'run_sql':
+        run_sql(app, args.script)
 
 
 if __name__ == '__main__':

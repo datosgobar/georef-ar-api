@@ -4,24 +4,26 @@ After=network.target
 
 [Service]
 PIDFile=/run/gunicorn/api-pid
-User=<user>
 Group=www-data
 RuntimeDirectory=gunicorn
-WorkingDirectory=/home/<user>/georef-api
-ExecStart=/home/<user>/georef-api/venv/bin/gunicorn \
+
+# Completar el usuario
+User=<usuario>
+
+# Completar la ruta a georef-api
+WorkingDirectory=<ruta a georef-api>
+
+# Completar la ruta a georef-api
+ExecStart=<ruta a georef-api>/venv/bin/gunicorn \
           --pid /run/gunicorn/api-pid \
           -w 4 \
           --bind 0.0.0.0:5000 service:app \
-          --log-config /home/<user>/georef-api/logging.ini
+          --log-config config/logging.ini
+
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 PrivateTmp=true
-
-Environment="GEOREF_API_DB_HOST="
-Environment="GEOREF_API_DB_NAME="
-Environment="GEOREF_API_DB_USER="
-Environment="GEOREF_API_DB_PASS="
-Environment="GEOREF_API_LOG_CONFIG="
+Environment="GEOREF_CONFIG=config/georef.cfg"
 
 [Install]
 WantedBy=multi-user.target
