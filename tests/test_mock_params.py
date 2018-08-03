@@ -183,6 +183,27 @@ class ParamParsingTest(TestCase):
             (T.VALUE_ERROR.value, 'campos')
         })
 
+    def test_id_param_length(self):
+        """Los parámtros de tipo ID no deberían aceptar valores de longitud
+        mayores a las especificadas."""
+        self.assert_errors_match('/municipios?id=1111111', {
+            (T.VALUE_ERROR.value, 'id')
+        })
+
+    def test_id_param_length_short(self):
+        """Los parámtros de tipo ID no deberían aceptar valores de longitud
+        menores a las de cierto rango de tolerancia."""
+        self.assert_errors_match('/municipios?id=1111', {
+            (T.VALUE_ERROR.value, 'id')
+        })
+
+    def test_id_param_digit(self):
+        """Los parámtros de tipo ID no deberían aceptar valores no
+        numéricos."""
+        self.assert_errors_match('/calles?id=foobar', {
+            (T.VALUE_ERROR.value, 'id')
+        })
+
     def test_empty_int_param(self):
         """Los parámtros de tipo int no deberían aceptar strings
         vacíos."""

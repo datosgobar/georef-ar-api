@@ -136,10 +136,16 @@ class SearchLocalityTest(SearchEntitiesTest):
         self.assert_name_search_id_matches(expected, exact=True)
 
     def test_id_invalid_search(self):
-        """La búsqueda por ID debe devolver 0 resultados cuando se
-        utiliza un ID no existente."""
-        data = self.get_response({'id': '99999'})
-        self.assertTrue(len(data) == 0)
+        """La búsqueda por ID debe devolver error 400 cuando se
+        utiliza un ID no válido."""
+        status = self.get_response(params={'id': 9999999999999}, status_only=True)
+        self.assertEqual(status, 400)
+
+    def test_short_id_search(self):
+        """La búsqueda por ID debe devolver la entidad correcta incluso si
+        se omiten ceros iniciales."""
+        data = self.get_response({'id': '2000010000'})
+        self.assertTrue(data[0]['id'] == '02000010000')
 
     def test_name_exact_gibberish_search(self):
         """La búsqueda por nombre exacto debe devolver 0 resultados cuando se

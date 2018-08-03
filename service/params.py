@@ -195,6 +195,49 @@ class StrParameter(Parameter):
         return val
 
 
+class IdParameter(Parameter):
+    """Representa un parámetro de tipo ID numérico.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de IdParameter.
+
+    """
+    def __init__(self, length, padding_char='0', padding_length=1):
+        self.length = length
+        self.padding_char = padding_char
+        self.min_length = length - padding_length
+        super().__init__()
+
+    def _parse_value(self, val):
+        if not val.isdigit() or \
+           len(val) > self.length or \
+           len(val) < self.min_length:
+            raise ValueError(strings.ID_PARAM_INVALID.format(self.length))
+
+        return val.rjust(self.length, self.padding_char)
+
+
+class StrOrIdParameter(Parameter):
+    """Representa un parámetro de tipo string no vacío, o un ID numérico.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de StrOrIdParameter.
+
+    """
+    def __init__(self, id_length, id_padding_char='0'):
+        self.id_param = IdParameter(id_length, id_padding_char)
+        self.str_param = StrParameter()
+        super().__init__()
+
+    def _parse_value(self, val):
+        if val.isdigit():
+            return self.id_param._parse_value(val)
+        else:
+            return self.str_param._parse_value(val)
+
+
 class BoolParameter(Parameter):
     """Representa un parámetro de tipo booleano.
 
@@ -491,7 +534,7 @@ class EndpointParameters():
 
 
 PARAMS_STATES = EndpointParameters(shared_params={
-    N.ID: StrParameter(),
+    N.ID: IdParameter(length=2),
     N.NAME: StrParameter(),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
@@ -503,9 +546,9 @@ PARAMS_STATES = EndpointParameters(shared_params={
 })
 
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
-    N.ID: StrParameter(),
+    N.ID: IdParameter(length=5),
     N.NAME: StrParameter(),
-    N.STATE: StrParameter(),
+    N.STATE: StrOrIdParameter(id_length=2),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
@@ -518,10 +561,10 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
 })
 
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
-    N.ID: StrParameter(),
+    N.ID: IdParameter(length=6),
     N.NAME: StrParameter(),
-    N.STATE: StrParameter(),
-    N.DEPT: StrParameter(),
+    N.STATE: StrOrIdParameter(id_length=2),
+    N.DEPT: StrOrIdParameter(id_length=5),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
@@ -535,11 +578,11 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
 })
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
-    N.ID: StrParameter(),
+    N.ID: IdParameter(length=11),
     N.NAME: StrParameter(),
-    N.STATE: StrParameter(),
-    N.DEPT: StrParameter(),
-    N.MUN: StrParameter(),
+    N.STATE: StrOrIdParameter(id_length=2),
+    N.DEPT: StrOrIdParameter(id_length=5),
+    N.MUN: StrOrIdParameter(id_length=6),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
@@ -556,8 +599,8 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrParameter(),
-    N.DEPT: StrParameter(),
+    N.STATE: StrOrIdParameter(id_length=2),
+    N.DEPT: StrOrIdParameter(id_length=5),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.DOOR_NUM,
                                           N.SOURCE],
@@ -572,11 +615,11 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 })
 
 PARAMS_STREETS = EndpointParameters(shared_params={
-    N.ID: StrParameter(),
+    N.ID: IdParameter(length=13),
     N.NAME: StrParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrParameter(),
-    N.DEPT: StrParameter(),
+    N.STATE: StrOrIdParameter(id_length=2),
+    N.DEPT: StrOrIdParameter(id_length=5),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.START_R, N.START_L, N.END_R,

@@ -30,3 +30,4 @@ INT_VAL_BIG = 'El número debe ser menor o igual que {}.'
 INT_VAL_BIG_GLOBAL = 'La suma de parámetros \'max\' debe ser menor o igual \
 que {}.'
 NOT_FOUND = 'No se encontró la URL especificada.'
+ID_PARAM_INVALID = 'El ID debe ser numérico y de longitud {}.'

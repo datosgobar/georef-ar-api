@@ -61,6 +61,18 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         data = self.get_response({'id': '06077'})
         self.assertListEqual([p['nombre'] for p in data], ['ARRECIFES'])
 
+    def test_id_invalid_search(self):
+        """La búsqueda por ID debe devolver error 400 cuando se
+        utiliza un ID no válido."""
+        status = self.get_response(params={'id': 99999}, status_only=True)
+        self.assertEqual(status, 400)
+
+    def test_short_id_search(self):
+        """La búsqueda por ID debe devolver la entidad correcta incluso si
+        se omiten ceros iniciales."""
+        data = self.get_response({'id': '2007'})
+        self.assertTrue(data[0]['id'] == '02007')
+
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
