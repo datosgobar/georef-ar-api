@@ -2,7 +2,7 @@
     "openapi": "3.0.1",
     "info": {
         "title": "georef-api",
-        "description": "API del servicio de normalización y geocodificación para direcciones de Argentina.",
+        "description": "API del servicio de normalización y geocodificación para direcciones de Argentina.\n\nPara ver ejemplos de uso de la API, dirigirse a la [página de GitHub del proyecto](https://github.com/datosgobar/georef-api).",
         "contact": {
             "name": "Equipo de Datos de la Nación Argentina",
             "url": "https://github.com/datosgobar",
@@ -20,9 +20,6 @@
 	    "url": "http://apis.datos.gob.ar/georef/api"
 	}
     ],
-    "externalDocs": {
-        "url": "https://github.com/datosgobar/georef-api"
-    },
     "components": {
         "schemas": {
             "provincia_sin_coordenadas": {
@@ -759,6 +756,7 @@
 	    "param_max": {
 		"type": "integer",
 		"minimum": 1,
+		"maximum": 5000,
 		"example": 10
 	    },
 	    "param_campos": {
