@@ -42,6 +42,7 @@ MUNICIPALITIES = [
     (['060861'], 'VICENTE LÓPEZ')
 ]
 
+
 class SearchMunicipalitiesTest(SearchEntitiesTest):
     """Pruebas de búsqueda de municipios."""
 
@@ -68,12 +69,14 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
     def test_id_search(self):
         """La búsqueda por ID debe devolver el municipio correspondiente."""
         data = self.get_response({'id': '060182'})
-        self.assertListEqual([p['nombre'] for p in data], ['CORONEL DE MARINA LEONARDO ROSALES'])
+        self.assertListEqual([p['nombre'] for p in data],
+                             ['CORONEL DE MARINA LEONARDO ROSALES'])
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['fuente', 'id', 'lat', 'lon', 'nombre', 'provincia', 'departamento'])
+        fields = sorted(['fuente', 'id', 'lat', 'lon', 'nombre', 'provincia',
+                         'departamento'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
@@ -97,7 +100,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
         data = [
-            asciifold(dep['nombre']) 
+            asciifold(dep['nombre'])
             for dep
             in self.get_response({'orden': 'nombre', 'max': 25})
         ]
@@ -120,7 +123,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         self.assert_name_search_id_matches(MUNICIPALITIES, exact=True)
 
     def test_name_exact_search_ignores_case(self):
-        """La búsqueda por nombre exacto debe ignorar mayúsculas y 
+        """La búsqueda por nombre exacto debe ignorar mayúsculas y
         minúsculas."""
         expected = [
             (['060408'], 'HURLINGHAM'),
@@ -164,16 +167,16 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         """La búsqueda por nombre aproximado debe tener una tolerancia
         de AUTO:4,8."""
         expected = [
-            (['060408'], 'RLINGHAM'),     # -2 caracteres (de 8+)
-            (['060408'], 'URLINGHAM'),    # -1 caracteres (de 8+)
-            (['060408'], 'hHURLINGHAM'),  # +1 caracteres (de 8+)
-            (['060408'], 'hHURLINGHAMm'), # +2 caracteres (de 8+)
-            (['142448'], 'GUIZAMÓN'),     # -2 caracteres (de 8+)
-            (['142448'], 'EGUIZAMÓN'),    # -1 caracteres (de 8+)
-            (['142448'], 'lLEGUIZAMÓN'),  # +1 caracteres (de 8+)
-            (['142448'], 'lLEGUIZAMÓNn'), # +2 caracteres (de 8+)
-            (['142238'], 'INCEN'),        # -1 caracteres (de 4-7)
-            (['142238'], 'pPINCEN'),      # +1 caracteres (de 4-7)
+            (['060408'], 'RLINGHAM'),      # -2 caracteres (de 8+)
+            (['060408'], 'URLINGHAM'),     # -1 caracteres (de 8+)
+            (['060408'], 'hHURLINGHAM'),   # +1 caracteres (de 8+)
+            (['060408'], 'hHURLINGHAMm'),  # +2 caracteres (de 8+)
+            (['142448'], 'GUIZAMÓN'),      # -2 caracteres (de 8+)
+            (['142448'], 'EGUIZAMÓN'),     # -1 caracteres (de 8+)
+            (['142448'], 'lLEGUIZAMÓN'),   # +1 caracteres (de 8+)
+            (['142448'], 'lLEGUIZAMÓNn'),  # +2 caracteres (de 8+)
+            (['142238'], 'INCEN'),         # -1 caracteres (de 4-7)
+            (['142238'], 'pPINCEN'),       # +1 caracteres (de 4-7)
         ]
 
         self.assert_name_search_id_matches(expected)
@@ -246,7 +249,8 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
 
         data = self.get_response({'departamento': dept_id})
         data.extend(self.get_response({'departamento': dept_name}))
-        data.extend(self.get_response({'departamento': dept_name, 'exacto': 1}))
+        data.extend(self.get_response({'departamento': dept_name,
+                                       'exacto': 1}))
 
         results = [mun['departamento']['id'] == dept_id for mun in data]
         self.assertTrue(all(results) and results)
@@ -285,7 +289,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
 
         results = self.get_response(method='POST', body=body)
         self.assertEqual(len(results), req_len)
-        
+
     def test_bulk_basic(self):
         """La búsqueda de una query sin parámetros debería funcionar
         correctamente."""

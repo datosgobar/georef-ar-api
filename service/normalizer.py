@@ -5,7 +5,7 @@ de los recursos que expone la API.
 """
 
 from service import data, params, formatter
-from service.names import *
+from service import names as N
 from flask import current_app
 from contextlib import contextmanager
 
@@ -75,12 +75,12 @@ def get_index_source(index):
         str: Nombre de la fuente.
 
     """
-    if index in [STATES, DEPARTMENTS, MUNICIPALITIES]:
-        return SOURCE_IGN
-    elif index in [SETTLEMENTS, LOCALITIES]:
-        return SOURCE_BAHRA
-    elif index == STREETS:
-        return SOURCE_INDEC
+    if index in [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES]:
+        return N.SOURCE_IGN
+    elif index in [N.SETTLEMENTS, N.LOCALITIES]:
+        return N.SOURCE_BAHRA
+    elif index == N.STREETS:
+        return N.SOURCE_INDEC
     else:
         raise ValueError(
             'No se pudo determinar la fuente de: {}'.format(index))
@@ -139,12 +139,12 @@ def process_entity_single(request, name, param_parser, key_translations,
 
     # Construir query a partir de parámetros
     query = translate_keys(qs_params, key_translations,
-                           ignore=[FLATTEN, FORMAT])
+                           ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
         key: qs_params[key]
-        for key in [FLATTEN, FIELDS, FORMAT]
+        for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in qs_params
     }
 
@@ -153,7 +153,7 @@ def process_entity_single(request, name, param_parser, key_translations,
 
     source = get_index_source(index)
     for match in result:
-        match[SOURCE] = source
+        match[N.SOURCE] = source
 
     return formatter.create_ok_response(name, result, fmt)
 
@@ -190,12 +190,12 @@ def process_entity_bulk(request, name, param_parser, key_translations, index):
     for parsed_params in body_params:
         # Construir query a partir de parámetros
         query = translate_keys(parsed_params, key_translations,
-                               ignore=[FLATTEN, FORMAT])
+                               ignore=[N.FLATTEN, N.FORMAT])
 
         # Construir reglas de formato a partir de parámetros
         fmt = {
             key: parsed_params[key]
-            for key in [FLATTEN, FIELDS]
+            for key in [N.FLATTEN, N.FIELDS]
             if key in parsed_params
         }
 
@@ -208,7 +208,7 @@ def process_entity_bulk(request, name, param_parser, key_translations, index):
     source = get_index_source(index)
     for result in results:
         for match in result:
-            match[SOURCE] = source
+            match[N.SOURCE] = source
 
     return formatter.create_ok_response_bulk(name, results, formats)
 
@@ -256,12 +256,12 @@ def process_state(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    return process_entity(request, STATES, params.PARAMS_STATES, {
-            ID: 'entity_id',
-            NAME: 'name',
-            EXACT: 'exact',
-            ORDER: 'order',
-            FIELDS: 'fields'
+    return process_entity(request, N.STATES, params.PARAMS_STATES, {
+            N.ID: 'entity_id',
+            N.NAME: 'name',
+            N.EXACT: 'exact',
+            N.ORDER: 'order',
+            N.FIELDS: 'fields'
     })
 
 
@@ -275,14 +275,15 @@ def process_department(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    return process_entity(request, DEPARTMENTS, params.PARAMS_DEPARTMENTS, {
-            ID: 'entity_id',
-            NAME: 'name',
-            STATE: 'state',
-            EXACT: 'exact',
-            ORDER: 'order',
-            FIELDS: 'fields'
-    })
+    return process_entity(request, N.DEPARTMENTS,
+                          params.PARAMS_DEPARTMENTS, {
+                              N.ID: 'entity_id',
+                              N.NAME: 'name',
+                              N.STATE: 'state',
+                              N.EXACT: 'exact',
+                              N.ORDER: 'order',
+                              N.FIELDS: 'fields'
+                          })
 
 
 def process_municipality(request):
@@ -295,15 +296,16 @@ def process_municipality(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    return process_entity(request, MUNICIPALITIES, params.PARAMS_MUNICIPALITIES, {
-            ID: 'entity_id',
-            NAME: 'name',
-            STATE: 'state',
-            DEPT: 'department',
-            EXACT: 'exact',
-            ORDER: 'order',
-            FIELDS: 'fields'
-    })
+    return process_entity(request, N.MUNICIPALITIES,
+                          params.PARAMS_MUNICIPALITIES, {
+                              N.ID: 'entity_id',
+                              N.NAME: 'name',
+                              N.STATE: 'state',
+                              N.DEPT: 'department',
+                              N.EXACT: 'exact',
+                              N.ORDER: 'order',
+                              N.FIELDS: 'fields'
+                          })
 
 
 def process_locality(request):
@@ -316,16 +318,16 @@ def process_locality(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    return process_entity(request, LOCALITIES, params.PARAMS_LOCALITIES, {
-            ID: 'entity_id',
-            NAME: 'name',
-            STATE: 'state',
-            DEPT: 'department',
-            MUN: 'municipality',
-            EXACT: 'exact',
-            ORDER: 'order',
-            FIELDS: 'fields'
-    }, index=SETTLEMENTS)
+    return process_entity(request, N.LOCALITIES, params.PARAMS_LOCALITIES, {
+            N.ID: 'entity_id',
+            N.NAME: 'name',
+            N.STATE: 'state',
+            N.DEPT: 'department',
+            N.MUN: 'municipality',
+            N.EXACT: 'exact',
+            N.ORDER: 'order',
+            N.FIELDS: 'fields'
+    }, index=N.SETTLEMENTS)
 
 
 def build_street_query_format(parsed_params):
@@ -343,21 +345,21 @@ def build_street_query_format(parsed_params):
     """
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
-        ID: 'street_id',
-        NAME: 'road_name',
-        STATE: 'state',
-        DEPT: 'department',
-        EXACT: 'exact',
-        FIELDS: 'fields',
-        ROAD_TYPE: 'road_type'
-    }, ignore=[FLATTEN, FORMAT])
+        N.ID: 'street_id',
+        N.NAME: 'road_name',
+        N.STATE: 'state',
+        N.DEPT: 'department',
+        N.EXACT: 'exact',
+        N.FIELDS: 'fields',
+        N.ROAD_TYPE: 'road_type'
+    }, ignore=[N.FLATTEN, N.FORMAT])
 
-    query['excludes'] = [GEOM]
+    query['excludes'] = [N.GEOM]
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
         key: parsed_params[key]
-        for key in [FLATTEN, FIELDS, FORMAT]
+        for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in parsed_params
     }
 
@@ -388,11 +390,11 @@ def process_street_single(request):
     es = get_elasticsearch()
     result = data.search_streets(es, [query])[0]
 
-    source = get_index_source(STREETS)
+    source = get_index_source(N.STREETS)
     for match in result:
-        match[SOURCE] = source
+        match[N.SOURCE] = source
 
-    return formatter.create_ok_response(STREETS, result, fmt)
+    return formatter.create_ok_response(N.STREETS, result, fmt)
 
 
 def process_street_bulk(request):
@@ -410,7 +412,7 @@ def process_street_bulk(request):
         flask.Response: respuesta HTTP
     """
     body_params, errors = params.PARAMS_STREETS.parse_post_params(
-        request.args, request.json and request.json.get(STREETS))
+        request.args, request.json and request.json.get(N.STREETS))
 
     if any(errors):
         return formatter.create_param_error_response_bulk(errors)
@@ -425,12 +427,12 @@ def process_street_bulk(request):
     es = get_elasticsearch()
     results = data.search_streets(es, queries)
 
-    source = get_index_source(STREETS)
+    source = get_index_source(N.STREETS)
     for result in results:
         for match in result:
-            match[SOURCE] = source
+            match[N.SOURCE] = source
 
-    return formatter.create_ok_response_bulk(STREETS, results, formats)
+    return formatter.create_ok_response_bulk(N.STREETS, results, formats)
 
 
 def process_street(request):
@@ -471,24 +473,24 @@ def build_addresses_result(result, query, source):
 
     with get_postgres_db_connection(pool) as connection:
         for street in result:
-            if FULL_NAME in fields:
-                parts = street[FULL_NAME].split(',')
+            if N.FULL_NAME in fields:
+                parts = street[N.FULL_NAME].split(',')
                 parts[0] += ' {}'.format(number)
-                street[FULL_NAME] = ','.join(parts)
+                street[N.FULL_NAME] = ','.join(parts)
 
-            if DOOR_NUM in fields:
-                street[DOOR_NUM] = number
+            if N.DOOR_NUM in fields:
+                street[N.DOOR_NUM] = number
 
-            start_r = street.pop(START_R)
-            end_l = street.pop(END_L)
-            geom = street.pop(GEOM)
+            start_r = street.pop(N.START_R)
+            end_l = street.pop(N.END_L)
+            geom = street.pop(N.GEOM)
 
-            if LOCATION_LAT in fields or LOCATION_LON in fields:
+            if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
                 loc = data.street_number_location(connection, geom, number,
                                                   start_r, end_l)
-                street[LOCATION] = loc
+                street[N.LOCATION] = loc
 
-            street[SOURCE] = source
+            street[N.SOURCE] = source
 
 
 def build_address_query_format(parsed_params):
@@ -505,24 +507,24 @@ def build_address_query_format(parsed_params):
         tuple: diccionario de query y diccionario de formato
     """
     # Construir query a partir de parámetros
-    road_name, number = parsed_params.pop(ADDRESS)
+    road_name, number = parsed_params.pop(N.ADDRESS)
     parsed_params['road_name'] = road_name
     parsed_params['number'] = number
 
     query = translate_keys(parsed_params, {
-        DEPT: 'department',
-        STATE: 'state',
-        EXACT: 'exact',
-        ROAD_TYPE: 'road_type'
-    }, ignore=[FLATTEN, FORMAT, FIELDS])
+        N.DEPT: 'department',
+        N.STATE: 'state',
+        N.EXACT: 'exact',
+        N.ROAD_TYPE: 'road_type'
+    }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])
 
-    query['fields'] = parsed_params[FIELDS] + [GEOM, START_R, END_L]
-    query['excludes'] = [START_L, END_R]
+    query['fields'] = parsed_params[N.FIELDS] + [N.GEOM, N.START_R, N.END_L]
+    query['excludes'] = [N.START_L, N.END_R]
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
         key: parsed_params[key]
-        for key in [FLATTEN, FIELDS, FORMAT]
+        for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in parsed_params
     }
 
@@ -553,10 +555,10 @@ def process_address_single(request):
     es = get_elasticsearch()
     result = data.search_streets(es, [query])[0]
 
-    source = get_index_source(STREETS)
+    source = get_index_source(N.STREETS)
     build_addresses_result(result, query, source)
 
-    return formatter.create_ok_response(ADDRESSES, result, fmt)
+    return formatter.create_ok_response(N.ADDRESSES, result, fmt)
 
 
 def process_address_bulk(request):
@@ -574,7 +576,7 @@ def process_address_bulk(request):
         flask.Response: respuesta HTTP
     """
     body_params, errors = params.PARAMS_ADDRESSES.parse_post_params(
-        request.args, request.json and request.json.get(ADDRESSES))
+        request.args, request.json and request.json.get(N.ADDRESSES))
 
     if any(errors):
         return formatter.create_param_error_response_bulk(errors)
@@ -589,11 +591,11 @@ def process_address_bulk(request):
     es = get_elasticsearch()
     results = data.search_streets(es, queries)
 
-    source = get_index_source(STREETS)
+    source = get_index_source(N.STREETS)
     for result, query in zip(results, queries):
         build_addresses_result(result, query, source)
 
-    return formatter.create_ok_response_bulk(ADDRESSES, results, formats)
+    return formatter.create_ok_response_bulk(N.ADDRESSES, results, formats)
 
 
 def process_address(request):
@@ -632,8 +634,8 @@ def build_place_result(query, dept, muni):
 
     """
     empty_entity = {
-        ID: None,
-        NAME: None
+        N.ID: None,
+        N.NAME: None
     }
 
     if not dept:
@@ -645,17 +647,17 @@ def build_place_result(query, dept, muni):
         # Remover la provincia del departamento y colocarla directamente
         # en el resultado. Haciendo esto se logra evitar una consulta
         # al índice de provincias.
-        state = dept.pop(STATE)
+        state = dept.pop(N.STATE)
         muni = muni or empty_entity.copy()
-        source = get_index_source(DEPARTMENTS)
+        source = get_index_source(N.DEPARTMENTS)
 
     place = {
-        STATE: state,
-        DEPT: dept,
-        MUN: muni,
-        LAT: query['lat'],
-        LON: query['lon'],
-        SOURCE: source
+        N.STATE: state,
+        N.DEPT: dept,
+        N.MUN: muni,
+        N.LAT: query['lat'],
+        N.LON: query['lon'],
+        N.SOURCE: source
     }
 
     return place
@@ -674,12 +676,12 @@ def build_place_query_format(parsed_params):
         tuple: diccionario de query y diccionario de formato
     """
     # Construir query a partir de parámetros
-    query = translate_keys(parsed_params, {}, ignore=[FLATTEN, FORMAT])
+    query = translate_keys(parsed_params, {}, ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
         key: parsed_params[key]
-        for key in [FLATTEN, FIELDS, FORMAT]
+        for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in parsed_params
     }
 
@@ -704,20 +706,20 @@ def process_place_queries(es, queries):
         dept_queries.append({
             'lat': query['lat'],
             'lon': query['lon'],
-            'fields': [ID, NAME, STATE]
+            'fields': [N.ID, N.NAME, N.STATE]
         })
 
-    departments = data.search_places(es, DEPARTMENTS, dept_queries)
+    departments = data.search_places(es, N.DEPARTMENTS, dept_queries)
 
     muni_queries = []
     for query in queries:
         muni_queries.append({
             'lat': query['lat'],
             'lon': query['lon'],
-            'fields': [ID, NAME]
+            'fields': [N.ID, N.NAME]
         })
 
-    munis = data.search_places(es, MUNICIPALITIES, muni_queries)
+    munis = data.search_places(es, N.MUNICIPALITIES, muni_queries)
 
     places = []
     for query, dept, muni in zip(queries, departments, munis):
@@ -750,7 +752,7 @@ def process_place_single(request):
     es = get_elasticsearch()
     result = process_place_queries(es, [query])[0]
 
-    return formatter.create_ok_response(PLACE, result, fmt,
+    return formatter.create_ok_response(N.PLACE, result, fmt,
                                         iterable_result=False)
 
 
@@ -769,7 +771,7 @@ def process_place_bulk(request):
         flask.Response: respuesta HTTP
     """
     body_params, errors = params.PARAMS_PLACE.parse_post_params(
-        request.args, request.json and request.json.get(PLACES))
+        request.args, request.json and request.json.get(N.PLACES))
 
     if any(errors):
         return formatter.create_param_error_response_bulk(errors)
@@ -784,7 +786,7 @@ def process_place_bulk(request):
     es = get_elasticsearch()
     results = process_place_queries(es, queries)
 
-    return formatter.create_ok_response_bulk(PLACE, results, formats,
+    return formatter.create_ok_response_bulk(N.PLACE, results, formats,
                                              iterable_result=False)
 
 

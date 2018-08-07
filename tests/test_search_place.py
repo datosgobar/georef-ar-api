@@ -1,4 +1,5 @@
 import random
+import unittest
 from service import formatter
 from . import SearchEntitiesTest
 
@@ -168,7 +169,7 @@ class SearchPlaceTest(SearchEntitiesTest):
         """Los resultados de una query envíada vía bulk deberían ser idénticos a
         los resultados de una query individual (GET)."""
         place = PLACES[0]
-        
+
         queries = [
             {
                 'lat': place[0],

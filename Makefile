@@ -34,3 +34,6 @@ test_mock: check_config_file
 	python -m unittest tests/test_mock_*
 
 test_all: test_live test_mock
+
+code_style:
+	flake8 tests service scripts

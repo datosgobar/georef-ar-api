@@ -159,7 +159,8 @@ def main():
                     logging.error('{} | "/{}" | {} | {} seg.'
                                   .format('GET', query, response_status,
                                           response_time))
-            logging.info('Consultas ejecutadas con éxito: {}.'.format(query_ok))
+            logging.info(
+                'Consultas ejecutadas con éxito: {}.'.format(query_ok))
             logging.info('Consultas ejecutadas con errores: {}.'
                          .format(query_error))
         logging.info('{} consultas ejecutadas en {} seg.'

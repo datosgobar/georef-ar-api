@@ -15,7 +15,6 @@ import pstats
 import io
 import subprocess
 import os
-import logging
 import time
 
 MAX_ROWS = 20

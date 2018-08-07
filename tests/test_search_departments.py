@@ -1,4 +1,5 @@
 import random
+import unittest
 from . import SearchEntitiesTest, asciifold
 from service import formatter
 from .test_search_states import STATES
@@ -64,7 +65,7 @@ class SearchDepartmentsTest(SearchEntitiesTest):
     def test_id_invalid_search(self):
         """La búsqueda por ID debe devolver error 400 cuando se
         utiliza un ID no válido."""
-        status = self.get_response(params={'id': 99999}, status_only=True)
+        status = self.get_response(params={'id': 999999}, status_only=True)
         self.assertEqual(status, 400)
 
     def test_short_id_search(self):
@@ -144,12 +145,6 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         ]
 
         self.assert_name_search_id_matches(expected, exact=True)
-
-    def test_id_invalid_search(self):
-        """La búsqueda por ID debe devolver 0 resultados cuando se
-        utiliza un ID no existente."""
-        data = self.get_response({'id': '99999'})
-        self.assertTrue(len(data) == 0)
 
     def test_name_exact_gibberish_search(self):
         """La búsqueda por nombre exacto debe devolver 0 resultados cuando se
@@ -279,7 +274,8 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         })
 
         first = results[0]
-        self.assertTrue(len(results) == 1 and len(first['departamentos']) == 10)
+        self.assertTrue(
+            len(results) == 1 and len(first['departamentos']) == 10)
 
     def test_bulk_equivalent(self):
         """Los resultados de una query envíada vía bulk deberían ser idénticos a

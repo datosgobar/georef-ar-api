@@ -156,7 +156,7 @@ class SearchStreetsTest(SearchEntitiesTest):
 
         results = self.get_response(method='POST', body=body)
         self.assertEqual(len(results), req_len)
-        
+
     def test_bulk_basic(self):
         """La búsqueda de una query sin parámetros debería funcionar
         correctamente."""

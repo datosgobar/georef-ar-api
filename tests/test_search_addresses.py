@@ -158,10 +158,10 @@ class SearchAddressesTest(SearchEntitiesTest):
     def test_address_search_fuzziness(self):
         """La búsqueda aproximada debe tener una tolerancia de AUTO:4,8."""
         expected = [
-            (['0676305002780'], 'RACONDEGUI 500'),     # -2 caracteres (de 8+)
-            (['0676305002780'], 'ARACONDEGUI 500'),    # -1 caracteres (de 8+)
-            (['0676305002780'], 'zZARACONDEGUI 500'),  # +1 caracteres (de 8+)
-            (['0676305002780'], 'zZARACONDEGUIi 500'), # +2 caracteres (de 8+)
+            (['0676305002780'], 'RACONDEGUI 500'),      # -2 caracteres (de 8+)
+            (['0676305002780'], 'ARACONDEGUI 500'),     # -1 caracteres (de 8+)
+            (['0676305002780'], 'zZARACONDEGUI 500'),   # +1 caracteres (de 8+)
+            (['0676305002780'], 'zZARACONDEGUIi 500'),  # +2 caracteres (de 8+)
             (['0202801006430'], 'NCLAN 3000'),         # -1 caracteres (de 4-7)
             (['0202801006430'], 'iINCLAN 3000')        # +1 caracteres (de 4-7)
         ]
@@ -172,8 +172,8 @@ class SearchAddressesTest(SearchEntitiesTest):
         """La búsqueda debe funcionar cuando la altura epecificada se encuentra
          dentro del límite inferior derecho y el límite superior izquierdo."""
         expected = [
-            (['1401401002760'], 'BARTOLOME ARGENSOLA 100'), # desde_d
-            (['1401401002760'], 'BARTOLOME ARGENSOLA 1999') # hasta_i
+            (['1401401002760'], 'BARTOLOME ARGENSOLA 100'),  # desde_d
+            (['1401401002760'], 'BARTOLOME ARGENSOLA 1999')  # hasta_i
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -245,7 +245,7 @@ class SearchAddressesTest(SearchEntitiesTest):
     def test_filter_by_state_name(self):
         """Se debe poder filtrar los resultados por nombre de provincia."""
         validations = []
-        
+
         states = [
             ('02', 'CIUDAD AUTÓNOMA DE BUENOS AIRES'),
             ('06', 'BUENOS AIRES'),
@@ -268,7 +268,7 @@ class SearchAddressesTest(SearchEntitiesTest):
     def test_filter_by_state_id(self):
         """Se debe poder filtrar los resultados por ID de provincia."""
         validations = []
-        
+
         states = [
             ('02', 'CIUDAD AUTÓNOMA DE BUENOS AIRES'),
             ('06', 'BUENOS AIRES'),
@@ -286,7 +286,7 @@ class SearchAddressesTest(SearchEntitiesTest):
             ))
 
         self.assertTrue(validations and all(validations))
-        
+
     def test_filter_by_department_name(self):
         """Se debe poder filtrar los resultados por nombre de departamento."""
         validations = []
@@ -334,7 +334,7 @@ class SearchAddressesTest(SearchEntitiesTest):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""
         params = ['direccion', 'tipo', 'departamento', 'provincia', 'max',
-            'campos']
+                  'campos']
         self.assert_empty_params_return_400(params)
 
     def test_unknown_param_returns_400(self):

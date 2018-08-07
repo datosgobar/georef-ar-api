@@ -90,7 +90,7 @@ class SearchLocalityTest(SearchEntitiesTest):
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
         data = [
-            asciifold(dep['nombre']) 
+            asciifold(dep['nombre'])
             for dep
             in self.get_response({'orden': 'nombre', 'max': 25})
         ]
@@ -113,7 +113,7 @@ class SearchLocalityTest(SearchEntitiesTest):
         self.assert_name_search_id_matches(LOCALITIES, exact=True)
 
     def test_name_exact_search_ignores_case(self):
-        """La búsqueda por nombre exacto debe ignorar mayúsculas y 
+        """La búsqueda por nombre exacto debe ignorar mayúsculas y
         minúsculas."""
         expected = [
             (['14098090000'], 'CORONEL BAIGORRIA'),
@@ -138,7 +138,8 @@ class SearchLocalityTest(SearchEntitiesTest):
     def test_id_invalid_search(self):
         """La búsqueda por ID debe devolver error 400 cuando se
         utiliza un ID no válido."""
-        status = self.get_response(params={'id': 9999999999999}, status_only=True)
+        status = self.get_response(params={'id': 9999999999999},
+                                   status_only=True)
         self.assertEqual(status, 400)
 
     def test_short_id_search(self):
@@ -170,9 +171,9 @@ class SearchLocalityTest(SearchEntitiesTest):
             (['06819020000'], 'LDUNGARAY'),     # -2 caracteres (de 8+)
             (['06819020000'], 'ALDUNGARAY'),    # -1 caracteres (de 8+)
             (['06819020000'], 'sSALDUNGARAY'),  # +1 caracteres (de 8+)
-            (['06819020000'], 'sSALDUNGARAYy'), # +2 caracteres (de 8+)
-            (['82098050000'], 'OMANG'),         # -1 caracteres (de 4-7)
-            (['82098050000'], 'rROMANG'),       # +1 caracteres (de 4-7)
+            (['06819020000'], 'sSALDUNGARAYy'),  # +2 caracteres (de 8+)
+            (['82098050000'], 'OMANG'),          # -1 caracteres (de 4-7)
+            (['82098050000'], 'rROMANG'),        # +1 caracteres (de 4-7)
         ]
 
         self.assert_name_search_id_matches(expected)
@@ -240,7 +241,10 @@ class SearchLocalityTest(SearchEntitiesTest):
 
         data = self.get_response({'departamento': dept_id})
         data.extend(self.get_response({'departamento': dept_name}))
-        data.extend(self.get_response({'departamento': dept_name, 'exacto': 1}))
+        data.extend(self.get_response({
+            'departamento': dept_name,
+            'exacto': 1
+        }))
 
         results = [loc['departamento']['id'] == dept_id for loc in data]
         self.assertTrue(all(results) and results)
@@ -293,7 +297,7 @@ class SearchLocalityTest(SearchEntitiesTest):
 
         results = self.get_response(method='POST', body=body)
         self.assertEqual(len(results), req_len)
-        
+
     def test_bulk_basic(self):
         """La búsqueda de una query sin parámetros debería funcionar
         correctamente."""
@@ -383,6 +387,6 @@ class SearchLocalityTest(SearchEntitiesTest):
             'max': '15'
         })
 
-        
+
 if __name__ == '__main__':
     unittest.main()

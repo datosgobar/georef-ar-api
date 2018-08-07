@@ -1,5 +1,6 @@
 from . import SearchEntitiesTest, asciifold
 import random
+import unittest
 
 
 STATES = [
@@ -28,6 +29,7 @@ STATES = [
     (['66'], 'SALTA'),
     (['90'], 'TUCUMÁN')
 ]
+
 
 class SearchStatesTest(SearchEntitiesTest):
     """Pruebas de búsqueda de provincias."""
@@ -106,7 +108,7 @@ class SearchStatesTest(SearchEntitiesTest):
         self.assert_name_search_id_matches(STATES, exact=True)
 
     def test_name_exact_search_ignores_case(self):
-        """La búsqueda por nombre exacto debe ignorar mayúsculas y 
+        """La búsqueda por nombre exacto debe ignorar mayúsculas y
         minúsculas."""
         expected = [
             (['54'], 'MISIONES'),
@@ -156,10 +158,10 @@ class SearchStatesTest(SearchEntitiesTest):
         """La búsqueda por nombre aproximado debe tener una tolerancia
         de AUTO:4,8."""
         expected = [
-            (['18'], 'rrientes'),     # -2 caracteres (de 8+)
-            (['18'], 'orrientes'),    # -1 caracteres (de 8+)
-            (['18'], 'cCorrientes'),  # +1 caracteres (de 8+)
-            (['18'], 'cCorrientesS'), # +2 caracteres (de 8+)
+            (['18'], 'rrientes'),      # -2 caracteres (de 8+)
+            (['18'], 'orrientes'),     # -1 caracteres (de 8+)
+            (['18'], 'cCorrientes'),   # +1 caracteres (de 8+)
+            (['18'], 'cCorrientesS'),  # +2 caracteres (de 8+)
             (['38'], 'ujuy'),       # -1 caracteres (de 4-7)
             (['38'], 'jJujuy'),     # +1 caracteres (de 4-7)
             (['66'], 'alta'),       # -1 caracteres (de 4-7)
@@ -269,7 +271,8 @@ class SearchStatesTest(SearchEntitiesTest):
         })
 
         first = results[0]
-        self.assertTrue(len(results) == 1 and len(first['provincias']) == len(STATES))
+        self.assertTrue(
+            len(results) == 1 and len(first['provincias']) == len(STATES))
 
     def test_bulk_equivalent(self):
         """Los resultados de una query envíada vía bulk deberían ser idénticos a
