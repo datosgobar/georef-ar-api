@@ -376,6 +376,21 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
             'provincia': '22'
         })
 
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['municipio_id',
+                                       'municipio_nombre',
+                                       'municipio_lat',
+                                       'municipio_lon',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_id',
+                                       'departamento_nombre',
+                                       'municipio_fuente'])
+
 
 if __name__ == '__main__':
     unittest.main()

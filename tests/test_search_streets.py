@@ -230,6 +230,25 @@ class SearchStreetsTest(SearchEntitiesTest):
             'campos': 'nombre,id,tipo'
         })
 
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['calle_id',
+                                       'calle_nombre',
+                                       'calle_inicio_derecha',
+                                       'calle_inicio_izquierda',
+                                       'calle_fin_derecha',
+                                       'calle_fin_izquierda',
+                                       'calle_nomenclatura',
+                                       'calle_tipo',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_id',
+                                       'departamento_nombre',
+                                       'calle_fuente'])
+
 
 if __name__ == '__main__':
     unittest.main()

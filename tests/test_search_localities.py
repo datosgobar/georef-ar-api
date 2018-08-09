@@ -387,6 +387,24 @@ class SearchLocalityTest(SearchEntitiesTest):
             'max': '15'
         })
 
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['localidad_id',
+                                       'localidad_nombre',
+                                       'localidad_lat',
+                                       'localidad_lon',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_id',
+                                       'departamento_nombre',
+                                       'municipio_id',
+                                       'municipio_nombre',
+                                       'localidad_tipo',
+                                       'localidad_fuente'])
+
 
 if __name__ == '__main__':
     unittest.main()

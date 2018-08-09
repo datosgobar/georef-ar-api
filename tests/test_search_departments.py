@@ -350,6 +350,19 @@ class SearchDepartmentsTest(SearchEntitiesTest):
             'max': 10
         })
 
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['departamento_id',
+                                       'departamento_nombre',
+                                       'departamento_lat',
+                                       'departamento_lon',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_fuente'])
+
 
 if __name__ == '__main__':
     unittest.main()

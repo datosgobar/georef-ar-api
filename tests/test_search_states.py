@@ -337,6 +337,15 @@ class SearchStatesTest(SearchEntitiesTest):
             'nombre': 'foobarfoobar'
         })
 
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['provincia_id', 'provincia_nombre',
+                                       'provincia_lat', 'provincia_lon',
+                                       'provincia_fuente'])
+
     def test_geojson_format(self):
         """Se debería poder obtener resultados en formato
         GEOJSON (sin parámetros)."""

@@ -434,6 +434,41 @@ class SearchAddressesTest(SearchEntitiesTest):
             'direccion': 'foobarfoobar 100'
         })
 
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({
+            'formato': 'csv',
+            'direccion': COMMON_ADDRESS
+        }, fmt='csv')
+
+        headers = next(resp)
+        self.assertListEqual(headers, ['calle_id',
+                                       'calle_nombre',
+                                       'calle_altura',
+                                       'calle_nomenclatura',
+                                       'calle_tipo',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_id',
+                                       'departamento_nombre',
+                                       'direccion_lat',
+                                       'direccion_lon',
+                                       'calle_fuente'])
+
+    def test_csv_empty_value(self):
+        """Un valor vacío (None) debería estar representado como '' en CSV."""
+        resp = self.get_response({
+            'formato': 'csv',
+            'direccion': 'NAON 1200',
+            'departamento': 6427,  # 0 inicial agregado por API
+            'max': 1
+        }, fmt='csv')
+
+        next(resp)
+        row = next(resp)
+        self.assertTrue(row[-3] == '' and row[-2] == '')
+
 
 if __name__ == '__main__':
     unittest.main()

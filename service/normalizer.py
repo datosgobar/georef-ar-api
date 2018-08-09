@@ -111,7 +111,7 @@ def translate_keys(d, translations, ignore=None):
 
 
 def process_entity_single(request, name, param_parser, key_translations,
-                          index):
+                          csv_fields, index):
     """Procesa una request GET para consultar datos de una entidad.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -123,6 +123,8 @@ def process_entity_single(request, name, param_parser, key_translations,
         key_translations (dict): Traducciones de keys a utilizar para convertir
             el diccionario de parámetros del usuario a un diccionario
             representando una query a Elasticsearch.
+        csv_fields (dict): Diccionario a utilizar para modificar los campos
+            cuando se utiliza el formato CSV.
         index (str): Nombre del índice a consultar.
 
     Raises:
@@ -147,6 +149,7 @@ def process_entity_single(request, name, param_parser, key_translations,
         for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in qs_params
     }
+    fmt[N.CSV_FIELDS] = csv_fields
 
     es = get_elasticsearch()
     result = data.search_entities(es, index, [query])[0]
@@ -213,7 +216,8 @@ def process_entity_bulk(request, name, param_parser, key_translations, index):
     return formatter.create_ok_response_bulk(name, results, formats)
 
 
-def process_entity(request, name, param_parser, key_translations, index=None):
+def process_entity(request, name, param_parser, key_translations, csv_fields,
+                   index=None):
     """Procesa una request GET o POST para consultar datos de una entidad.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
     En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
@@ -226,6 +230,8 @@ def process_entity(request, name, param_parser, key_translations, index=None):
         key_translations (dict): Traducciones de keys a utilizar para convertir
             los diccionarios de parámetros del usuario a una lista de
             diccionarios representando las queries a Elasticsearch.
+        csv_fields (dict): Diccionario a utilizar para modificar los campos
+            cuando se utiliza el formato CSV.
         index (str): Nombre del índice a consultar. Por defecto, se utiliza
             el nombre de la entidad.
 
@@ -238,7 +244,7 @@ def process_entity(request, name, param_parser, key_translations, index=None):
     try:
         if request.method == 'GET':
             return process_entity_single(request, name, param_parser,
-                                         key_translations, index)
+                                         key_translations, csv_fields, index)
         else:
             return process_entity_bulk(request, name, param_parser,
                                        key_translations, index)
@@ -262,7 +268,7 @@ def process_state(request):
             N.EXACT: 'exact',
             N.ORDER: 'order',
             N.FIELDS: 'fields'
-    })
+    }, formatter.STATES_CSV_FIELDS)
 
 
 def process_department(request):
@@ -283,7 +289,7 @@ def process_department(request):
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
                               N.FIELDS: 'fields'
-                          })
+                          }, formatter.DEPARTMENTS_CSV_FIELDS)
 
 
 def process_municipality(request):
@@ -305,7 +311,7 @@ def process_municipality(request):
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
                               N.FIELDS: 'fields'
-                          })
+                          }, formatter.MUNICIPALITIES_CSV_FIELDS)
 
 
 def process_locality(request):
@@ -327,7 +333,7 @@ def process_locality(request):
             N.EXACT: 'exact',
             N.ORDER: 'order',
             N.FIELDS: 'fields'
-    }, index=N.SETTLEMENTS)
+    }, formatter.LOCALITIES_CSV_FIELDS, index=N.SETTLEMENTS)
 
 
 def build_street_query_format(parsed_params):
@@ -362,6 +368,7 @@ def build_street_query_format(parsed_params):
         for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in parsed_params
     }
+    fmt[N.CSV_FIELDS] = formatter.STREETS_CSV_FIELDS
 
     return query, fmt
 
@@ -527,6 +534,7 @@ def build_address_query_format(parsed_params):
         for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in parsed_params
     }
+    fmt[N.CSV_FIELDS] = formatter.ADDRESSES_CSV_FIELDS
 
     return query, fmt
 
