@@ -1,6 +1,12 @@
 CFG_PATH ?= config/georef.cfg
 TIMEOUT ?= 320
 
+docs:
+	mkdocs build
+	$(BROWSER) site/index.html
+
+servedocs:
+	mkdocs serve
 
 check_config_file:
 	@test -f $(CFG_PATH) || \

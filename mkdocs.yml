@@ -1,0 +1,39 @@
+site_name: API del Servicio de Normalización de Datos Geográficos de Argentina
+site_url: http://apis.datos.gob.ar/georef/
+site_description: Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina
+site_author: Datos Argentina
+
+repo_url: https://github.com/datosgobar/georef-api
+edit_uri: ""
+
+nav:
+  - Inicio: index.md
+  - Usuarios:
+    - Comenzar a usar la API: quick_start.md
+    - Referencia API: https://datosgobar.github.io/georef-api/
+  - Desarrolladores:
+    - Desarrollo: 'developers/georef-api-development.md'
+    - Producción: 'developers/georef-api-production.md'
+    - Proceso de ETL: 'developers/georef-api-data.md'
+
+theme:
+  name: readthedocs
+  highlightjs: true
+  hljs_languages:
+      - yaml
+      - django
+      - python
+
+extra_css:
+  - css/extra.css
+
+plugins:
+  - search:
+      lang: es
+
+markdown_extensions:
+  - toc:
+      permalink: True
+  - attr_list
+  - fenced_code
+  - sane_lists
