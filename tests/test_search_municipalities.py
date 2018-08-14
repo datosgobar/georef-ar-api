@@ -70,7 +70,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         """La búsqueda por ID debe devolver el municipio correspondiente."""
         data = self.get_response({'id': '060182'})
         self.assertListEqual([p['nombre'] for p in data],
-                             ['CORONEL DE MARINA LEONARDO ROSALES'])
+                             ['Coronel de Marina Leonardo Rosales'])
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""

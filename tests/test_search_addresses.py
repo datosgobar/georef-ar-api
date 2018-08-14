@@ -270,9 +270,9 @@ class SearchAddressesTest(SearchEntitiesTest):
         validations = []
 
         states = [
-            ('02', 'CIUDAD AUTÓNOMA DE BUENOS AIRES'),
-            ('06', 'BUENOS AIRES'),
-            ('14', 'CÓRDOBA')
+            ('02', 'Ciudad Autónoma de Buenos Aires'),
+            ('06', 'Buenos Aires'),
+            ('14', 'Córdoba')
         ]
 
         for state_code, state_name in states:
@@ -313,9 +313,9 @@ class SearchAddressesTest(SearchEntitiesTest):
         """Se debe poder filtrar los resultados por ID de departamento."""
         validations = []
         departments = [
-            ('02007', 'COMUNA 1'),
-            ('02105', 'COMUNA 15'),
-            ('66147', 'ROSARIO DE LERMA')
+            ('02007', 'Comuna 1'),
+            ('02105', 'Comuna 15'),
+            ('66147', 'Rosario de Lerma')
         ]
 
         for dept_code, dept_name in departments:

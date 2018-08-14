@@ -4,30 +4,30 @@ import unittest
 
 
 STATES = [
-    (['54'], 'MISIONES'),
-    (['74'], 'SAN LUIS'),
-    (['86'], 'SANTIAGO DEL ESTERO'),
-    (['94'], 'TIERRA DEL FUEGO, ANTÁRTIDA E ISLAS DEL ATLÁNTICO SUR'),
-    (['18'], 'CORRIENTES'),
-    (['30'], 'ENTRE RÍOS'),
-    (['34'], 'FORMOSA'),
-    (['38'], 'JUJUY'),
-    (['46'], 'LA RIOJA'),
-    (['82'], 'SANTA FE'),
-    (['06'], 'BUENOS AIRES'),
-    (['14'], 'CÓRDOBA'),
-    (['22'], 'CHACO'),
-    (['58'], 'NEUQUÉN'),
-    (['78'], 'SANTA CRUZ'),
-    (['02'], 'CIUDAD AUTÓNOMA DE BUENOS AIRES'),
-    (['26'], 'CHUBUT'),
-    (['50'], 'MENDOZA'),
-    (['62'], 'RÍO NEGRO'),
-    (['70'], 'SAN JUAN'),
-    (['10'], 'CATAMARCA'),
-    (['42'], 'LA PAMPA'),
-    (['66'], 'SALTA'),
-    (['90'], 'TUCUMÁN')
+    (['54'], 'Misiones'),
+    (['74'], 'San Luis'),
+    (['86'], 'Santiago del Estero'),
+    (['94'], 'Tierra del Fuego, Antártida e Islas del Atlántico Sur'),
+    (['18'], 'Corrientes'),
+    (['30'], 'Entre Ríos'),
+    (['34'], 'Formosa'),
+    (['38'], 'Jujuy'),
+    (['46'], 'La Rioja'),
+    (['82'], 'Santa Fe'),
+    (['06'], 'Buenos Aires'),
+    (['14'], 'Córdoba'),
+    (['22'], 'Chaco'),
+    (['58'], 'Neuquén'),
+    (['78'], 'Santa Cruz'),
+    (['02'], 'Ciudad Autónoma de Buenos Aires'),
+    (['26'], 'Chubut'),
+    (['50'], 'Mendoza'),
+    (['62'], 'Río Negro'),
+    (['70'], 'San Juan'),
+    (['10'], 'Catamarca'),
+    (['42'], 'La Pampa'),
+    (['66'], 'Salta'),
+    (['90'], 'Tucumán')
 ]
 
 
@@ -62,7 +62,7 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_id_search(self):
         """La búsqueda por ID debe devolver la provincia correspondiente."""
         data = self.get_response({'id': '06'})
-        self.assertListEqual([p['nombre'] for p in data], ['BUENOS AIRES'])
+        self.assertListEqual([p['nombre'] for p in data], ['Buenos Aires'])
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""

@@ -60,7 +60,7 @@ class SearchDepartmentsTest(SearchEntitiesTest):
     def test_id_search(self):
         """La búsqueda por ID debe devolver el depto. correspondiente."""
         data = self.get_response({'id': '06077'})
-        self.assertListEqual([p['nombre'] for p in data], ['ARRECIFES'])
+        self.assertListEqual([p['nombre'] for p in data], ['Arrecifes'])
 
     def test_id_invalid_search(self):
         """La búsqueda por ID debe devolver error 400 cuando se
