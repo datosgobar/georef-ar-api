@@ -64,3 +64,4 @@ db.sqlite3
 environment.sh
 georef.cfg
 logging.ini
+/site/

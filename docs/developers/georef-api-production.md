@@ -51,13 +51,13 @@ CREATE EXTENSION postgis;
 
     `(venv) $ cp config/logging.example.ini config/logging.ini`
 	
-- Completar el archivo `config/logging.ini` con los datos apropiados.
+- Completar el archivo `config/logging.ini` con los valores apropiados.
     
 - Copiar el archivo de configuración:
 
     `(venv) $ cp config/georef.example.cfg config/georef.cfg`
     
-- Completar el archivo `config/georef.cfg` con los datos apropiados.
+- Completar el archivo `config/georef.cfg` con los valores apropiados.
  
 ### Elasticsearch
 
@@ -95,7 +95,7 @@ Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más s
 
 ### Archivos de datos
 
-- Se debe contar con los archivos de datos para entidades y calles mencionados al comienzo de la guía, y sus rutas deben estar configuradas en el archivo `config/georef.cfg`.
+- El archivo de configuración `config/georef.cfg` debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en `georef.example.cfg`) utilizan el portal de descargas `infra.datos.gob.ar`, que siempre provee la última versión de los archivos JSON disponibles.
 
 - Adicionalmente, se debe crear un archivo `georef_synonyms.txt`, en la ubicación del archivo de configuración de Elasticsearch (`$ES_HOME/config`), en cada nodo. El archivo contiene la base de sinónimos utilizados al momento de indexar documentos. Su contenido puede ser vacío, y debe ser idéntico por cada nodo.
 
@@ -113,7 +113,21 @@ Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más s
         
 - Listar los índices creados, y otros datos adicionales:
 
-    `(venv) $ make index_stats`
+    `(venv) $ make print_index_stats`
+
+### Re-indexar datos
+
+Si se modifican los archivos de datos JSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:
+
+- Si se desea actualizar los índices con los nuevos datos, solo si los datos entrantes son más recientes, se puede utilizar nuevamente:
+  
+    `(venv) $ make index`
+    
+- Si se desea forzar un re-indexado, es decir, si se desea indexar los datos nuevamente sin importar la fecha de creación, se debe utilizar la siguiente receta:
+
+    `(venv) $ make index_forced`
+	
+  La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en `config/georef.cfg`.
 
 ## Correr API
 
@@ -153,8 +167,8 @@ Agregar la configuración de los servicios `gunicorn` y `nginx`.
 
     `# systemctl restart nginx.service`
 
-## Pruebas
+## Tests
 
-- Pruebas unitarias (los servicios Elasticsearch y PostgreSQL deben estar activos y con los datos apropiados cargados):
+- Tests unitarios (los servicios Elasticsearch y PostgreSQL deben estar activos y con los datos apropiados cargados):
 
     `(venv) $ make test_all`

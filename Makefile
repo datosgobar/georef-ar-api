@@ -1,6 +1,8 @@
 CFG_PATH ?= config/georef.cfg
 TIMEOUT ?= 320
 
+.PHONY: docs
+
 docs:
 	mkdocs build
 	$(BROWSER) site/index.html
