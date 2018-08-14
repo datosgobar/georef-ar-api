@@ -15,6 +15,9 @@ check_config_file:
 index: check_config_file
 	python scripts/utils_script.py -m index -t $(TIMEOUT) -c ../$(CFG_PATH)
 
+index_forced: check_config_file
+	python scripts/utils_script.py -m index -t $(TIMEOUT) -c ../$(CFG_PATH) -f
+
 index_stats: check_config_file
 	python scripts/utils_script.py -m index_stats -t $(TIMEOUT) -i -c ../$(CFG_PATH)
 
