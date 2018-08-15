@@ -58,8 +58,8 @@ class SearchLocalityTest(SearchEntitiesTest):
         fields = sorted([
             'fuente',
             'id',
-            'lat',
-            'lon',
+            'centroide_lat',
+            'centroide_lon',
             'nombre',
             'provincia',
             'departamento',
@@ -72,12 +72,13 @@ class SearchLocalityTest(SearchEntitiesTest):
         """Los campos de las localidades devueltas deben ser filtrables."""
         fields_lists = [
             ['fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'lat', 'lon', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre', 'provincia.id'],
+            ['fuente', 'id', 'centroide_lat', 'centroide_lon', 'nombre'],
+            ['fuente', 'id', 'centroide_lat', 'nombre'],
+            ['fuente', 'id', 'centroide_lat', 'nombre', 'provincia.id'],
             ['departamento.id', 'fuente', 'id', 'nombre'],
             ['fuente', 'id', 'municipio.id', 'nombre', 'provincia.nombre']
         ]
+        fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
 
         for fields in fields_lists:
@@ -386,6 +387,24 @@ class SearchLocalityTest(SearchEntitiesTest):
             'nombre': 'BARRIO',
             'max': '15'
         })
+
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['localidad_id',
+                                       'localidad_nombre',
+                                       'localidad_centroide_lat',
+                                       'localidad_centroide_lon',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_id',
+                                       'departamento_nombre',
+                                       'municipio_id',
+                                       'municipio_nombre',
+                                       'localidad_tipo',
+                                       'localidad_fuente'])
 
 
 if __name__ == '__main__':

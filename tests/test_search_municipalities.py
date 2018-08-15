@@ -70,24 +70,25 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         """La búsqueda por ID debe devolver el municipio correspondiente."""
         data = self.get_response({'id': '060182'})
         self.assertListEqual([p['nombre'] for p in data],
-                             ['CORONEL DE MARINA LEONARDO ROSALES'])
+                             ['Coronel de Marina Leonardo Rosales'])
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['fuente', 'id', 'lat', 'lon', 'nombre', 'provincia',
-                         'departamento'])
+        fields = sorted(['fuente', 'id', 'centroide_lat', 'centroide_lon',
+                         'nombre', 'provincia', 'departamento'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de los municipios devueltos deben ser filtrables."""
         fields_lists = [
             ['fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'lat', 'lon', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre', 'provincia.id'],
+            ['fuente', 'id', 'centroide_lat', 'centroide_lon', 'nombre'],
+            ['fuente', 'id', 'centroide_lat', 'nombre'],
+            ['fuente', 'id', 'centroide_lat', 'nombre', 'provincia.id'],
             ['departamento.nombre', 'fuente', 'id', 'nombre']
         ]
+        fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
 
         for fields in fields_lists:
@@ -375,6 +376,21 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
             'nombre': 'COLONIA',
             'provincia': '22'
         })
+
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['municipio_id',
+                                       'municipio_nombre',
+                                       'municipio_centroide_lat',
+                                       'municipio_centroide_lon',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_id',
+                                       'departamento_nombre',
+                                       'municipio_fuente'])
 
 
 if __name__ == '__main__':

@@ -60,7 +60,7 @@ class SearchDepartmentsTest(SearchEntitiesTest):
     def test_id_search(self):
         """La búsqueda por ID debe devolver el depto. correspondiente."""
         data = self.get_response({'id': '06077'})
-        self.assertListEqual([p['nombre'] for p in data], ['ARRECIFES'])
+        self.assertListEqual([p['nombre'] for p in data], ['Arrecifes'])
 
     def test_id_invalid_search(self):
         """La búsqueda por ID debe devolver error 400 cuando se
@@ -77,18 +77,20 @@ class SearchDepartmentsTest(SearchEntitiesTest):
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['fuente', 'id', 'lat', 'lon', 'nombre', 'provincia'])
+        fields = sorted(['fuente', 'id', 'centroide_lat', 'centroide_lon',
+                         'nombre', 'provincia'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de los deptos. devueltos deben ser filtrables."""
         fields_lists = [
             ['fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'lat', 'lon', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre', 'provincia.id',
+            ['fuente', 'id', 'centroide_lat', 'centroide_lon', 'nombre'],
+            ['fuente', 'id', 'centroide_lat', 'nombre'],
+            ['fuente', 'id', 'centroide_lat', 'nombre', 'provincia.id',
              'provincia.nombre']
         ]
+        fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
 
         for fields in fields_lists:
@@ -349,6 +351,19 @@ class SearchDepartmentsTest(SearchEntitiesTest):
             'nombre': 'BELGRANO',
             'max': 10
         })
+
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['departamento_id',
+                                       'departamento_nombre',
+                                       'departamento_centroide_lat',
+                                       'departamento_centroide_lon',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_fuente'])
 
 
 if __name__ == '__main__':

@@ -12,8 +12,8 @@ A continuación, se muestran algunos ejemplos de uso de la API:
         {
             "fuente": "IGN",
             "id": "14",
-            "lat": -32.142933,
-            "lon": -63.801753,
+            "centroide_lat": -32.142933,
+            "centroide_lon": -63.801753,
             "nombre": "CÓRDOBA"
         }
     ]
@@ -29,8 +29,8 @@ A continuación, se muestran algunos ejemplos de uso de la API:
         {
             "fuente": "IGN",
             "id": "38042",
-            "lat": -24.194923,
-            "lon": -65.12645,
+            "centroide_lat": -24.194923,
+            "centroide_lon": -65.12645,
             "nombre": "PALPALÁ",
             "provincia": {
                 "id": "38",

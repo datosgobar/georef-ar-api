@@ -12,10 +12,86 @@ from flask import make_response, jsonify, Response
 CSV_SEP = ','
 CSV_ESCAPE = '"'
 CSV_NEWLINE = '\n'
-FLAT_DICT_SEP = '_'
+FLAT_SEP = '_'
+
+STATES_CSV_FIELDS = [
+    (N.ID, [N.STATE, N.ID]),
+    (N.NAME, [N.STATE, N.NAME]),
+    (N.C_LAT, [N.STATE, N.C_LAT]),
+    (N.C_LON, [N.STATE, N.C_LON]),
+    (N.SOURCE, [N.STATE, N.SOURCE])
+]
+
+DEPARTMENTS_CSV_FIELDS = [
+    (N.ID, [N.DEPT, N.ID]),
+    (N.NAME, [N.DEPT, N.NAME]),
+    (N.C_LAT, [N.DEPT, N.C_LAT]),
+    (N.C_LON, [N.DEPT, N.C_LON]),
+    (N.STATE_ID, [N.STATE, N.ID]),
+    (N.STATE_NAME, [N.STATE, N.NAME]),
+    (N.SOURCE, [N.DEPT, N.SOURCE])
+]
+
+MUNICIPALITIES_CSV_FIELDS = [
+    (N.ID, [N.MUN, N.ID]),
+    (N.NAME, [N.MUN, N.NAME]),
+    (N.C_LAT, [N.MUN, N.C_LAT]),
+    (N.C_LON, [N.MUN, N.C_LON]),
+    (N.STATE_ID, [N.STATE, N.ID]),
+    (N.STATE_NAME, [N.STATE, N.NAME]),
+    (N.DEPT_ID, [N.DEPT, N.ID]),
+    (N.DEPT_NAME, [N.DEPT, N.NAME]),
+    (N.SOURCE, [N.MUN, N.SOURCE])
+]
+
+LOCALITIES_CSV_FIELDS = [
+    (N.ID, [N.LOCALITY, N.ID]),
+    (N.NAME, [N.LOCALITY, N.NAME]),
+    (N.C_LAT, [N.LOCALITY, N.C_LAT]),
+    (N.C_LON, [N.LOCALITY, N.C_LON]),
+    (N.STATE_ID, [N.STATE, N.ID]),
+    (N.STATE_NAME, [N.STATE, N.NAME]),
+    (N.DEPT_ID, [N.DEPT, N.ID]),
+    (N.DEPT_NAME, [N.DEPT, N.NAME]),
+    (N.MUN_ID, [N.MUN, N.ID]),
+    (N.MUN_NAME, [N.MUN, N.NAME]),
+    (N.LOCALITY_TYPE, [N.LOCALITY, N.LOCALITY_TYPE]),
+    (N.SOURCE, [N.LOCALITY, N.SOURCE])
+]
+
+STREETS_CSV_FIELDS = [
+    (N.ID, [N.STREET, N.ID]),
+    (N.NAME, [N.STREET, N.NAME]),
+    (N.START_R, [N.STREET, N.START_R]),
+    (N.START_L, [N.STREET, N.START_L]),
+    (N.END_R, [N.STREET, N.END_R]),
+    (N.END_L, [N.STREET, N.END_L]),
+    (N.FULL_NAME, [N.STREET, N.FULL_NAME]),
+    (N.ROAD_TYPE, [N.STREET, N.ROAD_TYPE]),
+    (N.STATE_ID, [N.STATE, N.ID]),
+    (N.STATE_NAME, [N.STATE, N.NAME]),
+    (N.DEPT_ID, [N.DEPT, N.ID]),
+    (N.DEPT_NAME, [N.DEPT, N.NAME]),
+    (N.SOURCE, [N.STREET, N.SOURCE])
+]
+
+ADDRESSES_CSV_FIELDS = [
+    (N.ID, [N.STREET, N.ID]),
+    (N.NAME, [N.STREET, N.NAME]),
+    (N.DOOR_NUM, [N.STREET, N.DOOR_NUM]),
+    (N.FULL_NAME, [N.STREET, N.FULL_NAME]),
+    (N.ROAD_TYPE, [N.STREET, N.ROAD_TYPE]),
+    (N.STATE_ID, [N.STATE, N.ID]),
+    (N.STATE_NAME, [N.STATE, N.NAME]),
+    (N.DEPT_ID, [N.DEPT, N.ID]),
+    (N.DEPT_NAME, [N.DEPT, N.NAME]),
+    (N.LOCATION_LAT, [N.ADDRESS, N.LAT]),
+    (N.LOCATION_LON, [N.ADDRESS, N.LON]),
+    (N.SOURCE, [N.STREET, N.SOURCE])
+]
 
 
-def flatten_dict(d, max_depth=3, sep=FLAT_DICT_SEP):
+def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
     """Aplana un diccionario recursivamente. Modifica el diccionario original.
     Lanza un RuntimeError si no se pudo aplanar el diccionario
     con el número especificado de profundidad.
@@ -150,11 +226,14 @@ def create_csv_response(name, result, fmt):
 
     """
     def csv_generator():
-        keys = sorted([
-            field.replace('.', FLAT_DICT_SEP) for field in fmt[N.FIELDS]
-        ])
+        keys = []
+        field_names = []
+        for original_field, csv_field_name in fmt[N.CSV_FIELDS]:
+            if original_field in fmt[N.FIELDS]:
+                keys.append(original_field.replace('.', FLAT_SEP))
+                field_names.append(FLAT_SEP.join(csv_field_name))
 
-        yield '{}{}'.format(CSV_SEP.join(keys), CSV_NEWLINE)
+        yield '{}{}'.format(CSV_SEP.join(field_names), CSV_NEWLINE)
 
         for match in result:
             flatten_dict(match, max_depth=2)
@@ -207,10 +286,10 @@ def create_geojson_response(result, iterable_result):
 
     features = []
     for item in items:
-        if N.LAT in item and N.LON in item:
-            lat = item.pop(N.LAT)
-            lon = item.pop(N.LON)
+        lat = item.pop(N.LAT, None) or item.pop(N.C_LAT, None)
+        lon = item.pop(N.LON, None) or item.pop(N.C_LON, None)
 
+        if lat and lon:
             point = geojson.Point((lat, lon))
             features.append(geojson.Feature(geometry=point, properties=item))
 

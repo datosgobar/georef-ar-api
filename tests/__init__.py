@@ -25,7 +25,7 @@ class SearchEntitiesTest(TestCase):
         self.app = app.test_client()
 
     def get_response(self, params=None, method='GET', body=None,
-                     status_only=False):
+                     status_only=False, fmt='json'):
         if not params:
             params = {}
 
@@ -43,8 +43,16 @@ class SearchEntitiesTest(TestCase):
         elif response.status_code != 200:
             raise Exception('La petición no devolvió código 200.')
 
-        key = self.entity if method == 'GET' else 'resultados'
-        return json.loads(response.data)[key]
+        if fmt == 'json':
+            key = self.entity if method == 'GET' else 'resultados'
+            return json.loads(response.data)[key]
+        elif fmt == 'csv':
+            return csv.reader(response.data.decode().splitlines(),
+                              delimiter=formatter.CSV_SEP,
+                              quotechar=formatter.CSV_ESCAPE,
+                              lineterminator=formatter.CSV_NEWLINE)
+        else:
+            raise ValueError('Formato desconocido.')
 
     def assert_unknown_param_returns_400(self):
         response = self.app.get(self.endpoint + '?foo=bar')

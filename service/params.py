@@ -538,7 +538,7 @@ PARAMS_STATES = EndpointParameters(shared_params={
     N.NAME: StrParameter(),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.LAT, N.LON]),
+                               optionals=[N.C_LAT, N.C_LON]),
     N.MAX: IntParameter(default=24, lower_limit=1, upper_limit=MAX_SIZE_LEN),
     N.EXACT: BoolParameter()
 }, get_qs_params={
@@ -552,7 +552,7 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.LAT, N.LON, N.STATE_ID,
+                               optionals=[N.C_LAT, N.C_LON, N.STATE_ID,
                                           N.STATE_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
     N.EXACT: BoolParameter()
@@ -568,7 +568,7 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.LAT, N.LON, N.STATE_ID,
+                               optionals=[N.C_LAT, N.C_LON, N.STATE_ID,
                                           N.STATE_NAME, N.DEPT_ID,
                                           N.DEPT_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
@@ -586,7 +586,7 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.LAT, N.LON, N.STATE_ID,
+                               optionals=[N.C_LAT, N.C_LON, N.STATE_ID,
                                           N.STATE_NAME, N.DEPT_ID, N.DEPT_NAME,
                                           N.MUN_ID, N.MUN_NAME,
                                           N.LOCALITY_TYPE]),

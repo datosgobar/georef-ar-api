@@ -270,9 +270,9 @@ class SearchAddressesTest(SearchEntitiesTest):
         validations = []
 
         states = [
-            ('02', 'CIUDAD AUTÓNOMA DE BUENOS AIRES'),
-            ('06', 'BUENOS AIRES'),
-            ('14', 'CÓRDOBA')
+            ('02', 'Ciudad Autónoma de Buenos Aires'),
+            ('06', 'Buenos Aires'),
+            ('14', 'Córdoba')
         ]
 
         for state_code, state_name in states:
@@ -313,9 +313,9 @@ class SearchAddressesTest(SearchEntitiesTest):
         """Se debe poder filtrar los resultados por ID de departamento."""
         validations = []
         departments = [
-            ('02007', 'COMUNA 1'),
-            ('02105', 'COMUNA 15'),
-            ('66147', 'ROSARIO DE LERMA')
+            ('02007', 'Comuna 1'),
+            ('02105', 'Comuna 15'),
+            ('66147', 'Rosario de Lerma')
         ]
 
         for dept_code, dept_name in departments:
@@ -433,6 +433,41 @@ class SearchAddressesTest(SearchEntitiesTest):
         self.assert_valid_csv({
             'direccion': 'foobarfoobar 100'
         })
+
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({
+            'formato': 'csv',
+            'direccion': COMMON_ADDRESS
+        }, fmt='csv')
+
+        headers = next(resp)
+        self.assertListEqual(headers, ['calle_id',
+                                       'calle_nombre',
+                                       'calle_altura',
+                                       'calle_nomenclatura',
+                                       'calle_tipo',
+                                       'provincia_id',
+                                       'provincia_nombre',
+                                       'departamento_id',
+                                       'departamento_nombre',
+                                       'direccion_lat',
+                                       'direccion_lon',
+                                       'calle_fuente'])
+
+    def test_csv_empty_value(self):
+        """Un valor vacío (None) debería estar representado como '' en CSV."""
+        resp = self.get_response({
+            'formato': 'csv',
+            'direccion': 'NAON 1200',
+            'departamento': 6427,  # 0 inicial agregado por API
+            'max': 1
+        }, fmt='csv')
+
+        next(resp)
+        row = next(resp)
+        self.assertTrue(row[-3] == '' and row[-2] == '')
 
 
 if __name__ == '__main__':

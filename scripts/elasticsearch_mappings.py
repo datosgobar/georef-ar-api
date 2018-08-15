@@ -33,8 +33,8 @@ MAP_STATE = {
                     }
                 }
             },
-            'lat': {'type': 'float', 'index': False},
-            'lon': {'type': 'float', 'index': False}
+            'centroide_lat': {'type': 'float', 'index': False},
+            'centroide_lon': {'type': 'float', 'index': False}
         }
     }
 }
@@ -45,8 +45,8 @@ MAP_STATE_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'lat': {'type': 'float', 'index': False},
-            'lon': {'type': 'float', 'index': False},
+            'centroide_lat': {'type': 'float', 'index': False},
+            'centroide_lon': {'type': 'float', 'index': False},
             'geometria': {'type': 'geo_shape'}
         }
     }
@@ -68,8 +68,8 @@ MAP_DEPT = {
                     }
                 }
             },
-            'lat': {'type': 'float', 'index': False},
-            'lon': {'type': 'float', 'index': False},
+            'centroide_lat': {'type': 'float', 'index': False},
+            'centroide_lon': {'type': 'float', 'index': False},
             'provincia': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -98,8 +98,8 @@ MAP_DEPT_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'lat': {'type': 'float', 'index': False},
-            'lon': {'type': 'float', 'index': False},
+            'centroide_lat': {'type': 'float', 'index': False},
+            'centroide_lon': {'type': 'float', 'index': False},
             'provincia': {'type': 'object', 'enabled': False},
             'geometria': {'type': 'geo_shape'}
         }
@@ -122,8 +122,8 @@ MAP_MUNI = {
                     }
                 }
             },
-            'lat': {'type': 'float', 'index': False},
-            'lon': {'type': 'float', 'index': False},
+            'centroide_lat': {'type': 'float', 'index': False},
+            'centroide_lon': {'type': 'float', 'index': False},
             'departamento': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -170,8 +170,8 @@ MAP_MUNI_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'lat': {'type': 'float', 'index': False},
-            'lon': {'type': 'float', 'index': False},
+            'centroide_lat': {'type': 'float', 'index': False},
+            'centroide_lon': {'type': 'float', 'index': False},
             'departamento': {'type': 'object', 'enabled': False},
             'provincia': {'type': 'object', 'enabled': False},
             'geometria': {'type': 'geo_shape'}
@@ -196,8 +196,8 @@ MAP_SETTLEMENT = {
                 }
             },
             'tipo': {'type': 'keyword'},
-            'lat': {'type': 'float', 'index': False},
-            'lon': {'type': 'float', 'index': False},
+            'centroide_lat': {'type': 'float', 'index': False},
+            'centroide_lon': {'type': 'float', 'index': False},
             'municipio': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -263,8 +263,8 @@ MAP_SETTLEMENT_GEOM = {
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
             'tipo': {'type': 'keyword', 'index': False},
-            'lat': {'type': 'float', 'index': False},
-            'lon': {'type': 'float', 'index': False},
+            'centroide_lat': {'type': 'float', 'index': False},
+            'centroide_lon': {'type': 'float', 'index': False},
             'municipio': {'type': 'object', 'enabled': False},
             'departamento': {'type': 'object', 'enabled': False},
             'provincia': {'type': 'object', 'enabled': False},
@@ -298,16 +298,16 @@ MAP_STREET = {
                 'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER
             },
-            'inicio_derecha': {
+            'altura_inicio_derecha': {
                 'type': 'integer'
             },
-            'inicio_izquierda': {
+            'altura_inicio_izquierda': {
                 'type': 'integer'
             },
-            'fin_derecha': {
+            'altura_fin_derecha': {
                 'type': 'integer'
             },
-            'fin_izquierda': {
+            'altura_fin_izquierda': {
                 'type': 'integer'
             },
             'geometria': {

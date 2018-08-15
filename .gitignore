@@ -60,6 +60,8 @@ db.sqlite3
 .vscode/
 
 # Georef
+/backups/
 environment.sh
 georef.cfg
 logging.ini
+/site/

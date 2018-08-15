@@ -4,30 +4,30 @@ import unittest
 
 
 STATES = [
-    (['54'], 'MISIONES'),
-    (['74'], 'SAN LUIS'),
-    (['86'], 'SANTIAGO DEL ESTERO'),
-    (['94'], 'TIERRA DEL FUEGO, ANTÁRTIDA E ISLAS DEL ATLÁNTICO SUR'),
-    (['18'], 'CORRIENTES'),
-    (['30'], 'ENTRE RÍOS'),
-    (['34'], 'FORMOSA'),
-    (['38'], 'JUJUY'),
-    (['46'], 'LA RIOJA'),
-    (['82'], 'SANTA FE'),
-    (['06'], 'BUENOS AIRES'),
-    (['14'], 'CÓRDOBA'),
-    (['22'], 'CHACO'),
-    (['58'], 'NEUQUÉN'),
-    (['78'], 'SANTA CRUZ'),
-    (['02'], 'CIUDAD AUTÓNOMA DE BUENOS AIRES'),
-    (['26'], 'CHUBUT'),
-    (['50'], 'MENDOZA'),
-    (['62'], 'RÍO NEGRO'),
-    (['70'], 'SAN JUAN'),
-    (['10'], 'CATAMARCA'),
-    (['42'], 'LA PAMPA'),
-    (['66'], 'SALTA'),
-    (['90'], 'TUCUMÁN')
+    (['54'], 'Misiones'),
+    (['74'], 'San Luis'),
+    (['86'], 'Santiago del Estero'),
+    (['94'], 'Tierra del Fuego, Antártida e Islas del Atlántico Sur'),
+    (['18'], 'Corrientes'),
+    (['30'], 'Entre Ríos'),
+    (['34'], 'Formosa'),
+    (['38'], 'Jujuy'),
+    (['46'], 'La Rioja'),
+    (['82'], 'Santa Fe'),
+    (['06'], 'Buenos Aires'),
+    (['14'], 'Córdoba'),
+    (['22'], 'Chaco'),
+    (['58'], 'Neuquén'),
+    (['78'], 'Santa Cruz'),
+    (['02'], 'Ciudad Autónoma de Buenos Aires'),
+    (['26'], 'Chubut'),
+    (['50'], 'Mendoza'),
+    (['62'], 'Río Negro'),
+    (['70'], 'San Juan'),
+    (['10'], 'Catamarca'),
+    (['42'], 'La Pampa'),
+    (['66'], 'Salta'),
+    (['90'], 'Tucumán')
 ]
 
 
@@ -62,21 +62,23 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_id_search(self):
         """La búsqueda por ID debe devolver la provincia correspondiente."""
         data = self.get_response({'id': '06'})
-        self.assertListEqual([p['nombre'] for p in data], ['BUENOS AIRES'])
+        self.assertListEqual([p['nombre'] for p in data], ['Buenos Aires'])
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['id', 'lat', 'lon', 'nombre', 'fuente'])
+        fields = sorted(['id', 'centroide_lat', 'centroide_lon', 'nombre',
+                         'fuente'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de las provincias devueltas deben ser filtrables."""
         fields_lists = [
             ['fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'lat', 'lon', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre']
+            ['fuente', 'id', 'centroide_lat', 'centroide_lon', 'nombre'],
+            ['fuente', 'id', 'centroide_lat', 'nombre']
         ]
+        fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
 
         for fields in fields_lists:
@@ -328,7 +330,7 @@ class SearchStatesTest(SearchEntitiesTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'nombre': 'santa',
-            'campos': 'id,lat'
+            'campos': 'id,centroide_lat'
         })
 
     def test_empty_csv_valid(self):
@@ -336,6 +338,16 @@ class SearchStatesTest(SearchEntitiesTest):
         self.assert_valid_csv({
             'nombre': 'foobarfoobar'
         })
+
+    def test_csv_fields(self):
+        """Una consulta CSV debería tener ciertos campos, ordenados de una
+        forma específica."""
+        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        headers = next(resp)
+        self.assertListEqual(headers, ['provincia_id', 'provincia_nombre',
+                                       'provincia_centroide_lat',
+                                       'provincia_centroide_lon',
+                                       'provincia_fuente'])
 
     def test_geojson_format(self):
         """Se debería poder obtener resultados en formato
