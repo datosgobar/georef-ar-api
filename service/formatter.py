@@ -17,16 +17,16 @@ FLAT_SEP = '_'
 STATES_CSV_FIELDS = [
     (N.ID, [N.STATE, N.ID]),
     (N.NAME, [N.STATE, N.NAME]),
-    (N.LAT, [N.STATE, N.LAT]),
-    (N.LON, [N.STATE, N.LON]),
+    (N.C_LAT, [N.STATE, N.C_LAT]),
+    (N.C_LON, [N.STATE, N.C_LON]),
     (N.SOURCE, [N.STATE, N.SOURCE])
 ]
 
 DEPARTMENTS_CSV_FIELDS = [
     (N.ID, [N.DEPT, N.ID]),
     (N.NAME, [N.DEPT, N.NAME]),
-    (N.LAT, [N.DEPT, N.LAT]),
-    (N.LON, [N.DEPT, N.LON]),
+    (N.C_LAT, [N.DEPT, N.C_LAT]),
+    (N.C_LON, [N.DEPT, N.C_LON]),
     (N.STATE_ID, [N.STATE, N.ID]),
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.SOURCE, [N.DEPT, N.SOURCE])
@@ -35,8 +35,8 @@ DEPARTMENTS_CSV_FIELDS = [
 MUNICIPALITIES_CSV_FIELDS = [
     (N.ID, [N.MUN, N.ID]),
     (N.NAME, [N.MUN, N.NAME]),
-    (N.LAT, [N.MUN, N.LAT]),
-    (N.LON, [N.MUN, N.LON]),
+    (N.C_LAT, [N.MUN, N.C_LAT]),
+    (N.C_LON, [N.MUN, N.C_LON]),
     (N.STATE_ID, [N.STATE, N.ID]),
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.DEPT_ID, [N.DEPT, N.ID]),
@@ -47,8 +47,8 @@ MUNICIPALITIES_CSV_FIELDS = [
 LOCALITIES_CSV_FIELDS = [
     (N.ID, [N.LOCALITY, N.ID]),
     (N.NAME, [N.LOCALITY, N.NAME]),
-    (N.LAT, [N.LOCALITY, N.LAT]),
-    (N.LON, [N.LOCALITY, N.LON]),
+    (N.C_LAT, [N.LOCALITY, N.C_LAT]),
+    (N.C_LON, [N.LOCALITY, N.C_LON]),
     (N.STATE_ID, [N.STATE, N.ID]),
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.DEPT_ID, [N.DEPT, N.ID]),
@@ -286,10 +286,10 @@ def create_geojson_response(result, iterable_result):
 
     features = []
     for item in items:
-        if N.LAT in item and N.LON in item:
-            lat = item.pop(N.LAT)
-            lon = item.pop(N.LON)
+        lat = item.pop(N.LAT, None) or item.pop(N.C_LAT, None)
+        lon = item.pop(N.LON, None) or item.pop(N.C_LON, None)
 
+        if lat and lon:
             point = geojson.Point((lat, lon))
             features.append(geojson.Feature(geometry=point, properties=item))
 

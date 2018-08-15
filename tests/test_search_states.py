@@ -67,16 +67,18 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['id', 'lat', 'lon', 'nombre', 'fuente'])
+        fields = sorted(['id', 'centroide_lat', 'centroide_lon', 'nombre',
+                         'fuente'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de las provincias devueltas deben ser filtrables."""
         fields_lists = [
             ['fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'lat', 'lon', 'nombre'],
-            ['fuente', 'id', 'lat', 'nombre']
+            ['fuente', 'id', 'centroide_lat', 'centroide_lon', 'nombre'],
+            ['fuente', 'id', 'centroide_lat', 'nombre']
         ]
+        fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
 
         for fields in fields_lists:
@@ -328,7 +330,7 @@ class SearchStatesTest(SearchEntitiesTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'nombre': 'santa',
-            'campos': 'id,lat'
+            'campos': 'id,centroide_lat'
         })
 
     def test_empty_csv_valid(self):
@@ -343,7 +345,8 @@ class SearchStatesTest(SearchEntitiesTest):
         resp = self.get_response({'formato': 'csv'}, fmt='csv')
         headers = next(resp)
         self.assertListEqual(headers, ['provincia_id', 'provincia_nombre',
-                                       'provincia_lat', 'provincia_lon',
+                                       'provincia_centroide_lat',
+                                       'provincia_centroide_lon',
                                        'provincia_fuente'])
 
     def test_geojson_format(self):

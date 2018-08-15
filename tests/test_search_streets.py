@@ -39,10 +39,10 @@ class SearchStreetsTest(SearchEntitiesTest):
             'departamento',
             'fuente',
             'id',
-            'fin_derecha',
-            'fin_izquierda',
-            'inicio_derecha',
-            'inicio_izquierda',
+            'altura_fin_derecha',
+            'altura_fin_izquierda',
+            'altura_inicio_derecha',
+            'altura_inicio_izquierda',
             'nombre',
             'nomenclatura',
             'provincia',
@@ -56,8 +56,9 @@ class SearchStreetsTest(SearchEntitiesTest):
             ['fuente', 'id', 'nombre'],
             ['fuente', 'id', 'nombre', 'nomenclatura'],
             ['departamento.nombre', 'fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'inicio_derecha', 'nombre'],
+            ['fuente', 'id', 'altura_inicio_derecha', 'nombre'],
         ]
+        fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
 
         for fields in fields_lists:
@@ -237,10 +238,10 @@ class SearchStreetsTest(SearchEntitiesTest):
         headers = next(resp)
         self.assertListEqual(headers, ['calle_id',
                                        'calle_nombre',
-                                       'calle_inicio_derecha',
-                                       'calle_inicio_izquierda',
-                                       'calle_fin_derecha',
-                                       'calle_fin_izquierda',
+                                       'calle_altura_inicio_derecha',
+                                       'calle_altura_inicio_izquierda',
+                                       'calle_altura_fin_derecha',
+                                       'calle_altura_fin_izquierda',
                                        'calle_nomenclatura',
                                        'calle_tipo',
                                        'provincia_id',

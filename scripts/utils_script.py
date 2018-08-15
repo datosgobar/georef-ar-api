@@ -34,7 +34,7 @@ logger.addHandler(handler)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizdo el código para tomar
 # nuevas versiones de los archivos.
-FILE_VERSION = '0.1.0'
+FILE_VERSION = '1.0.0'
 
 SEPARATOR_WIDTH = 60
 ACTIONS = ['index', 'index_stats', 'run_sql']
@@ -130,11 +130,13 @@ class GeorefIndex:
         version = data['version']
         docs = data[self.docs_key]
 
+        logger.info('Versión de API:   {}'.format(FILE_VERSION))
+        logger.info('Versión de Datos: {}'.format(version))
+        logger.info('')
+
         if version.split('.')[0] != FILE_VERSION.split('.')[0]:
-            logger.warning('Salteando creación de nuevo índice')
-            logger.warning('Version de datos no compatible:')
-            logger.warning(' + API: {}'.format(FILE_VERSION))
-            logger.warning(' + Datos: {}'.format(version))
+            logger.warning('Salteando creación de nuevo índice:')
+            logger.warning('Versiones de datos no compatibles.')
             logger.info('')
             return False
 
