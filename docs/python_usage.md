@@ -73,3 +73,5 @@ provincias = pd.read_csv("http://apis.datos.gob.ar/georef/api/provincias?formato
 ```
 
 ## Con `data-cleaner`
+
+*TODO regla de limpieza*

@@ -12,7 +12,7 @@ nav:
     - Comenzar a usar la API Georef: quick_start.md
     - Usar en python: python_usage.md
     - Autenticarse con JWT: jwt-token.md
-    - Referencia API: https://datosgobar.github.io/georef-api/
+    - Referencia API: https://datosgobar.github.io/georef-ar-api/
   - Desarrolladores:
     - Desarrollo: 'developers/georef-api-development.md'
     - Producción: 'developers/georef-api-production.md'
