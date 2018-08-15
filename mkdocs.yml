@@ -9,7 +9,8 @@ edit_uri: ""
 nav:
   - Inicio: index.md
   - Usuarios:
-    - Comenzar a usar la API: quick_start.md
+    - Comenzar a usar la API Georef: quick_start.md
+    - Usar en python: python_usage.md
     - Autenticarse con JWT: jwt-token.md
     - Referencia API: https://datosgobar.github.io/georef-api/
   - Desarrolladores:

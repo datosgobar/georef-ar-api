@@ -1,4 +1,4 @@
-# Comenzar a usar la API
+# Comenzar a usar la API Georef
 
 ## Ejemplos
 A continuación, se muestran algunos ejemplos de uso de la API:
