@@ -14,20 +14,20 @@ script:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: 'bash bin/deploy production'
+    script: 'bash bin/travis.sh production'
     on:
       tags: true
       branch: master
       repo: datosgobar/georef-ar-api
   - provider: script
     skip_cleanup: true
-    script: 'bash bin/deploy staging'
+    script: 'bash bin/travis.sh staging'
     on:
       branch: master
       repo: datosgobar/georef-ar-api
   - provider: script
     skip_cleanup: true
-    script: 'bash bin/deploy development'
+    script: 'bash bin/travis.sh development'
     on:
       branch: development
       repo: datosgobar/georef-ar-api
