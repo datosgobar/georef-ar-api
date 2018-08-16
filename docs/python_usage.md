@@ -45,32 +45,38 @@ provincias = pd.read_csv("http://apis.datos.gob.ar/georef/api/provincias?formato
 ```
 
 ```
-    provincia_id                                   provincia_nombre
-0             14                                            Córdoba
-1             22                                              Chaco
-2             26                                             Chubut
-3              6                                       Buenos Aires
-4             10                                          Catamarca
-5             30                                         Entre Ríos
-6             34                                            Formosa
-7             42                                           La Pampa
-8             62                                          Río Negro
-9             70                                           San Juan
-10            78                                         Santa Cruz
-11            82                                           Santa Fe
-12            94  Tierra del Fuego, Antártida e Islas del Atlánt...
-13            38                                              Jujuy
-14            54                                           Misiones
-15             2                    Ciudad Autónoma de Buenos Aires
-16            18                                         Corrientes
-17            46                                           La Rioja
-18            66                                              Salta
-19            86                                Santiago del Estero
-20            50                                            Mendoza
-21            58                                            Neuquén
-22            74                                           San Luis
-23            90                                            Tucumán
+provincia_id                                   provincia_nombre
+          14                                            Córdoba
+          22                                              Chaco
+          26                                             Chubut
+           6                                       Buenos Aires
+          10                                          Catamarca
+          30                                         Entre Ríos
+          34                                            Formosa
+          42                                           La Pampa
+          62                                          Río Negro
+          70                                           San Juan
+          78                                         Santa Cruz
+          82                                           Santa Fe
+          94  Tierra del Fuego, Antártida e Islas del Atlánt...
+          38                                              Jujuy
+          54                                           Misiones
+           2                    Ciudad Autónoma de Buenos Aires
+          18                                         Corrientes
+          46                                           La Rioja
+          66                                              Salta
+          86                                Santiago del Estero
+          50                                            Mendoza
+          58                                            Neuquén
+          74                                           San Luis
+          90                                            Tucumán
 ```
+
+### Enriquecer datos con coordenadas
+
+
+
+
 
 ## Con `data-cleaner`
 
