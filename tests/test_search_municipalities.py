@@ -210,8 +210,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         expected = [
             (['060840'], 'TRES DE FEBRERO'),
             (['060840'], 'TRES DEL FEBRERO'),
-            (['060840'], 'TRES D FEBRERO'),
-            (['060840'], 'TRES LA FEBRERO'),
+            (['060840'], 'TRES LA FEBRERO')
         ]
 
         self.assert_name_search_id_matches(expected)

@@ -182,7 +182,6 @@ class SearchStatesTest(SearchEntitiesTest):
             (['54'], 'Misione'),
             (['86'], 'Santiag'),
             (['86'], 'Santiago'),
-            (['86'], 'Santiago d'),
             (['86'], 'Santiago de'),
             (['86'], 'Santiago del'),
             (['86'], 'Santiago del E'),
@@ -210,7 +209,7 @@ class SearchStatesTest(SearchEntitiesTest):
         """La búsqueda por nombre aproximado debe intercambiar términos
         equivalentes."""
         expected = [
-            (['02'], 'CABA'),
+            (['02', '14'], 'CABA'),
             (['02'], 'Capital Federal'),
             (['02'], 'C.A.B.A.'),
             (['02'], 'Ciudad Autónoma de Buenos Aires'),

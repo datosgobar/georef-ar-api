@@ -1,5 +1,5 @@
 SPANISH_STOP_WORDS = [
-    'la', 'las', 'el', 'los', 'de', 'del', 'y', 'e', 'lo', 'al', 'd'
+    'la', 'las', 'el', 'los', 'de', 'del', 'y', 'e', 'lo', 'al'
 ]
 
 
