@@ -10,14 +10,13 @@ nav:
   - Inicio: index.md
   - Usuarios:
     - Comenzar a usar la API Georef: quick_start.md
-    - Usar en python: python_usage.md
+    - Usar en Python: python_usage.md
     - Autenticarse con JWT: jwt-token.md
     - Referencia API: https://datosgobar.github.io/georef-ar-api/
   - Desarrolladores:
-    - Desarrollo: 'developers/georef-api-development.md'
-    - Producción: 'developers/georef-api-production.md'
-    - Python 3.6: 'developers/python3.6.md'
-    - Proceso de ETL: 'developers/georef-api-data.md'
+    - Ambiente de desarrollo y deploy: 'developers/georef-api-development.md'
+    - Instalación de Python 3.6: 'developers/python3.6.md'
+    - Proceso de ETL y Datos: 'developers/georef-api-data.md'
 
 theme:
   name: readthedocs
