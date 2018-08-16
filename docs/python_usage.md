@@ -30,7 +30,37 @@ provincias = get_similar("provincias", "San Juan")
 
 ### Normalizar varias entidades
 
-*TODO versión bulk del método*
+```python
+def get_similar_bulk(endpoint, nombres):
+    data = { endpoint: [
+        {"nombre": nombre, "max": 1} for nombre in nombres
+    ]}
+    url = API_BASE_URL + endpoint
+    results = requests.post(url, json=data).json()
+
+    # convierte a una lista de "resultado más probable" o "vacío" cuando no hay
+    parsed_results = [
+        single_result[endpoint][0] if single_result[endpoint] else {}
+        for single_result in results["resultados"]
+    ]
+
+    return parsed_results
+
+provincias = get_similar_bulk("provincias", ["pxa", "sant fe"])
+```
+
+```json
+[
+    {},
+    {
+        u'centroide_lat': -30.706927,
+        u'centroide_lon': -60.949837,
+        u'fuente': u'IGN',
+        u'id': u'82',
+        u'nombre': u'Santa Fe'
+    }
+]
+```
 
 ## Con `pandas`
 
@@ -73,6 +103,7 @@ provincia_id                                   provincia_nombre
 ```
 
 ### Enriquecer datos con coordenadas
+
 
 
 
