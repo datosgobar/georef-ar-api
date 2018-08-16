@@ -1,8 +1,8 @@
 {
     "openapi": "3.0.1",
     "info": {
-        "title": "georef-api",
-        "description": "API del servicio de normalización y geocodificación para direcciones de Argentina.\n\nPara ver ejemplos de uso de la API, dirigirse a la [página de GitHub del proyecto](https://github.com/datosgobar/georef-api).",
+        "title": "georef-ar-api",
+        "description": "API del Servicio de Normalización de Datos Geográficos de Argentina.\n\nPara ver ejemplos de uso de la API, dirigirse a la [página de documentación del proyecto](https://georef-ar-api.readthedocs.io).\n\nPara leer el código de la API, acceder a [GitHub](https://github.com/datosgobar/georef-ar-api).",
         "contact": {
             "name": "Equipo de Datos de la Nación Argentina",
             "url": "https://github.com/datosgobar",
@@ -31,7 +31,7 @@
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "SANTA FE"
+                        "example": "Santa Fe"
                     }
                 }
             },
@@ -44,13 +44,13 @@
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "SANTA FE"
+                        "example": "Santa Fe"
                     },
-                    "lat": {
+                    "centroide_lat": {
                         "type": "number",
                         "example": -30.706927
                     },
-                    "lon": {
+                    "centroide_lon": {
                         "type": "number",
                         "example": -60.558832
                     },
@@ -126,16 +126,16 @@
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "ROSARIO"
+                        "example": "Rosario"
                     },
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
-                    "lat": {
+                    "centroide_lat": {
                         "type": "number",
                         "example": -33.127856
                     },
-                    "lon": {
+                    "centroide_lon": {
                         "type": "number",
                         "example": -62.526029
                     },
@@ -154,7 +154,7 @@
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "ROSARIO"
+                        "example": "Rosario"
                     }
                 }
             },
@@ -230,7 +230,7 @@
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "GRANADERO BAIGORRIA"
+                        "example": "Granadero Baigorria"
                     },
                     "departamento": {
                         "$ref": "#/components/schemas/departamento_sin_coordenadas"
@@ -238,11 +238,11 @@
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
-                    "lat": {
+                    "centroide_lat": {
                         "type": "number",
                         "example": -32.851319
                     },
-                    "lon": {
+                    "centroide_lon": {
                         "type": "number",
                         "example": -60.704006
                     },
@@ -261,7 +261,7 @@
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "GRANADERO BAIGORRIA"
+                        "example": "Granadero Baigorria"
                     }
                 }
             },
@@ -343,7 +343,7 @@
                     },
                     "nombre": {
                         "type": "string",
-                        "example": "GRANADERO BAIGORRIA"
+                        "example": "Granadero Baigorria"
                     },
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
@@ -360,11 +360,11 @@
                             "Localidad simple (LS)"
                         ]
                     },
-                    "lat": {
+                    "centroide_lat": {
                         "type": "number",
                         "example": -32.861364
                     },
-                    "lon": {
+                    "centroide_lon": {
                         "type": "number",
                         "example": -60.706216
                     },
@@ -463,7 +463,7 @@
                     },
                     "nomenclatura": {
                         "type": "string",
-                        "example": "URQUIZA 400, ROSARIO, SANTA FE"
+                        "example": "URQUIZA 400, Rosario, Santa Fe"
                     },
                     "provincia": {
 			"$ref": "#/components/schemas/provincia_sin_coordenadas"
@@ -548,19 +548,19 @@
                     "departamento": {
 			"$ref": "#/components/schemas/departamento_sin_coordenadas"
                     },
-                    "fin_derecha": {
+                    "altura_fin_derecha": {
                         "type": "integer",
                         "example": 599
                     },
-                    "fin_iqzuierda": {
+                    "altura_fin_iqzuierda": {
                         "type": "integer",
                         "example": 598
                     },
-                    "inicio_derecha": {
+                    "altura_inicio_derecha": {
                         "type": "integer",
                         "example": 0
                     },
-                    "inicio_izquierda": {
+                    "altura_inicio_izquierda": {
                         "type": "integer",
                         "example": 0
                     },
@@ -574,7 +574,7 @@
                     },
                     "nomenclatura": {
                         "type": "string",
-                        "example": "URQUIZA, ROSARIO, SANTA FE"
+                        "example": "URQUIZA, Rosario, Santa Fe"
                     },
                     "provincia": {
 			"$ref": "#/components/schemas/provincia_sin_coordenadas"
@@ -741,17 +741,17 @@
 	    "param_provincia": {
 		"type": "string",
 		"minLength": 1,
-		"example": "SANTA FE"
+		"example": "Santa Fe"
 	    },
 	    "param_departamento": {
 		"type": "string",
 		"minLength": 1,
-		"example": "ROSARIO"
+		"example": "Rosario"
 	    },
 	    "param_municipio": {
 		"type": "string",
 		"minLength": 1,
-		"example": "GRANADERO BAIGORRIA"
+		"example": "Granadero Baigorria"
 	    },
 	    "param_max": {
 		"type": "integer",
@@ -804,7 +804,7 @@
 	    },
 	    "param_direccion": {
 		"type": "string",
-                "example": "URQUIZA 400",
+                "example": "Urquiza 400",
 		"minLength": 1
 	    },
 	    "param_lat": {
