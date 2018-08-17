@@ -32,6 +32,9 @@ provincias = get_similar("provincias", "San Juan")
 
 ```python
 def get_similar_bulk(endpoint, nombres):
+    """Normaliza una lista de nombres de alguna de las entidades geográficas."""
+
+    # realiza consulta a la API
     data = {
         endpoint: [
             {"nombre": nombre, "max": 1} for nombre in nombres
@@ -65,10 +68,13 @@ provincias = get_similar_bulk("provincias", ["pxa", "sant fe"])
 ]
 ```
 
-### Ubicar coordenadas dentro de unidades territoriales
+### Enriquecer coordenadas con las unidades territoriales que las contienen
 
 ```python
 def get_territorial_units(ubicaciones):
+    """Pide las unidades territoriales que contienen a c/punto de una lista de coordenadas."""
+
+    # realiza consulta a la API
     endpoint = "ubicacion"
     data = {
         "ubicaciones": [
