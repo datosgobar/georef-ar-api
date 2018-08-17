@@ -460,7 +460,7 @@ class EndpointParameters():
         Returns:
             tuple: Tupla de dos listas: una lista de conjuntos de parámetros
                 parseados, y una lista de conjuntos de errores de parseo. Los
-                elementos de ambas listas provinenen de 'parse_param_dict'.
+                elementos de ambas listas provienen de 'parse_param_dict'.
 
         """
         if qs_params:
