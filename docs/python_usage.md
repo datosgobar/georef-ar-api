@@ -32,6 +32,9 @@ provincias = get_similar("provincias", "San Juan")
 
 ```python
 def get_similar_bulk(endpoint, nombres):
+    """Normaliza una lista de nombres de alguna de las entidades geográficas."""
+
+    # realiza consulta a la API
     data = {
         endpoint: [
             {"nombre": nombre, "max": 1} for nombre in nombres
@@ -65,10 +68,13 @@ provincias = get_similar_bulk("provincias", ["pxa", "sant fe"])
 ]
 ```
 
-### Ubicar coordenadas dentro de unidades territoriales
+### Enriquecer coordenadas con las unidades territoriales que las contienen
 
 ```python
 def get_territorial_units(ubicaciones):
+    """Pide las unidades territoriales que contienen a c/punto de una lista de coordenadas."""
+
+    # realiza consulta a la API
     endpoint = "ubicacion"
     data = {
         "ubicaciones": [
@@ -124,9 +130,9 @@ ubicaciones = get_territorial_units([
 
 ## Con `pandas`
 
-### Consultar lista de referencia
+### Consultar listas de referencia
 
-Todas las consultas a la API en formato CSV, se pueden leer fácilmente a un `pandas.DataFrame`.
+Todas las consultas a la API en formato CSV, se pueden leer fácilmente a un `pandas.DataFrame`. De ahí se pueden tomar listas de referencia para distintas unidades territoriales.
 
 ```python
 import pandas as pd
@@ -162,9 +168,68 @@ provincia_id                                   provincia_nombre
           90                                            Tucumán
 ```
 
-### Enriquecer datos con coordenadas
+### Enriquecer coordenadas
 
-*TODO*
+```python
+def add_territorial_units(df, column_lat, column_lon):
+    """Agrega unidades territoriales que contienen coordenadas a un DataFrame.
+
+    Args:
+        df (pandas.DataFrame): Un DataFrame que tiene coordenadas.
+        column_lat (str): Nombre de la columna que tiene latitud.
+        column_lon (str): Nombre de la columna que tiene longitud.
+
+    Returns:
+        pandas.DataFrame: DataFrame original aumentado con unidades       territoriales que contienen a las coordenadas.
+    """
+
+    # toma una lista de coordenadas únicas (no repetidas)
+    coordinates = df[[column_lon, column_lat]].rename(
+        columns={column_lon: "lon", column_lat: "lat"}
+    ).drop_duplicates().to_dict("records")
+
+    # crea DataFrame de unidades territoriales que contienen a las coordenadas
+    ubicaciones = pd.DataFrame(get_territorial_units(coordenadas))
+
+    # agrega las unidades territoriales al DataFrame original
+    df_with_territorial_units = df.merge(
+        ubicaciones, "left",
+        left_on=[column_lon, column_lat],
+        right_on=["lon", "lat"]
+    )
+
+    # elimina columnas de coordenadas repetidas, dejando las originales
+    return df_with_territorial_units.drop(["lon", "lat"], axis=1)
+
+# descarga un CSV con coordenadas de aeropuertos
+df = pd.read_csv("https://servicios.transporte.gob.ar/gobierno_abierto/descargar.php?t=aeropuertos&d=detalle", sep=";")
+
+# Agrega unidades territoriales que contienen coordenadas a un DataFrame
+df_with_territorial_units = add_territorial_units(df, "longitud", "latitud")
+```
+
+```
+   tipo                       denominacion   latitud  longitud   elev  \
+Aeródromo       CORONEL BOGADO/AGROSERVICIOS -60.57066 -33.27226   44.0
+Aeródromo                       GENERAL ACHA -64.61351 -37.40164  277.0
+Aeródromo            ARRECIFES/LA CURA MALAL -60.14170 -34.07574   37.0
+Aeródromo                     PUERTO DESEADO -65.90410 -47.73511   82.0
+Aeródromo  BANDERA/AGROSERVICIOS DOÑA TERESA -62.26462 -28.85541   75.0
+
+departamento_id departamento_nombre municipio_id municipio_nombre  \
+          82084             Rosario       823393   Coronel Bogado
+          42154             Utracán       420133     General Acha
+          06077           Arrecifes       060077        Arrecifes
+          78014             Deseado         None             None
+          86077     General Taboada         None             None
+
+provincia_id     provincia_nombre
+          82             Santa Fe
+          42             La Pampa
+          06         Buenos Aires
+          78           Santa Cruz
+          86  Santiago del Estero
+```
 
 ## Con `data-cleaner`
 
