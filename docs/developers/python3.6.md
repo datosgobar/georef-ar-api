@@ -1,41 +1,43 @@
-# Python 3.6
+# Instalación de Python 3.6
+Para instalar Python 3.6 en entornos GNU/Linux, se puede utilizar la herramienta `pyenv` [disponible en GitHub](https://github.com/pyenv/pyenv). `pyenv` permite al usuario instalar cualquier versión de Python existente, e incluso tener varias versiones instaladas simultáneamente.
 
-## Instalación
+A continuación, se detallan los pasos necesarios para instalar Python 3.6. Los mismos fueron creados utilizando Ubuntu 16.04.
 
-- Librerias requeridas:
+## 1. Descargar `pyenv`
+Clonar el repositorio de `pyenv` en el directorio `~/.pyenv`:
+```bash
+$ git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+```
 
-  `$ sudo apt install build-essential libssl-dev zlib1g-dev`
+## 2. Agregar configuración de `pyenv` a `~/.bashrc`
+```bash
+$ echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+$ echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+$ echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc
+```
 
-  `$ sudo apt install libbz2-dev libreadline-dev libsqlite3-dev`
+## 3. Activar la nueva configuración
+```bash
+$ source ~/.bashrc
+```
 
-- Descargando los archivos binarios
+## 4. Instalar dependencias para compilar Python
+```bash
+$ sudo apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev
+```
 
-  `$ wget https://www.python.org/ftp/python/3.6.2/Python-3.6.4.tgz`
+## 5. Descargar, compilar e instalar Python 3.6
+```bash
+$ pyenv install 3.6.5
+```
 
-  `$ tar xvf Python-3.6.4.tgz`
-
-  `$ cd Python-3.6.4`
-
-- Instalación
-
-  `# ./configure --enable-optimizations`
-
-  `# make altinstall`
-
-- Pip
-
-  `$ sudo apt install python-pip` o `python3-pip`
-
-## Entorno virtuales
-
-- Instalación de Virtualenv
-
-  `$ sudo apt-get install virtualenv python-virtualenv`
-
-- Crear entorno
-
-  `$ python3.6 -m venv <name-venv>`
-
-- Activar entorno virtual
-
-  `$ . venv/bin/activate`
+## 6. Activar Python 3.6
+Una vez instalado Python 3.6, se debe activar su uso. `pyenv` permite establecer versiones de Python por directorio: de esta forma, es posible clonar el repositorio `georef-ar-api` en una ubicación, y activar el uso de Python 3.6 en la misma:
+```bash
+$ git clone https://github.com/datosgobar/georef-api.git
+$ cd georef-api
+$ pyenv version 3.6.5 # activar el uso de Python 3.6
+$ python --version    # el comando 'python' ahora utiliza Python 3.6, en este directorio
+Python 3.6.5
+```
+Notar que `pyenv` crea un archivo llamado `.python-version`, donde se especifica la versión de Python que debería ser utilizada en el directorio.
