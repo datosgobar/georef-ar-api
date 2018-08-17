@@ -39,5 +39,7 @@ $ cd georef-api
 $ pyenv version 3.6.5 # activar el uso de Python 3.6
 $ python --version    # el comando 'python' ahora utiliza Python 3.6, en este directorio
 Python 3.6.5
+$ pip --version       # también se instala 'pip' automáticamente
+pip 9.0.1 (python 3.6.5)
 ```
 Notar que `pyenv` crea un archivo llamado `.python-version`, donde se especifica la versión de Python que debería ser utilizada en el directorio.

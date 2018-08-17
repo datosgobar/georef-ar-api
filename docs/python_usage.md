@@ -1,4 +1,4 @@
-# Usar en python
+# Usar en Python
 
 ## Con `requests`
 

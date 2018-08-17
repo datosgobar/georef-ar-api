@@ -1,11 +1,10 @@
-# Comenzar a usar la API Georef
+# Ejemplos de uso
 
-## Ejemplos
-A continuación, se muestran algunos ejemplos de uso de la API:
+## Ejemplos rápidos
+A continuación, se muestran algunos ejemplos de uso de la API, utilizando los recursos `GET`:
 
-### Búsqueda de provincias:
+### Búsqueda de provincias
 `GET` [`http://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba`](http://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba)
-
 ```
 {
     "provincias": [
@@ -22,7 +21,6 @@ A continuación, se muestran algunos ejemplos de uso de la API:
 
 ### Búsqueda de departamentos
 `GET` [`http://apis.datos.gob.ar/georef/api/departamentos?provincia=jujuy&max=16`](http://apis.datos.gob.ar/georef/api/departamentos?provincia=jujuy&max=16)
-
 ```
 {
     "departamentos": [
@@ -42,9 +40,48 @@ A continuación, se muestran algunos ejemplos de uso de la API:
 }
 ```
 
-### Normalización de direcciones
-`GET` [`http://apis.datos.gob.ar/georef/api/direcciones?provincia=buenos aires&direccion=Florida 1801`](http://apis.datos.gob.ar/georef/api/direcciones?provincia=buenos%20aires&direccion=Florida%201801)
+### Búsqueda de municipios
+`GET` [`http://apis.datos.gob.ar/georef/api/municipios?departamento=graneros`](http://apis.datos.gob.ar/georef/api/municipios?departamento=graneros)
+```
+{
+    "municipios": [
+        {
+            "centroide_lat": -27.816619,
+            "centroide_lon": -65.199594,
+            "departamento": {
+                "id": "90035",
+                "nombre": "Graneros"
+            },
+            "fuente": "IGN",
+            "id": "908210",
+            "nombre": "Taco Ralo",
+            "provincia": {
+                "id": "90",
+                "nombre": "Tucumán"
+            }
+        },
+        { ... } // 2 municipios omitidos
+    ]
+}
+```
 
+### Búsqueda de localidades
+`GET` [`http://apis.datos.gob.ar/georef/api/localidades?provincia=chubut&campos=nombre`](http://apis.datos.gob.ar/georef/api/localidades?provincia=chubut&campos=nombre)
+```
+{
+    "localidades": [
+		{
+			"fuente": "BAHRA",
+			"id": "26007030000",
+			"nombre": "PUERTO PIRAMIDE"
+		},
+        { ... } // 9 resultados omitidos
+    ]
+}
+```
+
+### Normalización de direcciones
+`GET` [`http://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida 1801`](http://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida%201801)
 ```
 {
     "direcciones": [
@@ -71,7 +108,6 @@ A continuación, se muestran algunos ejemplos de uso de la API:
 
 ### Entidades geográficas en un punto
 `GET` [`http://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](http://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
-
 ```
 {
     "ubicacion": {
@@ -91,5 +127,105 @@ A continuación, se muestran algunos ejemplos de uso de la API:
             "nombre": "CATAMARCA"
         }
     }
+}
+```
+
+## Ejemplos de operaciones por lotes
+Todos los recursos de la API tienen una variante `POST`, que permite realizar varias consultas en una misma petición.
+
+### Búsqueda de municipios en lotes
+`POST` `http://apis.datos.gob.ar/georef/api/municipios`
+```json
+{
+    "municipios": [
+        {
+            "nombre": "belgrano",
+            "max": 1,
+            "campos": "id, nombre"
+        },
+        {
+            "nombre": "martin",
+            "max": 1,
+            "provincia": "cordoba",
+			"aplanar": true
+        }
+    ]
+}
+```
+Resultados:
+```json
+{
+    "resultados": [
+        {
+            "municipios": [
+                {
+                    "fuente": "IGN",
+                    "id": "060301",
+                    "nombre": "General Belgrano"
+                }
+            ]
+        },
+        {
+            "municipios": [
+                {
+                    "centroide_lat": -35.361211,
+                    "centroide_lon": -64.294073,
+                    "departamento_id": "42133",
+                    "departamento_nombre": "Realicó",
+                    "fuente": "IGN",
+                    "id": "420126",
+                    "nombre": "Embajador Martini",
+                    "provincia_id": "42",
+                    "provincia_nombre": "La Pampa"
+                }
+            ]
+        }
+    ]
+}
+```
+
+### Normalización de direcciones en lotes
+`POST` `http://apis.datos.gob.ar/georef/api/direcciones`
+```json
+{
+    "direcciones": [
+        {
+            "direccion": "santa fe 3100",
+            "max": 1,
+            "campos": "id, nombre, altura"
+        },
+        {
+            "direccion": "corientes 4010",
+            "max": 1,
+			"campos": "id, nombre, altura"
+        }
+    ]
+}
+```
+Resultados:
+```json
+{
+    "resultados": [
+        {
+            "direcciones": [
+                {
+                    "altura": 3100,
+                    "fuente": "INDEC",
+                    "id": "0642701011435",
+                    "nombre": "SANTA FE"
+                }
+            ]
+        },
+        {
+            "direcciones": [
+                {
+                    "altura": 4010,
+                    "fuente": "INDEC",
+                    "id": "0656801001020",
+                    "nombre": "CORRIENTES"
+                }
+            ]
+        }
+    ]
 }
 ```
