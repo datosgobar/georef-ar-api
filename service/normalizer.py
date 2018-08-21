@@ -77,7 +77,7 @@ def get_index_source(index):
     """
     if index in [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES]:
         return N.SOURCE_IGN
-    elif index in [N.SETTLEMENTS, N.LOCALITIES]:
+    elif index == N.LOCALITIES:
         return N.SOURCE_BAHRA
     elif index == N.STREETS:
         return N.SOURCE_INDEC
@@ -111,7 +111,7 @@ def translate_keys(d, translations, ignore=None):
 
 
 def process_entity_single(request, name, param_parser, key_translations,
-                          csv_fields, index):
+                          csv_fields):
     """Procesa una request GET para consultar datos de una entidad.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -125,7 +125,6 @@ def process_entity_single(request, name, param_parser, key_translations,
             representando una query a Elasticsearch.
         csv_fields (dict): Diccionario a utilizar para modificar los campos
             cuando se utiliza el formato CSV.
-        index (str): Nombre del índice a consultar.
 
     Raises:
         data.DataConnectionException: En caso de ocurrir un error de
@@ -152,16 +151,16 @@ def process_entity_single(request, name, param_parser, key_translations,
     fmt[N.CSV_FIELDS] = csv_fields
 
     es = get_elasticsearch()
-    result = data.search_entities(es, index, [query])[0]
+    result = data.search_entities(es, name, [query])[0]
 
-    source = get_index_source(index)
+    source = get_index_source(name)
     for match in result:
         match[N.SOURCE] = source
 
     return formatter.create_ok_response(name, result, fmt)
 
 
-def process_entity_bulk(request, name, param_parser, key_translations, index):
+def process_entity_bulk(request, name, param_parser, key_translations):
     """Procesa una request POST para consultar datos de una lista de entidades.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -173,7 +172,6 @@ def process_entity_bulk(request, name, param_parser, key_translations, index):
         key_translations (dict): Traducciones de keys a utilizar para convertir
             los diccionarios de parámetros del usuario a una lista de
             diccionarios representando las queries a Elasticsearch.
-        index (str): Nombre del índice a consultar.
 
     Raises:
         data.DataConnectionException: En caso de ocurrir un error de
@@ -206,9 +204,9 @@ def process_entity_bulk(request, name, param_parser, key_translations, index):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = data.search_entities(es, index, queries)
+    results = data.search_entities(es, name, queries)
 
-    source = get_index_source(index)
+    source = get_index_source(name)
     for result in results:
         for match in result:
             match[N.SOURCE] = source
@@ -216,8 +214,7 @@ def process_entity_bulk(request, name, param_parser, key_translations, index):
     return formatter.create_ok_response_bulk(name, results, formats)
 
 
-def process_entity(request, name, param_parser, key_translations, csv_fields,
-                   index=None):
+def process_entity(request, name, param_parser, key_translations, csv_fields):
     """Procesa una request GET o POST para consultar datos de una entidad.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
     En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
@@ -232,22 +229,17 @@ def process_entity(request, name, param_parser, key_translations, csv_fields,
             diccionarios representando las queries a Elasticsearch.
         csv_fields (dict): Diccionario a utilizar para modificar los campos
             cuando se utiliza el formato CSV.
-        index (str): Nombre del índice a consultar. Por defecto, se utiliza
-            el nombre de la entidad.
 
     Returns:
         flask.Response: respuesta HTTP
     """
-    if not index:
-        index = name
-
     try:
         if request.method == 'GET':
             return process_entity_single(request, name, param_parser,
-                                         key_translations, csv_fields, index)
+                                         key_translations, csv_fields)
         else:
             return process_entity_bulk(request, name, param_parser,
-                                       key_translations, index)
+                                       key_translations)
     except data.DataConnectionException:
         return formatter.create_internal_error_response()
 
@@ -333,7 +325,7 @@ def process_locality(request):
             N.EXACT: 'exact',
             N.ORDER: 'order',
             N.FIELDS: 'fields'
-    }, formatter.LOCALITIES_CSV_FIELDS, index=N.SETTLEMENTS)
+    }, formatter.LOCALITIES_CSV_FIELDS)
 
 
 def build_street_query_format(parsed_params):
