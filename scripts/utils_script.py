@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizdo el código para tomar
 # nuevas versiones de los archivos.
-FILE_VERSION = '1.0.0'
+FILE_VERSION = '2.0.0'
 
 SEPARATOR_WIDTH = 60
 ACTIONS = ['index', 'index_stats', 'run_sql']

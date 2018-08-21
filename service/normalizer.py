@@ -485,12 +485,13 @@ def build_addresses_result(result, query, source):
                 parts[0] += ' {}'.format(number)
                 street[N.FULL_NAME] = ','.join(parts)
 
+            door_nums = street.pop(N.DOOR_NUM)
+            start_r = door_nums[N.START][N.RIGHT]
+            end_l = door_nums[N.END][N.LEFT]
+            geom = street.pop(N.GEOM)
+
             if N.DOOR_NUM in fields:
                 street[N.DOOR_NUM] = number
-
-            start_r = street.pop(N.START_R)
-            end_l = street.pop(N.END_L)
-            geom = street.pop(N.GEOM)
 
             if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
                 loc = data.street_number_location(connection, geom, number,

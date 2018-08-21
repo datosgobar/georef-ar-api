@@ -34,19 +34,3 @@ def download(url, tries=DEFAULT_TRIES, retry_delay=RETRY_DELAY,
                 time.sleep(retry_delay)
 
     raise download_exception
-
-
-def download_to_file(url, file_path, **kwargs):
-    """
-    Descarga un archivo a través del protocolo HTTP, en uno o más intentos, y
-    escribe el contenido descargado el el path especificado.
-
-    Args:
-        url (str): URL (schema HTTP) del archivo a descargar.
-        file_path (str): Path del archivo a escribir. Si un archivo ya existe
-            en el path especificado, se sobrescribirá con nuevos contenidos.
-        kwargs: Parámetros para download().
-    """
-    content = download(url, **kwargs)
-    with open(file_path, "wb") as f:
-        f.write(content)

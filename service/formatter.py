@@ -17,16 +17,16 @@ FLAT_SEP = '_'
 STATES_CSV_FIELDS = [
     (N.ID, [N.STATE, N.ID]),
     (N.NAME, [N.STATE, N.NAME]),
-    (N.C_LAT, [N.STATE, N.C_LAT]),
-    (N.C_LON, [N.STATE, N.C_LON]),
+    (N.C_LAT, [N.STATE, N.CENTROID, N.LAT]),
+    (N.C_LON, [N.STATE, N.CENTROID, N.LON]),
     (N.SOURCE, [N.STATE, N.SOURCE])
 ]
 
 DEPARTMENTS_CSV_FIELDS = [
     (N.ID, [N.DEPT, N.ID]),
     (N.NAME, [N.DEPT, N.NAME]),
-    (N.C_LAT, [N.DEPT, N.C_LAT]),
-    (N.C_LON, [N.DEPT, N.C_LON]),
+    (N.C_LAT, [N.DEPT, N.CENTROID, N.LAT]),
+    (N.C_LON, [N.DEPT, N.CENTROID, N.LON]),
     (N.STATE_ID, [N.STATE, N.ID]),
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.SOURCE, [N.DEPT, N.SOURCE])
@@ -35,8 +35,8 @@ DEPARTMENTS_CSV_FIELDS = [
 MUNICIPALITIES_CSV_FIELDS = [
     (N.ID, [N.MUN, N.ID]),
     (N.NAME, [N.MUN, N.NAME]),
-    (N.C_LAT, [N.MUN, N.C_LAT]),
-    (N.C_LON, [N.MUN, N.C_LON]),
+    (N.C_LAT, [N.MUN, N.CENTROID, N.LAT]),
+    (N.C_LON, [N.MUN, N.CENTROID, N.LON]),
     (N.STATE_ID, [N.STATE, N.ID]),
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.DEPT_ID, [N.DEPT, N.ID]),
@@ -47,8 +47,8 @@ MUNICIPALITIES_CSV_FIELDS = [
 LOCALITIES_CSV_FIELDS = [
     (N.ID, [N.LOCALITY, N.ID]),
     (N.NAME, [N.LOCALITY, N.NAME]),
-    (N.C_LAT, [N.LOCALITY, N.C_LAT]),
-    (N.C_LON, [N.LOCALITY, N.C_LON]),
+    (N.C_LAT, [N.LOCALITY, N.CENTROID, N.LAT]),
+    (N.C_LON, [N.LOCALITY, N.CENTROID, N.LON]),
     (N.STATE_ID, [N.STATE, N.ID]),
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.DEPT_ID, [N.DEPT, N.ID]),
@@ -62,10 +62,10 @@ LOCALITIES_CSV_FIELDS = [
 STREETS_CSV_FIELDS = [
     (N.ID, [N.STREET, N.ID]),
     (N.NAME, [N.STREET, N.NAME]),
-    (N.START_R, [N.STREET, N.START_R]),
-    (N.START_L, [N.STREET, N.START_L]),
-    (N.END_R, [N.STREET, N.END_R]),
-    (N.END_L, [N.STREET, N.END_L]),
+    (N.START_R, [N.STREET, N.DOOR_NUM, N.START, N.RIGHT]),
+    (N.START_L, [N.STREET, N.DOOR_NUM, N.START, N.LEFT]),
+    (N.END_R, [N.STREET, N.DOOR_NUM, N.END, N.RIGHT]),
+    (N.END_L, [N.STREET, N.DOOR_NUM, N.END, N.LEFT]),
     (N.FULL_NAME, [N.STREET, N.FULL_NAME]),
     (N.ROAD_TYPE, [N.STREET, N.ROAD_TYPE]),
     (N.STATE_ID, [N.STATE, N.ID]),
@@ -236,7 +236,7 @@ def create_csv_response(name, result, fmt):
         yield '{}{}'.format(CSV_SEP.join(field_names), CSV_NEWLINE)
 
         for match in result:
-            flatten_dict(match, max_depth=2)
+            flatten_dict(match, max_depth=3)
 
             values = []
             for key in keys:
@@ -286,8 +286,14 @@ def create_geojson_response(result, iterable_result):
 
     features = []
     for item in items:
-        lat = item.pop(N.LAT, None) or item.pop(N.C_LAT, None)
-        lon = item.pop(N.LON, None) or item.pop(N.C_LON, None)
+        lat, lon = None, None
+        if N.LAT in item and N.LON in item:
+            lat = item.pop(N.LAT)
+            lon = item.pop(N.LON)
+        elif N.CENTROID in item:
+            centroid = item.pop(N.CENTROID)
+            lat = centroid[N.LAT]
+            lon = centroid[N.LON]
 
         if lat and lon:
             point = geojson.Point((lat, lon))
@@ -313,9 +319,9 @@ def format_result_json(name, result, fmt, iterable_result):
     if fmt.get(N.FLATTEN, False):
         if iterable_result:
             for match in result:
-                flatten_dict(match, max_depth=2)
+                flatten_dict(match, max_depth=3)
         else:
-            flatten_dict(result, max_depth=2)
+            flatten_dict(result, max_depth=3)
 
     return {name: result}
 

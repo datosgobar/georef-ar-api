@@ -1,5 +1,6 @@
 from . import SearchEntitiesTest, asciifold
 import random
+from service import formatter
 import unittest
 
 
@@ -67,24 +68,23 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['id', 'centroide_lat', 'centroide_lon', 'nombre',
-                         'fuente'])
+        fields = sorted(['id', 'centroide', 'nombre', 'fuente'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
         """Los campos de las provincias devueltas deben ser filtrables."""
         fields_lists = [
             ['fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'centroide_lat', 'centroide_lon', 'nombre'],
-            ['fuente', 'id', 'centroide_lat', 'nombre']
+            ['fuente', 'id', 'centroide.lat', 'centroide.lon', 'nombre'],
+            ['fuente', 'id', 'centroide.lat', 'nombre']
         ]
         fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
 
         for fields in fields_lists:
             data = self.get_response({'campos': ','.join(fields), 'max': 1})
+            formatter.flatten_dict(data[0], sep='.')
             fields_results.append(sorted(data[0].keys()))
-
         self.assertListEqual(fields_lists, fields_results)
 
     def test_name_ordering(self):

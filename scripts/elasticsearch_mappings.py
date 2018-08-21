@@ -33,8 +33,14 @@ MAP_STATE = {
                     }
                 }
             },
-            'centroide_lat': {'type': 'float', 'index': False},
-            'centroide_lon': {'type': 'float', 'index': False}
+            'centroide': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'lat': {'type': 'float', 'index': False},
+                    'lon': {'type': 'float', 'index': False}
+                }
+            }
         }
     }
 }
@@ -45,8 +51,14 @@ MAP_STATE_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'centroide_lat': {'type': 'float', 'index': False},
-            'centroide_lon': {'type': 'float', 'index': False},
+            'centroide': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'lat': {'type': 'float', 'index': False},
+                    'lon': {'type': 'float', 'index': False}
+                }
+            },
             'geometria': {'type': 'geo_shape'}
         }
     }
@@ -68,8 +80,14 @@ MAP_DEPT = {
                     }
                 }
             },
-            'centroide_lat': {'type': 'float', 'index': False},
-            'centroide_lon': {'type': 'float', 'index': False},
+            'centroide': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'lat': {'type': 'float', 'index': False},
+                    'lon': {'type': 'float', 'index': False}
+                }
+            },
             'provincia': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -98,8 +116,14 @@ MAP_DEPT_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'centroide_lat': {'type': 'float', 'index': False},
-            'centroide_lon': {'type': 'float', 'index': False},
+            'centroide': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'lat': {'type': 'float', 'index': False},
+                    'lon': {'type': 'float', 'index': False}
+                }
+            },
             'provincia': {'type': 'object', 'enabled': False},
             'geometria': {'type': 'geo_shape'}
         }
@@ -122,8 +146,14 @@ MAP_MUNI = {
                     }
                 }
             },
-            'centroide_lat': {'type': 'float', 'index': False},
-            'centroide_lon': {'type': 'float', 'index': False},
+            'centroide': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'lat': {'type': 'float', 'index': False},
+                    'lon': {'type': 'float', 'index': False}
+                }
+            },
             'departamento': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -170,8 +200,14 @@ MAP_MUNI_GEOM = {
             'id': {'type': 'keyword', 'index': False},
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
-            'centroide_lat': {'type': 'float', 'index': False},
-            'centroide_lon': {'type': 'float', 'index': False},
+            'centroide': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'lat': {'type': 'float', 'index': False},
+                    'lon': {'type': 'float', 'index': False}
+                }
+            },
             'departamento': {'type': 'object', 'enabled': False},
             'provincia': {'type': 'object', 'enabled': False},
             'geometria': {'type': 'geo_shape'}
@@ -196,8 +232,14 @@ MAP_SETTLEMENT = {
                 }
             },
             'tipo': {'type': 'keyword'},
-            'centroide_lat': {'type': 'float', 'index': False},
-            'centroide_lon': {'type': 'float', 'index': False},
+            'centroide': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'lat': {'type': 'float', 'index': False},
+                    'lon': {'type': 'float', 'index': False}
+                }
+            },
             'municipio': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -263,8 +305,14 @@ MAP_SETTLEMENT_GEOM = {
             'timestamp': TIMESTAMP,
             'nombre': {'type': 'keyword', 'index': False},
             'tipo': {'type': 'keyword', 'index': False},
-            'centroide_lat': {'type': 'float', 'index': False},
-            'centroide_lon': {'type': 'float', 'index': False},
+            'centroide': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'lat': {'type': 'float', 'index': False},
+                    'lon': {'type': 'float', 'index': False}
+                }
+            },
             'municipio': {'type': 'object', 'enabled': False},
             'departamento': {'type': 'object', 'enabled': False},
             'provincia': {'type': 'object', 'enabled': False},
@@ -298,17 +346,35 @@ MAP_STREET = {
                 'analyzer': NAME_ANALYZER_SYNONYMS,
                 'search_analyzer': NAME_ANALYZER
             },
-            'altura_inicio_derecha': {
-                'type': 'integer'
-            },
-            'altura_inicio_izquierda': {
-                'type': 'integer'
-            },
-            'altura_fin_derecha': {
-                'type': 'integer'
-            },
-            'altura_fin_izquierda': {
-                'type': 'integer'
+            'altura': {
+                'type': 'object',
+                'dynamic': 'strict',
+                'properties': {
+                    'inicio': {
+                        'type': 'object',
+                        'dynamic': 'strict',
+                        'properties': {
+                            'derecha': {
+                                'type': 'integer'
+                            },
+                            'izquierda': {
+                                'type': 'integer'
+                            }
+                        }
+                    },
+                    'fin': {
+                        'type': 'object',
+                        'dynamic': 'strict',
+                        'properties': {
+                            'derecha': {
+                                'type': 'integer'
+                            },
+                            'izquierda': {
+                                'type': 'integer'
+                            }
+                        }
+                    }
+                }
             },
             'geometria': {
                 'type': 'text',
