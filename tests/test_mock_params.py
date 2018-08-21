@@ -183,6 +183,13 @@ class ParamParsingTest(TestCase):
             (T.VALUE_ERROR.value, 'campos')
         })
 
+    def test_string_list_repeated(self):
+        """Los parámtros de tipo string list no deberían aceptar valores
+        repetidos."""
+        self.assert_errors_match('/localidades?campos=id,id', {
+            (T.VALUE_ERROR.value, 'campos')
+        })
+
     def test_id_param_length(self):
         """Los parámtros de tipo ID no deberían aceptar valores de longitud
         mayores a las especificadas."""

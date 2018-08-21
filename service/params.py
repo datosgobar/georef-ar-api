@@ -282,7 +282,11 @@ class StrListParameter(Parameter):
         if not val:
             raise ValueError(strings.STRLIST_EMPTY)
 
-        received = set(part.strip() for part in val.split(','))
+        parts = val.split(',')
+        received = set(part.strip() for part in parts)
+        if len(parts) != len(received):
+            raise ValueError(strings.STRLIST_REPEATED)
+
         # Siempre se agregan los valores constantes
         return list(self.constants | received)
 
