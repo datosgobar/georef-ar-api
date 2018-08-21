@@ -541,6 +541,7 @@ PARAMS_STATES = EndpointParameters(shared_params={
     N.ID: IdParameter(length=2),
     N.NAME: StrParameter(),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
+    N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.C_LAT, N.C_LON]),
     N.MAX: IntParameter(default=24, lower_limit=1, upper_limit=MAX_SIZE_LEN),
