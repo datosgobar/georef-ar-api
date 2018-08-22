@@ -193,7 +193,7 @@ def add_territorial_units(df, column_lat, column_lon):
     ).drop_duplicates().to_dict("records")
 
     # crea DataFrame de unidades territoriales que contienen a las coordenadas
-    ubicaciones = pd.DataFrame(get_territorial_units(coordenadas))
+    ubicaciones = pd.DataFrame(get_territorial_units(coordinates))
 
     # agrega las unidades territoriales al DataFrame original
     df_with_territorial_units = df.merge(
