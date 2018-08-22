@@ -13,7 +13,7 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
             "id": "14",
             "centroide": {
                 "lat": -32.142933,
-                "lon": -63.801753,
+                "lon": -63.801753
             },
             "nombre": "CÓRDOBA"
         }

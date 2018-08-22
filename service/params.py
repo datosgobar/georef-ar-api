@@ -371,18 +371,36 @@ class AddressParameter(Parameter):
         super().__init__(required=True)
 
     def _parse_value(self, val):
-        # TODO: Revisar expresiones regulares
-        match = re.search(r'(\s[0-9]+?)$', val)
-        number = int(match.group(1)) if match else None
-        if not number:
+        # 1) Remover ítems entre paréntesis e indicadores de número (N°, n°)
+        val = re.sub(r'\(.+\)|[nN][°º]', '', val.strip())
+
+        parts = [
+            # 3) Normalizar espacios
+            ' '.join(part.strip().split())
+            for part
+            # 2) Dividir el texto utilizando guiones, comas e indicadores
+            # de barrio (B°, b°)
+            in re.split(r'-|,|[bB][°º]', val)
+            if part
+        ]
+
+        address = None
+        for part in parts:
+            # 4) Por cada parte de texto resultante, buscar un nombre de calle
+            # junto a una altura numérica. La altura debe estar al final del
+            # texto. Priorizar los primeros resultados válidos encontrados.
+            match = re.search(r'^(.+)\s+([0-9]+)$', part)
+            if match:
+                name, num = match.groups()
+
+                if int(num) > 0:
+                    address = name, num
+                    break
+
+        if not address:
             raise ValueError(strings.ADDRESS_NO_NUM)
 
-        road_name = re.sub(r'(\s[0-9]+?)$', r'', val)
-
-        if not road_name:
-            raise ValueError(strings.ADDRESS_NO_NAME)
-
-        return road_name.strip(), number
+        return address
 
 
 class EndpointParameters():

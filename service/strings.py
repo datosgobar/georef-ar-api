@@ -8,7 +8,6 @@ default.'
 DEFAULT_INVALID_CHOICE = 'El valor default no se encuentra dentro de las \
 opciones de valores.'
 ADDRESS_NO_NUM = 'La dirección no contiene una altura.'
-ADDRESS_NO_NAME = 'La dirección no contiene un nombre de calle.'
 STRING_EMPTY = 'El campo de texto no tiene contenido.'
 STRLIST_EMPTY = 'La lista no contiene valores.'
 STRLIST_REPEATED = 'La lista contiene valores repetidos.'
