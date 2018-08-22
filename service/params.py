@@ -15,6 +15,22 @@ MAX_BULK_LEN = 5000
 MAX_SIZE_LEN = MAX_BULK_LEN
 
 
+class ParameterParsingException(Exception):
+    def __init__(self, errors):
+        self._errors = errors
+
+    @property
+    def errors(self):
+        return self._errors
+
+    """Excepción lanzada al finalizar la recolección de errores para todos los
+    parámetros.
+
+    """
+
+    pass
+
+
 class ParameterRequiredException(Exception):
     """Excepción lanzada cuando se detecta la ausencia de un parámetro
     requerido.
@@ -409,12 +425,13 @@ class EndpointParameters():
                 recibidos los parámetros.
 
         Returns:
-            tuple: Tupla de resultados y errores. Los resultados consisten de
-                un diccionario conteniendo como clave el nombre del parámetro,
-                y como valor el valor parseado y validado, con su tipo
-                apropiado. Los errores consisten de un diccionario conteniendo
-                como clave el nombre del parámetro recibido, y como valor un
-                objeto de tipo ParamError, especificando el error.
+            list: Lista de resultados. Los resultados consisten de un
+                diccionario conteniendo como clave el nombre del parámetro, y
+                como valor el valor parseado y validado, con su tipo apropiado.
+
+        Raises:
+            ParameterParsingException: Excepción con errores de parseo
+                de parámetros.
 
         """
         parsed, errors = {}, {}
@@ -448,7 +465,10 @@ class EndpointParameters():
                                                 strings.UNKNOWN_ERROR,
                                                 from_source)
 
-        return parsed, errors
+        if errors:
+            raise ParameterParsingException(errors)
+
+        return parsed
 
     def parse_post_params(self, qs_params, body_params):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP
@@ -462,65 +482,77 @@ class EndpointParameters():
                 HTTP.
 
         Returns:
-            tuple: Tupla de dos listas: una lista de conjuntos de parámetros
-                parseados, y una lista de conjuntos de errores de parseo. Los
-                elementos de ambas listas provienen de 'parse_param_dict'.
+            list: lista de conjuntos de parámetros parseados provienentes
+                de 'parse_param_dict'.
+
+        Raises:
+            ParameterParsingException: Excepción con errores de parseo
+                de parámetros.
 
         """
         if qs_params:
             # No aceptar parámetros de querystring en bulk
-            return [], [
+            raise ParameterParsingException([
                 {'querystring': ParamError(ParamErrorType.INVALID_LOCATION,
                                            strings.BULK_QS_INVALID,
                                            'querystring')}
-            ]
+            ])
 
         if not body_params or not isinstance(body_params, list):
             # No aceptar operaciones bulk que no sean listas, y no
             # aceptar listas vacías.
-            return [], [
+            raise ParameterParsingException([
                 {'body': ParamError(ParamErrorType.INVALID_BULK,
                                     strings.INVALID_BULK, 'body')}
-            ]
+            ])
 
         if len(body_params) > MAX_BULK_LEN:
-            return [], [
+            raise ParameterParsingException([
                 {'body': ParamError(
                     ParamErrorType.INVALID_BULK_LEN,
                     strings.BULK_LEN_ERROR.format(MAX_BULK_LEN), 'body')}
-            ]
+            ])
 
         results, errors_list = [], []
         for param_dict in body_params:
+            parsed, errors = {}, {}
             if not hasattr(param_dict, 'get'):
-                parsed, errors = {}, {
-                    'body': ParamError(ParamErrorType.INVALID_BULK_ENTRY,
-                                       strings.INVALID_BULK_ENTRY,
-                                       'body')
-                }
+                errors['body'] = ParamError(ParamErrorType.INVALID_BULK_ENTRY,
+                                            strings.INVALID_BULK_ENTRY, 'body')
             else:
-                parsed, errors = self.parse_params_dict(self.post_body_params,
-                                                        param_dict, 'body')
+                try:
+                    parsed = self.parse_params_dict(self.post_body_params,
+                                                    param_dict, 'body')
+                except ParameterParsingException as e:
+                    errors = e.errors
 
             results.append(parsed)
             errors_list.append(errors)
 
-        if not any(errors_list):
-            for name, param in self.post_body_params.items():
-                try:
-                    # Validar conjuntos de parámetros bajo el mismo nombre
-                    param.validate_values(result[name] for result in results)
-                except ValueError as e:
-                    error = ParamError(ParamErrorType.INVALID_SET, str(e),
-                                       'body')
+        if any(errors_list):
+            raise ParameterParsingException(errors_list)
 
-                    # Si la validación no fue exitosa, crear un error y
-                    # agregarlo al conjunto de errores de cada consulta que lo
-                    # utilizó.
-                    for errors in errors_list:
-                        errors[name] = error
+        for name, param in self.post_body_params.items():
+            try:
+                # Validar conjuntos de valores de parámetros bajo el
+                # mismo nombre
+                param.validate_values(result[name] for result in results)
+            except ValueError as e:
+                error = ParamError(ParamErrorType.INVALID_SET, str(e),
+                                   'body')
 
-        return results, errors_list
+                # Si la validación no fue exitosa, crear un error y
+                # agregarlo al conjunto de errores de cada consulta que lo
+                # utilizó.
+                for errors in errors_list:
+                    errors[name] = error
+
+        # Luego de validar conjuntos, lanzar una excepción si se generaron
+        # errores nuevos
+        if any(errors_list):
+            raise ParameterParsingException(errors_list)
+
+        return results
 
     def parse_get_params(self, qs_params):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP GET
@@ -530,7 +562,11 @@ class EndpointParameters():
             qs_params (dict): Parámetros recibidos en el query string.
 
         Returns:
-            tuple: Valor de retorno de 'parse_dict_params'.
+            list: Valor de retorno de 'parse_dict_params'.
+
+        Raises:
+            ParameterParsingException: Excepción con errores de parseo
+                de parámetros.
 
         """
         return self.parse_params_dict(self.get_qs_params, qs_params,

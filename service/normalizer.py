@@ -133,10 +133,10 @@ def process_entity_single(request, name, param_parser, key_translations,
     Returns:
         flask.Response: respuesta HTTP
     """
-    qs_params, errors = param_parser.parse_get_params(request.args)
-
-    if errors:
-        return formatter.create_param_error_response_single(errors)
+    try:
+        qs_params = param_parser.parse_get_params(request.args)
+    except params.ParameterParsingException as e:
+        return formatter.create_param_error_response_single(e.errors)
 
     # Construir query a partir de parámetros
     query = translate_keys(qs_params, key_translations,
@@ -180,11 +180,11 @@ def process_entity_bulk(request, name, param_parser, key_translations):
     Returns:
         flask.Response: respuesta HTTP
     """
-    body_params, errors = param_parser.parse_post_params(
-        request.args, request.json and request.json.get(name))
-
-    if any(errors):
-        return formatter.create_param_error_response_bulk(errors)
+    try:
+        body_params = param_parser.parse_post_params(
+            request.args, request.json and request.json.get(name))
+    except params.ParameterParsingException as e:
+        return formatter.create_param_error_response_bulk(e.errors)
 
     queries = []
     formats = []
@@ -379,10 +379,10 @@ def process_street_single(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    qs_params, errors = params.PARAMS_STREETS.parse_get_params(request.args)
-
-    if errors:
-        return formatter.create_param_error_response_single(errors)
+    try:
+        qs_params = params.PARAMS_STREETS.parse_get_params(request.args)
+    except params.ParameterParsingException as e:
+        return formatter.create_param_error_response_single(e.errors)
 
     query, fmt = build_street_query_format(qs_params)
 
@@ -410,11 +410,11 @@ def process_street_bulk(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    body_params, errors = params.PARAMS_STREETS.parse_post_params(
-        request.args, request.json and request.json.get(N.STREETS))
-
-    if any(errors):
-        return formatter.create_param_error_response_bulk(errors)
+    try:
+        body_params = params.PARAMS_STREETS.parse_post_params(
+            request.args, request.json and request.json.get(N.STREETS))
+    except params.ParameterParsingException as e:
+        return formatter.create_param_error_response_bulk(e.errors)
 
     queries = []
     formats = []
@@ -546,10 +546,10 @@ def process_address_single(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    qs_params, errors = params.PARAMS_ADDRESSES.parse_get_params(request.args)
-
-    if errors:
-        return formatter.create_param_error_response_single(errors)
+    try:
+        qs_params = params.PARAMS_ADDRESSES.parse_get_params(request.args)
+    except params.ParameterParsingException as e:
+        return formatter.create_param_error_response_single(e.errors)
 
     query, fmt = build_address_query_format(qs_params)
 
@@ -576,11 +576,11 @@ def process_address_bulk(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    body_params, errors = params.PARAMS_ADDRESSES.parse_post_params(
-        request.args, request.json and request.json.get(N.ADDRESSES))
-
-    if any(errors):
-        return formatter.create_param_error_response_bulk(errors)
+    try:
+        body_params = params.PARAMS_ADDRESSES.parse_post_params(
+            request.args, request.json and request.json.get(N.ADDRESSES))
+    except params.ParameterParsingException as e:
+        return formatter.create_param_error_response_bulk(e.errors)
 
     queries = []
     formats = []
@@ -743,10 +743,10 @@ def process_place_single(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    qs_params, errors = params.PARAMS_PLACE.parse_get_params(request.args)
-
-    if errors:
-        return formatter.create_param_error_response_single(errors)
+    try:
+        qs_params = params.PARAMS_PLACE.parse_get_params(request.args)
+    except params.ParameterParsingException as e:
+        return formatter.create_param_error_response_single(e.errors)
 
     query, fmt = build_place_query_format(qs_params)
 
@@ -771,11 +771,11 @@ def process_place_bulk(request):
     Returns:
         flask.Response: respuesta HTTP
     """
-    body_params, errors = params.PARAMS_PLACE.parse_post_params(
-        request.args, request.json and request.json.get(N.PLACES))
-
-    if any(errors):
-        return formatter.create_param_error_response_bulk(errors)
+    try:
+        body_params = params.PARAMS_PLACE.parse_post_params(
+            request.args, request.json and request.json.get(N.PLACES))
+    except params.ParameterParsingException as e:
+        return formatter.create_param_error_response_bulk(e.errors)
 
     queries = []
     formats = []

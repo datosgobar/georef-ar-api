@@ -76,11 +76,11 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 ```
 {
     "localidades": [
-		{
-			"fuente": "BAHRA",
-			"id": "26007030000",
-			"nombre": "PUERTO PIRAMIDE"
-		},
+        {
+            "fuente": "BAHRA",
+            "id": "26007030000",
+            "nombre": "PUERTO PIRAMIDE"
+        },
         { ... } // 9 resultados omitidos
     ]
 }

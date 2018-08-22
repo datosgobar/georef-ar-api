@@ -60,6 +60,10 @@ class SearchStatesTest(SearchEntitiesTest):
         data = self.get_response({'max': 1})[0]
         self.assertTrue(len(data['id']) == 2)
 
+    def test_flat_results(self):
+        """El parametro aplanar deberia aplanar los resultados devueltos."""
+        self.assert_flat_results()
+
     def test_id_search(self):
         """La búsqueda por ID debe devolver la provincia correspondiente."""
         data = self.get_response({'id': '06'})
