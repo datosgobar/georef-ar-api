@@ -15,15 +15,17 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
 `GET`[`apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero`](http://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
 ```json
 {
-  "provincias": [
-    {
-      "fuente": "IGN",
-      "id": "86",
-      "centroide_lat": -27.782412,
-      "centroide_lon": -63.252387,
-      "nombre": "Santiago del Estero"
-    }
-  ]
+    "provincias": [
+        {
+            "nombre": "Santiago del Estero",
+            "id": "86",
+            "fuente": "IGN",
+            "centroide": {
+                "lat": -27.782412,
+                "lon": -63.252387
+            }
+        }
+    ]
 }
 ```
 

@@ -20,8 +20,10 @@ provincias = get_similar("provincias", "San Juan")
 
 ```python
 [{
-    u'centroide_lat': -30.865368,
-    u'centroide_lon': -68.889491,
+    u'centroide': {
+        u'lat': -30.865368,
+        u'lon': -68.889491
+    },
     u'fuente': u'IGN',
     u'id': u'70',
     u'nombre': u'San Juan'
@@ -59,8 +61,10 @@ provincias = get_similar_bulk("provincias", ["pxa", "sant fe"])
 [
     {},
     {
-        u'centroide_lat': -30.706927,
-        u'centroide_lon': -60.949837,
+        u'centroide': {
+            u'lat': -30.706927,
+            u'lon': -60.949837
+        },
         u'fuente': u'IGN',
         u'id': u'82',
         u'nombre': u'Santa Fe'

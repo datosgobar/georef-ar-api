@@ -11,8 +11,10 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
         {
             "fuente": "IGN",
             "id": "14",
-            "centroide_lat": -32.142933,
-            "centroide_lon": -63.801753,
+            "centroide": {
+                "lat": -32.142933,
+                "lon": -63.801753,
+            },
             "nombre": "CÓRDOBA"
         }
     ]
@@ -27,8 +29,10 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
         {
             "fuente": "IGN",
             "id": "38042",
-            "centroide_lat": -24.194923,
-            "centroide_lon": -65.12645,
+            "centroide": {
+                "lat": -24.194923,
+                "lon": -65.12645
+            },
             "nombre": "PALPALÁ",
             "provincia": {
                 "id": "38",
@@ -46,8 +50,10 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 {
     "municipios": [
         {
-            "centroide_lat": -27.816619,
-            "centroide_lon": -65.199594,
+            "centroide": {
+                "lat": -27.816619,
+                "lon": -65.199594
+            },
             "departamento": {
                 "id": "90035",
                 "nombre": "Graneros"
