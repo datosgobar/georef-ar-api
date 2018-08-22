@@ -107,9 +107,9 @@ class Parameter:
         if required and default is not None:
             raise ValueError(strings.OBLIGATORY_NO_DEFAULT)
 
-        self.choices = choices
-        self.required = required
-        self.default = default
+        self._choices = choices
+        self._required = required
+        self._default = default
 
         if choices and \
            default is not None \
@@ -133,16 +133,16 @@ class Parameter:
 
         """
         if val is None:
-            if self.required:
+            if self._required:
                 raise ParameterRequiredException()
             else:
-                return self.default
+                return self._default
 
         parsed = self._parse_value(val)
 
-        if self.choices and not self._value_in_choices(parsed):
+        if self._choices and not self._value_in_choices(parsed):
             raise InvalidChoiceException(
-                strings.INVALID_CHOICE.format(', '.join(self.choices)))
+                strings.INVALID_CHOICE.format(', '.join(self._choices)))
 
         return parsed
 
@@ -179,7 +179,7 @@ class Parameter:
                 permitidos
 
         """
-        return val in self.choices
+        return val in self._choices
 
     def _parse_value(self, val):
         """Parsea un valor de tipo string y devuelve el resultado con el tipo
@@ -220,18 +220,18 @@ class IdParameter(Parameter):
 
     """
     def __init__(self, length, padding_char='0', padding_length=1):
-        self.length = length
-        self.padding_char = padding_char
-        self.min_length = length - padding_length
+        self._length = length
+        self._padding_char = padding_char
+        self._min_length = length - padding_length
         super().__init__()
 
     def _parse_value(self, val):
         if not val.isdigit() or \
-           len(val) > self.length or \
-           len(val) < self.min_length:
-            raise ValueError(strings.ID_PARAM_INVALID.format(self.length))
+           len(val) > self._length or \
+           len(val) < self._min_length:
+            raise ValueError(strings.ID_PARAM_INVALID.format(self._length))
 
-        return val.rjust(self.length, self.padding_char)
+        return val.rjust(self._length, self._padding_char)
 
 
 class StrOrIdParameter(Parameter):
@@ -243,15 +243,15 @@ class StrOrIdParameter(Parameter):
 
     """
     def __init__(self, id_length, id_padding_char='0'):
-        self.id_param = IdParameter(id_length, id_padding_char)
-        self.str_param = StrParameter()
+        self._id_param = IdParameter(id_length, id_padding_char)
+        self._str_param = StrParameter()
         super().__init__()
 
     def _parse_value(self, val):
         if val.isdigit():
-            return self.id_param._parse_value(val)
+            return self._id_param._parse_value(val)
         else:
-            return self.str_param._parse_value(val)
+            return self._str_param._parse_value(val)
 
 
 class BoolParameter(Parameter):
@@ -282,17 +282,17 @@ class StrListParameter(Parameter):
     """
 
     def __init__(self, required=False, constants=None, optionals=None):
-        self.constants = set(constants) if constants else set()
+        self._constants = set(constants) if constants else set()
         optionals = set(optionals) if optionals else set()
-        all_values = self.constants | optionals
+        all_values = self._constants | optionals
 
         super().__init__(required, list(all_values), all_values)
 
     def _value_in_choices(self, val):
-        # La variable val es de tipo set o list, self.choices es de tipo set:
+        # La variable val es de tipo set o list, self._choices es de tipo set:
         # devolver falso si existen elementos en val que no están en
-        # self.choices.
-        return not (set(val) - self.choices)
+        # self._choices.
+        return not (set(val) - self._choices)
 
     def _parse_value(self, val):
         if not val:
@@ -304,7 +304,7 @@ class StrListParameter(Parameter):
             raise ValueError(strings.STRLIST_REPEATED)
 
         # Siempre se agregan los valores constantes
-        return list(self.constants | received)
+        return list(self._constants | received)
 
 
 class IntParameter(Parameter):
@@ -318,8 +318,8 @@ class IntParameter(Parameter):
     """
     def __init__(self, required=False, default=None, choices=None,
                  lower_limit=None, upper_limit=None):
-        self.lower_limit = lower_limit
-        self.upper_limit = upper_limit
+        self._lower_limit = lower_limit
+        self._upper_limit = upper_limit
         super().__init__(required, default, choices)
 
     def _parse_value(self, val):
@@ -328,18 +328,18 @@ class IntParameter(Parameter):
         except ValueError:
             raise ValueError(strings.INT_VAL_ERROR)
 
-        if self.lower_limit is not None and int_val < self.lower_limit:
-            raise ValueError(strings.INT_VAL_SMALL.format(self.lower_limit))
+        if self._lower_limit is not None and int_val < self._lower_limit:
+            raise ValueError(strings.INT_VAL_SMALL.format(self._lower_limit))
 
-        if self.upper_limit is not None and int_val > self.upper_limit:
-            raise ValueError(strings.INT_VAL_BIG.format(self.upper_limit))
+        if self._upper_limit is not None and int_val > self._upper_limit:
+            raise ValueError(strings.INT_VAL_BIG.format(self._upper_limit))
 
         return int_val
 
     def validate_values(self, vals):
-        if sum(vals) > self.upper_limit:
+        if sum(vals) > self._upper_limit:
             raise ValueError(
-                strings.INT_VAL_BIG_GLOBAL.format(self.upper_limit))
+                strings.INT_VAL_BIG_GLOBAL.format(self._upper_limit))
 
 
 class FloatParameter(Parameter):
@@ -389,12 +389,12 @@ class EndpointParameters():
     """Representa un conjunto de parámetros para un endpoint HTTP.
 
     Attributes:
-        get_qs_params (dict): Diccionario de parámetros aceptados vía
+        _get_qs_params (dict): Diccionario de parámetros aceptados vía
             querystring en requests GET, siendo las keys los nombres de los
             parámetros que se debe usar al especificarlos, y los valores
             objetos de tipo Parameter.
 
-        shared_params (dict): Similar a 'get_qs_params', pero contiene
+        _shared_params (dict): Similar a 'get_qs_params', pero contiene
             parámetros aceptados vía querystring en requests GET Y parámetros
             aceptados vía body en requests POST (compartidos).
 
@@ -411,8 +411,8 @@ class EndpointParameters():
         shared_params = shared_params or {}
         get_qs_params = get_qs_params or {}
 
-        self.get_qs_params = {**get_qs_params, **shared_params}
-        self.post_body_params = shared_params
+        self._get_qs_params = {**get_qs_params, **shared_params}
+        self._post_body_params = shared_params
 
     def parse_params_dict(self, params, received, from_source):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP,
@@ -521,7 +521,7 @@ class EndpointParameters():
                                             strings.INVALID_BULK_ENTRY, 'body')
             else:
                 try:
-                    parsed = self.parse_params_dict(self.post_body_params,
+                    parsed = self.parse_params_dict(self._post_body_params,
                                                     param_dict, 'body')
                 except ParameterParsingException as e:
                     errors = e.errors
@@ -532,7 +532,7 @@ class EndpointParameters():
         if any(errors_list):
             raise ParameterParsingException(errors_list)
 
-        for name, param in self.post_body_params.items():
+        for name, param in self._post_body_params.items():
             try:
                 # Validar conjuntos de valores de parámetros bajo el
                 # mismo nombre
@@ -569,7 +569,7 @@ class EndpointParameters():
                 de parámetros.
 
         """
-        return self.parse_params_dict(self.get_qs_params, qs_params,
+        return self.parse_params_dict(self._get_qs_params, qs_params,
                                       'querystring')
 
 
