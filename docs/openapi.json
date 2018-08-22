@@ -46,14 +46,19 @@
                         "type": "string",
                         "example": "Santa Fe"
                     },
-                    "centroide_lat": {
-                        "type": "number",
-                        "example": -30.706927
-                    },
-                    "centroide_lon": {
-                        "type": "number",
-                        "example": -60.558832
-                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -30.706927
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.558832
+			    }
+			}
+		    },
 		    "fuente": {
 			"type": "string",
 			"example": "IGN"
@@ -99,6 +104,9 @@
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
 				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
 				"campos": {
 				    "$ref": "#/components/schemas/param_campos"
 				},
@@ -131,14 +139,19 @@
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
-                    "centroide_lat": {
-                        "type": "number",
-                        "example": -33.127856
-                    },
-                    "centroide_lon": {
-                        "type": "number",
-                        "example": -62.526029
-                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -33.127856
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -62.526029
+			    }
+			}
+		    },
 		    "fuente": {
 			"type": "string",
 			"example": "IGN"
@@ -238,14 +251,19 @@
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
-                    "centroide_lat": {
-                        "type": "number",
-                        "example": -32.851319
-                    },
-                    "centroide_lon": {
-                        "type": "number",
-                        "example": -60.704006
-                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.851319
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.704006
+			    }
+			}
+		    },
 		    "fuente": {
 			"type": "string",
 			"example": "IGN"
@@ -360,14 +378,19 @@
                             "Localidad simple (LS)"
                         ]
                     },
-                    "centroide_lat": {
-                        "type": "number",
-                        "example": -32.861364
-                    },
-                    "centroide_lon": {
-                        "type": "number",
-                        "example": -60.706216
-                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.861364
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.706216
+			    }
+			}
+		    },
 		    "fuente": {
 			"type": "string",
 			"example": "BAHRA"
@@ -548,22 +571,37 @@
                     "departamento": {
 			"$ref": "#/components/schemas/departamento_sin_coordenadas"
                     },
-                    "altura_fin_derecha": {
-                        "type": "integer",
-                        "example": 599
-                    },
-                    "altura_fin_iqzuierda": {
-                        "type": "integer",
-                        "example": 598
-                    },
-                    "altura_inicio_derecha": {
-                        "type": "integer",
-                        "example": 0
-                    },
-                    "altura_inicio_izquierda": {
-                        "type": "integer",
-                        "example": 0
-                    },
+		    "altura": {
+			"type": "object",
+			"properties": {
+			    "inicio": {
+				"type": "object",
+				"properties": {
+				    "derecha": {
+					"type": "integer",
+					"example": 0
+				    },
+				    "izquierda": {
+					"type": "integer",
+					"example": 0
+				    }
+				}
+			    },
+			    "fin": {
+				"type": "object",
+				"properties": {
+				    "derecha": {
+					"type": "integer",
+					"example": 599
+				    },
+				    "izquierda": {
+					"type": "integer",
+					"example": 598
+				    }
+				}
+			    }
+			}
+		    },
                     "id": {
                         "type": "string",
                         "example": "8208416001280"
@@ -1072,6 +1110,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
                     },
                     {
                         "$ref": "#/components/parameters/campos"
