@@ -372,7 +372,7 @@ class AddressParameter(Parameter):
 
     def _parse_value(self, val):
         # 1) Remover ítems entre paréntesis e indicadores de número (N°, n°)
-        val = re.sub(r'\(.+\)|[nN][°º]', '', val.strip())
+        val = re.sub(r'\(.*?\)|[nN][°º]', '', val.strip())
 
         parts = [
             # 3) Normalizar espacios
@@ -389,7 +389,7 @@ class AddressParameter(Parameter):
             # 4) Por cada parte de texto resultante, buscar un nombre de calle
             # junto a una altura numérica. La altura debe estar al final del
             # texto. Priorizar los primeros resultados válidos encontrados.
-            match = re.search(r'^(.+)\s+([0-9]+)$', part)
+            match = re.search(r'^(.+?)\s+([0-9]+)$', part)
             if match:
                 name, num = match.groups()
 
