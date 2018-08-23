@@ -1,4 +1,4 @@
-# Usar en python
+# Usar en Python
 
 ## Con `requests`
 
@@ -20,8 +20,10 @@ provincias = get_similar("provincias", "San Juan")
 
 ```python
 [{
-    u'centroide_lat': -30.865368,
-    u'centroide_lon': -68.889491,
+    u'centroide': {
+        u'lat': -30.865368,
+        u'lon': -68.889491
+    },
     u'fuente': u'IGN',
     u'id': u'70',
     u'nombre': u'San Juan'
@@ -59,8 +61,10 @@ provincias = get_similar_bulk("provincias", ["pxa", "sant fe"])
 [
     {},
     {
-        u'centroide_lat': -30.706927,
-        u'centroide_lon': -60.949837,
+        u'centroide': {
+            u'lat': -30.706927,
+            u'lon': -60.949837
+        },
         u'fuente': u'IGN',
         u'id': u'82',
         u'nombre': u'Santa Fe'
@@ -189,7 +193,7 @@ def add_territorial_units(df, column_lat, column_lon):
     ).drop_duplicates().to_dict("records")
 
     # crea DataFrame de unidades territoriales que contienen a las coordenadas
-    ubicaciones = pd.DataFrame(get_territorial_units(coordenadas))
+    ubicaciones = pd.DataFrame(get_territorial_units(coordinates))
 
     # agrega las unidades territoriales al DataFrame original
     df_with_territorial_units = df.merge(

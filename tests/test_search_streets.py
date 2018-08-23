@@ -39,10 +39,7 @@ class SearchStreetsTest(SearchEntitiesTest):
             'departamento',
             'fuente',
             'id',
-            'altura_fin_derecha',
-            'altura_fin_izquierda',
-            'altura_inicio_derecha',
-            'altura_inicio_izquierda',
+            'altura',
             'nombre',
             'nomenclatura',
             'provincia',
@@ -56,7 +53,7 @@ class SearchStreetsTest(SearchEntitiesTest):
             ['fuente', 'id', 'nombre'],
             ['fuente', 'id', 'nombre', 'nomenclatura'],
             ['departamento.nombre', 'fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'altura_inicio_derecha', 'nombre'],
+            ['fuente', 'id', 'altura.inicio.derecha', 'nombre'],
         ]
         fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []

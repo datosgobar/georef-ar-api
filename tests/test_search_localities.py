@@ -58,8 +58,7 @@ class SearchLocalityTest(SearchEntitiesTest):
         fields = sorted([
             'fuente',
             'id',
-            'centroide_lat',
-            'centroide_lon',
+            'centroide',
             'nombre',
             'provincia',
             'departamento',
@@ -72,9 +71,9 @@ class SearchLocalityTest(SearchEntitiesTest):
         """Los campos de las localidades devueltas deben ser filtrables."""
         fields_lists = [
             ['fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'centroide_lat', 'centroide_lon', 'nombre'],
-            ['fuente', 'id', 'centroide_lat', 'nombre'],
-            ['fuente', 'id', 'centroide_lat', 'nombre', 'provincia.id'],
+            ['fuente', 'id', 'centroide.lat', 'centroide.lon', 'nombre'],
+            ['fuente', 'id', 'centroide.lat', 'nombre'],
+            ['fuente', 'id', 'centroide.lat', 'nombre', 'provincia.id'],
             ['departamento.id', 'fuente', 'id', 'nombre'],
             ['fuente', 'id', 'municipio.id', 'nombre', 'provincia.nombre']
         ]

@@ -13,31 +13,64 @@ import psycopg2
 from flask import Flask
 import argparse
 import os
+from io import StringIO
 import urllib.parse
 import json
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import logging
 import uuid
 from datetime import datetime
 
+loggerStream = StringIO()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-handler = logging.StreamHandler()
-handler.setLevel(logging.INFO)
-
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s',
-                              '%Y-%m-%d %H:%M:%S')
-handler.setFormatter(formatter)
-
-logger.addHandler(handler)
 
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizdo el código para tomar
 # nuevas versiones de los archivos.
-FILE_VERSION = '1.0.0'
+FILE_VERSION = '2.0.0'
 
 SEPARATOR_WIDTH = 60
 ACTIONS = ['index', 'index_stats', 'run_sql']
+
+
+def setup_logger(l, loggerStream):
+    l.setLevel(logging.INFO)
+
+    stdoutHandler = logging.StreamHandler()
+    stdoutHandler.setLevel(logging.INFO)
+
+    strHandler = logging.StreamHandler(loggerStream)
+    strHandler.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s',
+                                  '%Y-%m-%d %H:%M:%S')
+    stdoutHandler.setFormatter(formatter)
+    strHandler.setFormatter(formatter)
+
+    l.addHandler(stdoutHandler)
+    l.addHandler(strHandler)
+
+
+def send_email(host, user, password, subject, message, recipients,
+               attachments=None):
+    with smtplib.SMTP_SSL(host) as smtp:
+        smtp.login(user, password)
+
+        msg = MIMEMultipart()
+        msg['Subject'] = subject
+        msg["From"] = user
+        msg["To"] = ",".join(recipients)
+        msg.attach(MIMEText(message))
+
+        for name, contents in (attachments or {}).items():
+            attachment = MIMEText(contents)
+            attachment['Content-Disposition'] = \
+                'attachment; filename="{}"'.format(name)
+            msg.attach(attachment)
+
+        smtp.send_message(msg)
 
 
 def print_log_separator(l, message):
@@ -115,8 +148,8 @@ class GeorefIndex:
 
             if not ok:
                 # TODO: Agregar manejo de errores adicional
-                logger.fatal('No se pudo indexar utilizando backups.')
-                logger.fatal('')
+                logger.error('No se pudo indexar utilizando backups.')
+                logger.error('')
 
         if ok:
             self.write_backup(data, files_cache)
@@ -297,9 +330,32 @@ class GeorefIndex:
             yield action
 
 
+def send_index_email(config, forced, env, log):
+    lines = log.splitlines()
+    warnings = len([line for line in lines if 'WARNING' in line])
+    errors = len([line for line in lines if 'ERROR' in line])
+
+    subject = 'Georef API [{}] Index - Errores: {} - Warnings: {}'.format(
+        env,
+        errors,
+        warnings
+    )
+    msg = 'Indexación de datos para Georef API. Modo forzado: {}'.format(
+        forced)
+
+    send_email(config['host'], config['user'], config['password'], subject,
+               msg, config['recipients'], {
+                   'log.txt': log
+               })
+
+
 def run_index(app, es, forced):
     backups_dir = app.config['BACKUPS_DIR']
     os.makedirs(backups_dir, exist_ok=True)
+
+    env = app.config['GEOREF_ENV']
+    logger.info('Comenzando (re)indexación en Georef API [{}]'.format(env))
+    logger.info('')
 
     indices = [
         GeorefIndex('provincias',
@@ -329,14 +385,14 @@ def run_index(app, es, forced):
                     app.config['MUNICIPALITIES_FILE'],
                     os.path.join(backups_dir, 'municipios.json'),
                     MAP_MUNI_GEOM),
-        GeorefIndex('bahra',
+        GeorefIndex('localidades',
                     app.config['LOCALITIES_FILE'],
-                    os.path.join(backups_dir, 'bahra.json'),
+                    os.path.join(backups_dir, 'localidades.json'),
                     MAP_SETTLEMENT,
                     ['geometria']),
-        GeorefIndex('bahra-geometria',
+        GeorefIndex('localidades-geometria',
                     app.config['LOCALITIES_FILE'],
-                    os.path.join(backups_dir, 'bahra.json'),
+                    os.path.join(backups_dir, 'localidades.json'),
                     MAP_SETTLEMENT_GEOM),
         GeorefIndex('calles',
                     app.config['STREETS_FILE'],
@@ -358,6 +414,13 @@ def run_index(app, es, forced):
             logger.error('')
 
     logger.info('')
+
+    mail_config = app.config.get_namespace('EMAIL_')
+    if mail_config['enabled']:
+        logger.info('Enviando mail...')
+        send_index_email(mail_config, forced, env,
+                         loggerStream.getvalue())
+        logger.info('Mail enviado.')
 
 
 def run_info(es):
@@ -410,6 +473,8 @@ def main():
                         help='Mostrar información de índices y salir.')
     args = parser.parse_args()
 
+    setup_logger(logger, loggerStream)
+
     app = Flask(__name__)
     app.config.from_pyfile(args.config, silent=False)
 
@@ -430,6 +495,8 @@ def main():
             run_index(app, es, args.forced)
         else:
             run_info(es)
+            import code
+            code.interact(local=locals())
 
     elif args.mode == 'run_sql':
         run_sql(app, args.script)

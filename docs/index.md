@@ -12,19 +12,20 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
     <tr><td>Sgo. del Estero</td></tr>
 </table>
 
-[`apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero`](http://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
-
+`GET`[`apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero`](http://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
 ```json
 {
-  "provincias": [
-    {
-      "fuente": "IGN",
-      "id": "86",
-      "centroide_lat": -27.782412,
-      "centroide_lon": -63.252387,
-      "nombre": "Santiago del Estero"
-    }
-  ]
+    "provincias": [
+        {
+            "nombre": "Santiago del Estero",
+            "id": "86",
+            "fuente": "IGN",
+            "centroide": {
+                "lat": -27.782412,
+                "lon": -63.252387
+            }
+        }
+    ]
 }
 ```
 
@@ -36,8 +37,7 @@ Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, pue
     <tr><td>-34.603633</td><td>-58.3837587</td></tr>
 </table>
 
-[`apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](http://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
-
+`GET`[`apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](http://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
 ```json
 {
     "ubicacion": {
