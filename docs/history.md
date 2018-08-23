@@ -1,5 +1,10 @@
 # Historial de versiones para `georef-ar-api`
 
+## 0.1.4
+- Se modificó la interpretación del parámetro `direccion` del recurso `/direcciones`:
+  - Se ignoran ítems entre paréntesis y ocurrencias de "N°"
+  - Se separa el texto utilizando "-", "," y "B°", y se intenta extraer una dirección (nombre + altura) de cada fragmento.
+
 ## 0.1.3
 - Se modificaron los siguientes campos:
   - `centroide_lat` y `centroide_lon` ahora están anidados.
