@@ -231,6 +231,4 @@ provincia_id     provincia_nombre
           86  Santiago del Estero
 ```
 
-## Con `data-cleaner`
-
-*TODO regla de limpieza*
+<!-- ## Con `data-cleaner` -->
