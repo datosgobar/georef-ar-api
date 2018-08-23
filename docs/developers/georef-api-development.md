@@ -126,7 +126,12 @@ Si se desea forzar un re-indexado, es decir, si se desea indexar los datos nueva
 (venv) $ make index_forced
 ```
 
-La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en `config/georef.cfg`.
+La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en `config/georef.cfg`. El uso de la receta es recomendado cuando se requiere re-indexar los datos incondicionalmente, algunas situaciones donde esto es necesario son:
+
+- Modificación de la estructura de los archivos de datos
+- Modificación de *mappeos* de tipos de Elasticsearch
+- Modificación de analizadores de texto de Elasticsearch
+- Modificación de listado de sinónimos
 
 ### 7. Correr API 
 #### Entornos de desarrollo
