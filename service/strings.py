@@ -22,7 +22,8 @@ INVALID_BULK_ENTRY = 'Las operaciones bulk deben ser de tipo objeto.'
 INTERNAL_ERROR = 'Ocurrió un error interno de servidor al procesar la \
 petición.'
 MISSING_ERROR = 'El parámetro es obligatorio.'
-UNKNOWN_ERROR = 'El parámetro especificado no existe.'
+UNKNOWN_ERROR = 'El parámetro especificado no existe. Los parámetros \
+aceptados están listados bajo la clave \'ayuda\'.'
 REPEATED_ERROR = 'El parámetro está repetido.'
 BULK_LEN_ERROR = 'El número máximo de operaciones bulk es: {}.'
 INT_VAL_SMALL = 'El número debe ser igual o mayor que {}.'

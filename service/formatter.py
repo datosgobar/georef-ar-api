@@ -130,12 +130,17 @@ def format_params_error_dict(error_dict):
     """
     results = []
     for param_name, param_error in error_dict.items():
-        results.append({
+        error = {
             'nombre_parametro': param_name,
             'codigo_interno': param_error.error_type.value,
             'mensaje': param_error.message,
             'ubicacion': param_error.source
-        })
+        }
+
+        if param_error.help:
+            error['ayuda'] = param_error.help
+
+        results.append(error)
 
     return results
 

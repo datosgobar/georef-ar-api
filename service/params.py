@@ -9,7 +9,6 @@ from service import strings
 
 import re
 from enum import Enum, unique
-from collections import namedtuple
 
 MAX_BULK_LEN = 5000
 MAX_SIZE_LEN = MAX_BULK_LEN
@@ -70,10 +69,33 @@ class ParamErrorType(Enum):
     INVALID_SET = 1009
 
 
-ParamError = namedtuple('ParamError', ['error_type', 'message', 'source'])
-"""La clase ParamError representa toda la información conocida sobre un error
-de parámetro.
-"""
+class ParamError:
+    """La clase ParamError representa toda la información conocida sobre un
+    error de parámetro.
+
+    """
+
+    def __init__(self, error_type, message, source, help=None):
+        self._error_type = error_type
+        self._message = message
+        self._source = source
+        self._help = help
+
+    @property
+    def error_type(self):
+        return self._error_type
+
+    @property
+    def message(self):
+        return self._message
+
+    @property
+    def source(self):
+        return self._source
+
+    @property
+    def help(self):
+        return self._help
 
 
 class Parameter:
@@ -481,7 +503,8 @@ class EndpointParameters():
             if param_name not in params:
                 errors[param_name] = ParamError(ParamErrorType.UNKNOWN_PARAM,
                                                 strings.UNKNOWN_ERROR,
-                                                from_source)
+                                                from_source,
+                                                list(params.keys()))
 
         if errors:
             raise ParameterParsingException(errors)
