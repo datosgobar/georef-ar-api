@@ -1,7 +1,21 @@
 # Instalación de Python 3.6
+
 Para instalar Python 3.6 en entornos GNU/Linux, se puede utilizar la herramienta `pyenv` [disponible en GitHub](https://github.com/pyenv/pyenv). `pyenv` permite al usuario instalar cualquier versión de Python existente, e incluso tener varias versiones instaladas simultáneamente.
 
 A continuación, se detallan los pasos necesarios para instalar Python 3.6. Los mismos fueron creados utilizando Ubuntu 16.04.
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+ 
+
+- [1. Descargar `pyenv`](#1-descargar-pyenv)
+- [2. Agregar configuración de `pyenv` a `~/.bashrc`](#2-agregar-configuracion-de-pyenv-a-bashrc)
+- [3. Activar la nueva configuración](#3-activar-la-nueva-configuracion)
+- [4. Instalar dependencias para compilar Python](#4-instalar-dependencias-para-compilar-python)
+- [5. Descargar, compilar e instalar Python 3.6](#5-descargar-compilar-e-instalar-python-36)
+- [6. Activar Python 3.6](#6-activar-python-36)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## 1. Descargar `pyenv`
 Clonar el repositorio de `pyenv` en el directorio `~/.pyenv`:

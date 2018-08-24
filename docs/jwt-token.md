@@ -1,6 +1,18 @@
 # Tokens JWT
 
-Para utilizar la API de Georef, es necesario autenticarse utilizando tokens [JWT](https://jwt.io/). Para generar un token JWT, se requieren dos elementos: una *key* y un *secret* generados para el uso con la API.
+Si pertenecés a un organismo de la Administración Pública Nacional y querés incrementar la cuota de uso de la API de Georef, podés pedir un token y autenticarte utilizando [JWT](https://jwt.io/).
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+ 
+
+- [Python](#python)
+- [Node.js](#nodejs)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+
+Para generar un token JWT, se requieren dos elementos: una *key* y un *secret* generados para el uso con la API.
 
 Una vez obtenidos ambos elementos, se puede generar un token JWT utilizando, por ejemplo, Python o Node.js. A continuación, se muestran ejemplos utilizando los siguientes valores demostrativos:
 

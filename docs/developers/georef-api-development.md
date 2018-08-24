@@ -1,5 +1,41 @@
 # Georef API - Guía de instalación para desarrolladores
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+ 
+
+- [Dependencias](#dependencias)
+- [Instalación](#instalacion)
+  - [1. Base de datos](#1-base-de-datos)
+  - [2. Elasticsearch](#2-elasticsearch)
+    - [2.1 Instalar el entorno de ejecución para Java:](#21-instalar-el-entorno-de-ejecucion-para-java)
+    - [2.2 Instalar Elasticsearch:](#22-instalar-elasticsearch)
+    - [2.3 Aplicar las configuraciones recomendadas](#23-aplicar-las-configuraciones-recomendadas)
+  - [3. Repositorio y dependencias](#3-repositorio-y-dependencias)
+    - [3.1 Clonar el repositorio:](#31-clonar-el-repositorio)
+    - [3.2 Crear un entorno virtual y activarlo:](#32-crear-un-entorno-virtual-y-activarlo)
+    - [3.3 Instalar dependencias con `pip`:](#33-instalar-dependencias-con-pip)
+    - [3.4 Copiar el archivo de configuración:](#34-copiar-el-archivo-de-configuracion)
+    - [3.5 Copiar el archivo de configuración de logs:](#35-copiar-el-archivo-de-configuracion-de-logs)
+    - [3.6 Crear el archivo de sinónimos](#36-crear-el-archivo-de-sinonimos)
+  - [4. Cargar las funciones SQL](#4-cargar-las-funciones-sql)
+  - [5. Crear los índices](#5-crear-los-indices)
+  - [6. (Opcional) Re-indexar datos](#6-opcional-re-indexar-datos)
+    - [Indexar datos nuevos](#indexar-datos-nuevos)
+    - [Forzar re-indexado](#forzar-re-indexado)
+  - [7. Correr API](#7-correr-api)
+    - [Entornos de desarrollo](#entornos-de-desarrollo)
+    - [Entornos productivos](#entornos-productivos)
+      - [7.1 Configurar servicio `georef-api` para `systemd`](#71-configurar-servicio-georef-api-para-systemd)
+      - [7.2 Activar y arrancar el servicio](#72-activar-y-arrancar-el-servicio)
+      - [7.3 Configurar `nginx`](#73-configurar-nginx)
+      - [7.4 (Opcional) Crear cache para `nginx`](#74-opcional-crear-cache-para-nginx)
+      - [7.5 Activar y validar configuración `nginx`](#75-activar-y-validar-configuracion-nginx)
+- [Tests](#tests)
+- [Archivos de datos](#archivos-de-datos)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Dependencias
 
 - [Elasticsearch >=6.2.0](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html)
@@ -9,6 +45,7 @@
 - [Nginx](https://nginx.org/) *(para entornos productivos)*
 
 ## Instalación
+
 ### 1. Base de datos
 Crear una base de datos en PostgreSQL con la extensión PostGIS. A continuación, se muestra un ejemplo utilizando `georef_api` como nombre para la base de datos:
 ```sql
@@ -53,6 +90,7 @@ Editar el archivo `/etc/elasticsearch/jvm.options` (siguiendo las [recomendacion
 ```
 
 ### 3. Repositorio y dependencias
+
 #### 3.1 Clonar el repositorio:
 ```bash
 $ git clone https://github.com/datosgobar/georef-api.git
