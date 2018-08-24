@@ -1,7 +1,7 @@
 #!/bin/bash
 # script de deploy TravisCI para georef-ar-api
 
-readonly reindex_regex="^\[force_reindex\]"
+readonly reindex_regex="\[force_reindex\]"
 
 echo "- Iniciando el script de deploy para georef-ar-api..."
 
