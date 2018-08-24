@@ -176,8 +176,11 @@ def create_param_error_response_bulk(errors):
     }), 400)
 
 
-def create_404_error_response():
+def create_404_error_response(url_map):
     """Retorna un error HTTP con código 404.
+
+    Args:
+        url_map (werkzeug.routing.Map): Mapa de URLs de la aplicación Flask.
 
     Returns:
         flask.Response: Respuesta HTTP con error 404.
@@ -185,7 +188,8 @@ def create_404_error_response():
     """
     errors = [
         {
-            'mensaje': strings.NOT_FOUND
+            'mensaje': strings.NOT_FOUND,
+            'recursos_disponibles': list(str(r) for r in url_map.iter_rules())
         }
     ]
 

@@ -31,7 +31,7 @@ def disable_cache(f):
 
 @app.errorhandler(404)
 def handle_404(e):
-    return formatter.create_404_error_response()
+    return formatter.create_404_error_response(app.url_map)
 
 
 # API v1.0

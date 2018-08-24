@@ -5,7 +5,7 @@ Crea la aplicación Flask de la API de Georef.
 
 from flask import Flask
 
-app = Flask('georef')
+app = Flask('georef', static_folder=None)
 app.config.from_envvar('GEOREF_CONFIG')
 
 import service.routes  # noqa: E402,F401
