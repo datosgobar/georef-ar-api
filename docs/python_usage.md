@@ -5,12 +5,12 @@
  
 
 - [Con `requests`](#con-requests)
-  - [Normalizar una entidad](#normalizar-una-entidad)
-  - [Normalizar varias entidades](#normalizar-varias-entidades)
-  - [Enriquecer coordenadas con las unidades territoriales que las contienen](#enriquecer-coordenadas-con-las-unidades-territoriales-que-las-contienen)
+    - [Normalizar una entidad](#normalizar-una-entidad)
+    - [Normalizar varias entidades](#normalizar-varias-entidades)
+    - [Enriquecer coordenadas con las unidades territoriales que las contienen](#enriquecer-coordenadas-con-las-unidades-territoriales-que-las-contienen)
 - [Con `pandas`](#con-pandas)
-  - [Consultar listas de referencia](#consultar-listas-de-referencia)
-  - [Enriquecer coordenadas](#enriquecer-coordenadas)
+    - [Consultar listas de referencia](#consultar-listas-de-referencia)
+    - [Enriquecer coordenadas](#enriquecer-coordenadas)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 

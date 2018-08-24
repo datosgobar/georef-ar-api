@@ -7,15 +7,15 @@ Los archivos de datos de Georef consisten de cinco (5) archivos en formato JSON,
  
 
 - [Fuentes](#fuentes)
-  - [Unidades Territoriales](#unidades-territoriales)
-  - [BAHRA](#bahra)
-  - [Vías de Circulación](#vias-de-circulacion)
+    - [Unidades Territoriales](#unidades-territoriales)
+    - [BAHRA](#bahra)
+    - [Vías de Circulación](#vias-de-circulacion)
 - [Archivos](#archivos)
-  - [Provincias](#provincias)
-  - [Departamentos](#departamentos)
-  - [Municipios](#municipios)
-  - [Localidades](#localidades)
-  - [Calles](#calles)
+    - [Provincias](#provincias)
+    - [Departamentos](#departamentos)
+    - [Municipios](#municipios)
+    - [Localidades](#localidades)
+    - [Calles](#calles)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 

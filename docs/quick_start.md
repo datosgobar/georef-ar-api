@@ -5,15 +5,15 @@
  
 
 - [Ejemplos rápidos](#ejemplos-rapidos)
-  - [Búsqueda de provincias](#busqueda-de-provincias)
-  - [Búsqueda de departamentos](#busqueda-de-departamentos)
-  - [Búsqueda de municipios](#busqueda-de-municipios)
-  - [Búsqueda de localidades](#busqueda-de-localidades)
-  - [Normalización de direcciones](#normalizacion-de-direcciones)
-  - [Entidades geográficas en un punto](#entidades-geograficas-en-un-punto)
+    - [Búsqueda de provincias](#busqueda-de-provincias)
+    - [Búsqueda de departamentos](#busqueda-de-departamentos)
+    - [Búsqueda de municipios](#busqueda-de-municipios)
+    - [Búsqueda de localidades](#busqueda-de-localidades)
+    - [Normalización de direcciones](#normalizacion-de-direcciones)
+    - [Entidades geográficas en un punto](#entidades-geograficas-en-un-punto)
 - [Ejemplos de operaciones por lotes](#ejemplos-de-operaciones-por-lotes)
-  - [Búsqueda de municipios en lotes](#busqueda-de-municipios-en-lotes)
-  - [Normalización de direcciones en lotes](#normalizacion-de-direcciones-en-lotes)
+    - [Búsqueda de municipios en lotes](#busqueda-de-municipios-en-lotes)
+    - [Normalización de direcciones en lotes](#normalizacion-de-direcciones-en-lotes)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
