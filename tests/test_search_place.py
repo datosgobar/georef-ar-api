@@ -142,6 +142,75 @@ class SearchPlaceTest(SearchEntitiesTest):
             not isinstance(v, dict) for v in resp.values()
         ]) and resp)
 
+    def test_state_centroids(self):
+        """Cuando se utiliza el centroide de una entidad (con geometría convexa
+        o casi convexa) como ubicación, se debería obtener la misma entidad
+        como parte de la respuesta."""
+        states = self.get_response(endpoint='/api/provincias',
+                                   entity='provincias',
+                                   params={
+                                       'campos': 'centroide.lat,centroide.lon'
+                                   })
+
+        validations = []
+
+        for state in states:
+            if state['id'] == '66':
+                # La geometría de Salta es muy cóncava
+                continue
+
+            lat = state['centroide']['lat']
+            lon = state['centroide']['lon']
+            place = self.get_response({'lat': lat, 'lon': lon})
+
+            validations.append(place['provincia']['id'] == state['id'])
+
+        self.assertTrue(validations and all(validations))
+
+    def test_department_centroids(self):
+        """Cuando se utiliza el centroide de una entidad (con geometría convexa
+        o casi convexa) como ubicación, se debería obtener la misma entidad
+        como parte de la respuesta."""
+        depts = self.get_response(endpoint='/api/departamentos',
+                                  entity='departamentos',
+                                  params={
+                                      'campos': 'centroide.lat,centroide.lon',
+                                      'max': 30
+                                  })
+
+        validations = []
+
+        for dept in depts:
+            lat = dept['centroide']['lat']
+            lon = dept['centroide']['lon']
+            place = self.get_response({'lat': lat, 'lon': lon})
+
+            validations.append(place['departamento']['id'] == dept['id'])
+
+        self.assertTrue(validations and all(validations))
+
+    def test_municipality_centroids(self):
+        """Cuando se utiliza el centroide de una entidad (con geometría convexa
+        o casi convexa) como ubicación, se debería obtener la misma entidad
+        como parte de la respuesta."""
+        munis = self.get_response(endpoint='/api/municipios',
+                                  entity='municipios',
+                                  params={
+                                      'campos': 'centroide.lat,centroide.lon',
+                                      'max': 30
+                                  })
+
+        validations = []
+
+        for muni in munis:
+            lat = muni['centroide']['lat']
+            lon = muni['centroide']['lon']
+            place = self.get_response({'lat': lat, 'lon': lon})
+
+            validations.append(place['municipio']['id'] == muni['id'])
+
+        self.assertTrue(validations and all(validations))
+
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""
         status = self.get_response(method='POST', body={}, status_only=True)

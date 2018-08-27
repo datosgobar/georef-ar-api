@@ -25,11 +25,18 @@ class SearchEntitiesTest(TestCase):
         self.app = app.test_client()
 
     def get_response(self, params=None, method='GET', body=None,
-                     status_only=False, fmt='json'):
+                     status_only=False, fmt='json', endpoint=None,
+                     entity=None):
+        """Método de uso general para obtener resultados de la API, utilizando
+        internamente los métodos .get() y .post() del app Flask."""
+
         if not params:
             params = {}
 
-        query = self.endpoint + '?' + urllib.parse.urlencode(params)
+        endpoint = endpoint or self.endpoint
+        entity = entity or self.entity
+
+        query = endpoint + '?' + urllib.parse.urlencode(params)
 
         if method == 'GET':
             response = self.app.get(query)
@@ -41,10 +48,11 @@ class SearchEntitiesTest(TestCase):
         if status_only:
             return response.status_code
         elif response.status_code != 200:
-            raise Exception('La petición no devolvió código 200.')
+            raise Exception(
+                'La petición no devolvió código 200: {}'.format(response.data))
 
         if fmt == 'json':
-            key = self.entity if method == 'GET' else 'resultados'
+            key = entity if method == 'GET' else 'resultados'
             return json.loads(response.data)[key]
         elif fmt == 'csv':
             return csv.reader(response.data.decode().splitlines(),
