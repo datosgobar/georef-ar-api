@@ -493,7 +493,8 @@ class EndpointParameters():
                 parsed[param_name] = param.get_value(received_val)
             except ParameterRequiredException:
                 errors[param_name] = ParamError(ParamErrorType.PARAM_REQUIRED,
-                                                strings.MISSING_ERROR,
+                                                strings.MISSING_ERROR.format(
+                                                    param_name),
                                                 from_source)
             except ValueError as e:
                 errors[param_name] = ParamError(ParamErrorType.VALUE_ERROR,
