@@ -163,8 +163,7 @@ class Parameter:
         parsed = self._parse_value(val)
 
         if self._choices and not self._value_in_choices(parsed):
-            raise InvalidChoiceException(
-                strings.INVALID_CHOICE.format(', '.join(self._choices)))
+            raise InvalidChoiceException(strings.INVALID_CHOICE)
 
         return parsed
 
@@ -215,6 +214,10 @@ class Parameter:
 
         """
         raise NotImplementedError()
+
+    @property
+    def choices(self):
+        return sorted(list(self._choices))
 
 
 class StrParameter(Parameter):
@@ -497,7 +500,8 @@ class EndpointParameters():
                                                 str(e), from_source)
             except InvalidChoiceException as e:
                 errors[param_name] = ParamError(ParamErrorType.INVALID_CHOICE,
-                                                str(e), from_source)
+                                                str(e), from_source,
+                                                param.choices)
 
         for param_name in received:
             if param_name not in params:
