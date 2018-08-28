@@ -186,7 +186,7 @@ def search_streets(es, params_list):
 
 def build_entity_search(entity_id=None, name=None, state=None,
                         department=None, municipality=None, max=None,
-                        order=None, fields=None, exact=False):
+                        order=None, fields=None, exact=False, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para entidades políticas
     (localidades, departamentos, o provincias) según parámetros de búsqueda
     de una consulta.
@@ -203,6 +203,8 @@ def build_entity_search(entity_id=None, name=None, state=None,
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'department',
             'municipality' o 'state'.) (opcional).
+        offset (int): Retornar resultados comenenzando desde los 'offset'
+            primeros resultados obtenidos.
 
     Returns:
         Search: Búsqueda de tipo Search.
@@ -243,12 +245,12 @@ def build_entity_search(entity_id=None, name=None, state=None,
         s = s.sort(order)
 
     s = s.source(include=fields, exclude=[N.TIMESTAMP])
-    return s[:(max or DEFAULT_MAX)]
+    return s[offset: offset + (max or DEFAULT_MAX)]
 
 
 def build_streets_search(street_id=None, road_name=None, department=None,
                          state=None, road_type=None, max=None, fields=None,
-                         exact=False, number=None, excludes=None):
+                         exact=False, number=None, excludes=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
@@ -265,6 +267,8 @@ def build_streets_search(street_id=None, road_name=None, department=None,
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
             'department'.) (opcional).
+        offset (int): Retornar resultados comenenzando desde los 'offset'
+            primeros resultados obtenidos.
 
     Returns:
         Search: Búsqueda de tipo Search.
@@ -307,7 +311,7 @@ def build_streets_search(street_id=None, road_name=None, department=None,
             s = s.query(build_name_query(N.STATE_NAME, state, exact))
 
     s = s.source(include=fields, exclude=[N.TIMESTAMP])
-    return s[:(max or DEFAULT_MAX)]
+    return s[offset: offset + (max or DEFAULT_MAX)]
 
 
 def build_place_search(lat, lon, fields=None):

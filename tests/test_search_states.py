@@ -64,6 +64,25 @@ class SearchStatesTest(SearchEntitiesTest):
         """El parametro aplanar deberia aplanar los resultados devueltos."""
         self.assert_flat_results()
 
+    def test_pagination(self):
+        """Los resultados deberían poder ser paginados."""
+        page_size = 8
+        pages = 3
+        results = set()
+
+        for i in range(pages):
+            resp = self.get_response({
+                'inicio': i * page_size,
+                'max': page_size
+            })
+
+            for result in resp:
+                results.add(result['id'])
+
+        # Si el paginado funciona correctamente, no deberían haberse repetido
+        # IDs de entidades entre resultados.
+        self.assertEqual(len(results), page_size * pages)
+
     def test_id_search(self):
         """La búsqueda por ID debe devolver la provincia correspondiente."""
         data = self.get_response({'id': '06'})

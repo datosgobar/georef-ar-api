@@ -47,6 +47,25 @@ class SearchStreetsTest(SearchEntitiesTest):
         ])
         self.assertListEqual(fields, sorted(data.keys()))
 
+    def test_pagination(self):
+        """Los resultados deberían poder ser paginados."""
+        page_size = 50
+        pages = 5
+        results = set()
+
+        for i in range(pages):
+            resp = self.get_response({
+                'inicio': i * page_size,
+                'max': page_size
+            })
+
+            for result in resp:
+                results.add(result['id'])
+
+        # Si el paginado funciona correctamente, no deberían haberse repetido
+        # IDs de entidades entre resultados.
+        self.assertEqual(len(results), page_size * pages)
+
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""
         fields_lists = [

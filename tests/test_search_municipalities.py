@@ -72,6 +72,25 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         self.assertListEqual([p['nombre'] for p in data],
                              ['Coronel de Marina Leonardo Rosales'])
 
+    def test_pagination(self):
+        """Los resultados deberían poder ser paginados."""
+        page_size = 50
+        pages = 5
+        results = set()
+
+        for i in range(pages):
+            resp = self.get_response({
+                'inicio': i * page_size,
+                'max': page_size
+            })
+
+            for result in resp:
+                results.add(result['id'])
+
+        # Si el paginado funciona correctamente, no deberían haberse repetido
+        # IDs de entidades entre resultados.
+        self.assertEqual(len(results), page_size * pages)
+
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]

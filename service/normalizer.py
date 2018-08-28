@@ -8,6 +8,9 @@ from service import data, params, formatter
 from service import names as N
 from flask import current_app
 from contextlib import contextmanager
+import logging
+
+logger = logging.getLogger('georef')
 
 
 def get_elasticsearch():
@@ -241,6 +244,8 @@ def process_entity(request, name, param_parser, key_translations, csv_fields):
             return process_entity_bulk(request, name, param_parser,
                                        key_translations)
     except data.DataConnectionException:
+        logger.exception(
+            'Excepción en manejo de consulta para recurso: {}'.format(name))
         return formatter.create_internal_error_response()
 
 
@@ -259,7 +264,8 @@ def process_state(request):
             N.NAME: 'name',
             N.EXACT: 'exact',
             N.ORDER: 'order',
-            N.FIELDS: 'fields'
+            N.FIELDS: 'fields',
+            N.OFFSET: 'offset'
     }, formatter.STATES_CSV_FIELDS)
 
 
@@ -280,7 +286,8 @@ def process_department(request):
                               N.STATE: 'state',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
-                              N.FIELDS: 'fields'
+                              N.FIELDS: 'fields',
+                              N.OFFSET: 'offset'
                           }, formatter.DEPARTMENTS_CSV_FIELDS)
 
 
@@ -302,7 +309,8 @@ def process_municipality(request):
                               N.DEPT: 'department',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
-                              N.FIELDS: 'fields'
+                              N.FIELDS: 'fields',
+                              N.OFFSET: 'offset'
                           }, formatter.MUNICIPALITIES_CSV_FIELDS)
 
 
@@ -324,7 +332,8 @@ def process_locality(request):
             N.MUN: 'municipality',
             N.EXACT: 'exact',
             N.ORDER: 'order',
-            N.FIELDS: 'fields'
+            N.FIELDS: 'fields',
+            N.OFFSET: 'offset'
     }, formatter.LOCALITIES_CSV_FIELDS)
 
 
@@ -349,7 +358,8 @@ def build_street_query_format(parsed_params):
         N.DEPT: 'department',
         N.EXACT: 'exact',
         N.FIELDS: 'fields',
-        N.ROAD_TYPE: 'road_type'
+        N.ROAD_TYPE: 'road_type',
+        N.OFFSET: 'offset'
     }, ignore=[N.FLATTEN, N.FORMAT])
 
     query['excludes'] = [N.GEOM]
@@ -451,6 +461,8 @@ def process_street(request):
         else:
             return process_street_bulk(request)
     except data.DataConnectionException:
+        logger.exception(
+            'Excepción en manejo de consulta para recurso: calles')
         return formatter.create_internal_error_response()
 
 
@@ -515,7 +527,8 @@ def build_address_query_format(parsed_params):
         N.DEPT: 'department',
         N.STATE: 'state',
         N.EXACT: 'exact',
-        N.ROAD_TYPE: 'road_type'
+        N.ROAD_TYPE: 'road_type',
+        N.OFFSET: 'offset'
     }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])
 
     query['fields'] = parsed_params[N.FIELDS] + [N.GEOM, N.START_R, N.END_L]
@@ -617,6 +630,8 @@ def process_address(request):
         else:
             return process_address_bulk(request)
     except data.DataConnectionException:
+        logger.exception(
+            'Excepción en manejo de consulta para recurso: direcciones')
         return formatter.create_internal_error_response()
 
 
@@ -810,4 +825,6 @@ def process_place(request):
         else:
             return process_place_bulk(request)
     except data.DataConnectionException:
+        logger.exception(
+            'Excepción en manejo de consulta para recurso: ubicacion')
         return formatter.create_internal_error_response()

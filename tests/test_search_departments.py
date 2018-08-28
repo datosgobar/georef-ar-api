@@ -247,6 +247,25 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         """El parametro aplanar deberia aplanar los resultados devueltos."""
         self.assert_flat_results()
 
+    def test_pagination(self):
+        """Los resultados deberían poder ser paginados."""
+        page_size = 50
+        pages = 5
+        results = set()
+
+        for i in range(pages):
+            resp = self.get_response({
+                'inicio': i * page_size,
+                'max': page_size
+            })
+
+            for result in resp:
+                results.add(result['id'])
+
+        # Si el paginado funciona correctamente, no deberían haberse repetido
+        # IDs de entidades entre resultados.
+        self.assertEqual(len(results), page_size * pages)
+
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""
         status = self.get_response(method='POST', body={}, status_only=True)

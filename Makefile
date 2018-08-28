@@ -34,7 +34,7 @@ start_dev_server: check_config_file
 
 start_gunicorn_dev_server: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	gunicorn service:app -w 1 --log-config=config/logging.ini
+	gunicorn service:app -w 1 --log-config=config/logging.ini -b 127.0.0.1:5000
 
 test_live: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \

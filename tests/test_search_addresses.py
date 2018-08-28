@@ -32,6 +32,26 @@ class SearchAddressesTest(SearchEntitiesTest):
         data = self.get_response({'direccion': COMMON_ADDRESS, 'max': 1})[0]
         self.assertTrue(len(data['id']) == 13)
 
+    def test_pagination(self):
+        """Los resultados deberían poder ser paginados."""
+        page_size = 10
+        pages = 5
+        results = set()
+
+        for i in range(pages):
+            resp = self.get_response({
+                'inicio': i * page_size,
+                'max': page_size,
+                'direccion': COMMON_ADDRESS
+            })
+
+            for result in resp:
+                results.add(result['id'])
+
+        # Si el paginado funciona correctamente, no deberían haberse repetido
+        # IDs de entidades entre resultados.
+        self.assertEqual(len(results), page_size * pages)
+
     def test_flatten_results(self):
         """Los resultados se deberían poder obtener en formato aplanado."""
         data = self.get_response({

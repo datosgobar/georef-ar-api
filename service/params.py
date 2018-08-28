@@ -4,14 +4,16 @@ Contiene clases utilizadas para leer y validar parámetros recibidos en requests
 HTTP.
 """
 
+import re
+from enum import Enum, unique
+from collections import defaultdict
+from flask import current_app
+
 import service.names as N
 from service import strings
 
-import re
-from enum import Enum, unique
-
-MAX_BULK_LEN = 5000
-MAX_SIZE_LEN = MAX_BULK_LEN
+MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
+MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
 
 
 class ParameterParsingException(Exception):
@@ -341,7 +343,7 @@ class IntParameter(Parameter):
     o más parámetros 'max' recibidos en conjunto.
 
     """
-    def __init__(self, required=False, default=None, choices=None,
+    def __init__(self, required=False, default=0, choices=None,
                  lower_limit=None, upper_limit=None):
         self._lower_limit = lower_limit
         self._upper_limit = upper_limit
@@ -360,11 +362,6 @@ class IntParameter(Parameter):
             raise ValueError(strings.INT_VAL_BIG.format(self._upper_limit))
 
         return int_val
-
-    def validate_values(self, vals):
-        if sum(vals) > self._upper_limit:
-            raise ValueError(
-                strings.INT_VAL_BIG_GLOBAL.format(self._upper_limit))
 
 
 class FloatParameter(Parameter):
@@ -428,6 +425,59 @@ class AddressParameter(Parameter):
         return address
 
 
+class ParamValidator:
+    """Interfaz para realizar una validación de valores de parámetros HTTP.
+
+    Los validadores deben definir un solo método, 'validate_values'.
+
+    """
+
+    def validate_values(self, param_names, values):
+        """Realizar una validación de parámetros.
+
+        El método 'validate_values' puede ser llamado en dos contextos:
+
+        1) Al momento de validar valores para un conjunto de parámetros
+            distintos. Por ejemplo, el valor de 'max' e 'inicio'. En este caso,
+            param_names es un listado de todos los parámetros a validar.
+
+        2) Al momento de validar varios valores para un mismo parámetro (por
+            ejemplo, varios valores de 'max' en una request POST). En este
+            caso, el valor de param_names es una lista de un solo nombre de
+            parámetro.
+
+        Args:
+            param_names (list): Lista de nombres de parámetros.
+            values (list): Lista de valores leídos y convertidos.
+
+        Raises:
+            ValueError: En caso de fallar la validación.
+
+        """
+        raise NotImplementedError()
+
+
+class IntSetSumValidator(ParamValidator):
+    """Implementa una validación de parámetros que comprueba que uno o más
+    valores sumados no superen un cierto valor.
+
+    Ver la documentación de 'ParamValidator' para detalles de uso.
+
+    Attributes:
+        _upper_limit (int): Suma máxima permitida.
+
+    """
+
+    def __init__(self, upper_limit):
+        self._upper_limit = upper_limit
+
+    def validate_values(self, param_names, values):
+        if sum(values) > self._upper_limit:
+            names = ', '.join('\'{}\''.format(name) for name in param_names)
+            raise ValueError(
+                strings.INT_VAL_BIG_GLOBAL.format(names, self._upper_limit))
+
+
 class EndpointParameters():
     """Representa un conjunto de parámetros para un endpoint HTTP.
 
@@ -440,6 +490,19 @@ class EndpointParameters():
         _shared_params (dict): Similar a 'get_qs_params', pero contiene
             parámetros aceptados vía querystring en requests GET Y parámetros
             aceptados vía body en requests POST (compartidos).
+
+        _cross_validators (list): Lista de tuplas (validador, [nombres]), que
+            representa los validadores utilizados para validar distintos
+            parámetros como conjuntos. Por ejemplo, los parámetros 'max' e
+            'inicio' deben cumplir, en conjunto, la condición de no sumar
+            más de un valor específico.
+
+        _set_validators (dict): Diccionario de (nombre de parámetro -
+            validador), utilizado para realizar validaciones sobre conjuntos de
+            valores para un mismo parámetro. Este tipo de validaciones es
+            utilizado cuando se procesan los requests POST, donde el usuario
+            puede enviar varias consultas, con parámetros repetidos entre
+            consultas.
 
     """
 
@@ -456,6 +519,35 @@ class EndpointParameters():
 
         self._get_qs_params = {**get_qs_params, **shared_params}
         self._post_body_params = shared_params
+
+        self._cross_validators = []
+        self._set_validators = defaultdict(list)
+
+    def with_cross_validator(self, param_names, validator):
+        """Agrega un validador a la lista de validadores para grupos de
+        parámetros.
+
+        Args:
+            param_names (list): Lista de nombres de parámetros sobre los cuales
+                ejecutar el validador.
+            validator (ParamValidator): Validador de valores.
+
+        """
+        self._cross_validators.append((validator, param_names))
+        return self
+
+    def with_set_validator(self, param_name, validator):
+        """Agrega un validador a la lista de validadores para conjuntos de
+        valores para un parámetro.
+
+        Args:
+            param_name (str): Nombre del parámetro a utilizar en la validación
+                de conjuntos de valores.
+            validator (ParamValidator): Validador de valores.
+
+        """
+        self._set_validators[param_name].append(validator)
+        return self
 
     def parse_params_dict(self, params, received, from_source):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP,
@@ -514,7 +606,83 @@ class EndpointParameters():
         if errors:
             raise ParameterParsingException(errors)
 
+        self.cross_validate_params(parsed)
         return parsed
+
+    def cross_validate_params(self, parsed):
+        """Ejecuta las validaciones de conjuntos de parámetros.
+
+        Args:
+            parsed (dict): Diccionario parámetro-valor donde se almacenan los
+                resultados del parseo de argumentos para una consulta.
+
+        Raises:
+            ParameterParsingException: Se lanza la excepción si no se pasó una
+                validación instalada para conjuntos de parámetros.
+
+        """
+        errors = {}
+
+        for validator, param_names in self._cross_validators:
+            values = [parsed[name] for name in param_names]
+            try:
+                validator.validate_values(param_names, values)
+            except ValueError as e:
+                for param in param_names:
+                    errors[param] = ParamError(ParamErrorType.INVALID_SET,
+                                               str(e), param)
+
+                # Si se encontraron errores al validar uno o más parámetros,
+                # utilizar el primer error encontrado.
+                break
+
+        if errors:
+            raise ParameterParsingException(errors)
+
+    def validate_param_sets(self, results):
+        """Ejecuta las validaciones de conjuntos de valores sobre todos los
+        parámetros aceptados por el objeto EndpointParameters.
+
+        Args:
+            results (list): Lista de diccionarios, cada diccionario contiene
+                los resultados de parsear los parámetros de una consulta.
+
+        Raises:
+            ParameterParsingException: Se lanza la excepción si no se pasó una
+                validación instalada para conjuntos de valores.
+
+        """
+        # Comenzar con un diccionario de errores vacío por cada consulta.
+        errors_list = [{}] * len(results)
+
+        for name, param in self._post_body_params.items():
+            validators = self._set_validators[name]
+
+            for validator in validators:
+                try:
+                    # Validar conjuntos de valores de parámetros bajo el
+                    # mismo nombre
+                    validator.validate_values([name],
+                                              (result[name]
+                                               for result in results))
+                except ValueError as e:
+                    error = ParamError(ParamErrorType.INVALID_SET, str(e),
+                                       'body')
+
+                    # Si la validación no fue exitosa, crear un error y
+                    # agregarlo al conjunto de errores de cada consulta que lo
+                    # utilizó.
+                    for errors in errors_list:
+                        errors[name] = error
+
+                    # Se muestra solo el error de la primera validación
+                    # fallida.
+                    break
+
+        # Luego de validar conjuntos, lanzar una excepción si se generaron
+        # errores nuevos
+        if any(errors_list):
+            raise ParameterParsingException(errors_list)
 
     def parse_post_params(self, qs_params, body_params):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP
@@ -552,25 +720,25 @@ class EndpointParameters():
                                     strings.INVALID_BULK, 'body')}
             ])
 
-        if len(body_params) > MAX_BULK_LEN:
+        if len(body_params) > MAX_RESULT_LEN:
             raise ParameterParsingException([
                 {'body': ParamError(
                     ParamErrorType.INVALID_BULK_LEN,
-                    strings.BULK_LEN_ERROR.format(MAX_BULK_LEN), 'body')}
+                    strings.BULK_LEN_ERROR.format(MAX_RESULT_LEN), 'body')}
             ])
 
         results, errors_list = [], []
         for param_dict in body_params:
             parsed, errors = {}, {}
-            if not hasattr(param_dict, 'get'):
-                errors['body'] = ParamError(ParamErrorType.INVALID_BULK_ENTRY,
-                                            strings.INVALID_BULK_ENTRY, 'body')
-            else:
+            if hasattr(param_dict, 'get'):
                 try:
                     parsed = self.parse_params_dict(self._post_body_params,
                                                     param_dict, 'body')
                 except ParameterParsingException as e:
                     errors = e.errors
+            else:
+                errors['body'] = ParamError(ParamErrorType.INVALID_BULK_ENTRY,
+                                            strings.INVALID_BULK_ENTRY, 'body')
 
             results.append(parsed)
             errors_list.append(errors)
@@ -578,26 +746,7 @@ class EndpointParameters():
         if any(errors_list):
             raise ParameterParsingException(errors_list)
 
-        for name, param in self._post_body_params.items():
-            try:
-                # Validar conjuntos de valores de parámetros bajo el
-                # mismo nombre
-                param.validate_values(result[name] for result in results)
-            except ValueError as e:
-                error = ParamError(ParamErrorType.INVALID_SET, str(e),
-                                   'body')
-
-                # Si la validación no fue exitosa, crear un error y
-                # agregarlo al conjunto de errores de cada consulta que lo
-                # utilizó.
-                for errors in errors_list:
-                    errors[name] = error
-
-        # Luego de validar conjuntos, lanzar una excepción si se generaron
-        # errores nuevos
-        if any(errors_list):
-            raise ParameterParsingException(errors_list)
-
+        self.validate_param_sets(results)
         return results
 
     def parse_get_params(self, qs_params):
@@ -626,11 +775,18 @@ PARAMS_STATES = EndpointParameters(shared_params={
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.C_LAT, N.C_LON]),
-    N.MAX: IntParameter(default=24, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.MAX: IntParameter(default=24, lower_limit=1, upper_limit=MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
-})
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+)
 
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.ID: IdParameter(length=5),
@@ -641,11 +797,18 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.C_LAT, N.C_LON, N.STATE_ID,
                                           N.STATE_NAME]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
-})
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+)
 
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.ID: IdParameter(length=6),
@@ -658,11 +821,18 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
                                optionals=[N.C_LAT, N.C_LON, N.STATE_ID,
                                           N.STATE_NAME, N.DEPT_ID,
                                           N.DEPT_NAME]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
-})
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+)
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
     N.ID: IdParameter(length=11),
@@ -677,11 +847,18 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
                                           N.STATE_NAME, N.DEPT_ID, N.DEPT_NAME,
                                           N.MUN_ID, N.MUN_NAME,
                                           N.LOCALITY_TYPE]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
-})
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+)
 
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
@@ -695,11 +872,18 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
                                           N.DEPT_NAME, N.ROAD_TYPE,
                                           N.FULL_NAME, N.LOCATION_LAT,
                                           N.LOCATION_LON]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv'])
-})
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+)
 
 PARAMS_STREETS = EndpointParameters(shared_params={
     N.ID: IdParameter(length=13),
@@ -713,11 +897,19 @@ PARAMS_STREETS = EndpointParameters(shared_params={
                                           N.END_L, N.STATE_ID, N.STATE_NAME,
                                           N.DEPT_ID, N.DEPT_NAME, N.FULL_NAME,
                                           N.ROAD_TYPE]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_SIZE_LEN),
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'csv'])
-})
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+)
+
 
 PARAMS_PLACE = EndpointParameters(shared_params={
     N.LAT: FloatParameter(required=True),

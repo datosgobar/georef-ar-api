@@ -54,6 +54,7 @@ FIELDS = 'campos'
 CSV_FIELDS = 'campos_csv'
 FLATTEN = 'aplanar'
 MAX = 'max'
+OFFSET = 'inicio'
 FORMAT = 'formato'
 EXACT = 'exacto'
 

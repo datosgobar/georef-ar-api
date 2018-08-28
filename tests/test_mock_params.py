@@ -211,6 +211,20 @@ class ParamParsingTest(TestCase):
             (T.VALUE_ERROR.value, 'id')
         })
 
+    def test_max_offset_sum(self):
+        """La suma de los parámetros max e inicio debería estar limitada."""
+        self.assert_errors_match(
+            choice(ENDPOINTS) + '?max=4000&inicio=10000', {
+                (T.INVALID_SET.value, 'max'),
+                (T.INVALID_SET.value, 'inicio')
+            })
+
+    def test_max_offset(self):
+        """El parámetro inicio debería tener un valor máximo permitido."""
+        self.assert_errors_match(choice(ENDPOINTS) + '?inicio=100000', {
+                (T.VALUE_ERROR.value, 'inicio')
+            })
+
     def test_empty_int_param(self):
         """Los parámtros de tipo int no deberían aceptar strings
         vacíos."""
