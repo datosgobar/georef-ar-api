@@ -33,10 +33,13 @@ class QueryResult:
             1 como valor default, ya que el 'total' de entidades posibles a ser
             devueltas es 0 o 1, pero al contar ya con un resultado, el número
             deber ser 1.
+        _offset (int): Cantidad de resultados salteados. En caso de iterable ==
+            False, se establece como 0, ya que no se puede saltear el único
+            posible.
 
     """
 
-    def __init__(self, entities, iterable=False, total=1):
+    def __init__(self, entities, iterable=False, total=1, offset=0):
         """Inicializar una QueryResult. Se recomienda utilizar
         'from_single_entity' y 'from_entity_list' en vez de utilizar este
         método.
@@ -45,6 +48,7 @@ class QueryResult:
         self._entities = entities
         self._iterable = iterable
         self._total = total
+        self._offset = offset
 
     @classmethod
     def from_single_entity(cls, entity):
@@ -57,15 +61,18 @@ class QueryResult:
         return cls([entity])
 
     @classmethod
-    def from_entity_list(cls, entities, total):
+    def from_entity_list(cls, entities, total, offset):
         """Construir una QueryResult a partir de una lista de entidades de
         cualquier longitud.
 
         Args:
-            entity (list): Lista de entidades.
+            entities (list): Lista de entidades.
+            total (int): Total de entidades encontradas, no necesariamente
+                incluidas.
+            offset (int): Cantidad de resultados salteados.
 
         """
-        return cls(entities, iterable=True, total=total)
+        return cls(entities, iterable=True, total=total, offset=offset)
 
     @property
     def entities(self):
@@ -77,6 +84,10 @@ class QueryResult:
     @property
     def total(self):
         return self._total
+
+    @property
+    def offset(self):
+        return self._offset
 
     @property
     def iterable(self):
@@ -239,7 +250,8 @@ def process_entity_single(request, name, param_parser, key_translations,
     for match in result.hits:
         match[N.SOURCE] = source
 
-    query_result = QueryResult.from_entity_list(result.hits, result.total)
+    query_result = QueryResult.from_entity_list(result.hits, result.total,
+                                                result.offset)
 
     return formatter.create_ok_response(name, query_result, fmt)
 
@@ -296,7 +308,8 @@ def process_entity_bulk(request, name, param_parser, key_translations):
         for match in result.hits:
             match[N.SOURCE] = source
 
-    query_results = [QueryResult.from_entity_list(result.hits, result.total)
+    query_results = [QueryResult.from_entity_list(result.hits, result.total,
+                                                  result.offset)
                      for result in results]
 
     return formatter.create_ok_response_bulk(name, query_results, formats)
@@ -495,7 +508,8 @@ def process_street_single(request):
     for match in result.hits:
         match[N.SOURCE] = source
 
-    query_result = QueryResult.from_entity_list(result.hits, result.total)
+    query_result = QueryResult.from_entity_list(result.hits, result.total,
+                                                result.offset)
 
     return formatter.create_ok_response(N.STREETS, query_result, fmt)
 
@@ -536,7 +550,8 @@ def process_street_bulk(request):
         for match in result.hits:
             match[N.SOURCE] = source
 
-    query_results = [QueryResult.from_entity_list(result.hits, result.total)
+    query_results = [QueryResult.from_entity_list(result.hits, result.total,
+                                                  result.offset)
                      for result in results]
 
     return formatter.create_ok_response_bulk(N.STREETS, query_results, formats)
@@ -673,7 +688,8 @@ def process_address_single(request):
     source = get_index_source(N.STREETS)
     build_addresses_result(result, query, source)
 
-    query_result = QueryResult.from_entity_list(result.hits, result.total)
+    query_result = QueryResult.from_entity_list(result.hits, result.total,
+                                                result.offset)
 
     return formatter.create_ok_response(N.ADDRESSES, query_result, fmt)
 
@@ -713,7 +729,8 @@ def process_address_bulk(request):
     for result, query in zip(results, queries):
         build_addresses_result(result, query, source)
 
-    query_results = [QueryResult.from_entity_list(result.hits, result.total)
+    query_results = [QueryResult.from_entity_list(result.hits, result.total,
+                                                  result.offset)
                      for result in results]
 
     return formatter.create_ok_response_bulk(N.ADDRESSES, query_results,

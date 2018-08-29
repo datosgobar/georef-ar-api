@@ -324,7 +324,12 @@ def format_result_json(name, result, fmt):
             flatten_dict(result.first_entity(), max_depth=3)
 
     if result.iterable:
-        return {name: result.entities}
+        return {
+            name: result.entities,
+            N.RETURNED: len(result.entities),
+            N.TOTAL: result.total,
+            N.OFFSET: result.offset
+        }
     else:
         return {name: result.first_entity()}
 

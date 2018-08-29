@@ -213,7 +213,8 @@ class SearchPlaceTest(SearchEntitiesTest):
 
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""
-        status = self.get_response(method='POST', body={}, status_only=True)
+        status = self.get_response(method='POST', body={},
+                                   return_value='status')
         self.assertEqual(status, 400)
 
     def test_bulk_response_len(self):

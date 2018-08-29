@@ -65,7 +65,8 @@ class SearchDepartmentsTest(SearchEntitiesTest):
     def test_id_invalid_search(self):
         """La búsqueda por ID debe devolver error 400 cuando se
         utiliza un ID no válido."""
-        status = self.get_response(params={'id': 999999}, status_only=True)
+        status = self.get_response(params={'id': 999999},
+                                   return_value='status')
         self.assertEqual(status, 400)
 
     def test_short_id_search(self):
@@ -266,9 +267,16 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         # IDs de entidades entre resultados.
         self.assertEqual(len(results), page_size * pages)
 
+    def test_total_results(self):
+        """Dada una query sin parámetros, se deben retornar los metadatos de
+        resultados apropiados."""
+        resp = self.get_response(return_value='full')
+        self.assertTrue(resp['devueltos'] == 10 and resp['inicio'] == 0)
+
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""
-        status = self.get_response(method='POST', body={}, status_only=True)
+        status = self.get_response(method='POST', body={},
+                                   return_value='status')
         self.assertEqual(status, 400)
 
     def test_bulk_response_len(self):
@@ -327,9 +335,8 @@ class SearchDepartmentsTest(SearchEntitiesTest):
 
         individual_results = []
         for query in queries:
-            individual_results.append({
-                'departamentos': self.get_response(params=query)
-            })
+            individual_results.append(self.get_response(params=query,
+                                                        return_value='full'))
 
         bulk_results = self.get_response(method='POST', body={
             'departamentos': queries

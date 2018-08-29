@@ -25,7 +25,7 @@ class SearchEntitiesTest(TestCase):
         self.app = app.test_client()
 
     def get_response(self, params=None, method='GET', body=None,
-                     status_only=False, fmt='json', endpoint=None,
+                     return_value='data', fmt='json', endpoint=None,
                      entity=None):
         """Método de uso general para obtener resultados de la API, utilizando
         internamente los métodos .get() y .post() del app Flask."""
@@ -45,22 +45,29 @@ class SearchEntitiesTest(TestCase):
         else:
             raise ValueError('Método desconocido.')
 
-        if status_only:
+        if return_value == 'status':
             return response.status_code
-        elif response.status_code != 200:
-            raise Exception(
-                'La petición no devolvió código 200: {}'.format(response.data))
+        elif return_value in ['data', 'full']:
+            if response.status_code != 200:
+                raise Exception(
+                    'La petición no devolvió código 200: {}'.format(
+                        response.data))
 
-        if fmt == 'json':
-            key = entity if method == 'GET' else 'resultados'
-            return json.loads(response.data)[key]
-        elif fmt == 'csv':
-            return csv.reader(response.data.decode().splitlines(),
-                              delimiter=formatter.CSV_SEP,
-                              quotechar=formatter.CSV_ESCAPE,
-                              lineterminator=formatter.CSV_NEWLINE)
+            if return_value == 'data':
+                if fmt == 'json':
+                    key = entity if method == 'GET' else 'resultados'
+                    return json.loads(response.data)[key]
+                elif fmt == 'csv':
+                    return csv.reader(response.data.decode().splitlines(),
+                                      delimiter=formatter.CSV_SEP,
+                                      quotechar=formatter.CSV_ESCAPE,
+                                      lineterminator=formatter.CSV_NEWLINE)
+                else:
+                    raise ValueError('Formato desconocido.')
+            elif return_value == 'full':
+                return json.loads(response.data)
         else:
-            raise ValueError('Formato desconocido.')
+            raise ValueError('Tipo de retorno desconocido.')
 
     def assert_unknown_param_returns_400(self):
         response = self.app.get(self.endpoint + '?foo=bar')

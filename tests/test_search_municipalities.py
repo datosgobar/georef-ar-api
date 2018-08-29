@@ -91,6 +91,12 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         # IDs de entidades entre resultados.
         self.assertEqual(len(results), page_size * pages)
 
+    def test_total_results(self):
+        """Dada una query sin parámetros, se deben retornar los metadatos de
+        resultados apropiados."""
+        resp = self.get_response(return_value='full')
+        self.assertTrue(resp['devueltos'] == 10 and resp['inicio'] == 0)
+
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
@@ -291,7 +297,8 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
 
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""
-        status = self.get_response(method='POST', body={}, status_only=True)
+        status = self.get_response(method='POST', body={},
+                                   return_value='status')
         self.assertEqual(status, 400)
 
     def test_bulk_response_len(self):
@@ -352,9 +359,8 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
 
         individual_results = []
         for query in queries:
-            individual_results.append({
-                'municipios': self.get_response(params=query)
-            })
+            individual_results.append(self.get_response(params=query,
+                                                        return_value='full'))
 
         bulk_results = self.get_response(method='POST', body={
             'municipios': queries

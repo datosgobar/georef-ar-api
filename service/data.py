@@ -34,12 +34,15 @@ class ElasticsearchResult:
         _hits (list): Lista de resultados (diccionarios).
         _total (int): Total de resultados encontrados, no necesariamente
             incluidos en la respuesta.
+        _offset (int): Cantidad de resultados salteados, comenzando desde el
+            primero.
 
     """
 
-    def __init__(self, response):
+    def __init__(self, response, offset):
         self._hits = [hit.to_dict() for hit in response.hits]
         self._total = response.hits.total
+        self._offset = offset
 
     @property
     def hits(self):
@@ -48,6 +51,10 @@ class ElasticsearchResult:
     @property
     def total(self):
         return self._total
+
+    @property
+    def offset(self):
+        return self._offset
 
     def __len__(self):
         return len(self._hits)
@@ -137,7 +144,14 @@ def run_searches(es, index, searches):
 
     try:
         responses = ms.execute(raise_on_error=True)
-        return [ElasticsearchResult(response) for response in responses]
+        es_results = []
+
+        for search, response in zip(searches, responses):
+            # Incluir offset (inicio) en los resultados
+            offset = search.to_dict()['from']
+            es_results.append(ElasticsearchResult(response, offset))
+
+        return es_results
     except elasticsearch.ElasticsearchException:
         raise DataConnectionException()
 
@@ -157,7 +171,7 @@ def search_entities(es, index, params_list):
         list: Resultados de búsqueda de entidades.
 
     """
-    searches = (build_entity_search(**params) for params in params_list)
+    searches = [build_entity_search(**params) for params in params_list]
     return run_searches(es, index, searches)
 
 
@@ -177,7 +191,7 @@ def search_places(es, index, params_list):
 
     """
     index = '{}-{}'.format(index, N.GEOM)  # Utilizar índices con geometrías
-    searches = (build_place_search(**params) for params in params_list)
+    searches = [build_place_search(**params) for params in params_list]
     return run_searches(es, index, searches)
 
 
@@ -194,7 +208,7 @@ def search_streets(es, params_list):
         list: Resultados de búsqueda de vías de circulación.
 
     """
-    searches = (build_streets_search(**params) for params in params_list)
+    searches = [build_streets_search(**params) for params in params_list]
     return run_searches(es, N.STREETS, searches)
 
 
