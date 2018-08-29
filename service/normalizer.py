@@ -13,6 +13,76 @@ import logging
 logger = logging.getLogger('georef')
 
 
+class QueryResult:
+    """Representa el resultado de una consulta a la API.
+
+    Se distinguen dos casos de resultados posibles:
+        1) Resultados en forma de lista de 0 o más elementos.
+        2) Resultado singular.
+    Internamente, ambos casos se almacenan como una lista.
+
+    Attributes:
+        _entities (list): Lista de entidades (provincias, municipios,
+            ubicaciones, calles, etc.).
+        _iterable (bool): Falso si el resultado representa una entidad
+            singular (como en el caso de una ubicación). Verdadero cuando
+            se representa una lista de entidades (como en el caso de,
+            por ejemplo, provincias).
+        _total (int): Total de entidades encontradas, no necesariamente
+            incluidas en la respuesta. En caso de iterable == False, se utiliza
+            1 como valor default, ya que el 'total' de entidades posibles a ser
+            devueltas es 0 o 1, pero al contar ya con un resultado, el número
+            deber ser 1.
+
+    """
+
+    def __init__(self, entities, iterable=False, total=1):
+        """Inicializar una QueryResult. Se recomienda utilizar
+        'from_single_entity' y 'from_entity_list' en vez de utilizar este
+        método.
+
+        """
+        self._entities = entities
+        self._iterable = iterable
+        self._total = total
+
+    @classmethod
+    def from_single_entity(cls, entity):
+        """Construir una QueryResult a partir de una entidad singular.
+
+        Args:
+            entity (dict): Entidad encontrada.
+
+        """
+        return cls([entity])
+
+    @classmethod
+    def from_entity_list(cls, entities, total):
+        """Construir una QueryResult a partir de una lista de entidades de
+        cualquier longitud.
+
+        Args:
+            entity (list): Lista de entidades.
+
+        """
+        return cls(entities, iterable=True, total=total)
+
+    @property
+    def entities(self):
+        return self._entities
+
+    def first_entity(self):
+        return self._entities[0]
+
+    @property
+    def total(self):
+        return self._total
+
+    @property
+    def iterable(self):
+        return self._iterable
+
+
 def get_elasticsearch():
     """Devuelve la conexión a Elasticsearch activa para la sesión
     de flask. La conexión es creada si no existía.
@@ -61,6 +131,14 @@ def get_postgres_db_connection_pool():
 
 @contextmanager
 def get_postgres_db_connection(pool):
+    """Crea un contexto que extrae una conexión del pool de conexiones. La
+    conexión es devuelta al pool incondicionalmente al terminar la ejecución
+    del contexto.
+
+    Args:
+        pool (psycopg2.pool.AbstractConnectionPool): Pool de conexiones.
+
+    """
     connection = pool.getconn()
     try:
         yield connection
@@ -135,6 +213,7 @@ def process_entity_single(request, name, param_parser, key_translations,
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         qs_params = param_parser.parse_get_params(request.args)
@@ -157,10 +236,12 @@ def process_entity_single(request, name, param_parser, key_translations,
     result = data.search_entities(es, name, [query])[0]
 
     source = get_index_source(name)
-    for match in result:
+    for match in result.hits:
         match[N.SOURCE] = source
 
-    return formatter.create_ok_response(name, result, fmt)
+    query_result = QueryResult.from_entity_list(result.hits, result.total)
+
+    return formatter.create_ok_response(name, query_result, fmt)
 
 
 def process_entity_bulk(request, name, param_parser, key_translations):
@@ -182,6 +263,7 @@ def process_entity_bulk(request, name, param_parser, key_translations):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         body_params = param_parser.parse_post_params(
@@ -211,10 +293,13 @@ def process_entity_bulk(request, name, param_parser, key_translations):
 
     source = get_index_source(name)
     for result in results:
-        for match in result:
+        for match in result.hits:
             match[N.SOURCE] = source
 
-    return formatter.create_ok_response_bulk(name, results, formats)
+    query_results = [QueryResult.from_entity_list(result.hits, result.total)
+                     for result in results]
+
+    return formatter.create_ok_response_bulk(name, query_results, formats)
 
 
 def process_entity(request, name, param_parser, key_translations, csv_fields):
@@ -235,6 +320,7 @@ def process_entity(request, name, param_parser, key_translations, csv_fields):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         if request.method == 'GET':
@@ -258,6 +344,7 @@ def process_state(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     return process_entity(request, N.STATES, params.PARAMS_STATES, {
             N.ID: 'entity_id',
@@ -278,6 +365,7 @@ def process_department(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     return process_entity(request, N.DEPARTMENTS,
                           params.PARAMS_DEPARTMENTS, {
@@ -300,6 +388,7 @@ def process_municipality(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     return process_entity(request, N.MUNICIPALITIES,
                           params.PARAMS_MUNICIPALITIES, {
@@ -323,6 +412,7 @@ def process_locality(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     return process_entity(request, N.LOCALITIES, params.PARAMS_LOCALITIES, {
             N.ID: 'entity_id',
@@ -349,6 +439,7 @@ def build_street_query_format(parsed_params):
 
     Returns:
         tuple: diccionario de query y diccionario de formato
+
     """
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
@@ -388,6 +479,7 @@ def process_street_single(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         qs_params = params.PARAMS_STREETS.parse_get_params(request.args)
@@ -400,10 +492,12 @@ def process_street_single(request):
     result = data.search_streets(es, [query])[0]
 
     source = get_index_source(N.STREETS)
-    for match in result:
+    for match in result.hits:
         match[N.SOURCE] = source
 
-    return formatter.create_ok_response(N.STREETS, result, fmt)
+    query_result = QueryResult.from_entity_list(result.hits, result.total)
+
+    return formatter.create_ok_response(N.STREETS, query_result, fmt)
 
 
 def process_street_bulk(request):
@@ -419,6 +513,7 @@ def process_street_bulk(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         body_params = params.PARAMS_STREETS.parse_post_params(
@@ -438,10 +533,13 @@ def process_street_bulk(request):
 
     source = get_index_source(N.STREETS)
     for result in results:
-        for match in result:
+        for match in result.hits:
             match[N.SOURCE] = source
 
-    return formatter.create_ok_response_bulk(N.STREETS, results, formats)
+    query_results = [QueryResult.from_entity_list(result.hits, result.total)
+                     for result in results]
+
+    return formatter.create_ok_response_bulk(N.STREETS, query_results, formats)
 
 
 def process_street(request):
@@ -454,6 +552,7 @@ def process_street(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         if request.method == 'GET':
@@ -483,7 +582,7 @@ def build_addresses_result(result, query, source):
     pool = get_postgres_db_connection_pool()
 
     with get_postgres_db_connection(pool) as connection:
-        for street in result:
+        for street in result.hits:
             if N.FULL_NAME in fields:
                 parts = street[N.FULL_NAME].split(',')
                 parts[0] += ' {}'.format(number)
@@ -517,6 +616,7 @@ def build_address_query_format(parsed_params):
 
     Returns:
         tuple: diccionario de query y diccionario de formato
+
     """
     # Construir query a partir de parámetros
     road_name, number = parsed_params.pop(N.ADDRESS)
@@ -558,6 +658,7 @@ def process_address_single(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         qs_params = params.PARAMS_ADDRESSES.parse_get_params(request.args)
@@ -572,7 +673,9 @@ def process_address_single(request):
     source = get_index_source(N.STREETS)
     build_addresses_result(result, query, source)
 
-    return formatter.create_ok_response(N.ADDRESSES, result, fmt)
+    query_result = QueryResult.from_entity_list(result.hits, result.total)
+
+    return formatter.create_ok_response(N.ADDRESSES, query_result, fmt)
 
 
 def process_address_bulk(request):
@@ -588,6 +691,7 @@ def process_address_bulk(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         body_params = params.PARAMS_ADDRESSES.parse_post_params(
@@ -609,7 +713,11 @@ def process_address_bulk(request):
     for result, query in zip(results, queries):
         build_addresses_result(result, query, source)
 
-    return formatter.create_ok_response_bulk(N.ADDRESSES, results, formats)
+    query_results = [QueryResult.from_entity_list(result.hits, result.total)
+                     for result in results]
+
+    return formatter.create_ok_response_bulk(N.ADDRESSES, query_results,
+                                             formats)
 
 
 def process_address(request):
@@ -690,6 +798,7 @@ def build_place_query_format(parsed_params):
 
     Returns:
         tuple: diccionario de query y diccionario de formato
+
     """
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {}, ignore=[N.FLATTEN, N.FORMAT])
@@ -725,7 +834,7 @@ def process_place_queries(es, queries):
             'fields': [N.ID, N.NAME, N.STATE]
         })
 
-    departments = data.search_places(es, N.DEPARTMENTS, dept_queries)
+    dept_results = data.search_places(es, N.DEPARTMENTS, dept_queries)
 
     muni_queries = []
     for query in queries:
@@ -735,10 +844,16 @@ def process_place_queries(es, queries):
             'fields': [N.ID, N.NAME]
         })
 
-    munis = data.search_places(es, N.MUNICIPALITIES, muni_queries)
+    muni_results = data.search_places(es, N.MUNICIPALITIES, muni_queries)
 
     places = []
-    for query, dept, muni in zip(queries, departments, munis):
+    for query, dept_result, muni_result in zip(queries, dept_results,
+                                               muni_results):
+        # Ya que la query de tipo place retorna una o cero entidades,
+        # extraer la primera entidad de los resultados, o tomar None si
+        # no hay resultados.
+        dept = dept_result.hits[0] if dept_result else None
+        muni = muni_result.hits[0] if muni_result else None
         places.append(build_place_result(query, dept, muni))
 
     return places
@@ -757,6 +872,7 @@ def process_place_single(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         qs_params = params.PARAMS_PLACE.parse_get_params(request.args)
@@ -766,10 +882,11 @@ def process_place_single(request):
     query, fmt = build_place_query_format(qs_params)
 
     es = get_elasticsearch()
-    result = process_place_queries(es, [query])[0]
+    place = process_place_queries(es, [query])[0]
 
-    return formatter.create_ok_response(N.PLACE, result, fmt,
-                                        iterable_result=False)
+    query_result = QueryResult.from_single_entity(place)
+
+    return formatter.create_ok_response(N.PLACE, query_result, fmt)
 
 
 def process_place_bulk(request):
@@ -785,6 +902,7 @@ def process_place_bulk(request):
 
     Returns:
         flask.Response: respuesta HTTP
+
     """
     try:
         body_params = params.PARAMS_PLACE.parse_post_params(
@@ -800,10 +918,10 @@ def process_place_bulk(request):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = process_place_queries(es, queries)
+    places = process_place_queries(es, queries)
+    query_results = [QueryResult.from_single_entity(place) for place in places]
 
-    return formatter.create_ok_response_bulk(N.PLACE, results, formats,
-                                             iterable_result=False)
+    return formatter.create_ok_response_bulk(N.PLACE, query_results, formats)
 
 
 def process_place(request):

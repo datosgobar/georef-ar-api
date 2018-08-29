@@ -17,19 +17,17 @@ MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
 
 
 class ParameterParsingException(Exception):
+    """Excepción lanzada al finalizar la recolección de errores para todos los
+    parámetros.
+
+    """
+
     def __init__(self, errors):
         self._errors = errors
 
     @property
     def errors(self):
         return self._errors
-
-    """Excepción lanzada al finalizar la recolección de errores para todos los
-    parámetros.
-
-    """
-
-    pass
 
 
 class ParameterRequiredException(Exception):
@@ -109,10 +107,10 @@ class Parameter:
     ser un parámetro requerido).
 
     Attributes:
-        choices (list): Lista de valores permitidos (o None si se permite
+        _choices (list): Lista de valores permitidos (o None si se permite
             cualquier valor).
-        required (bool): Verdadero si el parámetro es requerido.
-        default: Valor que debería tomar el parámetro en caso de no haber sido
+        _required (bool): Verdadero si el parámetro es requerido.
+        _default: Valor que debería tomar el parámetro en caso de no haber sido
             recibido.
 
     """

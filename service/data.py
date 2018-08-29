@@ -27,6 +27,32 @@ class DataConnectionException(Exception):
     pass
 
 
+class ElasticsearchResult:
+    """Representa resultados para una consulta a Elasticsearch.
+
+    Attributes:
+        _hits (list): Lista de resultados (diccionarios).
+        _total (int): Total de resultados encontrados, no necesariamente
+            incluidos en la respuesta.
+
+    """
+
+    def __init__(self, response):
+        self._hits = [hit.to_dict() for hit in response.hits]
+        self._total = response.hits.total
+
+    @property
+    def hits(self):
+        return self._hits
+
+    @property
+    def total(self):
+        return self._total
+
+    def __len__(self):
+        return len(self._hits)
+
+
 def postgres_db_connection_pool(host, name, user, password, maxconn):
     """Crea una pool de conexiones a la base de datos PostgreSQL.
 
@@ -101,7 +127,7 @@ def run_searches(es, index, searches):
 
     Returns:
         list: Lista de resultados, cada resultado contiene una lista de 'hits'
-            (documentos encontrados).
+            (documentos encontrados) y otros metadatos.
 
     """
     ms = MultiSearch(index=index, using=es)
@@ -111,11 +137,7 @@ def run_searches(es, index, searches):
 
     try:
         responses = ms.execute(raise_on_error=True)
-
-        return [
-            [hit.to_dict() for hit in response.hits]
-            for response in responses
-        ]
+        return [ElasticsearchResult(response) for response in responses]
     except elasticsearch.ElasticsearchException:
         raise DataConnectionException()
 
@@ -154,17 +176,9 @@ def search_places(es, index, params_list):
         list: Resultados de búsqueda de entidades.
 
     """
-    index += '-' + N.GEOM  # Utilizar índices con geometrías
+    index = '{}-{}'.format(index, N.GEOM)  # Utilizar índices con geometrías
     searches = (build_place_search(**params) for params in params_list)
-    results = run_searches(es, index, searches)
-
-    # Ya que solo puede existir una entidad por punto (para un tipo dado
-    # de entidad), modificar los resultados para que el resultado de cada
-    # consulta esté compuesto de exactamente una entidad, o el valor None.
-    return [
-        result[0] if result else None
-        for result in results
-    ]
+    return run_searches(es, index, searches)
 
 
 def search_streets(es, params_list):

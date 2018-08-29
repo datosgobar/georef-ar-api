@@ -227,7 +227,7 @@ def create_csv_response(name, result, fmt):
 
     Args:
         name (str): Nombre de la entidad que fue consultada.
-        result (list): Lista de entidades.
+        result (QueryResult): Resultado de una consulta (con iterable==True).
         fmt (dict): Parámetros de formato.
 
     Returns:
@@ -244,7 +244,7 @@ def create_csv_response(name, result, fmt):
 
         yield '{}{}'.format(CSV_SEP.join(field_names), CSV_NEWLINE)
 
-        for match in result:
+        for match in result.entities:
             flatten_dict(match, max_depth=3)
 
             values = []
@@ -274,27 +274,19 @@ def create_csv_response(name, result, fmt):
     }))
 
 
-def create_geojson_response(result, iterable_result):
+def create_geojson_response(result):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato GeoJSON.
 
     Args:
-        result (list, dict): Entidad o lista de entidades.
-        iterable_result (bool): Verdadero si el resultado es iterable. Si no lo
-            es, internamente se crea una lista de un elemento con el resultado
-            adentro.
+        result (QueryResult): Resultado de una consulta.
 
     Returns:
         flask.Response: Respuesta HTTP con contenido GeoJSON.
 
     """
-    if iterable_result:
-        items = result
-    else:
-        items = [result]
-
     features = []
-    for item in items:
+    for item in result.entities:
         lat, lon = None, None
         if N.LAT in item and N.LON in item:
             lat = item.pop(N.LAT)
@@ -311,49 +303,50 @@ def create_geojson_response(result, iterable_result):
     return make_response(jsonify(geojson.FeatureCollection(features)))
 
 
-def format_result_json(name, result, fmt, iterable_result):
+def format_result_json(name, result, fmt):
     """Toma el resultado de una consulta, y la devuelve con una estructura
     apropiada para ser convertida a JSON.
 
     Args:
         name (str): Nombre de la entidad consultada.
-        result (list, dict): Entidad o lista de entidades.
+        result (QueryResult): Resultado de una consulta.
         fmt (dict): Parámetros de formato.
-        iterable_result (bool): Verdadero si el resultado es iterable.
 
     Returns:
         dict: Resultados con esctructura y formato apropiados.
 
     """
     if fmt.get(N.FLATTEN, False):
-        if iterable_result:
-            for match in result:
+        if result.iterable:
+            for match in result.entities:
                 flatten_dict(match, max_depth=3)
         else:
-            flatten_dict(result, max_depth=3)
+            flatten_dict(result.first_entity(), max_depth=3)
 
-    return {name: result}
+    if result.iterable:
+        return {name: result.entities}
+    else:
+        return {name: result.first_entity()}
 
 
-def create_json_response_single(name, result, fmt, iterable_result):
+def create_json_response_single(name, result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato JSON.
 
     Args:
         name (str): Nombre de la entidad consultada.
-        result (list, dict): Entidad o lista de entidades.
+        result (QueryResult): Resultado de una consulta.
         fmt (dict): Parámetros de formato.
-        iterable_result (bool): Verdadero si el resultado es iterable.
 
     Returns:
         flask.Response: Respuesta HTTP con contenido JSON.
 
     """
-    json_response = format_result_json(name, result, fmt, iterable_result)
+    json_response = format_result_json(name, result, fmt)
     return make_response(jsonify(json_response))
 
 
-def create_json_response_bulk(name, results, formats, iterable_result):
+def create_json_response_bulk(name, results, formats):
     """Toma una lista de resultados de una consulta o más, y devuelve una
     respuesta HTTP 200 con los resultados en formato JSON.
 
@@ -361,15 +354,13 @@ def create_json_response_bulk(name, results, formats, iterable_result):
         name (str): Nombre de la entidad consultada.
         results (list): Lista de resultados.
         formats (list): Lista de parámetros de formato por consulta.
-        iterable_result (bool): Verdadero si todos los resultados son
-            iterables.
 
     Returns:
         flask.Response: Respuesta HTTP con contenido JSON.
 
     """
     json_results = [
-        format_result_json(name, result, fmt, iterable_result)
+        format_result_json(name, result, fmt)
         for result, fmt in zip(results, formats)
     ]
 
@@ -404,35 +395,32 @@ def filter_result_fields(result, fields_dict, max_depth=3):
             filter_result_fields(value, fields_dict[key], max_depth - 1)
 
 
-def format_result_fields(result, fmt, iterable_result):
+def format_result_fields(result, fmt):
     """Aplica el parámetro de formato 'campos' a un resultado.
 
     Args:
-        result (dict): Resultado con valores a filtrar.
+        result (QueryResult): Resultado con valores a filtrar.
         fmt (dict): Parámetros de formato.
-        iterable_result (bool): Verdadero si el resultado es iterable.
 
     """
     fields_dict = fields_list_to_dict(fmt[N.FIELDS])
-    if iterable_result:
-        for item in result:
+    if result.iterable:
+        for item in result.entities:
             filter_result_fields(item, fields_dict)
     else:
-        filter_result_fields(result, fields_dict)
+        filter_result_fields(result.first_entity(), fields_dict)
 
 
-def format_results_fields(results, formats, iterable_result):
+def format_results_fields(results, formats):
     """Aplica el parámetro de formato 'campos' a varios resultados.
 
     Args:
         results (list): Resultados con valores a filtrar.
         formats (list): Lista de parámetros de formato.
-        iterable_result (bool): Verdadero si todos los resultados son
-            iterables.
 
     """
     for result, fmt in zip(results, formats):
-        format_result_fields(result, fmt, iterable_result)
+        format_result_fields(result, fmt)
 
 
 def fields_list_to_dict(fields):
@@ -459,48 +447,47 @@ def fields_list_to_dict(fields):
     return fields_dict
 
 
-def create_ok_response(name, result, fmt, iterable_result=True):
+def create_ok_response(name, result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en el formato especificado.
 
     Args:
         name (str): Nombre de la entidad consultada.
-        result (list, dict): Entidad o lista de entidades.
+        result (QueryResult): Resultado de una consulta.
         fmt (dict): Parámetros de formato.
-        iterable_result (bool): Verdadero si el resultado es iterable.
 
     Returns:
         flask.Response: Respuesta HTTP 200.
 
     """
-    format_result_fields(result, fmt, iterable_result)
+    format_result_fields(result, fmt)
 
     if fmt[N.FORMAT] == 'json':
-        return create_json_response_single(name, result, fmt, iterable_result)
+        return create_json_response_single(name, result, fmt)
     elif fmt[N.FORMAT] == 'csv':
-        if not iterable_result:
+        if not result.iterable:
             raise RuntimeError(
                 'Se requieren datos iterables para crear una respuesta CSV.')
 
         return create_csv_response(name, result, fmt)
     elif fmt[N.FORMAT] == 'geojson':
-        return create_geojson_response(result, iterable_result)
+        return create_geojson_response(result)
 
 
-def create_ok_response_bulk(name, results, formats, iterable_result=True):
+def create_ok_response_bulk(name, results, formats):
     """Toma una lista de resultados de una consulta o más, y devuelve una
     respuesta HTTP 200 con los resultados en formato JSON.
 
     Args:
         name (str): Nombre de la entidad consultada.
-        results (list): Lista de resultados.
+        results (list): Lista de resultados QueryResult.
         formats (list): Lista de parámetros de formato por consulta.
-        iterable_result (bool): Verdadero si todos los resultados son
-            iterables.
 
     Returns:
         flask.Response: Respuesta HTTP 200.
 
     """
-    format_results_fields(results, formats, iterable_result)
-    return create_json_response_bulk(name, results, formats, iterable_result)
+    format_results_fields(results, formats)
+    # El valor FMT de cada elemento de formats es 'json' (ya que en modo bulk
+    # solo se permiten respuestas JSON).
+    return create_json_response_bulk(name, results, formats)
