@@ -1,6 +1,6 @@
-from elasticsearch_params import LOWCASE_ASCII_NORMALIZER
-from elasticsearch_params import NAME_ANALYZER
-from elasticsearch_params import NAME_ANALYZER_SYNONYMS
+from .elasticsearch_params import LOWCASE_ASCII_NORMALIZER
+from .elasticsearch_params import NAME_ANALYZER
+from .elasticsearch_params import NAME_ANALYZER_SYNONYMS
 
 # Mapeos de entidades para Elasticsearch
 # Por cada entidad, se define un mapeo sin geometría, con campos indexados,

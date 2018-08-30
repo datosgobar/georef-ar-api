@@ -91,6 +91,16 @@ ADDRESSES_CSV_FIELDS = [
 ]
 
 
+ENDPOINT_CSV_FIELDS = {
+    N.STATES: STATES_CSV_FIELDS,
+    N.DEPARTMENTS: DEPARTMENTS_CSV_FIELDS,
+    N.MUNICIPALITIES: MUNICIPALITIES_CSV_FIELDS,
+    N.LOCALITIES: LOCALITIES_CSV_FIELDS,
+    N.STREETS: STREETS_CSV_FIELDS,
+    N.ADDRESSES: ADDRESSES_CSV_FIELDS
+}
+
+
 def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
     """Aplana un diccionario recursivamente. Modifica el diccionario original.
     Lanza un RuntimeError si no se pudo aplanar el diccionario

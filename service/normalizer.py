@@ -61,7 +61,7 @@ class QueryResult:
         return cls([entity])
 
     @classmethod
-    def from_entity_list(cls, entities, total, offset):
+    def from_entity_list(cls, entities, total, offset=0):
         """Construir una QueryResult a partir de una lista de entidades de
         cualquier longitud.
 
@@ -202,8 +202,7 @@ def translate_keys(d, translations, ignore=None):
     }
 
 
-def process_entity_single(request, name, param_parser, key_translations,
-                          csv_fields):
+def process_entity_single(request, name, param_parser, key_translations):
     """Procesa una request GET para consultar datos de una entidad.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -215,8 +214,6 @@ def process_entity_single(request, name, param_parser, key_translations,
         key_translations (dict): Traducciones de keys a utilizar para convertir
             el diccionario de parámetros del usuario a un diccionario
             representando una query a Elasticsearch.
-        csv_fields (dict): Diccionario a utilizar para modificar los campos
-            cuando se utiliza el formato CSV.
 
     Raises:
         data.DataConnectionException: En caso de ocurrir un error de
@@ -241,7 +238,7 @@ def process_entity_single(request, name, param_parser, key_translations,
         for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in qs_params
     }
-    fmt[N.CSV_FIELDS] = csv_fields
+    fmt[N.CSV_FIELDS] = formatter.ENDPOINT_CSV_FIELDS[name]
 
     es = get_elasticsearch()
     result = data.search_entities(es, name, [query])[0]
@@ -315,7 +312,7 @@ def process_entity_bulk(request, name, param_parser, key_translations):
     return formatter.create_ok_response_bulk(name, query_results, formats)
 
 
-def process_entity(request, name, param_parser, key_translations, csv_fields):
+def process_entity(request, name, param_parser, key_translations):
     """Procesa una request GET o POST para consultar datos de una entidad.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
     En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
@@ -328,8 +325,6 @@ def process_entity(request, name, param_parser, key_translations, csv_fields):
         key_translations (dict): Traducciones de keys a utilizar para convertir
             los diccionarios de parámetros del usuario a una lista de
             diccionarios representando las queries a Elasticsearch.
-        csv_fields (dict): Diccionario a utilizar para modificar los campos
-            cuando se utiliza el formato CSV.
 
     Returns:
         flask.Response: respuesta HTTP
@@ -338,7 +333,7 @@ def process_entity(request, name, param_parser, key_translations, csv_fields):
     try:
         if request.method == 'GET':
             return process_entity_single(request, name, param_parser,
-                                         key_translations, csv_fields)
+                                         key_translations)
         else:
             return process_entity_bulk(request, name, param_parser,
                                        key_translations)
@@ -366,7 +361,7 @@ def process_state(request):
             N.ORDER: 'order',
             N.FIELDS: 'fields',
             N.OFFSET: 'offset'
-    }, formatter.STATES_CSV_FIELDS)
+    })
 
 
 def process_department(request):
@@ -389,7 +384,7 @@ def process_department(request):
                               N.ORDER: 'order',
                               N.FIELDS: 'fields',
                               N.OFFSET: 'offset'
-                          }, formatter.DEPARTMENTS_CSV_FIELDS)
+                          })
 
 
 def process_municipality(request):
@@ -413,7 +408,7 @@ def process_municipality(request):
                               N.ORDER: 'order',
                               N.FIELDS: 'fields',
                               N.OFFSET: 'offset'
-                          }, formatter.MUNICIPALITIES_CSV_FIELDS)
+                          })
 
 
 def process_locality(request):
@@ -437,7 +432,7 @@ def process_locality(request):
             N.ORDER: 'order',
             N.FIELDS: 'fields',
             N.OFFSET: 'offset'
-    }, formatter.LOCALITIES_CSV_FIELDS)
+    })
 
 
 def build_street_query_format(parsed_params):

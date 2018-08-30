@@ -1,27 +1,27 @@
-import download
+from .. import app
+from .. import normalizer
 
-from elasticsearch import Elasticsearch
 from elasticsearch import helpers
-from elasticsearch_params import DEFAULT_SETTINGS
-from elasticsearch_mappings import MAP_STATE, MAP_STATE_GEOM
-from elasticsearch_mappings import MAP_DEPT, MAP_DEPT_GEOM
-from elasticsearch_mappings import MAP_MUNI, MAP_MUNI_GEOM
-from elasticsearch_mappings import MAP_SETTLEMENT, MAP_SETTLEMENT_GEOM
-from elasticsearch_mappings import MAP_STREET
-import psycopg2
+from .elasticsearch_params import DEFAULT_SETTINGS
+from .elasticsearch_mappings import MAP_STATE, MAP_STATE_GEOM
+from .elasticsearch_mappings import MAP_DEPT, MAP_DEPT_GEOM
+from .elasticsearch_mappings import MAP_MUNI, MAP_MUNI_GEOM
+from .elasticsearch_mappings import MAP_SETTLEMENT, MAP_SETTLEMENT_GEOM
+from .elasticsearch_mappings import MAP_STREET
+from . import download
 
-from flask import Flask
+import psycopg2
 import argparse
 import os
-from io import StringIO
 import urllib.parse
 import json
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import logging
 import uuid
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from datetime import datetime
+from io import StringIO
 
 loggerStream = StringIO()
 logger = logging.getLogger(__name__)
@@ -303,6 +303,13 @@ class GeorefIndex:
             return None
         return list(es.indices.get_alias(name=self.alias).keys())[0]
 
+    def filter_doc(self, doc):
+        return {
+            key: doc[key]
+            for key in doc
+            if key not in self.excludes
+        }
+
     def bulk_update_generator(self, docs, index):
         """Crea un generador de operaciones 'create' para Elasticsearch a
         partir de una lista de documentos a indexar.
@@ -313,11 +320,7 @@ class GeorefIndex:
 
         """
         for original_doc in docs:
-            doc = {
-                key: original_doc[key]
-                for key in original_doc
-                if key not in self.excludes
-            }
+            doc = self.filter_doc(original_doc)
 
             action = {
                 '_op_type': 'create',
@@ -358,47 +361,55 @@ def run_index(app, es, forced):
     logger.info('')
 
     indices = [
-        GeorefIndex('provincias',
-                    app.config['STATES_FILE'],
-                    os.path.join(backups_dir, 'provincias.json'),
-                    MAP_STATE,
-                    ['geometria']),
-        GeorefIndex('provincias-geometria',
-                    app.config['STATES_FILE'],
-                    os.path.join(backups_dir, 'provincias.json'),
-                    MAP_STATE_GEOM),
-        GeorefIndex('departamentos',
-                    app.config['DEPARTMENTS_FILE'],
-                    os.path.join(backups_dir, 'departamentos.json'),
-                    MAP_DEPT,
-                    ['geometria']),
-        GeorefIndex('departamentos-geometria',
-                    app.config['DEPARTMENTS_FILE'],
-                    os.path.join(backups_dir, 'departamentos.json'),
-                    MAP_DEPT_GEOM),
-        GeorefIndex('municipios',
-                    app.config['MUNICIPALITIES_FILE'],
-                    os.path.join(backups_dir, 'municipios.json'),
-                    MAP_MUNI,
-                    ['geometria']),
-        GeorefIndex('municipios-geometria',
-                    app.config['MUNICIPALITIES_FILE'],
-                    os.path.join(backups_dir, 'municipios.json'),
-                    MAP_MUNI_GEOM),
-        GeorefIndex('localidades',
-                    app.config['LOCALITIES_FILE'],
-                    os.path.join(backups_dir, 'localidades.json'),
-                    MAP_SETTLEMENT,
-                    ['geometria']),
-        GeorefIndex('localidades-geometria',
-                    app.config['LOCALITIES_FILE'],
-                    os.path.join(backups_dir, 'localidades.json'),
-                    MAP_SETTLEMENT_GEOM),
-        GeorefIndex('calles',
-                    app.config['STREETS_FILE'],
-                    os.path.join(backups_dir, 'calles.json'),
-                    MAP_STREET,
-                    ['codigo_postal'],
+        GeorefIndex(alias='provincias',
+                    filepath=app.config['STATES_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'provincias.json'),
+                    mapping=MAP_STATE,
+                    excludes=['geometria']),
+        GeorefIndex(alias='provincias-geometria',
+                    filepath=app.config['STATES_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'provincias.json'),
+                    mapping=MAP_STATE_GEOM),
+        GeorefIndex(alias='departamentos',
+                    filepath=app.config['DEPARTMENTS_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'departamentos.json'),
+                    mapping=MAP_DEPT,
+                    excludes=['geometria']),
+        GeorefIndex(alias='departamentos-geometria',
+                    filepath=app.config['DEPARTMENTS_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'departamentos.json'),
+                    mapping=MAP_DEPT_GEOM),
+        GeorefIndex(alias='municipios',
+                    filepath=app.config['MUNICIPALITIES_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'municipios.json'),
+                    mapping=MAP_MUNI,
+                    excludes=['geometria']),
+        GeorefIndex(alias='municipios-geometria',
+                    filepath=app.config['MUNICIPALITIES_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'municipios.json'),
+                    mapping=MAP_MUNI_GEOM),
+        GeorefIndex(alias='localidades',
+                    filepath=app.config['LOCALITIES_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'localidades.json'),
+                    mapping=MAP_SETTLEMENT,
+                    excludes=['geometria']),
+        GeorefIndex(alias='localidades-geometria',
+                    filepath=app.config['LOCALITIES_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'localidades.json'),
+                    mapping=MAP_SETTLEMENT_GEOM),
+        GeorefIndex(alias='calles',
+                    filepath=app.config['STREETS_FILE'],
+                    backup_filepath=os.path.join(backups_dir, 'calles.json'),
+                    mapping=MAP_STREET,
+                    excludes=['codigo_postal'],
                     docs_key='vias')
     ]
 
@@ -459,13 +470,13 @@ def run_sql(app, script):
 
 
 def main():
+    print(os.getcwd())
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', metavar='<action>', required=True,
                         choices=ACTIONS)
     parser.add_argument('-t', '--timeout', metavar='<seconds>', default=300,
                         type=int,
                         help='Tiempo de espera para transfer. Elasticsearch.')
-    parser.add_argument('-c', '--config', metavar='<path>', required=True)
     parser.add_argument('-s', '--script', metavar='<path>',
                         type=argparse.FileType())
     parser.add_argument('-f', '--forced', action='store_true')
@@ -475,31 +486,17 @@ def main():
 
     setup_logger(logger, loggerStream)
 
-    app = Flask(__name__)
-    app.config.from_pyfile(args.config, silent=False)
+    with app.app_context():
+        if args.mode in ['index', 'index_stats']:
+            es = normalizer.get_elasticsearch()
 
-    if args.mode in ['index', 'index_stats']:
-        options = {
-            'hosts': app.config['ES_HOSTS'],
-            'timeout': args.timeout
-        }
+            if args.mode == 'index':
+                run_index(app, es, args.forced)
+            else:
+                run_info(es)
 
-        if app.config['ES_SNIFF']:
-            options['sniff_on_start'] = True
-            options['sniff_on_connection_fail'] = True
-            options['sniffer_timeout'] = app.config['ES_SNIFFER_TIMEOUT']
-
-        es = Elasticsearch(**options)
-
-        if args.mode == 'index':
-            run_index(app, es, args.forced)
-        else:
-            run_info(es)
-            import code
-            code.interact(local=locals())
-
-    elif args.mode == 'run_sql':
-        run_sql(app, args.script)
+        elif args.mode == 'run_sql':
+            run_sql(app, args.script)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 CFG_PATH ?= config/georef.cfg
+UTILS_PY = service.management.utils_script
 TIMEOUT ?= 320
 
 .PHONY: docs
@@ -15,16 +16,20 @@ check_config_file:
 		(echo "No existe el archivo de configuración $(CFG_PATH)." && exit 1)
 
 index: check_config_file
-	python scripts/utils_script.py -m index -t $(TIMEOUT) -c ../$(CFG_PATH)
+	GEOREF_CONFIG=$(CFG_PATH) \
+	python -m $(UTILS_PY) -m index -t $(TIMEOUT)
 
 index_forced: check_config_file
-	python scripts/utils_script.py -m index -t $(TIMEOUT) -c ../$(CFG_PATH) -f
+	GEOREF_CONFIG=$(CFG_PATH) \
+	python -m $(UTILS_PY) -m index -t $(TIMEOUT) -f
 
 print_index_stats: check_config_file
-	python scripts/utils_script.py -m index_stats -t $(TIMEOUT) -i -c ../$(CFG_PATH)
+	GEOREF_CONFIG=$(CFG_PATH) \
+	python -m $(UTILS_PY) -m index_stats -t $(TIMEOUT) -i
 
 load_sql: check_config_file
-	python scripts/utils_script.py -m run_sql -c ../$(CFG_PATH) -s scripts/function_geocodificar.sql
+	GEOREF_CONFIG=$(CFG_PATH) \
+	python -m $(UTILS_PY) -m run_sql -s service/management/function_geocodificar.sql
 
 start_dev_server: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
@@ -47,7 +52,7 @@ test_mock: check_config_file
 test_all: test_live test_mock
 
 code_style:
-	flake8 tests service scripts
+	flake8 tests service
 
 doctoc: ## generate table of contents, doctoc command line tool required
         ## https://github.com/thlorenz/doctoc
