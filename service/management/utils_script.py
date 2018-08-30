@@ -419,9 +419,8 @@ def run_index(app, es, forced):
         try:
             index.create_or_reindex(es, files_cache, forced)
         except Exception as e:
-            logger.error('Ocurrió un error al indexar:')
             logger.error('')
-            logger.error(e)
+            logger.exception('Ocurrió un error al indexar:')
             logger.error('')
 
     logger.info('')
