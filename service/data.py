@@ -190,7 +190,6 @@ def search_places(es, index, params_list):
         list: Resultados de búsqueda de entidades.
 
     """
-    index = '{}-{}'.format(index, N.GEOM)  # Utilizar índices con geometrías
     searches = [build_place_search(**params) for params in params_list]
     return run_searches(es, index, searches)
 

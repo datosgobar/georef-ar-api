@@ -49,6 +49,10 @@ test_mock: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
 	python -m unittest tests/test_mock_*
 
+test_custom: check_config_file
+	GEOREF_CONFIG=$(CFG_PATH) \
+	python -m unittest tests/$(TEST_FILES) # Variable de entorno definida por el usuario
+
 test_all: test_live test_mock
 
 code_style:

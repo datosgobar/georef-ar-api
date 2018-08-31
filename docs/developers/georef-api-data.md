@@ -54,7 +54,7 @@ El archivo de datos de provincias debe tener formato JSON. Su esquema de datos d
 				"lat": -26.9478, // Latitud de centroide
 				"lon": -65.36475 // Longitud de centroide
 			},
-			"geometry": {
+			"geometria": {
 				"type": "mutlipolygon", // Tipo de geometría
 				"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]] // Listado de coordenadas (formato WKT) del MultiPolygon
 			}
@@ -78,7 +78,7 @@ El archivo de datos de departamentos debe tener formato JSON. Su esquema de dato
 				"lat": -34.770165, // Latitud de centroide
 				"lon": -58.625449  // Longitud de centroide
 			},
-			"geometry": {
+			"geometria": {
 				"type": "mutlipolygon", // Tipo de geometría
 				"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]] // Listado de coordenadas (formato WKT) del MultiPolygon
 			},
@@ -106,7 +106,7 @@ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos d
 				"lat": -36.298222, // Latitud de centroide
 				"lon": -61.149648  // Longitud de centroide
 			},
-			"geometry": {
+			"geometria": {
 				"type": "mutlipolygon", // Tipo de geometría
 				"coordinates": [[[[-58.4453, -34.4324], [-58.6463, -34.6841], ...]]] // Listado de coordenadas (formato WKT) del MultiPolygon
 			},
@@ -139,7 +139,7 @@ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos 
 				"lat": -38.741555, // Latitud de centroide
 				"lon": -61.537720  // Longitud de centroide
 			},
-			"geometry": {
+			"geometria": {
 				"type": "multipoint", // Tipo de geometría
 				"coordinates": [[-61.5377, -38.7415], ...] // Listado de coordenadas (formato WKT) del MultiPoint
 			},

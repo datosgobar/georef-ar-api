@@ -3,12 +3,9 @@ from .elasticsearch_params import NAME_ANALYZER
 from .elasticsearch_params import NAME_ANALYZER_SYNONYMS
 
 # Mapeos de entidades para Elasticsearch
-# Por cada entidad, se define un mapeo sin geometría, con campos indexados,
-# y otro con geometría, con el resto de los campos sin indexar.
-# La separación en dos mapeos por entidad se debe a que las geometrías tienden
-# a aumentar significativamente el tamaño de los documentos, por lo que la
-# performance de la búsqueda por id/texto/etc se ve disminuida.
-
+# El excluimiento del campo 'geometria' en _source se debe a que las geometrías
+# tienden a aumentar significativamente el tamaño de los documentos, por lo que
+# la performance de la búsqueda por id/texto/etc se ve disminuida.
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
 
 TIMESTAMP = {
@@ -19,6 +16,9 @@ TIMESTAMP = {
 
 MAP_STATE = {
     '_doc': {
+        '_source': {
+            'excludes': ['geometria']
+        },
         'properties': {
             'id': {'type': 'keyword'},
             'timestamp': TIMESTAMP,
@@ -33,6 +33,7 @@ MAP_STATE = {
                     }
                 }
             },
+            'geometria': {'type': 'geo_shape'},
             'centroide': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -45,27 +46,11 @@ MAP_STATE = {
     }
 }
 
-MAP_STATE_GEOM = {
-    '_doc': {
-        'properties': {
-            'id': {'type': 'keyword', 'index': False},
-            'timestamp': TIMESTAMP,
-            'nombre': {'type': 'keyword', 'index': False},
-            'centroide': {
-                'type': 'object',
-                'dynamic': 'strict',
-                'properties': {
-                    'lat': {'type': 'float', 'index': False},
-                    'lon': {'type': 'float', 'index': False}
-                }
-            },
-            'geometria': {'type': 'geo_shape'}
-        }
-    }
-}
-
 MAP_DEPT = {
     '_doc': {
+        '_source': {
+            'excludes': ['geometria']
+        },
         'properties': {
             'id': {'type': 'keyword'},
             'timestamp': TIMESTAMP,
@@ -88,6 +73,7 @@ MAP_DEPT = {
                     'lon': {'type': 'float', 'index': False}
                 }
             },
+            'geometria': {'type': 'geo_shape'},
             'provincia': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -110,28 +96,11 @@ MAP_DEPT = {
     }
 }
 
-MAP_DEPT_GEOM = {
-    '_doc': {
-        'properties': {
-            'id': {'type': 'keyword', 'index': False},
-            'timestamp': TIMESTAMP,
-            'nombre': {'type': 'keyword', 'index': False},
-            'centroide': {
-                'type': 'object',
-                'dynamic': 'strict',
-                'properties': {
-                    'lat': {'type': 'float', 'index': False},
-                    'lon': {'type': 'float', 'index': False}
-                }
-            },
-            'provincia': {'type': 'object', 'enabled': False},
-            'geometria': {'type': 'geo_shape'}
-        }
-    }
-}
-
 MAP_MUNI = {
     '_doc': {
+        '_source': {
+            'excludes': ['geometria']
+        },
         'properties': {
             'id': {'type': 'keyword'},
             'timestamp': TIMESTAMP,
@@ -146,6 +115,7 @@ MAP_MUNI = {
                     }
                 }
             },
+            'geometria': {'type': 'geo_shape'},
             'centroide': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -194,29 +164,11 @@ MAP_MUNI = {
     }
 }
 
-MAP_MUNI_GEOM = {
-    '_doc': {
-        'properties': {
-            'id': {'type': 'keyword', 'index': False},
-            'timestamp': TIMESTAMP,
-            'nombre': {'type': 'keyword', 'index': False},
-            'centroide': {
-                'type': 'object',
-                'dynamic': 'strict',
-                'properties': {
-                    'lat': {'type': 'float', 'index': False},
-                    'lon': {'type': 'float', 'index': False}
-                }
-            },
-            'departamento': {'type': 'object', 'enabled': False},
-            'provincia': {'type': 'object', 'enabled': False},
-            'geometria': {'type': 'geo_shape'}
-        }
-    }
-}
-
 MAP_SETTLEMENT = {
     '_doc': {
+        '_source': {
+            'excludes': ['geometria']
+        },
         'properties': {
             'id': {'type': 'keyword'},
             'timestamp': TIMESTAMP,
@@ -232,6 +184,7 @@ MAP_SETTLEMENT = {
                 }
             },
             'tipo': {'type': 'keyword'},
+            'geometria': {'type': 'geo_shape'},
             'centroide': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -294,29 +247,6 @@ MAP_SETTLEMENT = {
                     }
                 }
             }
-        }
-    }
-}
-
-MAP_SETTLEMENT_GEOM = {
-    '_doc': {
-        'properties': {
-            'id': {'type': 'keyword', 'index': False},
-            'timestamp': TIMESTAMP,
-            'nombre': {'type': 'keyword', 'index': False},
-            'tipo': {'type': 'keyword', 'index': False},
-            'centroide': {
-                'type': 'object',
-                'dynamic': 'strict',
-                'properties': {
-                    'lat': {'type': 'float', 'index': False},
-                    'lon': {'type': 'float', 'index': False}
-                }
-            },
-            'municipio': {'type': 'object', 'enabled': False},
-            'departamento': {'type': 'object', 'enabled': False},
-            'provincia': {'type': 'object', 'enabled': False},
-            'geometria': {'type': 'geo_shape'}
         }
     }
 }

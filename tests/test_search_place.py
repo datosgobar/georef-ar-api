@@ -193,16 +193,23 @@ class SearchPlaceTest(SearchEntitiesTest):
         """Cuando se utiliza el centroide de una entidad (con geometría convexa
         o casi convexa) como ubicación, se debería obtener la misma entidad
         como parte de la respuesta."""
-        munis = self.get_response(endpoint='/api/municipios',
-                                  entity='municipios',
-                                  params={
-                                      'campos': 'centroide.lat,centroide.lon',
-                                      'max': 30
-                                  })
+        concave_munis = ['060595', '500014', '625140', '460049', '386266',
+                         '220469']
+
+        results = self.get_response(
+            endpoint='/api/municipios',
+            method='POST',
+            body={
+                'municipios': [
+                    {'id': mun_id} for mun_id in concave_munis
+                ]
+            }
+        )
 
         validations = []
 
-        for muni in munis:
+        for result in results:
+            muni = result['municipios'][0]
             lat = muni['centroide']['lat']
             lon = muni['centroide']['lon']
             place = self.get_response({'lat': lat, 'lon': lon})
