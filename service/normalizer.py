@@ -461,8 +461,6 @@ def build_street_query_format(parsed_params):
         N.OFFSET: 'offset'
     }, ignore=[N.FLATTEN, N.FORMAT])
 
-    query['excludes'] = [N.GEOM]
-
     # Construir reglas de formato a partir de parámetros
     fmt = {
         key: parsed_params[key]
@@ -642,7 +640,6 @@ def build_address_query_format(parsed_params):
     }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])
 
     query['fields'] = parsed_params[N.FIELDS] + [N.GEOM, N.START_R, N.END_L]
-    query['excludes'] = [N.START_L, N.END_R]
 
     # Construir reglas de formato a partir de parámetros
     fmt = {

@@ -271,13 +271,13 @@ def build_entity_search(entity_id=None, name=None, state=None,
             order += N.EXACT_SUFFIX
         s = s.sort(order)
 
-    s = s.source(include=fields, exclude=[N.TIMESTAMP])
+    s = s.source(include=fields)
     return s[offset: offset + (max or DEFAULT_MAX)]
 
 
 def build_streets_search(street_id=None, road_name=None, department=None,
                          state=None, road_type=None, max=None, fields=None,
-                         exact=False, number=None, excludes=None, offset=0):
+                         exact=False, number=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
@@ -290,7 +290,6 @@ def build_streets_search(street_id=None, road_name=None, department=None,
         road_type (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
-        excludes (list): Campos a no incluir en los resultados (opcional).
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
             'department'.) (opcional).
@@ -303,12 +302,6 @@ def build_streets_search(street_id=None, road_name=None, department=None,
     """
     if not fields:
         fields = []
-
-    if not excludes:
-        excludes = []
-
-    if N.TIMESTAMP not in excludes:
-        excludes.append(N.TIMESTAMP)
 
     s = Search()
 
@@ -337,7 +330,7 @@ def build_streets_search(street_id=None, road_name=None, department=None,
         else:
             s = s.query(build_name_query(N.STATE_NAME, state, exact))
 
-    s = s.source(include=fields, exclude=[N.TIMESTAMP])
+    s = s.source(include=fields)
     return s[offset: offset + (max or DEFAULT_MAX)]
 
 
@@ -367,7 +360,7 @@ def build_place_search(lat, lon, fields=None):
     }
 
     s = s.query(GeoShape(**{N.GEOM: options}))
-    s = s.source(include=fields, exclude=[N.GEOM, N.TIMESTAMP])
+    s = s.source(include=fields)
     return s[:1]
 
 

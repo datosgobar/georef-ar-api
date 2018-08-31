@@ -8,12 +8,6 @@ from .elasticsearch_params import NAME_ANALYZER_SYNONYMS
 # la performance de la búsqueda por id/texto/etc se ve disminuida.
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
 
-TIMESTAMP = {
-    'type': 'date',
-    'format': 'epoch_second',
-    'index': False
-}
-
 MAP_STATE = {
     '_doc': {
         '_source': {
@@ -21,7 +15,6 @@ MAP_STATE = {
         },
         'properties': {
             'id': {'type': 'keyword'},
-            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
@@ -53,7 +46,6 @@ MAP_DEPT = {
         },
         'properties': {
             'id': {'type': 'keyword'},
-            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
@@ -103,7 +95,6 @@ MAP_MUNI = {
         },
         'properties': {
             'id': {'type': 'keyword'},
-            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
@@ -171,7 +162,6 @@ MAP_SETTLEMENT = {
         },
         'properties': {
             'id': {'type': 'keyword'},
-            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
@@ -259,7 +249,6 @@ MAP_STREET = {
                 'index': False
             },
             'id': {'type': 'keyword'},
-            'timestamp': TIMESTAMP,
             'nombre': {
                 'type': 'text',
                 'analyzer': NAME_ANALYZER_SYNONYMS,
