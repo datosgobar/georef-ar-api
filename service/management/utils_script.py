@@ -33,6 +33,7 @@ FILE_VERSION = '2.0.0'
 
 SEPARATOR_WIDTH = 60
 ACTIONS = ['index', 'index_stats', 'run_sql']
+TIMEOUT = 500
 
 
 def setup_logger(l, loggerStream):
@@ -214,7 +215,8 @@ class GeorefIndex:
         logger.info('Insertando documentos...')
 
         for ok, response in helpers.streaming_bulk(es, operations,
-                                                   raise_on_error=False):
+                                                   raise_on_error=False,
+                                                   request_timeout=TIMEOUT):
             if ok and response['create']['result'] == 'created':
                 creations += 1
             else:
@@ -432,9 +434,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', metavar='<action>', required=True,
                         choices=ACTIONS)
-    parser.add_argument('-t', '--timeout', metavar='<seconds>', default=300,
-                        type=int,
-                        help='Tiempo de espera para transfer. Elasticsearch.')
     parser.add_argument('-s', '--script', metavar='<path>',
                         type=argparse.FileType())
     parser.add_argument('-f', '--forced', action='store_true')

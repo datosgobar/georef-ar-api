@@ -1,6 +1,5 @@
 CFG_PATH ?= config/georef.cfg
 UTILS_PY = service.management.utils_script
-TIMEOUT ?= 320
 
 .PHONY: docs
 
@@ -17,15 +16,15 @@ check_config_file:
 
 index: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m index -t $(TIMEOUT)
+	python -m $(UTILS_PY) -m index
 
 index_forced: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m index -t $(TIMEOUT) -f
+	python -m $(UTILS_PY) -m index -f
 
 print_index_stats: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m index_stats -t $(TIMEOUT) -i
+	python -m $(UTILS_PY) -m index_stats -i
 
 load_sql: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
