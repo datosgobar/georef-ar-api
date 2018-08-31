@@ -7,7 +7,9 @@ OBLIGATORY_NO_DEFAULT = 'Los parámetros obligatorios no pueden tener valor \
 default.'
 DEFAULT_INVALID_CHOICE = 'El valor default no se encuentra dentro de las \
 opciones de valores.'
-ADDRESS_NO_NUM = 'La dirección no contiene una altura.'
+ADDRESS_FORMAT = 'La dirección debe tener el siguiente formato: <nombre de \
+calle> <altura>.'
+ADDRESS_INVALID_NUM = 'La dirección debe tener una altura positiva.'
 STRING_EMPTY = 'El campo de texto no tiene contenido.'
 STRLIST_EMPTY = 'La lista no contiene valores.'
 STRLIST_REPEATED = 'La lista contiene valores repetidos.'
@@ -16,8 +18,8 @@ FLOAT_VAL_ERROR = 'El parámetro no es un número real.'
 INVALID_CHOICE = 'El parámetro debe consistir en una lista de ítems separados \
 por comas. Los valores posibles de los ítems se listan bajo la \
 clave \'ayuda\'.'
-INVALID_BULK = 'Las operaciones deben estar contenidas en una lista de \
-longitud 1 o más.'
+INVALID_BULK = 'Las operaciones deben estar contenidas en una lista no vacía \
+bajo la clave \'{}\'.'
 BULK_QS_INVALID = 'No se permiten parámetros vía query string en operaciones \
 bulk.'
 INVALID_BULK_ENTRY = 'Las operaciones bulk deben ser de tipo objeto.'

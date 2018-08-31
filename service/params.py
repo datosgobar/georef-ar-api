@@ -416,9 +416,11 @@ class AddressParameter(Parameter):
                 if int(num) > 0:
                     address = name, num
                     break
+                else:
+                    raise ValueError(strings.ADDRESS_INVALID_NUM)
 
         if not address:
-            raise ValueError(strings.ADDRESS_NO_NUM)
+            raise ValueError(strings.ADDRESS_FORMAT)
 
         return address
 
@@ -682,16 +684,16 @@ class EndpointParameters():
         if any(errors_list):
             raise ParameterParsingException(errors_list)
 
-    def parse_post_params(self, qs_params, body_params):
+    def parse_post_params(self, qs_params, body, body_key):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP
         POST utilizando el conjunto de parámetros internos. Se parsean por
         separado los parámetros querystring y los parámetros de body.
 
         Args:
             qs_params (dict): Parámetros recibidos en el query string.
-            body_params (list): Lista de diccionarios, cada uno representando
-                un conjunto de parámetros recibidos en el body del request
-                HTTP.
+            body_params (dict): Datos JSON recibidos vía POST.
+            body_key (str): Nombre de la key bajo donde debería estar la lista
+                de consultas recibias vía POST, en 'body_params'.
 
         Returns:
             list: lista de conjuntos de parámetros parseados provienentes
@@ -710,17 +712,20 @@ class EndpointParameters():
                                            'querystring')}
             ])
 
+        body_params = (body or {}).get(body_key)
+
         if not body_params or not isinstance(body_params, list):
             # No aceptar operaciones bulk que no sean listas, y no
             # aceptar listas vacías.
             raise ParameterParsingException([
-                {'body': ParamError(ParamErrorType.INVALID_BULK,
-                                    strings.INVALID_BULK, 'body')}
+                {body_key: ParamError(ParamErrorType.INVALID_BULK,
+                                      strings.INVALID_BULK.format(body_key),
+                                      'body')}
             ])
 
         if len(body_params) > MAX_RESULT_LEN:
             raise ParameterParsingException([
-                {'body': ParamError(
+                {body_key: ParamError(
                     ParamErrorType.INVALID_BULK_LEN,
                     strings.BULK_LEN_ERROR.format(MAX_RESULT_LEN), 'body')}
             ])
@@ -735,8 +740,9 @@ class EndpointParameters():
                 except ParameterParsingException as e:
                     errors = e.errors
             else:
-                errors['body'] = ParamError(ParamErrorType.INVALID_BULK_ENTRY,
-                                            strings.INVALID_BULK_ENTRY, 'body')
+                errors[body_key] = ParamError(
+                    ParamErrorType.INVALID_BULK_ENTRY,
+                    strings.INVALID_BULK_ENTRY, 'body')
 
             results.append(parsed)
             errors_list.append(errors)

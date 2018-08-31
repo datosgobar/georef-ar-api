@@ -276,7 +276,7 @@ def process_entity_bulk(request, name, param_parser, key_translations):
     """
     try:
         body_params = param_parser.parse_post_params(
-            request.args, request.json and request.json.get(name))
+            request.args, request.json, name)
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
@@ -524,7 +524,7 @@ def process_street_bulk(request):
     """
     try:
         body_params = params.PARAMS_STREETS.parse_post_params(
-            request.args, request.json and request.json.get(N.STREETS))
+            request.args, request.json, N.STREETS)
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
@@ -703,7 +703,7 @@ def process_address_bulk(request):
     """
     try:
         body_params = params.PARAMS_ADDRESSES.parse_post_params(
-            request.args, request.json and request.json.get(N.ADDRESSES))
+            request.args, request.json, N.ADDRESSES)
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
@@ -915,7 +915,7 @@ def process_place_bulk(request):
     """
     try:
         body_params = params.PARAMS_PLACE.parse_post_params(
-            request.args, request.json and request.json.get(N.PLACES))
+            request.args, request.json, N.PLACES)
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 

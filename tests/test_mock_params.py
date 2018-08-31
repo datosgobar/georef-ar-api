@@ -23,14 +23,23 @@ class ParamParsingTest(TestCase):
         """No se deberían aceptar operaciones bulk cuando el body HTTP
         no contiene JSON."""
         self.assert_errors_match('/provincias', [
-            {(T.INVALID_BULK.value, 'body')}
+            {(T.INVALID_BULK.value, 'provincias')}
         ], method='POST')
 
     def test_bulk_empty_json(self):
         """No se deberían aceptar operaciones bulk cuando el body HTTP
         contiene JSON vacío."""
-        self.assert_errors_match('/calles', [
-            {(T.INVALID_BULK.value, 'body')}
+        endpoint = choice(ENDPOINTS)
+
+        self.assert_errors_match(endpoint, [
+            {(T.INVALID_BULK.value, endpoint[1:])}
+        ], method='POST', body={})
+
+    def test_bulk_empty_json_places(self):
+        """No se deberían aceptar operaciones bulk cuando el body HTTP
+        contiene JSON vacío."""
+        self.assert_errors_match('/ubicacion', [
+            {(T.INVALID_BULK.value, 'ubicaciones')}
         ], method='POST', body={})
 
     def test_bulk_empty(self):
@@ -40,7 +49,7 @@ class ParamParsingTest(TestCase):
         }
 
         self.assert_errors_match('/municipios', [
-            {(T.INVALID_BULK.value, 'body')}
+            {(T.INVALID_BULK.value, 'municipios')}
         ], body=body)
 
     def test_bulk_invalid_type(self):
@@ -51,7 +60,7 @@ class ParamParsingTest(TestCase):
         }
 
         self.assert_errors_match('/departamentos', [
-            {(T.INVALID_BULK.value, 'body')}
+            {(T.INVALID_BULK.value, 'departamentos')}
         ], body=body)
 
     def test_bulk_invalid_item_type(self):
@@ -63,7 +72,7 @@ class ParamParsingTest(TestCase):
 
         self.assert_errors_match('/municipios', [
             set(),
-            {(T.INVALID_BULK_ENTRY.value, 'body')}
+            {(T.INVALID_BULK_ENTRY.value, 'municipios')}
         ], body=body)
 
     def test_unknown_param(self):
@@ -378,7 +387,7 @@ class ParamParsingTest(TestCase):
 
         self.assert_errors_match('/calles', [
             {
-                (T.INVALID_BULK_LEN.value, 'body')
+                (T.INVALID_BULK_LEN.value, 'calles')
             }
         ], body=body)
 
