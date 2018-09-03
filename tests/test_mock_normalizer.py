@@ -7,6 +7,8 @@ from unittest import mock
 import random
 from service import app
 
+from flask import current_app
+
 ENDPOINTS = [
     '/calles',
     '/provincias',
@@ -17,8 +19,16 @@ ENDPOINTS = [
 
 MOCK_STREET = {
     'nomenclatura': 'SANTA FE, SAAVEDRA, BUENOS AIRES',
-    'inicio_derecha': 0,
-    'fin_izquierda': 1000,
+    'altura': {
+        'inicio': {
+            'derecha': 0,
+            'izquierda': 0
+        },
+        'fin': {
+            'derecha': 1000,
+            'izquierda': 1001
+        }
+    },
     'geometria': None
 }
 
@@ -30,6 +40,13 @@ class NormalizerTest(TestCase):
         app.testing = True
         self.app = app.test_client()
         self.base_url = '/api/v1.0'
+
+    def tearDown(self):
+        with app.app_context():
+            if hasattr(current_app, 'elasticsearch'):
+                delattr(current_app, 'elasticsearch')
+            if hasattr(current_app, 'postgres_pool'):
+                delattr(current_app, 'postgres_pool')
 
     @mock.patch("elasticsearch.Elasticsearch", autospec=True)
     def test_elasticsearch_connection_error(self, es):
@@ -94,7 +111,8 @@ class NormalizerTest(TestCase):
             'responses': [
                 {
                     'hits': {
-                        'hits': hits
+                        'hits': hits,
+                        'total': 1
                     }
                 }
             ]

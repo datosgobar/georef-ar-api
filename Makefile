@@ -52,7 +52,9 @@ test_custom: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
 	python -m unittest tests/$(TEST_FILES) # Variable de entorno definida por el usuario
 
-test_all: test_live test_mock
+test_all: check_config_file
+	GEOREF_CONFIG=$(CFG_PATH) \
+	python -m unittest
 
 code_style:
 	flake8 tests service
