@@ -38,15 +38,15 @@ start_dev_server: check_config_file
 
 start_gunicorn_dev_server: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	gunicorn service:app -w 1 --log-config=config/logging.ini -b 127.0.0.1:5000
+	gunicorn service:app -w 4 --log-config=config/logging.ini -b 127.0.0.1:5000
 
 test_live: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m unittest tests/test_search_*
+	python -m unittest discover -p test_search_*
 
 test_mock: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m unittest tests/test_mock_*
+	python -m unittest discover -p test_mock_*
 
 test_custom: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
