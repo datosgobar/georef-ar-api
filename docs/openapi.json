@@ -68,6 +68,18 @@
             "provincias_single": {
                 "type": "object",
 		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 24
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 24
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
 		    "provincias": {
 			"type": "array",
 			"items": {
@@ -111,6 +123,9 @@
 				    "$ref": "#/components/schemas/param_campos"
 				},
 				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
 				    "$ref": "#/components/schemas/param_max"
 				},
 				"exacto": {
@@ -174,6 +189,18 @@
             "departamentos_single": {
                 "type": "object",
 		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 529
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
 		    "departamentos": {
 			"type": "array",
 			"items": {
@@ -220,6 +247,9 @@
 				    "$ref": "#/components/schemas/param_campos"
 				},
 				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
 				    "$ref": "#/components/schemas/param_max"
 				},
 				"exacto": {
@@ -286,6 +316,18 @@
 	    "municipios_single": {
 		"type": "object",
 		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 1820
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
 		    "municipios": {
 			"type": "array",
 			"items": {
@@ -335,6 +377,9 @@
 				    "$ref": "#/components/schemas/param_campos"
 				},
 				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
 				    "$ref": "#/components/schemas/param_max"
 				},
 				"exacto": {
@@ -400,6 +445,18 @@
 	    "localidades_single": {
 		"type": "object",
 		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 4901
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
 		    "localidades": {
 			"type": "array",
 			"items": {
@@ -454,6 +511,9 @@
 				"max": {
 				    "$ref": "#/components/schemas/param_max"
 				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
 				"exacto": {
 				    "$ref": "#/components/schemas/param_exacto"
 				}
@@ -504,6 +564,18 @@
 	    "direcciones_single": {
 		"type": "object",
 		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 28
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
 		    "direcciones": {
 			"type": "array",
 			"items": {
@@ -550,6 +622,9 @@
 				    "$ref": "#/components/schemas/param_campos"
 				},
 				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
 				    "$ref": "#/components/schemas/param_max"
 				},
 				"exacto": {
@@ -639,6 +714,18 @@
 	    "calles_single": {
 		"type": "object",
 		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 151500
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
 		    "calles": {
 			"type": "array",
 			"items": {
@@ -688,6 +775,9 @@
 				    "$ref": "#/components/schemas/param_campos"
 				},
 				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
 				    "$ref": "#/components/schemas/param_max"
 				},
 				"exacto": {
@@ -796,6 +886,12 @@
 		"minimum": 1,
 		"maximum": 5000,
 		"example": 10
+	    },
+	    "param_inicio": {
+		"type": "integer",
+		"minimum": 0,
+		"maximum": 10000,
+		"example": 0
 	    },
 	    "param_campos": {
 		"type": "string",
@@ -957,6 +1053,14 @@
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_max"
+                }
+            },
+            "inicio": {
+                "name": "inicio",
+                "description": "Cantidad de resultados a saltear.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_inicio"
                 }
             },
             "campos": {
@@ -1121,6 +1225,9 @@
                         "$ref": "#/components/parameters/max"
                     },
                     {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+                    {
                         "$ref": "#/components/parameters/exacto"
                     },
                     {
@@ -1204,6 +1311,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
                     },
                     {
                         "$ref": "#/components/parameters/exacto"
@@ -1293,6 +1403,9 @@
 		    {
 			"$ref": "#/components/parameters/max"
 		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
 		    {
 			"$ref": "#/components/parameters/exacto"
 		    },
@@ -1384,6 +1497,9 @@
 		    {
 			"$ref": "#/components/parameters/max"
 		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
 		    {
 			"$ref": "#/components/parameters/exacto"
 		    },
@@ -1472,6 +1588,9 @@
 		    {
 			"$ref": "#/components/parameters/max"
 		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
 		    {
 			"$ref": "#/components/parameters/exacto"
 		    },
@@ -1557,6 +1676,9 @@
 		    {
 			"$ref": "#/components/parameters/max"
 		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
 		    {
 			"$ref": "#/components/parameters/exacto"
 		    },
