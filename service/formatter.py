@@ -336,7 +336,7 @@ def format_result_json(name, result, fmt):
     if result.iterable:
         return {
             name: result.entities,
-            N.RETURNED: len(result.entities),
+            N.QUANTITY: len(result.entities),
             N.TOTAL: result.total,
             N.OFFSET: result.offset
         }

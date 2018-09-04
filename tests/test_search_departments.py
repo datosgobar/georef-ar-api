@@ -271,7 +271,7 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         """Dada una query sin parámetros, se deben retornar los metadatos de
         resultados apropiados."""
         resp = self.get_response(return_value='full')
-        self.assertTrue(resp['devueltos'] == 10 and resp['inicio'] == 0)
+        self.assertTrue(resp['cantidad'] == 10 and resp['inicio'] == 0)
 
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""

@@ -60,7 +60,7 @@ EXACT = 'exacto'
 # Results
 RESULTS = 'resultados'
 TOTAL = 'total'
-RETURNED = 'devueltos'
+QUANTITY = 'cantidad'
 
 # Elasticsearch
 STATE_ID = 'provincia.id'

@@ -95,7 +95,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         """Dada una query sin parámetros, se deben retornar los metadatos de
         resultados apropiados."""
         resp = self.get_response(return_value='full')
-        self.assertTrue(resp['devueltos'] == 10 and resp['inicio'] == 0)
+        self.assertTrue(resp['cantidad'] == 10 and resp['inicio'] == 0)
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""

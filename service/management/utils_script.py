@@ -141,7 +141,6 @@ class GeorefIndex:
                                                   check_timestamp=False)
 
             if not ok:
-                # TODO: Agregar manejo de errores adicional
                 logger.error('No se pudo indexar utilizando backups.')
                 logger.error('')
 

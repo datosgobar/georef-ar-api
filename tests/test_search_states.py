@@ -87,7 +87,7 @@ class SearchStatesTest(SearchEntitiesTest):
         """Dada una query sin parámetros, se deben retornar los metadatos de
         resultados apropiados."""
         resp = self.get_response(return_value='full')
-        self.assertTrue(resp['total'] == 24 and resp['devueltos'] == 24)
+        self.assertTrue(resp['total'] == 24 and resp['cantidad'] == 24)
 
     def test_id_search(self):
         """La búsqueda por ID debe devolver la provincia correspondiente."""
