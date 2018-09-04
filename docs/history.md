@@ -1,5 +1,15 @@
 # Historial de versiones para `georef-ar-api`
 
+## 0.1.5
+- Mejora mensajes de errores para varios casos:
+  - Acceso a recursos inexistentes (por ejemplo: `/provincia`).
+  - Valores inválidos para parámetros con elección limitada de valores (por ejemplo, `orden`).
+  - Listas de operaciones bulk inválidas.
+  - Direcciones de calles malformadas.
+- Agrega API de paginado.
+  - Nuevo parámetro: `inicio`.
+  - Los resultados ahora incluyen tres metadatos: `cantidad`, `total` e `inicio`.
+
 ## 0.1.4
 - Se modificó la interpretación del parámetro `direccion` del recurso `/direcciones`:
   - Se ignoran ítems entre paréntesis y ocurrencias de "N°"
