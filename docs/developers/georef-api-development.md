@@ -1,4 +1,6 @@
-# Georef API - Guía de instalación para desarrolladores
+# Guía de instalación para desarrolladores
+
+En este documento se detallan los pasos a seguir si se desea configurar un servidor de API Georef propio.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->

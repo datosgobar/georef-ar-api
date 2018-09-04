@@ -14,7 +14,7 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
     <tr><td>Sgo. del Estero</td></tr>
 </table>
 
-`GET`[`apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero`](http://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
+`GET`[`https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero`](https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
 ```json
 {
     "provincias": [
@@ -27,7 +27,10 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
                 "lon": -63.252387
             }
         }
-    ]
+    ],
+    "cantidad": 1,
+    "total": 1,
+    "inicio": 0
 }
 ```
 
@@ -41,7 +44,7 @@ Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, pue
     <tr><td>-34.603633</td><td>-58.3837587</td></tr>
 </table>
 
-`GET`[`apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](http://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
+`GET`[`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
 ```json
 {
     "ubicacion": {
@@ -70,7 +73,7 @@ Finalmente, se puede utilizar la API como punto de referencia al momento de crea
 
 Listar las provincias de la República Argentina:
 
-`GET`[`apis.datos.gob.ar/georef/api/provincias?campos=id,nombre`](http://apis.datos.gob.ar/georef/api/provincias)
+`GET`[`https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre`](https://apis.datos.gob.ar/georef/api/provincias)
 ```json
 {
     "provincias": [
@@ -80,13 +83,16 @@ Listar las provincias de la República Argentina:
             "fuente": "IGN"
         },
 		{ ... } // 23 resultados omitidos
-    ]
+    ],
+    "cantidad": 24,
+    "total": 24,
+    "inicio": 0
 }
 ```
 
 Asumiendo que el usuario selecciona **Chaco** (ID: **22**), se ejecutaría la siguiente consulta para obtener el listado de municipios:
 
-`GET`[`apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100`](http://apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100)
+`GET`[`https://apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100`](https://apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100)
 ```json
 {
     "municipios": [
@@ -96,7 +102,10 @@ Asumiendo que el usuario selecciona **Chaco** (ID: **22**), se ejecutaría la si
             "fuente": "IGN"
         },
 		{ ... } // 67 resultados omitidos
-    ]
+    ],
+    "cantidad": 68,
+    "total": 68,
+    "inicio": 0
 }
 ```
 

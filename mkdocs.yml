@@ -19,6 +19,7 @@ nav:
     - Ambiente de desarrollo y deploy: developers/georef-api-development.md
     - Instalación de Python 3.6: developers/python3.6.md
     - Proceso de ETL y Datos: developers/georef-api-data.md
+    - Historial de versiones: history.md
 
 theme:
   name: readthedocs

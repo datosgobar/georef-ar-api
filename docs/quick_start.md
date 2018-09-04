@@ -21,7 +21,7 @@
 A continuación, se muestran algunos ejemplos de uso de la API, utilizando los recursos `GET`:
 
 ### Búsqueda de provincias
-`GET` [`http://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba`](http://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba)
+`GET` [`https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba`](https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba)
 ```
 {
     "provincias": [
@@ -34,12 +34,15 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
             },
             "nombre": "CÓRDOBA"
         }
-    ]
+    ],
+    "cantidad": 1,
+    "total": 1,
+    "inicio": 0
 }
 ```
 
 ### Búsqueda de departamentos
-`GET` [`http://apis.datos.gob.ar/georef/api/departamentos?provincia=jujuy&max=16`](http://apis.datos.gob.ar/georef/api/departamentos?provincia=jujuy&max=16)
+`GET` [`https://apis.datos.gob.ar/georef/api/departamentos?provincia=jujuy&max=16`](https://apis.datos.gob.ar/georef/api/departamentos?provincia=jujuy&max=16)
 ```
 {
     "departamentos": [
@@ -57,12 +60,15 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
             }
         },
         { ... } // 15 departamentos omitidos
-    ]
+    ],
+    "cantidad": 16,
+    "total": 16,
+    "inicio": 0
 }
 ```
 
 ### Búsqueda de municipios
-`GET` [`http://apis.datos.gob.ar/georef/api/municipios?departamento=graneros`](http://apis.datos.gob.ar/georef/api/municipios?departamento=graneros)
+`GET` [`https://apis.datos.gob.ar/georef/api/municipios?departamento=graneros`](https://apis.datos.gob.ar/georef/api/municipios?departamento=graneros)
 ```
 {
     "municipios": [
@@ -84,12 +90,15 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
             }
         },
         { ... } // 2 municipios omitidos
-    ]
+    ],
+    "cantidad": 3,
+    "total": 3,
+    "inicio": 0
 }
 ```
 
 ### Búsqueda de localidades
-`GET` [`http://apis.datos.gob.ar/georef/api/localidades?provincia=chubut&campos=nombre`](http://apis.datos.gob.ar/georef/api/localidades?provincia=chubut&campos=nombre)
+`GET` [`https://apis.datos.gob.ar/georef/api/localidades?provincia=chubut&campos=nombre`](https://apis.datos.gob.ar/georef/api/localidades?provincia=chubut&campos=nombre)
 ```
 {
     "localidades": [
@@ -99,12 +108,15 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
             "nombre": "PUERTO PIRAMIDE"
         },
         { ... } // 9 resultados omitidos
-    ]
+    ],
+    "cantidad": 10,
+    "total": 90,
+    "inicio": 0
 }
 ```
 
 ### Normalización de direcciones
-`GET` [`http://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida 1801`](http://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida%201801)
+`GET` [`https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida 1801`](https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida%201801)
 ```
 {
     "direcciones": [
@@ -125,12 +137,15 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
             "tipo": "CALLE"
         },
         { ... } // 9 resultados omitidos
-    ]
+    ],
+    "cantidad": 1,
+    "total": 13,
+    "inicio": 0
 }
 ```
 
 ### Entidades geográficas en un punto
-`GET` [`http://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](http://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
+`GET` [`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
 ```
 {
     "ubicacion": {
@@ -154,10 +169,10 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 ```
 
 ## Ejemplos de operaciones por lotes
-Todos los recursos de la API tienen una variante `POST`, que permite realizar varias consultas en una misma petición.
+Todos los recursos de la API tienen una variante `POST`, que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo.
 
 ### Búsqueda de municipios en lotes
-`POST` `http://apis.datos.gob.ar/georef/api/municipios`
+`POST` `https://apis.datos.gob.ar/georef/api/municipios`
 ```json
 {
     "municipios": [
@@ -169,7 +184,7 @@ Todos los recursos de la API tienen una variante `POST`, que permite realizar va
         {
             "nombre": "martin",
             "max": 1,
-            "provincia": "cordoba",
+            "provincia": "la pampa",
 			"aplanar": true
         }
     ]
@@ -186,7 +201,10 @@ Resultados:
                     "id": "060301",
                     "nombre": "General Belgrano"
                 }
-            ]
+            ],
+            "cantidad": 1,
+            "total": 8,
+            "inicio": 0
         },
         {
             "municipios": [
@@ -201,14 +219,17 @@ Resultados:
                     "provincia_id": "42",
                     "provincia_nombre": "La Pampa"
                 }
-            ]
+            ],
+            "cantidad": 1,
+            "total": 2,
+            "inicio": 0
         }
     ]
 }
 ```
 
 ### Normalización de direcciones en lotes
-`POST` `http://apis.datos.gob.ar/georef/api/direcciones`
+`POST` `https://apis.datos.gob.ar/georef/api/direcciones`
 ```json
 {
     "direcciones": [
@@ -220,7 +241,8 @@ Resultados:
         {
             "direccion": "corientes 4010",
             "max": 1,
-			"campos": "id, nombre, altura"
+			"campos": "id, nombre, altura",
+			"departamento": "General López"
         }
     ]
 }
@@ -237,17 +259,23 @@ Resultados:
                     "id": "0642701011435",
                     "nombre": "SANTA FE"
                 }
-            ]
+            ],
+            "cantidad": 1,
+            "total": 25,
+            "inicio": 0
         },
         {
             "direcciones": [
                 {
                     "altura": 4010,
                     "fuente": "INDEC",
-                    "id": "0656801001020",
+                    "id": "8204229000610",
                     "nombre": "CORRIENTES"
                 }
-            ]
+            ],
+            "cantidad": 1,
+            "total": 1,
+            "inicio": 0
         }
     ]
 }
