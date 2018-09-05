@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizdo el código para tomar
 # nuevas versiones de los archivos.
-FILE_VERSION = '2.0.0'
+FILE_VERSION = '4.0.0'
 
 SEPARATOR_WIDTH = 60
 ACTIONS = ['index', 'index_stats', 'run_sql']
@@ -85,14 +85,11 @@ def print_log_separator(l, message):
 
 
 class GeorefIndex:
-    def __init__(self, alias, filepath, backup_filepath, mapping,
-                 excludes=None, docs_key='entidades'):
+    def __init__(self, alias, filepath, backup_filepath, mapping):
         self.alias = alias
-        self.docs_key = docs_key
         self.filepath = filepath
         self.backup_filepath = backup_filepath
         self.mapping = mapping
-        self.excludes = excludes or []
 
     def fetch_data(self, filepath):
         data = None
@@ -154,10 +151,10 @@ class GeorefIndex:
 
         timestamp = data['timestamp']
         version = data['version']
-        docs = data[self.docs_key]
+        docs = data['datos']
 
-        logger.info('Versión de API:   {}'.format(FILE_VERSION))
-        logger.info('Versión de Datos: {}'.format(version))
+        logger.info('Versión de datos API: {}'.format(FILE_VERSION))
+        logger.info('Versión de datos ETL: {}'.format(version))
         logger.info('')
 
         if version.split('.')[0] != FILE_VERSION.split('.')[0]:
@@ -289,13 +286,6 @@ class GeorefIndex:
             return None
         return list(es.indices.get_alias(name=self.alias).keys())[0]
 
-    def filter_doc(self, doc):
-        return {
-            key: doc[key]
-            for key in doc
-            if key not in self.excludes
-        }
-
     def bulk_update_generator(self, docs, index):
         """Crea un generador de operaciones 'create' para Elasticsearch a
         partir de una lista de documentos a indexar.
@@ -305,9 +295,7 @@ class GeorefIndex:
             index (str): Nombre del índice.
 
         """
-        for original_doc in docs:
-            doc = self.filter_doc(original_doc)
-
+        for doc in docs:
             action = {
                 '_op_type': 'create',
                 '_type': '_doc',
@@ -370,9 +358,7 @@ def run_index(app, es, forced):
         GeorefIndex(alias='calles',
                     filepath=app.config['STREETS_FILE'],
                     backup_filepath=os.path.join(backups_dir, 'calles.json'),
-                    mapping=MAP_STREET,
-                    excludes=['codigo_postal'],
-                    docs_key='vias')
+                    mapping=MAP_STREET)
     ]
 
     for index in indices:

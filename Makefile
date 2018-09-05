@@ -50,7 +50,7 @@ test_mock: check_config_file
 
 test_custom: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m unittest tests/$(TEST_FILES) # Variable de entorno definida por el usuario
+	python -m unittest discover -p $(TEST_FILES) # Variable de entorno definida por el usuario
 
 test_all: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
