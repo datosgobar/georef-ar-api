@@ -56,8 +56,16 @@ class ParamParsingTest(TestCase):
         """No se deberían aceptar operaciones bulk que no sean de
         tipo lista."""
         body = {
-            'departamentos': "prueba"
+            'departamentos': 'foobar'
         }
+
+        self.assert_errors_match('/departamentos', [
+            {(T.INVALID_BULK.value, 'departamentos')}
+        ], body=body)
+
+    def test_bulk_invalid_root_element(self):
+        """El elemento JSON de raíz debe ser un diccionario."""
+        body = ['foobar']
 
         self.assert_errors_match('/departamentos', [
             {(T.INVALID_BULK.value, 'departamentos')}

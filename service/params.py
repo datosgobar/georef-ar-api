@@ -713,7 +713,9 @@ class EndpointParameters():
                                            'querystring')}
             ])
 
-        body_params = (body or {}).get(body_key)
+        body_params = None
+        if isinstance(body, dict):
+            body_params = body.get(body_key)
 
         if not body_params or not isinstance(body_params, list):
             # No aceptar operaciones bulk que no sean listas, y no
