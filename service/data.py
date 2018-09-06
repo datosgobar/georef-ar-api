@@ -315,8 +315,10 @@ def build_streets_search(street_id=None, road_name=None, department=None,
         s = s.query(build_match_query(N.ROAD_TYPE, road_type, fuzzy=True))
 
     if number:
-        s = s.query(build_range_query(N.START_R, '<=', number))
-        s = s.query(build_range_query(N.END_L, '>=', number))
+        s = s.query(build_range_query(N.START_R, '<=', number) |
+                    build_range_query(N.START_L, '<=', number))
+        s = s.query(build_range_query(N.END_L, '>=', number) |
+                    build_range_query(N.END_R, '>=', number))
 
     if department:
         if department.isdigit():

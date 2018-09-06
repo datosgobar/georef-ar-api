@@ -573,6 +573,38 @@ def process_street(request):
         return formatter.create_internal_error_response()
 
 
+def street_extents(door_nums, number):
+    """Dados los datos de alturas de una calle, y una altura recibida en una
+    consulta, retorna los extremos de la calle que contienen la altura.
+    Idealmente, se utilizaría siempre start_r y end_l, pero al contar a veces
+    con datos incompletos, se flexibiliza la elección de extremos para poder
+    geolocalizar más direcciones.
+
+    Args:
+        door_nums (dict): Datos de alturas de la calle.
+        number (int): Altura recibida en una consulta.
+
+    Returns:
+        tuple (int, int): Altura inicial y final de la calle que contienen la
+            altura especificada. Si la altura no está contenida dentro de
+            ninguna combinación de extremos, devolver (None, None).
+
+    """
+    start_r = door_nums[N.START][N.RIGHT]
+    start_l = door_nums[N.START][N.LEFT]
+    end_r = door_nums[N.END][N.RIGHT]
+    end_l = door_nums[N.END][N.LEFT]
+
+    combinations = [(start_r, end_l), (start_l, end_r), (start_r, end_r),
+                    (start_l, end_l)]
+
+    for start, end in combinations:
+        if start <= number <= end:
+            return start, end
+
+    return None, None
+
+
 def build_addresses_result(result, query, source):
     """Construye resultados para una consulta al endpoint de direcciones.
     Modifica los resultados contenidos en la lista 'result', agregando
@@ -597,16 +629,16 @@ def build_addresses_result(result, query, source):
                 street[N.FULL_NAME] = ','.join(parts)
 
             door_nums = street.pop(N.DOOR_NUM)
-            start_r = door_nums[N.START][N.RIGHT]
-            end_l = door_nums[N.END][N.LEFT]
+            start, end = street_extents(door_nums, number)
             geom = street.pop(N.GEOM)
 
             if N.DOOR_NUM in fields:
                 street[N.DOOR_NUM] = number
 
-            if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
+            if (N.LOCATION_LAT in fields or N.LOCATION_LON in fields) and \
+               start is not None and end is not None:
                 loc = data.street_number_location(connection, geom, number,
-                                                  start_r, end_l)
+                                                  start, end)
                 street[N.LOCATION] = loc
 
             street[N.SOURCE] = source

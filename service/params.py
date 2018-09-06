@@ -411,9 +411,10 @@ class AddressParameter(Parameter):
             # texto. Priorizar los primeros resultados válidos encontrados.
             match = re.search(r'^(.+?)\s+([0-9]+)$', part)
             if match:
-                name, num = match.groups()
+                name, num_str = match.groups()
+                num = int(num_str)
 
-                if int(num) > 0:
+                if num > 0:
                     address = name, num
                     break
                 else:
