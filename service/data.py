@@ -157,8 +157,8 @@ def run_searches(es, index, searches):
 
 
 def search_entities(es, index, params_list):
-    """Busca entidades políticas (localidades, departamentos, o provincias)
-    según parámetros de una o más consultas.
+    """Busca entidades políticas (localidades, departamentos, provincias o
+    municipios) según parámetros de una o más consultas.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.

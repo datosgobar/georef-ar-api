@@ -392,7 +392,7 @@ class AddressParameter(Parameter):
 
     def _parse_value(self, val):
         # 1) Remover ítems entre paréntesis e indicadores de número (N°, n°)
-        val = re.sub(r'\(.*?\)|[nN][°º]', '', val.strip())
+        val = re.sub(r'\(.*?\)|[nN][°º]', '', val.strip('\'" '))
 
         parts = [
             # 3) Normalizar espacios

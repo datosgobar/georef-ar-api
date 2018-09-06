@@ -89,7 +89,7 @@ $ source venv/bin/activate
 
 #### 3.3 Instalar dependencias con `pip`:
 ```bash
-(venv) $ pip3 install -r requirements.txt
+(venv) $ pip3 install -r requirements.txt -r requirements-dev.txt
 ```
 
 #### 3.4 Copiar el archivo de configuración:
