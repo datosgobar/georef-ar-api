@@ -22,7 +22,7 @@
 import requests
 import urllib
 
-API_BASE_URL = "http://apis.datos.gob.ar/georef/api/"
+API_BASE_URL = "https://apis.datos.gob.ar/georef/api/"
 
 def get_similar(endpoint, nombre, **kwargs):
     kwargs["nombre"] = nombre
@@ -155,7 +155,7 @@ Todas las consultas a la API en formato CSV, se pueden leer fácilmente a un `pa
 ```python
 import pandas as pd
 
-provincias = pd.read_csv("http://apis.datos.gob.ar/georef/api/provincias?formato=csv")
+provincias = pd.read_csv("https://apis.datos.gob.ar/georef/api/provincias?formato=csv")
 ```
 
 ```

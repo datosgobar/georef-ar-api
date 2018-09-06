@@ -45,7 +45,7 @@ Finalmente, para consumir la API de Georef, adjuntar el token generado en las ca
 ```python
 >>> import requests
 >>> headers = { 'Authorization': 'Bearer {}'.format(token) }
->>> resp = requests.get('http://apis.datos.gob.ar/georef/api/provincias', headers=headers)
+>>> resp = requests.get('https://apis.datos.gob.ar/georef/api/provincias', headers=headers)
 >>> resp.json()
 {
 	'provincias': [

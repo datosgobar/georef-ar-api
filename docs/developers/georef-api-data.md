@@ -38,15 +38,16 @@ Los datos utilizados por Georef API fueron obtenidos a través de un proceso de 
 - Enlace: [Portal de geoservicios de INDEC](https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas)
 
 ## Archivos
-A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `2.0.0`.
+A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `4.0.0`.
 
 ### Provincias
 El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
-	"timestamp": "1532435389", // Fecha de creación de los datos,
-	"version": "2.0.0", // Versión de archivo
-	"entidades": [ // Lista de entidades
+	"timestamp": "1532435389", // Timestamp de creación
+	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "4.0.0", // Versión de archivo
+	"datos": [ // Lista de entidades
 		{
 			"id": "90", // ID de provincia
 			"nombre": "Tucumán", // Nombre de provincia
@@ -68,9 +69,10 @@ El archivo de datos de provincias debe tener formato JSON. Su esquema de datos d
 El archivo de datos de departamentos debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
-	"timestamp": "1532435389", // Fecha de creación de los datos
-	"version": "2.0.0", // Versión de archivo
-	"entidades": [ // Lista de entidades
+	"timestamp": "1532435389", // Timestamp de creación
+	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "4.0.0", // Versión de archivo
+	"datos": [ // Lista de entidades
 		{
 			"id": "06427", // ID del departamento
 			"nombre": "La Matanza", // Nombre del departamento
@@ -96,9 +98,10 @@ El archivo de datos de departamentos debe tener formato JSON. Su esquema de dato
 El archivo de datos de municipios debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
-	"timestamp": "1532435389", // Fecha de creación de los datos
-	"version": "2.0.0", // Versión de archivo
-	"entidades": [ // Lista de entidades
+	"timestamp": "1532435389", // Timestamp de creación
+	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "4.0.0", // Versión de archivo
+	"datos": [ // Lista de entidades
 		{
 			"id": "060105", // ID del municipio
 			"nombre": "Bolívar", // Nombre del municipio
@@ -128,9 +131,10 @@ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos d
 El archivo de datos de localidades debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
-	"timestamp": "1532435389", // Fecha de creación de los datos
-	"version": "2.0.0", // Versión de archivo
-	"entidades": [ // Lista de entidades
+	"timestamp": "1532435389", // Timestamp de creación
+	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "4.0.0", // Versión de archivo
+	"datos": [ // Lista de entidades
 		{
 			"id": "06189080000", // ID del asentamiento
 			"nombre": "San Roman", // Nombre del asentamiento
@@ -165,9 +169,10 @@ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos 
 El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
-	"timestamp": "1532435389", // Fecha de creación de los datos
-	"version": "2.0.0", // Versión de archivo
-	"vias": [ // Lista de vías de circulación
+	"timestamp": "1532435389", // Timestamp de creación
+	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "4.0.0", // Versión de archivo
+	"datos": [ // Lista de vías de circulación
 		{
 			"nomenclatura": "LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires", // Nomenclatura: 'nombre, departamento, provincia'
 			"id": "0202101007345", // ID de la vía de circulación
