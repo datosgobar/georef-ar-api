@@ -1,5 +1,9 @@
 # Historial de versiones
 
+## 0.1.6
+- Actualiza proceso de indexación para utilizar datos de ETL versión `4.0.0`.
+- Modifica manejo de altura en recurso `/direcciones`. La nueva versión del recurso intenta ubicar altura dentro de los extremos de la calle tomando en consideración que los datos pueden no siempre estar completos (o ser ideales). Este cambio también afecta la efectividad de la geolocalización de direcciones.
+
 ## 0.1.5
 - Mejora mensajes de errores para varios casos:
 	- Acceso a recursos inexistentes (por ejemplo: `/provincia`).
