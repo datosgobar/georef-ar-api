@@ -1,6 +1,6 @@
 import unittest
 import random
-from . import SearchEntitiesTest
+from . import SearchEntitiesTest, asciifold
 from service import formatter
 
 COMMON_ADDRESS = 'Corrientes 1000'
@@ -112,6 +112,30 @@ class SearchAddressesTest(SearchEntitiesTest):
         """La búsqueda debe fallar si la altura es cero."""
         response = self.app.get(self.endpoint + '?direccion=Corrientes 0')
         self.assertEqual(response.status_code, 400)
+
+    def test_name_ordering(self):
+        """Los resultados deben poder ser ordenados por nombre."""
+        resp = self.get_response({
+            'direccion': 'santa fe 1000',
+            'orden': 'nombre',
+            'max': 1000
+        })
+
+        ordered = [r['nombre'] for r in resp]
+        expected = sorted(ordered, key=asciifold)
+        self.assertListEqual(ordered, expected)
+
+    def test_id_ordering(self):
+        """Los resultados deben poder ser ordenados por ID."""
+        resp = self.get_response({
+            'direccion': 'corrientes 1000',
+            'orden': 'id',
+            'max': 1000
+        })
+
+        ordered = [r['id'] for r in resp]
+        expected = sorted(ordered)
+        self.assertListEqual(ordered, expected)
 
     def test_address_exact_match(self):
         """La búsqueda exacta debe devolver las direcciones
@@ -488,6 +512,11 @@ class SearchAddressesTest(SearchEntitiesTest):
         next(resp)
         row = next(resp)
         self.assertTrue(row[-3] == '' and row[-2] == '')
+
+    def test_geojson_format(self):
+        """Se debería poder obtener resultados en formato
+        GEOJSON (sin parámetros)."""
+        self.assert_valid_geojson({'direccion': COMMON_ADDRESS})
 
 
 if __name__ == '__main__':

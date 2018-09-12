@@ -1,7 +1,7 @@
 import unittest
 from service import formatter
 import random
-from . import SearchEntitiesTest
+from . import SearchEntitiesTest, asciifold
 
 
 class SearchStreetsTest(SearchEntitiesTest):
@@ -46,6 +46,28 @@ class SearchStreetsTest(SearchEntitiesTest):
             'tipo'
         ])
         self.assertListEqual(fields, sorted(data.keys()))
+
+    def test_name_ordering(self):
+        """Los resultados deben poder ser ordenados por nombre."""
+        resp = self.get_response({
+            'orden': 'nombre',
+            'max': 1000
+        })
+
+        ordered = [r['nombre'] for r in resp]
+        expected = sorted(ordered, key=asciifold)
+        self.assertListEqual(ordered, expected)
+
+    def test_id_ordering(self):
+        """Los resultados deben poder ser ordenados por ID."""
+        resp = self.get_response({
+            'orden': 'id',
+            'max': 1000
+        })
+
+        ordered = [r['id'] for r in resp]
+        expected = sorted(ordered)
+        self.assertListEqual(ordered, expected)
 
     def test_pagination(self):
         """Los resultados deberían poder ser paginados."""

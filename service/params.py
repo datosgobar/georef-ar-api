@@ -872,6 +872,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ROAD_TYPE: StrParameter(),
     N.STATE: StrOrIdParameter(id_length=2),
     N.DEPT: StrOrIdParameter(id_length=5),
+    N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.DOOR_NUM,
                                           N.SOURCE],
@@ -883,7 +884,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv'])
+    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
 }).with_set_validator(
     N.MAX,
     IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
@@ -898,6 +899,7 @@ PARAMS_STREETS = EndpointParameters(shared_params={
     N.ROAD_TYPE: StrParameter(),
     N.STATE: StrOrIdParameter(id_length=2),
     N.DEPT: StrOrIdParameter(id_length=5),
+    N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
                                optionals=[N.START_R, N.START_L, N.END_R,

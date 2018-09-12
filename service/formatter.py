@@ -301,13 +301,13 @@ def create_geojson_response(result):
         if N.LAT in item and N.LON in item:
             lat = item.pop(N.LAT)
             lon = item.pop(N.LON)
-        elif N.CENTROID in item:
-            centroid = item.pop(N.CENTROID)
-            lat = centroid[N.LAT]
-            lon = centroid[N.LON]
+        elif N.CENTROID in item or N.LOCATION in item:
+            loc = item.pop(N.CENTROID, None) or item.pop(N.LOCATION)
+            lat = loc[N.LAT]
+            lon = loc[N.LON]
 
         if lat and lon:
-            point = geojson.Point((lat, lon))
+            point = geojson.Point((lon, lat))
             features.append(geojson.Feature(geometry=point, properties=item))
 
     return make_response(jsonify(geojson.FeatureCollection(features)))

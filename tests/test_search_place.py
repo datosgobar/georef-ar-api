@@ -218,6 +218,29 @@ class SearchPlaceTest(SearchEntitiesTest):
 
         self.assertTrue(validations and all(validations))
 
+    def test_geojson_coordinates(self):
+        """Dada una respuesta en formato GeoJSON, se debería poder tomar las
+        coordenadas de cualquier Feature y encontrar la misma entidad vía el
+        recurso /ubicacion."""
+        name = random.choice(['tucuman', 'buenos aires', 'cordoba',
+                              'entre rios', 'santa cruz', 'la pampa'])
+
+        resp = self.get_response(
+            params={
+                'nombre': name,
+                'formato': 'geojson'
+            },
+            endpoint='/api/provincias',
+            return_value='full'
+        )
+
+        state_id = resp['features'][0]['properties']['id']
+        state_coordinates = resp['features'][0]['geometry']['coordinates']
+        lon, lat = state_coordinates[0], state_coordinates[1]
+
+        place = self.get_response({'lat': lat, 'lon': lon})
+        self.assertEqual(place['provincia']['id'], state_id)
+
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""
         status = self.get_response(method='POST', body={},

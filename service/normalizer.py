@@ -458,7 +458,8 @@ def build_street_query_format(parsed_params):
         N.EXACT: 'exact',
         N.FIELDS: 'fields',
         N.ROAD_TYPE: 'road_type',
-        N.OFFSET: 'offset'
+        N.OFFSET: 'offset',
+        N.ORDER: 'order'
     }, ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
@@ -668,7 +669,8 @@ def build_address_query_format(parsed_params):
         N.STATE: 'state',
         N.EXACT: 'exact',
         N.ROAD_TYPE: 'road_type',
-        N.OFFSET: 'offset'
+        N.OFFSET: 'offset',
+        N.ORDER: 'order'
     }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])
 
     query['fields'] = parsed_params[N.FIELDS] + [N.GEOM, N.START_R, N.END_L]

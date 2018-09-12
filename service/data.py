@@ -276,8 +276,8 @@ def build_entity_search(entity_id=None, name=None, state=None,
 
 
 def build_streets_search(street_id=None, road_name=None, department=None,
-                         state=None, road_type=None, max=None, fields=None,
-                         exact=False, number=None, offset=0):
+                         state=None, road_type=None, max=None, order=None,
+                         fields=None, exact=False, number=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
@@ -289,6 +289,7 @@ def build_streets_search(street_id=None, road_name=None, department=None,
         state (str): ID o nombre de provincia para filtrar (opcional).
         road_type (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
+        order (str): Campo por el cual ordenar los resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
@@ -331,6 +332,11 @@ def build_streets_search(street_id=None, road_name=None, department=None,
             s = s.query(build_match_query(N.STATE_ID, state))
         else:
             s = s.query(build_name_query(N.STATE_NAME, state, exact))
+
+    if order:
+        if order == N.NAME:
+            order += N.EXACT_SUFFIX
+        s = s.sort(order)
 
     s = s.source(include=fields)
     return s[offset: offset + (max or DEFAULT_MAX)]
