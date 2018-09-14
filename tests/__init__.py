@@ -109,6 +109,20 @@ class SearchEntitiesTest(TestCase):
             not isinstance(v, dict) for v in resp[0].values()
         ]) and resp)
 
+    def assert_fields_set_equals(self, set_name, fields, params=None):
+        if not params:
+            params = {}
+
+        params['campos'] = set_name
+        entity_a = self.get_response(params)[0]
+        formatter.flatten_dict(entity_a, sep='.')
+
+        params['campos'] = ', '.join(fields)
+        entity_b = self.get_response(params)[0]
+        formatter.flatten_dict(entity_b, sep='.')
+
+        self.assertListEqual(sorted(entity_a.keys()), sorted(entity_b.keys()))
+
     def assert_name_search_id_matches(self, term_matches, exact=False):
         results = []
         for _, query in term_matches:

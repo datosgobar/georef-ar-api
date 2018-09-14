@@ -134,9 +134,11 @@ class Parameter:
         self._default = default
 
         if choices and \
-           default is not None \
-           and not self._value_in_choices(default):
-            raise ValueError(strings.DEFAULT_INVALID_CHOICE)
+           default is not None:
+            try:
+                self._check_value_in_choices(default)
+            except InvalidChoiceException:
+                raise ValueError(strings.DEFAULT_INVALID_CHOICE)
 
     def get_value(self, val):
         """Toma un valor 'val' recibido desde una request HTTP, y devuelve el
@@ -162,8 +164,8 @@ class Parameter:
 
         parsed = self._parse_value(val)
 
-        if self._choices and not self._value_in_choices(parsed):
-            raise InvalidChoiceException(strings.INVALID_CHOICE)
+        if self._choices:
+            self._check_value_in_choices(parsed)
 
         return parsed
 
@@ -186,7 +188,7 @@ class Parameter:
         # de valores.
         pass
 
-    def _value_in_choices(self, val):
+    def _check_value_in_choices(self, val):
         """Comprueba que un valor esté dentro de los valores permitidos del
         objeto Parameter. El valor ya debería estar parseado y tener el tipo
         apropiado.
@@ -195,12 +197,13 @@ class Parameter:
             val: Valor a comprobar si está contenido dentro de los valores
                 permitidos.
 
-        Returns:
-            bool: Verdadero si el valor está contenido dentro de los valores
-                permitidos
+        Raises:
+            InvalidChoiceException: si el valor no está contenido dentro de los
+                valores permitidos.
 
         """
-        return val in self._choices
+        if val not in self._choices:
+            raise InvalidChoiceException(strings.INVALID_CHOICE)
 
     def _parse_value(self, val):
         """Parsea un valor de tipo string y devuelve el resultado con el tipo
@@ -296,40 +299,61 @@ class BoolParameter(Parameter):
         return val is not None
 
 
-class StrListParameter(Parameter):
-    """Representa un parámetro de tipo lista de strings.
+class FieldListParameter(Parameter):
+    """Representa un parámetro de tipo lista de campos.
 
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
     nuevamente el método '_parse_value' para implementar lógica de parseo y
-    validación propias de StrListParameter. Se define también el método
-    _value_in_choices para modificar su comportamiento original.
+    validación propias de FieldListParameter. Se define también el método
+    _check_value_in_choices para modificar su comportamiento original.
+
+    Attributes:
+        self._basic (set): Conjunto de campos mínimos, siempre son incluídos
+            en cualquier lista de campos, incluso si el usuario no los
+            especificó.
+        self._standard (set): Conjunto de campos estándar. Se retorna este
+            conjunto de parámetros como default cuando no se especifica ningún
+            conjunto de parámetros.
+        self._complete (set): Conjunto de campos completos. Este conjunto
+            contiene todos los campos posibles a especificar.
 
     """
 
-    def __init__(self, required=False, constants=None, optionals=None):
-        self._constants = set(constants) if constants else set()
-        optionals = set(optionals) if optionals else set()
-        all_values = self._constants | optionals
+    def __init__(self, basic=None, standard=None, complete=None):
+        self._basic = set(basic or [])
+        self._standard = set(standard or []) | self._basic
+        self._complete = set(complete or []) | self._standard
 
-        super().__init__(required, list(all_values), all_values)
+        super().__init__(False, list(self._standard), self._complete)
 
-    def _value_in_choices(self, val):
+    def _check_value_in_choices(self, val):
         # La variable val es de tipo set o list, self._choices es de tipo set:
-        # devolver falso si existen elementos en val que no están en
+        # Lanzar una excepción si existen elementos en val que no están en
         # self._choices.
-        return not (set(val) - self._choices)
+        if set(val) - self._complete:
+            raise InvalidChoiceException(strings.FIELD_LIST_INVALID_CHOICE)
 
     def _parse_value(self, val):
         if not val:
-            raise ValueError(strings.STRLIST_EMPTY)
+            raise ValueError(strings.FIELD_LIST_EMPTY)
 
-        parts = val.split(',')
-        received = set(part.strip() for part in parts)
+        parts = [part.strip() for part in val.split(',')]
+
+        # Manejar casos especiales: basico, estandar y completo
+        if len(parts) == 1 and parts[0] in [N.BASIC, N.STANDARD, N.COMPLETE]:
+            if parts[0] == N.BASIC:
+                return list(self._basic)
+            elif parts[0] == N.STANDARD:
+                return list(self._standard)
+            elif parts[0] == N.COMPLETE:
+                return list(self._complete)
+
+        received = set(parts)
         if len(parts) != len(received):
-            raise ValueError(strings.STRLIST_REPEATED)
+            raise ValueError(strings.FIELD_LIST_REPEATED)
 
-        # Siempre se agregan los valores constantes
-        return list(self._constants | received)
+        # Siempre se agregan los valores básicos
+        return list(self._basic | received)
 
 
 class IntParameter(Parameter):
@@ -780,8 +804,8 @@ PARAMS_STATES = EndpointParameters(shared_params={
     N.NAME: StrParameter(),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.C_LAT, N.C_LON]),
+    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.SOURCE],
+                                 standard=[N.C_LAT, N.C_LON]),
     N.MAX: IntParameter(default=24, lower_limit=1, upper_limit=MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
@@ -801,9 +825,9 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.STATE: StrOrIdParameter(id_length=2),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.C_LAT, N.C_LON, N.STATE_ID,
-                                          N.STATE_NAME]),
+    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.SOURCE],
+                                 standard=[N.C_LAT, N.C_LON, N.STATE_ID,
+                                           N.STATE_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
@@ -824,10 +848,10 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.DEPT: StrOrIdParameter(id_length=5),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.C_LAT, N.C_LON, N.STATE_ID,
-                                          N.STATE_NAME, N.DEPT_ID,
-                                          N.DEPT_NAME]),
+    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.SOURCE],
+                                 standard=[N.C_LAT, N.C_LON, N.STATE_ID,
+                                           N.STATE_NAME, N.DEPT_ID,
+                                           N.DEPT_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
@@ -849,11 +873,11 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
     N.MUN: StrOrIdParameter(id_length=6),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.C_LAT, N.C_LON, N.STATE_ID,
-                                          N.STATE_NAME, N.DEPT_ID, N.DEPT_NAME,
-                                          N.MUN_ID, N.MUN_NAME,
-                                          N.LOCALITY_TYPE]),
+    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.SOURCE],
+                                 standard=[N.C_LAT, N.C_LON, N.STATE_ID,
+                                           N.STATE_NAME, N.DEPT_ID,
+                                           N.DEPT_NAME, N.MUN_ID, N.MUN_NAME,
+                                           N.LOCALITY_TYPE]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
@@ -874,12 +898,11 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.DEPT: StrOrIdParameter(id_length=5),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.DOOR_NUM,
-                                          N.SOURCE],
-                               optionals=[N.STATE_ID, N.STATE_NAME, N.DEPT_ID,
-                                          N.DEPT_NAME, N.ROAD_TYPE,
-                                          N.FULL_NAME, N.LOCATION_LAT,
-                                          N.LOCATION_LON]),
+    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.DOOR_NUM, N.SOURCE],
+                                 standard=[N.STATE_ID, N.STATE_NAME, N.DEPT_ID,
+                                           N.DEPT_NAME, N.ROAD_TYPE,
+                                           N.FULL_NAME, N.LOCATION_LAT,
+                                           N.LOCATION_LON]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
@@ -901,11 +924,11 @@ PARAMS_STREETS = EndpointParameters(shared_params={
     N.DEPT: StrOrIdParameter(id_length=5),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.ID, N.NAME, N.SOURCE],
-                               optionals=[N.START_R, N.START_L, N.END_R,
-                                          N.END_L, N.STATE_ID, N.STATE_NAME,
-                                          N.DEPT_ID, N.DEPT_NAME, N.FULL_NAME,
-                                          N.ROAD_TYPE]),
+    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.SOURCE],
+                                 standard=[N.START_R, N.START_L, N.END_R,
+                                           N.END_L, N.STATE_ID, N.STATE_NAME,
+                                           N.DEPT_ID, N.DEPT_NAME, N.FULL_NAME,
+                                           N.ROAD_TYPE]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
@@ -924,9 +947,9 @@ PARAMS_PLACE = EndpointParameters(shared_params={
     N.LAT: FloatParameter(required=True),
     N.LON: FloatParameter(required=True),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: StrListParameter(constants=[N.STATE_ID, N.STATE_NAME, N.SOURCE],
-                               optionals=[N.DEPT_ID, N.DEPT_NAME, N.MUN_ID,
-                                          N.MUN_NAME, N.LAT, N.LON])
+    N.FIELDS: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.SOURCE],
+                                 standard=[N.DEPT_ID, N.DEPT_NAME, N.MUN_ID,
+                                           N.MUN_NAME, N.LAT, N.LON])
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson'])
 })

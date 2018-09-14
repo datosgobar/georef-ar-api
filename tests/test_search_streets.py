@@ -115,6 +115,26 @@ class SearchStreetsTest(SearchEntitiesTest):
 
         self.assertListEqual(fields_lists, fields_results)
 
+    def test_basic_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'basico'."""
+        self.assert_fields_set_equals('basico', ['id', 'fuente', 'nombre'])
+
+    def test_standard_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'estandar'."""
+        self.assert_fields_set_equals('estandar',
+                                      ['id', 'fuente', 'nombre',
+                                       'altura.fin.derecha',
+                                       'altura.fin.izquierda',
+                                       'altura.inicio.derecha',
+                                       'altura.inicio.izquierda',
+                                       'departamento.id',
+                                       'departamento.nombre',
+                                       'nomenclatura',
+                                       'provincia.id', 'provincia.nombre',
+                                       'tipo'])
+
     def assert_street_search_id_matches(self, term_matches, exact=False):
         results = []
         for code, query in term_matches:

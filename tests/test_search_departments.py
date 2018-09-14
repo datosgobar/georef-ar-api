@@ -100,6 +100,19 @@ class SearchDepartmentsTest(SearchEntitiesTest):
 
         self.assertListEqual(fields_lists, fields_results)
 
+    def test_basic_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'basico'."""
+        self.assert_fields_set_equals('basico', ['id', 'fuente', 'nombre'])
+
+    def test_standard_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'estandar'."""
+        self.assert_fields_set_equals('estandar',
+                                      ['id', 'fuente', 'nombre',
+                                       'centroide.lat', 'centroide.lon',
+                                       'provincia.id', 'provincia.nombre'])
+
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
         data = [

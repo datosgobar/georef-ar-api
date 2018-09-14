@@ -110,6 +110,11 @@ def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
         d (dict): Diccionario a aplanar.
         max_depth (int): Profundidad máxima a alcanzar.
 
+    Raises:
+        RuntimeError: cuando se alcanza la profundidad máxima. Se agrega esta
+            medida de seguridad en caso de tener un diccionario demasiado
+            profundo, o un diccionario con referencias cíclicas.
+
     """
     if max_depth <= 0:
         raise RuntimeError("Profundidad máxima alcanzada.")

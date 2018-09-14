@@ -56,6 +56,9 @@ MAX = 'max'
 OFFSET = 'inicio'
 FORMAT = 'formato'
 EXACT = 'exacto'
+BASIC = 'basico'
+STANDARD = 'estandar'
+COMPLETE = 'completo'
 
 # Results
 RESULTS = 'resultados'

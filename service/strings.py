@@ -11,8 +11,6 @@ ADDRESS_FORMAT = 'La dirección debe tener el siguiente formato: <nombre de \
 calle> <altura>.'
 ADDRESS_INVALID_NUM = 'La dirección debe tener una altura positiva.'
 STRING_EMPTY = 'El campo de texto no tiene contenido.'
-STRLIST_EMPTY = 'La lista no contiene valores.'
-STRLIST_REPEATED = 'La lista contiene valores repetidos.'
 INT_VAL_ERROR = 'El parámetro no es un número entero.'
 FLOAT_VAL_ERROR = 'El parámetro no es un número real.'
 INVALID_CHOICE = 'El parámetro debe consistir en una lista de ítems separados \
@@ -36,3 +34,7 @@ INT_VAL_BIG_GLOBAL = 'La suma de parámetros {} debe ser menor o igual \
 que {}.'
 NOT_FOUND = 'No se encontró la URL especificada.'
 ID_PARAM_INVALID = 'El ID debe ser numérico y de longitud {}.'
+FIELD_LIST_EMPTY = 'La lista no contiene valores.'
+FIELD_LIST_REPEATED = 'La lista contiene valores repetidos.'
+FIELD_LIST_INVALID_CHOICE = INVALID_CHOICE + ' Alternativamente, se pueden \
+especificar los valores \'basico\', \'estandar\' o \'completo\'.'
