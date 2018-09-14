@@ -12,4 +12,4 @@ with app.app_context():
     # Crear parsers de parámetros utilizando configuración de Flask app
     import service.params
 
-import service.routes  # noqa: E402,F401
+import service.routes  # noqa: E402,F401 pylint: disable=wrong-import-position

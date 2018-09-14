@@ -1,16 +1,3 @@
-from .. import app
-from .. import normalizer
-
-from elasticsearch import helpers
-from .elasticsearch_params import DEFAULT_SETTINGS
-from .elasticsearch_mappings import MAP_STATE
-from .elasticsearch_mappings import MAP_DEPT
-from .elasticsearch_mappings import MAP_MUNI
-from .elasticsearch_mappings import MAP_SETTLEMENT
-from .elasticsearch_mappings import MAP_STREET
-from . import download
-
-import psycopg2
 import argparse
 import os
 import urllib.parse
@@ -22,6 +9,21 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
 from io import StringIO
+
+from elasticsearch import helpers
+import psycopg2
+import requests
+
+from .. import app
+from .. import normalizer
+from .elasticsearch_params import DEFAULT_SETTINGS
+from .elasticsearch_mappings import MAP_STATE
+from .elasticsearch_mappings import MAP_DEPT
+from .elasticsearch_mappings import MAP_MUNI
+from .elasticsearch_mappings import MAP_SETTLEMENT
+from .elasticsearch_mappings import MAP_STREET
+from . import download
+
 
 loggerStream = StringIO()
 logger = logging.getLogger(__name__)
@@ -36,13 +38,13 @@ ACTIONS = ['index', 'index_stats', 'run_sql']
 TIMEOUT = 500
 
 
-def setup_logger(l, loggerStream):
+def setup_logger(l, stream):
     l.setLevel(logging.INFO)
 
     stdoutHandler = logging.StreamHandler()
     stdoutHandler.setLevel(logging.INFO)
 
-    strHandler = logging.StreamHandler(loggerStream)
+    strHandler = logging.StreamHandler(stream)
     strHandler.setLevel(logging.INFO)
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s',
@@ -102,7 +104,7 @@ class GeorefIndex:
             try:
                 content = download.download(filepath)
                 data = json.loads(content.decode())
-            except Exception:
+            except requests.exceptions.RequestException:
                 logger.warning('No se pudo descargar el archivo.')
                 logger.warning('')
         else:
@@ -113,7 +115,7 @@ class GeorefIndex:
             try:
                 with open(filepath) as f:
                     data = json.load(f)
-            except Exception:
+            except (OSError, ValueError):
                 logger.warning('No se pudo acceder al archivo JSON.')
                 logger.warning('')
 
@@ -326,7 +328,7 @@ def send_index_email(config, forced, env, log):
                })
 
 
-def run_index(app, es, forced):
+def run_index(es, forced):
     backups_dir = app.config['BACKUPS_DIR']
     os.makedirs(backups_dir, exist_ok=True)
 
@@ -364,7 +366,7 @@ def run_index(app, es, forced):
     for index in indices:
         try:
             index.create_or_reindex(es, forced)
-        except Exception as e:
+        except Exception:  # pylint: disable=broad-except
             logger.error('')
             logger.exception('Ocurrió un error al indexar:')
             logger.error('')
@@ -395,7 +397,7 @@ def run_info(es):
         logger.info(line)
 
 
-def run_sql(app, script):
+def run_sql(script):
     try:
         conn = psycopg2.connect(host=app.config['SQL_DB_HOST'],
                                 dbname=app.config['SQL_DB_NAME'],
@@ -433,12 +435,12 @@ def main():
             es = normalizer.get_elasticsearch()
 
             if args.mode == 'index':
-                run_index(app, es, args.forced)
+                run_index(es, args.forced)
             else:
                 run_info(es)
 
         elif args.mode == 'run_sql':
-            run_sql(app, args.script)
+            run_sql(args.script)
 
 
 if __name__ == '__main__':

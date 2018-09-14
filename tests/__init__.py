@@ -1,9 +1,9 @@
-from unittest import TestCase
-from service import app, formatter
+import csv
 import json
 import urllib
-import csv
+from unittest import TestCase
 import geojson
+from service import app, formatter
 
 
 def asciifold(text):
@@ -20,6 +20,11 @@ def asciifold(text):
 
 
 class SearchEntitiesTest(TestCase):
+    def __init__(self, *args, **kwargs):
+        self.endpoint = None
+        self.entity = None
+        super().__init__(*args, **kwargs)
+
     def setUp(self):
         app.testing = True
         self.app = app.test_client()
@@ -47,7 +52,8 @@ class SearchEntitiesTest(TestCase):
 
         if return_value == 'status':
             return response.status_code
-        elif return_value in ['data', 'full']:
+
+        if return_value in ['data', 'full']:
             if response.status_code != 200:
                 raise Exception(
                     'La petición no devolvió código 200: {}'.format(
@@ -57,17 +63,19 @@ class SearchEntitiesTest(TestCase):
                 if fmt == 'json':
                     key = entity if method == 'GET' else 'resultados'
                     return json.loads(response.data)[key]
-                elif fmt == 'csv':
+
+                if fmt == 'csv':
                     return csv.reader(response.data.decode().splitlines(),
                                       delimiter=formatter.CSV_SEP,
                                       quotechar=formatter.CSV_ESCAPE,
                                       lineterminator=formatter.CSV_NEWLINE)
-                else:
-                    raise ValueError('Formato desconocido.')
-            elif return_value == 'full':
+
+                raise ValueError('Formato desconocido.')
+
+            if return_value == 'full':
                 return json.loads(response.data)
-        else:
-            raise ValueError('Tipo de retorno desconocido.')
+
+        raise ValueError('Tipo de retorno desconocido.')
 
     def assert_unknown_param_returns_400(self):
         response = self.app.get(self.endpoint + '?foo=bar')

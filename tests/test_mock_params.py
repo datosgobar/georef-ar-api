@@ -1,7 +1,7 @@
+from random import choice
 from unittest import TestCase
 from service import app
 from service.params import ParamErrorType as T
-from random import choice
 
 ENDPOINTS = [
     '/provincias',
@@ -18,6 +18,12 @@ class ParamParsingTest(TestCase):
 
         self.app = app.test_client()
         self.url_base = '/api/v1.0'
+
+    def test_404_response(self):
+        """Se debería devolver un error 404 con contenido JSON en caso de
+        intentar acceder a un recurso inexistente."""
+        resp = self.app.get('/api/foobar')
+        self.assertTrue(resp.status_code == 404 and 'errores' in resp.json)
 
     def test_bulk_no_json(self):
         """No se deberían aceptar operaciones bulk cuando el body HTTP
@@ -149,10 +155,8 @@ class ParamParsingTest(TestCase):
             (T.REPEATED.value, 'nombre')
         })
 
-    def test_invalid_location(self):
+    def test_invalid_param_location(self):
         """El parámetro 'formato' solo se puede especificar vía querystring."""
-        """Los parámetros con valores inválidos deberían generar errores
-        vía JSON."""
         body = {
             'municipios': [
                 {

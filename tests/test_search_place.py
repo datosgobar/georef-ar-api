@@ -3,6 +3,7 @@ import unittest
 from service import formatter
 from . import SearchEntitiesTest
 
+
 PLACES = [
     ('-27.27416', '-66.75292', {
         'provincia': '10',

@@ -4,10 +4,10 @@ Contiene funciones que ejecutan consultas a índices de Elasticsearch, o a la
 base de datos PostgreSQL.
 """
 
+import logging
 import elasticsearch
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
-import logging
 import psycopg2.pool
 from service import names as N
 
@@ -389,14 +389,14 @@ def build_name_query(field, value, exact=False):
     if exact:
         field += N.EXACT_SUFFIX
         return build_match_query(field, value, False)
-    else:
-        match_query = build_match_query(field, value, True, operator='and')
 
-        if len(value.strip()) >= MIN_AUTOCOMPLETE_CHARS:
-            prefix_query = build_match_phrase_prefix_query(field, value)
-            return prefix_query | match_query
-        else:
-            return match_query
+    match_query = build_match_query(field, value, True, operator='and')
+
+    if len(value.strip()) >= MIN_AUTOCOMPLETE_CHARS:
+        prefix_query = build_match_phrase_prefix_query(field, value)
+        return prefix_query | match_query
+
+    return match_query
 
 
 def build_match_phrase_prefix_query(field, value):

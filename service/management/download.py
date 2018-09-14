@@ -1,5 +1,5 @@
-import requests
 import time
+import requests
 
 DEFAULT_TRIES = 1
 RETRY_DELAY = 1
@@ -27,7 +27,7 @@ def download(url, tries=DEFAULT_TRIES, retry_delay=RETRY_DELAY,
         try:
             return requests.get(url, timeout=try_timeout, proxies=proxies,
                                 verify=verify).content
-        except Exception as e:
+        except requests.exceptions.RequestException as e:
             download_exception = e
 
             if i < tries - 1:

@@ -4,9 +4,9 @@ Declara las rutas de los recursos que expone la API e
 invoca las funciones que procesan dichos recursos.
 """
 
-from service import app, normalizer, formatter
-from flask import request, Blueprint
 from functools import wraps
+from flask import request, Blueprint
+from service import app, normalizer, formatter
 
 
 def disable_cache(f):
@@ -30,7 +30,7 @@ def disable_cache(f):
 
 
 @app.errorhandler(404)
-def handle_404(e):
+def handle_404(_):
     return formatter.create_404_error_response(app.url_map)
 
 

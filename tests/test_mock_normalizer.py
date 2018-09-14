@@ -1,13 +1,12 @@
-import elasticsearch
-import psycopg2
 import logging
-
+import random
 from unittest import TestCase
 from unittest import mock
-import random
+import elasticsearch
+import psycopg2
+from flask import current_app
 from service import app
 
-from flask import current_app
 
 ENDPOINTS = [
     '/calles',

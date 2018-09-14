@@ -4,11 +4,11 @@ Contiene funciones que manejan la lógica de procesamiento
 de los recursos que expone la API.
 """
 
+import logging
+from contextlib import contextmanager
+from flask import current_app
 from service import data, params, formatter
 from service import names as N
-from flask import current_app
-from contextlib import contextmanager
-import logging
 
 logger = logging.getLogger('georef')
 
@@ -169,13 +169,15 @@ def get_index_source(index):
     """
     if index in [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES]:
         return N.SOURCE_IGN
-    elif index == N.LOCALITIES:
+
+    if index == N.LOCALITIES:
         return N.SOURCE_BAHRA
-    elif index == N.STREETS:
+
+    if index == N.STREETS:
         return N.SOURCE_INDEC
-    else:
-        raise ValueError(
-            'No se pudo determinar la fuente de: {}'.format(index))
+
+    raise ValueError(
+        'No se pudo determinar la fuente de: {}'.format(index))
 
 
 def translate_keys(d, translations, ignore=None):
@@ -334,9 +336,9 @@ def process_entity(request, name, param_parser, key_translations):
         if request.method == 'GET':
             return process_entity_single(request, name, param_parser,
                                          key_translations)
-        else:
-            return process_entity_bulk(request, name, param_parser,
-                                       key_translations)
+
+        return process_entity_bulk(request, name, param_parser,
+                                   key_translations)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: {}'.format(name))
@@ -566,8 +568,8 @@ def process_street(request):
     try:
         if request.method == 'GET':
             return process_street_single(request)
-        else:
-            return process_street_bulk(request)
+
+        return process_street_bulk(request)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: calles')
@@ -778,8 +780,8 @@ def process_address(request):
     try:
         if request.method == 'GET':
             return process_address_single(request)
-        else:
-            return process_address_bulk(request)
+
+        return process_address_bulk(request)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: direcciones')
@@ -983,8 +985,8 @@ def process_place(request):
     try:
         if request.method == 'GET':
             return process_place_single(request)
-        else:
-            return process_place_bulk(request)
+
+        return process_place_bulk(request)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: ubicacion')

@@ -1,8 +1,8 @@
 import random
 import unittest
+from service import formatter
 from . import SearchEntitiesTest, asciifold
 from .test_search_states import STATES
-from service import formatter
 
 
 LOCALITIES = [

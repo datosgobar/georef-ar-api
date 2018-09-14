@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime
 import logging
-import requests
 import os
+import requests
 
 
 DOMAIN = os.environ.get('DOMAIN_GEOREF_API')
@@ -140,7 +138,7 @@ def main():
         queries_length_requested = len(QUERIES) * QUERIES_AVG_REQUESTED
         print('-- Iniciando test de consultas. Total de consultas: {}.'
               .format(queries_length_requested))
-        for i in range(0, QUERIES_AVG_REQUESTED):
+        for _ in range(0, QUERIES_AVG_REQUESTED):
             query_ok = 0
             query_error = 0
             for query in QUERIES:

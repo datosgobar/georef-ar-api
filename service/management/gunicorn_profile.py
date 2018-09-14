@@ -31,7 +31,7 @@ def profile_enabled(req):
     return 'X-Gunicorn-Profile'.upper() in [h[0] for h in req.headers]
 
 
-def when_ready(server):
+def when_ready(_):
     if not os.path.exists(PROFILE_DIR):
         os.makedirs(PROFILE_DIR)
 
@@ -42,7 +42,7 @@ def pre_request(worker, req):
         worker.profile.enable()
 
 
-def post_request(worker, req, environ, resp):
+def post_request(worker, req, *_):
     if not profile_enabled(req):
         return
 

@@ -57,10 +57,12 @@ test_all: check_config_file
 	python -m unittest
 
 code_style:
-	flake8 tests service
+	flake8 tests/ service/
+	pylint tests/ service/
 
-doctoc: ## generate table of contents, doctoc command line tool required
-        ## https://github.com/thlorenz/doctoc
+# Generar tablas de contenidos, se requiere el comando 'doctoc'
+# https://github.com/thlorenz/doctoc
+doctoc:
 	doctoc --maxlevel 3 --github --title " " docs/quick_start.md
 	bash fix_github_links.sh docs/quick_start.md
 	doctoc --maxlevel 3 --github --title " " docs/spreadsheet_integration.md

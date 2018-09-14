@@ -1,7 +1,8 @@
 import unittest
 import random
-from . import SearchEntitiesTest, asciifold
 from service import formatter
+from . import SearchEntitiesTest, asciifold
+
 
 COMMON_ADDRESS = 'Corrientes 1000'
 

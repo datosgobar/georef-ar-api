@@ -1,6 +1,6 @@
 import unittest
-from service import formatter
 import random
+from service import formatter
 from . import SearchEntitiesTest, asciifold
 
 

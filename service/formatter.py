@@ -4,10 +4,10 @@ Contiene funciones que establecen la presentación de los datos obtenidos desde
 las consultas a los índices o a la base de datos.
 """
 
+from flask import make_response, jsonify, Response
+import geojson
 from service import strings
 from service import names as N
-import geojson
-from flask import make_response, jsonify, Response
 
 CSV_SEP = ','
 CSV_ESCAPE = '"'
@@ -345,8 +345,8 @@ def format_result_json(name, result, fmt):
             N.TOTAL: result.total,
             N.OFFSET: result.offset
         }
-    else:
-        return {name: result.first_entity()}
+
+    return {name: result.first_entity()}
 
 
 def create_json_response_single(name, result, fmt):
@@ -479,19 +479,27 @@ def create_ok_response(name, result, fmt):
     Returns:
         flask.Response: Respuesta HTTP 200.
 
+    Raises:
+        RuntimeError: Si se especifica un formato desconocido, o si se
+            especifica formato CSV para datos no iterables.
+
     """
     format_result_fields(result, fmt)
 
     if fmt[N.FORMAT] == 'json':
         return create_json_response_single(name, result, fmt)
-    elif fmt[N.FORMAT] == 'csv':
+
+    if fmt[N.FORMAT] == 'csv':
         if not result.iterable:
             raise RuntimeError(
                 'Se requieren datos iterables para crear una respuesta CSV.')
 
         return create_csv_response(name, result, fmt)
-    elif fmt[N.FORMAT] == 'geojson':
+
+    if fmt[N.FORMAT] == 'geojson':
         return create_geojson_response(result)
+
+    raise RuntimeError('Formato desconocido.')
 
 
 def create_ok_response_bulk(name, results, formats):

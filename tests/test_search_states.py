@@ -1,7 +1,7 @@
-from . import SearchEntitiesTest, asciifold
 import random
-from service import formatter
 import unittest
+from service import formatter
+from . import SearchEntitiesTest, asciifold
 
 
 STATES = [

@@ -1,7 +1,7 @@
 import random
 import unittest
-from . import SearchEntitiesTest, asciifold
 from service import formatter
+from . import SearchEntitiesTest, asciifold
 from .test_search_states import STATES
 
 

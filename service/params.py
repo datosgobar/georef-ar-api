@@ -8,7 +8,6 @@ import re
 from enum import Enum, unique
 from collections import defaultdict
 from flask import current_app
-
 import service.names as N
 from service import strings
 
@@ -24,6 +23,7 @@ class ParameterParsingException(Exception):
 
     def __init__(self, errors):
         self._errors = errors
+        super().__init__()
 
     @property
     def errors(self):
@@ -277,9 +277,8 @@ class StrOrIdParameter(Parameter):
 
     def _parse_value(self, val):
         if val.isdigit():
-            return self._id_param._parse_value(val)
-        else:
-            return self._str_param._parse_value(val)
+            return self._id_param.get_value(val)
+        return self._str_param.get_value(val)
 
 
 class BoolParameter(Parameter):
@@ -343,9 +342,9 @@ class FieldListParameter(Parameter):
         if len(parts) == 1 and parts[0] in [N.BASIC, N.STANDARD, N.COMPLETE]:
             if parts[0] == N.BASIC:
                 return list(self._basic)
-            elif parts[0] == N.STANDARD:
+            if parts[0] == N.STANDARD:
                 return list(self._standard)
-            elif parts[0] == N.COMPLETE:
+            if parts[0] == N.COMPLETE:
                 return list(self._complete)
 
         received = set(parts)
@@ -680,7 +679,7 @@ class EndpointParameters():
         # Comenzar con un diccionario de errores vacío por cada consulta.
         errors_list = [{}] * len(results)
 
-        for name, param in self._post_body_params.items():
+        for name in self._post_body_params.keys():
             validators = self._set_validators[name]
 
             for validator in validators:
