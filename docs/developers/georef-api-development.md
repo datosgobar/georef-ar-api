@@ -155,6 +155,21 @@ La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteri
 - Modificación de analizadores de texto de Elasticsearch
 - Modificación de listado de sinónimos
 
+
+Cualquiera de las dos opciones también permite indexar datos selectivamente: se debe especificar el nombre del índice a crear/re-indexar. Por ejemplo:
+```bash
+(venv) $ make index INDEX_NAME=localidades
+(venv) $ make index_forced INDEX_NAME=calles
+```
+
+Los nombres de los índices disponibles son:
+
+- `provincias`
+- `departamentos`
+- `municipios`
+- `localidades`
+- `calles`
+
 ### 7. Correr API 
 #### Entornos de desarrollo
 Correr la API de Georef utilizando un servidor de prueba (no apto para producción):

@@ -1,4 +1,5 @@
 CFG_PATH ?= config/georef.cfg
+INDEX_NAME ?= all
 UTILS_PY = service.management.utils_script
 
 .PHONY: docs
@@ -16,11 +17,11 @@ check_config_file:
 
 index: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m index
+	python -m $(UTILS_PY) -m index -n $(INDEX_NAME)
 
 index_forced: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m index -f
+	python -m $(UTILS_PY) -m index -f -n $(INDEX_NAME)
 
 print_index_stats: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \

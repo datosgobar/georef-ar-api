@@ -88,10 +88,14 @@ def print_log_separator(l, message):
 
 class GeorefIndex:
     def __init__(self, alias, filepath, backup_filepath, mapping):
-        self.alias = alias
-        self.filepath = filepath
-        self.backup_filepath = backup_filepath
-        self.mapping = mapping
+        self._alias = alias
+        self._filepath = filepath
+        self._backup_filepath = backup_filepath
+        self._mapping = mapping
+
+    @property
+    def alias(self):
+        return self._alias
 
     def fetch_data(self, filepath):
         data = None
@@ -123,10 +127,10 @@ class GeorefIndex:
 
     def create_or_reindex(self, es, forced=False):
         print_log_separator(logger,
-                            'Creando/reindexando {}'.format(self.alias))
+                            'Creando/reindexando {}'.format(self._alias))
         logger.info('')
 
-        data = self.fetch_data(self.filepath)
+        data = self.fetch_data(self._filepath)
         ok = self.create_or_reindex_with_data(es, data,
                                               check_timestamp=not forced)
 
@@ -135,7 +139,7 @@ class GeorefIndex:
             logger.warning('Intentando nuevamente con backup...')
             logger.warning('')
 
-            data = self.fetch_data(self.backup_filepath)
+            data = self.fetch_data(self._backup_filepath)
             ok = self.create_or_reindex_with_data(es, data,
                                                   check_timestamp=False)
 
@@ -165,7 +169,7 @@ class GeorefIndex:
             logger.info('')
             return False
 
-        new_index = '{}-{}-{}'.format(self.alias,
+        new_index = '{}-{}-{}'.format(self._alias,
                                       uuid.uuid4().hex[:8], timestamp)
         old_index = self.get_old_index(es)
 
@@ -193,7 +197,7 @@ class GeorefIndex:
 
     def write_backup(self, data):
         logger.info('Creando archivo de backup...')
-        with open(self.backup_filepath, 'w') as f:
+        with open(self._backup_filepath, 'w') as f:
             json.dump(data, f)
         logger.info('Archivo creado.')
         logger.info('')
@@ -203,7 +207,7 @@ class GeorefIndex:
         logger.info('')
         es.indices.create(index=index, body={
             'settings': DEFAULT_SETTINGS,
-            'mappings': self.mapping
+            'mappings': self._mapping
         })
 
     def insert_documents(self, es, index, docs):
@@ -247,14 +251,14 @@ class GeorefIndex:
             alias_ops.append({
                 'remove': {
                     'index': old_index,
-                    'alias': self.alias
+                    'alias': self._alias
                 }
             })
 
         alias_ops.append({
             'add': {
                 'index': index,
-                'alias': self.alias
+                'alias': self._alias
             }
         })
 
@@ -284,9 +288,9 @@ class GeorefIndex:
         return new_date > old_date
 
     def get_old_index(self, es):
-        if not es.indices.exists_alias(name=self.alias):
+        if not es.indices.exists_alias(name=self._alias):
             return None
-        return list(es.indices.get_alias(name=self.alias).keys())[0]
+        return list(es.indices.get_alias(name=self._alias).keys())[0]
 
     def bulk_update_generator(self, docs, index):
         """Crea un generador de operaciones 'create' para Elasticsearch a
@@ -328,7 +332,7 @@ def send_index_email(config, forced, env, log):
                })
 
 
-def run_index(es, forced):
+def run_index(es, forced, name='all'):
     backups_dir = app.config['BACKUPS_DIR']
     os.makedirs(backups_dir, exist_ok=True)
 
@@ -364,12 +368,13 @@ def run_index(es, forced):
     ]
 
     for index in indices:
-        try:
-            index.create_or_reindex(es, forced)
-        except Exception:  # pylint: disable=broad-except
-            logger.error('')
-            logger.exception('Ocurrió un error al indexar:')
-            logger.error('')
+        if name in ['all', index.alias]:
+            try:
+                index.create_or_reindex(es, forced)
+            except Exception:  # pylint: disable=broad-except
+                logger.error('')
+                logger.exception('Ocurrió un error al indexar:')
+                logger.error('')
 
     logger.info('')
 
@@ -423,6 +428,10 @@ def main():
                         choices=ACTIONS)
     parser.add_argument('-s', '--script', metavar='<path>',
                         type=argparse.FileType())
+    parser.add_argument('-n', '--name', metavar='<index name>',
+                        choices=['provincias', 'departamentos', 'municipios',
+                                 'localidades', 'calles', 'all'],
+                        default='all')
     parser.add_argument('-f', '--forced', action='store_true')
     parser.add_argument('-i', '--info', action='store_true',
                         help='Mostrar información de índices y salir.')
@@ -435,7 +444,7 @@ def main():
             es = normalizer.get_elasticsearch()
 
             if args.mode == 'index':
-                run_index(es, args.forced)
+                run_index(es, args.forced, args.name)
             else:
                 run_info(es)
 

@@ -9,8 +9,8 @@ install:
 env:
 - CFG_PATH=config/georef.example.cfg
 script:
-- make test_mock
 - make code_style
+- make test_mock
 deploy:
   - provider: script
     skip_cleanup: true
