@@ -190,6 +190,13 @@ class ParamParsingTest(TestCase):
             {(T.INVALID_CHOICE.value, 'campos')}
         ], body=body)
 
+    def test_field_set_and_specific(self):
+        """No se debería aceptar un conjunto de campos (por ejemplo, estandar)
+        y campos específicos en una misma consulta."""
+        self.assert_errors_match('/provincias?campos=estandar,id', {
+            (T.INVALID_CHOICE.value, 'campos')
+        })
+
     def test_empty_string_param(self):
         """Los parámtros de tipo string no deberían aceptar strings
         vacíos."""

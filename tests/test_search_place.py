@@ -50,25 +50,61 @@ class SearchPlaceTest(SearchEntitiesTest):
         fields = sorted([
             'provincia',
             'departamento',
-            'fuente',
             'municipio',
             'lat',
             'lon'
         ])
         self.assertListEqual(fields, sorted(data.keys()))
 
+    def test_basic_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'basico'."""
+        place = PLACES[0]
+        self.assert_fields_set_equals('basico', ['provincia.id',
+                                                 'provincia.nombre',
+                                                 'lat', 'lon'],
+                                      {'lat': place[0], 'lon': place[1]},
+                                      iterable=False)
+
+    def test_standard_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'estandar'."""
+        place = PLACES[0]
+
+        self.assert_fields_set_equals('estandar',
+                                      ['provincia.id', 'provincia.nombre',
+                                       'lat', 'lon', 'departamento.id',
+                                       'departamento.nombre',
+                                       'municipio.id', 'municipio.nombre'],
+                                      {'lat': place[0], 'lon': place[1]},
+                                      iterable=False)
+
+    def test_complete_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'completo'."""
+        place = PLACES[0]
+
+        self.assert_fields_set_equals('completo',
+                                      ['provincia.id', 'provincia.nombre',
+                                       'lat', 'lon', 'departamento.id',
+                                       'departamento.nombre',
+                                       'municipio.id', 'municipio.nombre',
+                                       'fuente'],
+                                      {'lat': place[0], 'lon': place[1]},
+                                      iterable=False)
+
     def test_filter_results_fields(self):
         """Los campos de la ubicación devuelta deben ser filtrables."""
         place = PLACES[0]
         fields_lists = [
-            ['fuente', 'provincia.id', 'provincia.nombre'],
-            ['fuente', 'lat', 'provincia.id', 'provincia.nombre'],
-            ['fuente', 'lon', 'provincia.id', 'provincia.nombre'],
+            ['provincia.id', 'provincia.nombre', 'lat', 'lon'],
             ['departamento.id', 'fuente', 'lat', 'lon', 'provincia.id',
              'provincia.nombre'],
-            ['fuente', 'lon', 'municipio.id', 'provincia.id',
-             'provincia.nombre']
+            ['lon', 'municipio.id', 'provincia.id',
+             'provincia.nombre', 'lat', 'fuente']
         ]
+        fields_lists = [sorted(l) for l in fields_lists]
+
         fields_results = []
 
         for fields in fields_lists:

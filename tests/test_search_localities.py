@@ -81,7 +81,6 @@ class SearchLocalityTest(SearchEntitiesTest):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
         fields = sorted([
-            'fuente',
             'id',
             'centroide',
             'nombre',
@@ -115,12 +114,23 @@ class SearchLocalityTest(SearchEntitiesTest):
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""
-        self.assert_fields_set_equals('basico', ['id', 'fuente', 'nombre'])
+        self.assert_fields_set_equals('basico', ['id', 'nombre'])
 
     def test_standard_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'estandar'."""
         self.assert_fields_set_equals('estandar',
+                                      ['id', 'nombre', 'centroide.lat',
+                                       'centroide.lon', 'provincia.id',
+                                       'provincia.nombre', 'departamento.id',
+                                       'departamento.nombre',
+                                       'municipio.id', 'municipio.nombre',
+                                       'tipo'])
+
+    def test_complete_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'completo'."""
+        self.assert_fields_set_equals('completo',
                                       ['id', 'fuente', 'nombre',
                                        'centroide.lat', 'centroide.lon',
                                        'provincia.id', 'provincia.nombre',
@@ -444,8 +454,7 @@ class SearchLocalityTest(SearchEntitiesTest):
                                        'departamento_nombre',
                                        'municipio_id',
                                        'municipio_nombre',
-                                       'localidad_tipo',
-                                       'localidad_fuente'])
+                                       'localidad_tipo'])
 
 
 if __name__ == '__main__':

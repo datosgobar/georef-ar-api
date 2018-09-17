@@ -37,7 +37,6 @@ class SearchStreetsTest(SearchEntitiesTest):
         data = self.get_response({'max': 1})[0]
         fields = sorted([
             'departamento',
-            'fuente',
             'id',
             'altura',
             'nombre',
@@ -118,12 +117,27 @@ class SearchStreetsTest(SearchEntitiesTest):
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""
-        self.assert_fields_set_equals('basico', ['id', 'fuente', 'nombre'])
+        self.assert_fields_set_equals('basico', ['id', 'nombre'])
 
     def test_standard_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'estandar'."""
         self.assert_fields_set_equals('estandar',
+                                      ['id', 'nombre',
+                                       'altura.fin.derecha',
+                                       'altura.fin.izquierda',
+                                       'altura.inicio.derecha',
+                                       'altura.inicio.izquierda',
+                                       'departamento.id',
+                                       'departamento.nombre',
+                                       'nomenclatura',
+                                       'provincia.id', 'provincia.nombre',
+                                       'tipo'])
+
+    def test_complete_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'completo'."""
+        self.assert_fields_set_equals('completo',
                                       ['id', 'fuente', 'nombre',
                                        'altura.fin.derecha',
                                        'altura.fin.izquierda',
@@ -311,8 +325,7 @@ class SearchStreetsTest(SearchEntitiesTest):
                                        'provincia_id',
                                        'provincia_nombre',
                                        'departamento_id',
-                                       'departamento_nombre',
-                                       'calle_fuente'])
+                                       'departamento_nombre'])
 
 
 if __name__ == '__main__':

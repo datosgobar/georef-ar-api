@@ -97,7 +97,7 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['id', 'centroide', 'nombre', 'fuente'])
+        fields = sorted(['id', 'centroide', 'nombre'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
@@ -119,14 +119,21 @@ class SearchStatesTest(SearchEntitiesTest):
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""
-        self.assert_fields_set_equals('basico', ['id', 'fuente', 'nombre'])
+        self.assert_fields_set_equals('basico', ['id', 'nombre'])
 
     def test_standard_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'estandar'."""
         self.assert_fields_set_equals('estandar',
-                                      ['id', 'fuente', 'nombre',
-                                       'centroide.lat', 'centroide.lon'])
+                                      ['id', 'nombre', 'centroide.lat',
+                                       'centroide.lon'])
+
+    def test_complete_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'completo'."""
+        self.assert_fields_set_equals('completo',
+                                      ['id', 'nombre', 'centroide.lat',
+                                       'centroide.lon', 'fuente'])
 
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
@@ -386,8 +393,7 @@ class SearchStatesTest(SearchEntitiesTest):
         headers = next(resp)
         self.assertListEqual(headers, ['provincia_id', 'provincia_nombre',
                                        'provincia_centroide_lat',
-                                       'provincia_centroide_lon',
-                                       'provincia_fuente'])
+                                       'provincia_centroide_lon'])
 
     def test_geojson_format(self):
         """Se debería poder obtener resultados en formato

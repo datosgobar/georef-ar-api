@@ -9,7 +9,7 @@ install:
 env:
 - CFG_PATH=config/georef.example.cfg
 script:
-- make code_style
+- make code_checks
 - make test_mock
 deploy:
   - provider: script

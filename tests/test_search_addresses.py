@@ -74,12 +74,40 @@ class SearchAddressesTest(SearchEntitiesTest):
             'id',
             'nombre',
             'nomenclatura',
-            'fuente',
             'provincia',
             'tipo',
             'ubicacion'
         ])
         self.assertListEqual(fields, sorted(data.keys()))
+
+    def test_basic_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'basico'."""
+        self.assert_fields_set_equals('basico', ['id', 'nombre', 'altura'],
+                                      {'direccion': COMMON_ADDRESS})
+
+    def test_standard_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'estandar'."""
+        self.assert_fields_set_equals('estandar',
+                                      ['id', 'nombre', 'altura',
+                                       'departamento.id',
+                                       'departamento.nombre',
+                                       'nomenclatura', 'tipo',
+                                       'provincia.id', 'provincia.nombre',
+                                       'ubicacion.lat', 'ubicacion.lon'],
+                                      {'direccion': COMMON_ADDRESS})
+
+    def test_complete_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'completo'."""
+        self.assert_fields_set_equals('completo',
+                                      ['id', 'fuente', 'nombre', 'tipo',
+                                       'altura', 'departamento.id',
+                                       'departamento.nombre', 'nomenclatura',
+                                       'provincia.id', 'provincia.nombre',
+                                       'ubicacion.lat', 'ubicacion.lon'],
+                                      {'direccion': COMMON_ADDRESS})
 
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""
@@ -498,8 +526,7 @@ class SearchAddressesTest(SearchEntitiesTest):
                                        'departamento_id',
                                        'departamento_nombre',
                                        'direccion_lat',
-                                       'direccion_lon',
-                                       'calle_fuente'])
+                                       'direccion_lon'])
 
     def test_csv_empty_value(self):
         """Un valor vacío (None) debería estar representado como '' en CSV."""
@@ -510,9 +537,10 @@ class SearchAddressesTest(SearchEntitiesTest):
             'max': 1
         }, fmt='csv')
 
-        next(resp)
+        header = next(resp)
         row = next(resp)
-        self.assertTrue(row[-3] == '' and row[-2] == '')
+        self.assertTrue(row[header.index('direccion_lat')] == '' and
+                        row[header.index('direccion_lon')] == '')
 
     def test_geojson_format(self):
         """Se debería poder obtener resultados en formato

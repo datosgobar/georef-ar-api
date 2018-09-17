@@ -57,7 +57,7 @@ test_all: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
 	python -m unittest
 
-code_style:
+code_checks:
 	flake8 tests/ service/
 	pylint tests/ service/
 
