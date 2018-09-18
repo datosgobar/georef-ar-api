@@ -4,6 +4,7 @@ Contiene funciones que establecen la presentación de los datos obtenidos desde
 las consultas a los índices o a la base de datos.
 """
 
+import csv
 from flask import make_response, jsonify, Response
 import geojson
 from service import strings
@@ -99,6 +100,57 @@ ENDPOINT_CSV_FIELDS = {
     N.STREETS: STREETS_CSV_FIELDS,
     N.ADDRESSES: ADDRESSES_CSV_FIELDS
 }
+
+
+class CSVLineWriter:
+    """La clase CSVWriter permite escribir contenido CSV de a líneas, sin la
+    necesidad de un objeto file-like como intermediario.
+
+    Attributes:
+        _dummy_writer (CSVLineWriter.DummyWriter): Objeto file-like utilizado
+            como parámetro 'csvfile' para el csv.writer interno.
+        _csv_writer (csv.writer): Objeto writer utilizado para darle formato a
+            las filas provistas.
+
+    """
+
+    class DummyWriter:
+        """La clase DummyWriter simplemente implementa el método write() como
+        una asignación a una variable interna. Esto permite leer el contenido
+        escrito en cualquier momento.
+
+        """
+
+        def __init__(self):
+            self._content = None
+
+        def write(self, content):
+            self._content = content
+
+        def getvalue(self):
+            return self._content
+
+    def __init__(self, *args, **kwargs):
+        """Construye un objeto CSVLineWriter.
+
+        Los argumentos recibidos se envían a el objeto csv.writer interno.
+
+        """
+        self._dummy_writer = CSVLineWriter.DummyWriter()
+        self._csv_writer = csv.writer(self._dummy_writer, *args, **kwargs)
+
+    def row_to_str(self, row):
+        """Retorna una fila de valores como string en formato CSV.
+
+        Args:
+            row (list): Lista de valores.
+
+        Returns:
+            str: Valores como fila en formato CSV.
+
+        """
+        self._csv_writer.writerow(row)
+        return self._dummy_writer.getvalue()
 
 
 def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
@@ -250,6 +302,10 @@ def create_csv_response(name, result, fmt):
 
     """
     def csv_generator():
+        csv_writer = CSVLineWriter(delimiter=CSV_SEP,
+                                   lineterminator=CSV_NEWLINE,
+                                   quotechar=CSV_ESCAPE)
+
         keys = []
         field_names = []
         for original_field, csv_field_name in fmt[N.CSV_FIELDS]:
@@ -257,30 +313,13 @@ def create_csv_response(name, result, fmt):
                 keys.append(original_field.replace('.', FLAT_SEP))
                 field_names.append(FLAT_SEP.join(csv_field_name))
 
-        yield '{}{}'.format(CSV_SEP.join(field_names), CSV_NEWLINE)
+        yield csv_writer.row_to_str(field_names)
 
         for match in result.entities:
             flatten_dict(match, max_depth=3)
+            values = [match[key] for key in keys]
 
-            values = []
-            for key in keys:
-                original_val = match[key]
-                val = str(original_val) if original_val is not None else ''
-
-                escape = False
-                if CSV_SEP in val or CSV_NEWLINE in val:
-                    escape = True
-
-                if CSV_ESCAPE in val:
-                    val = val.replace(CSV_ESCAPE, CSV_ESCAPE * 2)
-                    escape = True
-
-                if escape:
-                    values.append('{}{}{}'.format(CSV_ESCAPE, val, CSV_ESCAPE))
-                else:
-                    values.append(val)
-
-            yield '{}{}'.format(CSV_SEP.join(values), CSV_NEWLINE)
+            yield csv_writer.row_to_str(values)
 
     resp = Response(csv_generator(), mimetype='text/csv')
     return make_response((resp, {
