@@ -1,6 +1,6 @@
 # georef-api Swagger UI
 
-Página Swagger UI para la documentación OpenAPI de `georef-api`. La documentación se puede acceder visitando [este enlace](https://datosgobar.github.io/georef-api/).
+Página Swagger UI para la documentación OpenAPI de `georef-api`. La documentación se puede acceder visitando [este enlace](https://datosgobar.github.io/georef-api/open_api).
 
 ## Archivos
 
@@ -12,8 +12,9 @@ Página Swagger UI para la documentación OpenAPI de `georef-api`. La documentac
 
 1. Clonar la rama `gh-pages` del repositorio:
 ```bash
-$ git clone -b gh-pages git@github.com:datosgobar/georef-api.git
-$ cd georef-api
+$ git clone -b gh-pages git@github.com:datosgobar/georef-ar-api.git
+$ cd georef-ar-api
+$ cd open_api
 ```
 
 2. Instalar las dependencias:

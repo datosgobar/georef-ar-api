@@ -13,9 +13,8 @@ const DisableTryItOutPlugin = function() {
 }
 
 window.onload = function() {
-    // Build a system
     const ui = SwaggerUIBundle({
-        url: "https://raw.githubusercontent.com/datosgobar/georef-api/gh-pages/docs/openapi.json",
+        url: "https://raw.githubusercontent.com/datosgobar/georef-api/gh-pages/open_api/docs/openapi.json",
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [
