@@ -1,12 +1,12 @@
 # georef-api Swagger UI
 
-Página Swagger UI para la documentación OpenAPI de `georef-api`. La documentación se puede acceder visitando [este enlace](https://datosgobar.github.io/georef-api/open_api).
+Página Swagger UI para la documentación OpenAPI de `georef-ar-api`. La documentación se puede acceder visitando [este enlace](https://datosgobar.github.io/georef-ar-api/open_api).
 
 ## Archivos
 
-`docs/openapi.json`: Documentación para `georef-api` en formato OpenAPI 3.
+`docs/openapi.json`: Documentación para `georef-ar-api` en formato OpenAPI 3.
 
-`src/`: Archivos de `swagger-ui-dist` modificados para la documentación de `georef-api`.
+`src/`: Archivos de `swagger-ui-dist` modificados para la documentación de `georef-ar-api`.
 
 ## Desarrollo
 
