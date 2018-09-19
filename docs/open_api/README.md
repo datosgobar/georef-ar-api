@@ -1,23 +1,21 @@
-# georef-api Swagger UI
+# georef-ar-api Swagger UI
 
 Página Swagger UI para la documentación OpenAPI de `georef-ar-api`. La documentación se puede acceder visitando [este enlace](https://datosgobar.github.io/georef-ar-api/open_api).
 
 ## Archivos
 
-`docs/openapi.json`: Documentación para `georef-ar-api` en formato OpenAPI 3.
+`spec/openapi.json`: Documentación para `georef-ar-api` en formato OpenAPI 3.
 
 `src/`: Archivos de `swagger-ui-dist` modificados para la documentación de `georef-ar-api`.
 
 ## Desarrollo
 
-1. Clonar la rama `gh-pages` del repositorio:
+1. Desde la raíz del proyecto, acceder al directorio `open_api`:
 ```bash
-$ git clone -b gh-pages git@github.com:datosgobar/georef-ar-api.git
-$ cd georef-ar-api
-$ cd open_api
+$ cd docs/open_api
 ```
 
-2. Instalar las dependencias:
+2. Instalar las dependencias. Se requiere tener `npm` instalado.
 ```bash
 $ npm install --global gulp-cli
 $ npm install
@@ -31,11 +29,11 @@ $ gulp build
 ```
 El comando ejecutado copia los archivos de `swagger-ui-dist`, `swagger-ui-themes` y `src/` al directorio raíz del proyecto, en el orden mencionado. Los archivos de `src/` toman proridad y sobreescriben archivos existentes con el mismo nombre, si los hay.
 
-5. Subir los cambios a la rama `gh-pages`:
+5. Subir los cambios a la rama `master`:
 ```bash
 $ git add ...
 $ git commit -m "..."
-$ git push origin gh-pages
+$ git push origin master
 ```
 
 ## Herramientas
@@ -49,5 +47,5 @@ $ npm install --global swagger-cli
 
 2. Ejecutar la herramienta de validación:
 ```
-$ swagger-cli validate docs/openapi.json
+$ swagger-cli validate spec/openapi.json
 ```

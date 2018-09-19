@@ -14,7 +14,7 @@ const DisableTryItOutPlugin = function() {
 
 window.onload = function() {
     const ui = SwaggerUIBundle({
-        url: "https://raw.githubusercontent.com/datosgobar/georef-api/gh-pages/open_api/docs/openapi.json",
+        url: "https://raw.githubusercontent.com/datosgobar/georef-api/master/docs/open_api/spec/openapi.json",
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [
