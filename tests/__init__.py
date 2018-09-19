@@ -53,7 +53,7 @@ class SearchEntitiesTest(TestCase):
         if return_value == 'status':
             return response.status_code
 
-        if return_value in ['data', 'full']:
+        if return_value in ['data', 'full', 'raw']:
             if response.status_code != 200:
                 raise Exception(
                     'La petición no devolvió código 200: {}'.format(
@@ -74,6 +74,9 @@ class SearchEntitiesTest(TestCase):
 
             if return_value == 'full':
                 return json.loads(response.data)
+
+            if return_value == 'raw':
+                return response.data
 
         raise ValueError('Tipo de retorno desconocido.')
 
@@ -99,16 +102,16 @@ class SearchEntitiesTest(TestCase):
                              has_header,
                              row_count > 0]))
 
-    def assert_valid_geojson(self, params=None):
+    def get_geojson(self, params=None):
         if not params:
             params = {}
-
         params['formato'] = 'geojson'
 
-        query = self.endpoint + '?' + urllib.parse.urlencode(params)
-        response = self.app.get(query)
-        geodata = geojson.loads(response.data.decode())
+        resp = self.get_response(params=params, return_value='raw')
+        return geojson.loads(resp.decode())
 
+    def assert_valid_geojson(self, params=None):
+        geodata = self.get_geojson(params)
         self.assertTrue(len(geodata['features']) > 0)
 
     def assert_flat_results(self):

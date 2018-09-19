@@ -398,6 +398,14 @@ class SearchDepartmentsTest(SearchEntitiesTest):
             'max': 10
         })
 
+    def test_geojson_format_flat(self):
+        """Se deberían poder aplanar los resultados GeoJSON."""
+        resp = self.get_geojson({'aplanar': True, 'max': 1})
+        self.assertTrue(all([
+            not isinstance(v, dict) for v
+            in resp['features'][0]['properties'].values()
+        ]) and resp)
+
     def test_csv_fields(self):
         """Una consulta CSV debería tener ciertos campos, ordenados de una
         forma específica."""

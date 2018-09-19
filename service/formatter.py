@@ -328,12 +328,13 @@ def create_csv_response(name, result, fmt):
     }))
 
 
-def create_geojson_response(result):
+def create_geojson_response(result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato GeoJSON.
 
     Args:
         result (QueryResult): Resultado de una consulta.
+        fmt (dict): Parámetros de formato.
 
     Returns:
         flask.Response: Respuesta HTTP con contenido GeoJSON.
@@ -351,6 +352,9 @@ def create_geojson_response(result):
             lon = loc[N.LON]
 
         if lat and lon:
+            if fmt.get(N.FLATTEN, False):
+                flatten_dict(item, max_depth=3)
+
             point = geojson.Point((lon, lat))
             features.append(geojson.Feature(geometry=point, properties=item))
 
@@ -536,7 +540,7 @@ def create_ok_response(name, result, fmt):
         return create_csv_response(name, result, fmt)
 
     if fmt[N.FORMAT] == 'geojson':
-        return create_geojson_response(result)
+        return create_geojson_response(result, fmt)
 
     raise RuntimeError('Formato desconocido.')
 
