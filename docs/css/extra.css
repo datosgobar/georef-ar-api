@@ -1,0 +1,124 @@
+body {
+    color: rgba(0, 0, 0, 0.9);
+}
+
+.md-header {
+    background-color: hsl(0, 0%, 100%);
+    color: #0695c8;
+    height: 6.8rem;
+}
+
+.md-flex {
+    margin-top: 10px;
+}
+
+.md-nav__link--active {
+    color: #0695c8;
+}
+
+.md-typeset a {
+    color: #0695c8;
+}
+
+.md-search__input {
+    background-color: rgba(255, 255, 255, 1);
+    border: 1px solid #999999;
+    color: #777777;
+}
+
+input::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #ccc !important;
+    opacity: 1;
+    /* Firefox */
+}
+
+input:-ms-input-placeholder {
+    /* Internet Explorer 10-11 */
+    color: #ccc !important;
+}
+
+input::-ms-input-placeholder {
+    /* Microsoft Edge */
+    color: #ccc !important;
+}
+
+.md-header-nav__button.md-logo * {
+    display: block;
+    width: 200px;
+    height: 50px;
+    margin-top: -14px;
+}
+
+.md-sidebar .md-sidebar--secondary {
+    display: none !important;
+}
+
+hr {
+    background-color: #777;
+}
+
+.footer {
+    width: 100%;
+    height: 50px;
+    background-color: red;
+}
+
+@media only screen and (max-width: 76.1875em) {
+    .md-nav--primary .md-nav__title--site {
+        position: relative;
+        background-color: #ffffff !important;
+        color: #0695c8 !important;
+    }
+}
+
+@media only screen and (max-width: 76.1875em) {
+    .md-nav--primary .md-nav__title--site .md-nav__button {
+        width: 200px !important;
+    }
+}
+
+.md-nav__link:hover {
+    color: #00739b;
+}
+
+.md-typeset a:hover {
+    color: #00739b;
+}
+
+.md-typeset .md-typeset__table{
+  display: inline;
+}
+.md-typeset .md-typeset__table table {
+    width: auto;
+    margin: 0 auto;
+    text-align: center;
+}
+.md-typeset table:not([class]) th:not([align]), .md-typeset table:not([class]) td:not([align]) {
+    text-align: center;
+}
+.md-typeset table tr:first-child td {
+    font-weight: bold;
+}
+.md-typeset table tr:first-child th {
+    font-weight: bold;
+}
+
+tr:nth-child(even) {background: rgba(0, 0, 0, 0.04)}
+tr:nth-child(odd) {background: #FFF}
+
+table {
+    margin: 0 auto;
+}
+
+tbody {
+    display: inline;
+}
+
+.wy-nav-top {
+    background: rgb(0, 0, 185);
+}
+
+.md-typeset .admonition, .md-typeset details {
+    font-size: 1.6rem
+}

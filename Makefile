@@ -4,13 +4,6 @@ UTILS_PY = service.management.utils_script
 
 .PHONY: docs
 
-docs:
-	mkdocs build
-	$(BROWSER) site/index.html
-
-servedocs:
-	mkdocs serve
-
 check_config_file:
 	@test -f $(CFG_PATH) || \
 		(echo "No existe el archivo de configuración $(CFG_PATH)." && exit 1)
@@ -61,20 +54,32 @@ code_checks:
 	flake8 tests/ service/
 	pylint tests/ service/
 
+docs:
+	mkdocs build
+	$(BROWSER) docs/site/index.html
+
+servedocs:
+	mkdocs serve
+
+docs_dist:
+	mkdocs build
+	rsync -avu docs/site/ docs/
+	rm -rf docs/site
+
 # Generar tablas de contenidos, se requiere el comando 'doctoc'
 # https://github.com/thlorenz/doctoc
 doctoc:
-	doctoc --maxlevel 3 --github --title " " docs/quick_start.md
-	bash docs/fix_github_links.sh docs/quick_start.md
-	doctoc --maxlevel 3 --github --title " " docs/spreadsheet_integration.md
-	bash docs/fix_github_links.sh docs/spreadsheet_integration.md
-	doctoc --maxlevel 3 --github --title " " docs/python_usage.md
-	bash docs/fix_github_links.sh docs/python_usage.md
-	doctoc --maxlevel 3 --github --title " " docs/jwt-token.md
-	bash docs/fix_github_links.sh docs/jwt-token.md
-	doctoc --maxlevel 3 --github --title " " docs/developers/georef-api-development.md
-	bash docs/fix_github_links.sh docs/developers/georef-api-development.md
-	doctoc --maxlevel 3 --github --title " " docs/developers/python3.6.md
-	bash docs/fix_github_links.sh docs/developers/python3.6.md
-	doctoc --maxlevel 3 --github --title " " docs/developers/georef-api-data.md
-	bash docs/fix_github_links.sh docs/developers/georef-api-data.md
+	doctoc --maxlevel 3 --github --title " " docs/src/quick_start.md
+	bash docs/src/fix_github_links.sh docs/src/quick_start.md
+	doctoc --maxlevel 3 --github --title " " docs/src/spreadsheet_integration.md
+	bash docs/src/fix_github_links.sh docs/src/spreadsheet_integration.md
+	doctoc --maxlevel 3 --github --title " " docs/src/python_usage.md
+	bash docs/src/fix_github_links.sh docs/src/python_usage.md
+	doctoc --maxlevel 3 --github --title " " docs/src/jwt-token.md
+	bash docs/src/fix_github_links.sh docs/src/jwt-token.md
+	doctoc --maxlevel 3 --github --title " " docs/src/developers/georef-api-development.md
+	bash docs/src/fix_github_links.sh docs/src/developers/georef-api-development.md
+	doctoc --maxlevel 3 --github --title " " docs/src/developers/python3.6.md
+	bash docs/src/fix_github_links.sh docs/src/developers/python3.6.md
+	doctoc --maxlevel 3 --github --title " " docs/src/developers/georef-api-data.md
+	bash docs/src/fix_github_links.sh docs/src/developers/georef-api-data.md

@@ -1,0 +1,776 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
+      
+      
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/georef-api-development/">
+      
+      
+        <meta name="author" content="Datos Argentina">
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.0, mkdocs-material-3.0.4">
+    
+    
+      
+        <title>Ambiente de desarrollo y deploy - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+      
+    
+    
+	
+      <link rel="stylesheet" href="../assets/stylesheets/application.451f80e5.css">
+      
+      
+    
+	<link rel="stylesheet" href="../css/extra.css">
+
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    <script src="../js/extra.js"></script>
+
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../assets/fonts/material-icons.css">
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+    
+  </head>
+  
+    <body dir="ltr">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="__github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="../#guia-de-instalacion-para-desarrolladores" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="http://apis.datos.gob.ar/georef/" title="API del Servicio de Normalización de Datos Geográficos de Argentina" class="md-header-nav__button md-logo">
+          
+            <img src="../images/logo.svg" width="24" height="24">
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                API del Servicio de Normalización de Datos Geográficos de Argentina
+              </span>
+              <span class="md-header-nav__topic">
+                Ambiente de desarrollo y deploy
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/datosgobar/georef-ar-api" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <!--
+  Copyright (c) 2016-2018 Martin Donath <martin.donath@squidfunk.com>
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to
+  deal in the Software without restriction, including without limitation the
+  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+  sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE.
+-->
+
+<!-- Main navigation -->
+<nav class="md-nav md-nav--primary" data-md-level="0">
+
+        <!-- Site title -->
+        <label class="md-nav__title md-nav__title--site" for="__drawer">
+          <a href="http://apis.datos.gob.ar/georef/"
+              title="API del Servicio de Normalización de Datos Geográficos de Argentina" class="md-nav__button md-logo">
+            
+              <img src="../images/logo.svg" width="48" height="48" />
+            
+          </a>
+          API del Servicio de Normalización de Datos Geográficos de Argentina
+        </label>
+      
+        <!-- Repository containing source -->
+        
+          <div class="md-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/datosgobar/georef-ar-api" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#__github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        
+      
+        <!-- Render item list -->
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+            
+            
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Inicio" class="md-nav__link">
+      Inicio
+    </a>
+  </li>
+
+            <hr/>
+          
+            
+            
+            
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Usuarios
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        Usuarios
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../quick_start/" title="Ejemplos de uso" class="md-nav__link">
+      Ejemplos de uso
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../spreadsheet_integration/" title="Usar en planillas de cálculo" class="md-nav__link">
+      Usar en planillas de cálculo
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../python_usage/" title="Usar en Python" class="md-nav__link">
+      Usar en Python
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../jwt-token/" title="Autenticarse con JWT" class="md-nav__link">
+      Autenticarse con JWT
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="https://datosgobar.github.io/georef-ar-api/open_api" title="Referencia API" class="md-nav__link">
+      Referencia API
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+            <hr/>
+          
+            
+            
+            
+
+
+  <li class="md-nav__item">
+    <a href="../applications/" title="Aplicaciones" class="md-nav__link">
+      Aplicaciones
+    </a>
+  </li>
+
+            <hr/>
+          
+            
+            
+            
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
+    <label class="md-nav__link" for="nav-4">
+      Desarrolladores
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        Desarrolladores
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Ambiente de desarrollo y deploy
+      </label>
+    
+    <a href="./" title="Ambiente de desarrollo y deploy" class="md-nav__link md-nav__link--active">
+      Ambiente de desarrollo y deploy
+    </a>
+    
+      
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../python3.6/" title="Instalación de Python 3.6" class="md-nav__link">
+      Instalación de Python 3.6
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../georef-api-data/" title="Proceso de ETL y Datos" class="md-nav__link">
+      Proceso de ETL y Datos
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../history/" title="Historial de versiones" class="md-nav__link">
+      Historial de versiones
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+            <hr/>
+          
+        </ul>
+      </nav>
+      
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="guia-de-instalacion-para-desarrolladores">Guía de instalación para desarrolladores<a class="headerlink" href="#guia-de-instalacion-para-desarrolladores" title="Permanent link">&para;</a></h1>
+<p>En este documento se detallan los pasos a seguir si se desea configurar un servidor de API Georef propio.</p>
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+<ul>
+<li><a href="#dependencias">Dependencias</a></li>
+<li><a href="#instalacion">Instalación</a><ul>
+<li><a href="#1-base-de-datos">1. Base de datos</a></li>
+<li><a href="#2-elasticsearch">2. Elasticsearch</a></li>
+<li><a href="#3-repositorio-y-dependencias">3. Repositorio y dependencias</a></li>
+<li><a href="#4-cargar-las-funciones-sql">4. Cargar las funciones SQL</a></li>
+<li><a href="#5-crear-los-indices">5. Crear los índices</a></li>
+<li><a href="#6-opcional-re-indexar-datos">6. (Opcional) Re-indexar datos</a></li>
+<li><a href="#7-correr-api">7. Correr API</a></li>
+</ul>
+</li>
+<li><a href="#tests">Tests</a></li>
+<li><a href="#archivos-de-datos">Archivos de datos</a></li>
+</ul>
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+<h2 id="dependencias">Dependencias<a class="headerlink" href="#dependencias" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html">Elasticsearch &gt;=6.2.0</a></li>
+<li><a href="https://www.python.org/downloads/">Python &gt;=3.6.x</a></li>
+<li><a href="https://www.postgresql.org/download/">PostgreSQL 9.6</a></li>
+<li><a href="http://postgis.net/install/">PostGIS 2.3</a></li>
+<li><a href="https://nginx.org/">Nginx</a> <em>(para entornos productivos)</em></li>
+</ul>
+<h2 id="instalacion">Instalación<a class="headerlink" href="#instalacion" title="Permanent link">&para;</a></h2>
+<h3 id="1-base-de-datos">1. Base de datos<a class="headerlink" href="#1-base-de-datos" title="Permanent link">&para;</a></h3>
+<p>Crear una base de datos en PostgreSQL con la extensión PostGIS. A continuación, se muestra un ejemplo utilizando <code>georef_api</code> como nombre para la base de datos:</p>
+<pre><code class="sql">-- Crear la base de datos:
+CREATE DATABASE georef_api WITH ENCODING='UTF8';
+
+-- Agregar PostGIS a la base de datos creada:
+CREATE EXTENSION postgis;
+</code></pre>
+
+<h3 id="2-elasticsearch">2. Elasticsearch<a class="headerlink" href="#2-elasticsearch" title="Permanent link">&para;</a></h3>
+<p>Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más servidores (nodos).</p>
+<h4 id="21-instalar-el-entorno-de-ejecucion-para-java">2.1 Instalar el entorno de ejecución para Java:<a class="headerlink" href="#21-instalar-el-entorno-de-ejecucion-para-java" title="Permanent link">&para;</a></h4>
+<pre><code class="bash">$ sudo apt install default-jre
+</code></pre>
+
+<h4 id="22-instalar-elasticsearch">2.2 Instalar Elasticsearch:<a class="headerlink" href="#22-instalar-elasticsearch" title="Permanent link">&para;</a></h4>
+<pre><code class="bash">$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.0.deb
+$ sudo dpkg -i elasticsearch-6.2.0.deb
+$ sudo systemctl enable elasticsearch # utilizando systemd para administrar el servicio
+</code></pre>
+
+<h4 id="23-aplicar-las-configuraciones-recomendadas">2.3 Aplicar las configuraciones recomendadas<a class="headerlink" href="#23-aplicar-las-configuraciones-recomendadas" title="Permanent link">&para;</a></h4>
+<p>Editar el archivo  <code>/etc/elasticsearch/elasticsearch.yml</code> (el valor de <code>node.name</code> debe ser único por nodo):</p>
+<pre><code class="text">node.name: node-1
+http.max_content_length: 100mb
+</code></pre>
+
+<p>Editar el archivo <code>/etc/elasticsearch/jvm.options</code> (siguiendo las <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html">recomendaciones de Elasticsearch</a>):</p>
+<pre><code class="text"># Tamaño del heap size de la JVM
+# Se recomienda utilizar siempre el mismo valor como mínimo y máximo
+# Ejemplo: 4 GB
+-Xms4g
+-Xmx4g
+</code></pre>
+
+<h3 id="3-repositorio-y-dependencias">3. Repositorio y dependencias<a class="headerlink" href="#3-repositorio-y-dependencias" title="Permanent link">&para;</a></h3>
+<h4 id="31-clonar-el-repositorio">3.1 Clonar el repositorio:<a class="headerlink" href="#31-clonar-el-repositorio" title="Permanent link">&para;</a></h4>
+<pre><code class="bash">$ git clone https://github.com/datosgobar/georef-api.git
+$ cd georef-api
+</code></pre>
+
+<h4 id="32-crear-un-entorno-virtual-y-activarlo">3.2 Crear un entorno virtual y activarlo:<a class="headerlink" href="#32-crear-un-entorno-virtual-y-activarlo" title="Permanent link">&para;</a></h4>
+<pre><code class="bash">$ python3 -m venv venv
+$ source venv/bin/activate
+</code></pre>
+
+<h4 id="33-instalar-dependencias-con-pip">3.3 Instalar dependencias con <code>pip</code>:<a class="headerlink" href="#33-instalar-dependencias-con-pip" title="Permanent link">&para;</a></h4>
+<pre><code class="bash">(venv) $ pip3 install -r requirements.txt -r requirements-dev.txt
+</code></pre>
+
+<h4 id="34-copiar-el-archivo-de-configuracion">3.4 Copiar el archivo de configuración:<a class="headerlink" href="#34-copiar-el-archivo-de-configuracion" title="Permanent link">&para;</a></h4>
+<pre><code class="bash">(venv) $ cp config/georef.example.cfg config/georef.cfg
+</code></pre>
+
+<p>Luego, completar el archivo <code>config/georef.cfg</code> con los valores apropiados.</p>
+<h4 id="35-copiar-el-archivo-de-configuracion-de-logs">3.5 Copiar el archivo de configuración de logs:<a class="headerlink" href="#35-copiar-el-archivo-de-configuracion-de-logs" title="Permanent link">&para;</a></h4>
+<pre><code class="bash">(venv) $ cp config/logging.example.ini config/logging.ini
+</code></pre>
+
+<p>Luego, completar el archivo <code>config/logging.ini</code> con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.</p>
+<h4 id="36-crear-el-archivo-de-sinonimos">3.6 Crear el archivo de sinónimos<a class="headerlink" href="#36-crear-el-archivo-de-sinonimos" title="Permanent link">&para;</a></h4>
+<p>Adicionalmente, se debe crear un archivo <code>georef_synonyms.txt</code>, en la ubicación del archivo de configuración de Elasticsearch (<code>$ES_HOME/config</code>). El archivo contiene la base de sinónimos utilizados al momento de indexar documentos. Su contenido puede ser vacío o contener, por ejemplo, el siguiente contenido:</p>
+<pre><code class="text">buenos aires, bsas
+ciudad autonoma de buenos aires, caba, capital federal
+santiago, sgo, stgo
+</code></pre>
+
+<h3 id="4-cargar-las-funciones-sql">4. Cargar las funciones SQL<a class="headerlink" href="#4-cargar-las-funciones-sql" title="Permanent link">&para;</a></h3>
+<p>Cargar las funciones SQL necesarias para el funcionamiento de la API:</p>
+<pre><code class="bash">(venv) $ make load_sql
+</code></pre>
+
+<h3 id="5-crear-los-indices">5. Crear los índices<a class="headerlink" href="#5-crear-los-indices" title="Permanent link">&para;</a></h3>
+<p>Generar índices de entidades y calles:</p>
+<pre><code class="bash">(venv) $ make index
+</code></pre>
+
+<p>Listar los índices creados, y otros datos adicionales:</p>
+<pre><code class="bash">(venv) $ make print_index_stats
+</code></pre>
+
+<h3 id="6-opcional-re-indexar-datos">6. (Opcional) Re-indexar datos<a class="headerlink" href="#6-opcional-re-indexar-datos" title="Permanent link">&para;</a></h3>
+<p>Si se modifican los archivos de datos JSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:</p>
+<h4 id="indexar-datos-nuevos">Indexar datos nuevos<a class="headerlink" href="#indexar-datos-nuevos" title="Permanent link">&para;</a></h4>
+<p>Si se desea actualizar los índices con los nuevos datos, solo si los datos entrantes son más recientes, se puede utilizar nuevamente:</p>
+<pre><code class="bash">(venv) $ make index
+</code></pre>
+
+<h4 id="forzar-re-indexado">Forzar re-indexado<a class="headerlink" href="#forzar-re-indexado" title="Permanent link">&para;</a></h4>
+<p>Si se desea forzar un re-indexado, es decir, si se desea indexar los datos nuevamente sin importar la fecha de creación, se debe utilizar la siguiente receta:</p>
+<pre><code class="bash">(venv) $ make index_forced
+</code></pre>
+
+<p>La receta <code>index_forced</code> intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en <code>config/georef.cfg</code>. El uso de la receta es recomendado cuando se requiere re-indexar los datos incondicionalmente, algunas situaciones donde esto es necesario son:</p>
+<ul>
+<li>Modificación de la estructura de los archivos de datos</li>
+<li>Modificación de <em>mappeos</em> de tipos de Elasticsearch</li>
+<li>Modificación de analizadores de texto de Elasticsearch</li>
+<li>Modificación de listado de sinónimos</li>
+</ul>
+<p>Cualquiera de las dos opciones también permite indexar datos selectivamente: se debe especificar el nombre del índice a crear/re-indexar. Por ejemplo:</p>
+<pre><code class="bash">(venv) $ make index INDEX_NAME=localidades
+(venv) $ make index_forced INDEX_NAME=calles
+</code></pre>
+
+<p>Los nombres de los índices disponibles son:</p>
+<ul>
+<li><code>provincias</code></li>
+<li><code>departamentos</code></li>
+<li><code>municipios</code></li>
+<li><code>localidades</code></li>
+<li><code>calles</code></li>
+</ul>
+<h3 id="7-correr-api">7. Correr API<a class="headerlink" href="#7-correr-api" title="Permanent link">&para;</a></h3>
+<h4 id="entornos-de-desarrollo">Entornos de desarrollo<a class="headerlink" href="#entornos-de-desarrollo" title="Permanent link">&para;</a></h4>
+<p>Correr la API de Georef utilizando un servidor de prueba (no apto para producción):</p>
+<pre><code class="bash">(venv) $ make start_dev_server
+</code></pre>
+
+<h4 id="entornos-productivos">Entornos productivos<a class="headerlink" href="#entornos-productivos" title="Permanent link">&para;</a></h4>
+<h5 id="71-configurar-servicio-georef-api-para-systemd">7.1 Configurar servicio <code>georef-api</code> para <code>systemd</code><a class="headerlink" href="#71-configurar-servicio-georef-api-para-systemd" title="Permanent link">&para;</a></h5>
+<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-api.service"><code>config/georef-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>', que deben ser reemplazados por el usuario.</p>
+<h5 id="72-activar-y-arrancar-el-servicio">7.2 Activar y arrancar el servicio<a class="headerlink" href="#72-activar-y-arrancar-el-servicio" title="Permanent link">&para;</a></h5>
+<pre><code class="bash">$ sudo systemctl daemon-reload
+$ sudo systemctl enable georef-api.service
+$ sudo systemctl start georef-api.service
+</code></pre>
+
+<h5 id="73-configurar-nginx">7.3 Configurar <code>nginx</code><a class="headerlink" href="#73-configurar-nginx" title="Permanent link">&para;</a></h5>
+<p>Primero, crear <code>/etc/nginx/sites-available/georef-api</code> tomando como base la configuración del archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-api.nginx"><code>georef-api.nginx</code></a>.</p>
+<h5 id="74-opcional-crear-cache-para-nginx">7.4 (Opcional) Crear cache para <code>nginx</code><a class="headerlink" href="#74-opcional-crear-cache-para-nginx" title="Permanent link">&para;</a></h5>
+<p>Si se desea activar el uso del cache de <code>nginx</code>, descomentar las líneas contentiendo las directivas <code>proxy_cache</code> y <code>proxy_cache_valid</code> del archivo <code>georef-api</code> creado. Luego, activar el cache <code>georef</code> agregando la siguiente línea al archivo de configuración <code>nginx.conf</code> (sección <code>http</code>):</p>
+<pre><code class="nginx">proxy_cache_path /data/nginx/cache levels=1:2 inactive=120m keys_zone=georef:10m use_temp_path=off;
+</code></pre>
+
+<p>Finalmente, crear el directorio <code>/data/nginx/cache</code>.</p>
+<h5 id="75-activar-y-validar-configuracion-nginx">7.5 Activar y validar configuración <code>nginx</code><a class="headerlink" href="#75-activar-y-validar-configuracion-nginx" title="Permanent link">&para;</a></h5>
+<p>Generar un link simbólico a la configuración del sitio:</p>
+<pre><code class="bash">$ sudo ln -s /etc/nginx/sites-available/georef-api /etc/nginx/sites-enabled/georef-api
+</code></pre>
+
+<p>Validar la configuración:</p>
+<pre><code class="bash">$ sudo nginx -t
+</code></pre>
+
+<p>Cargar la nueva configuración:</p>
+<pre><code class="bash">$ sudo nginx -s reload
+</code></pre>
+
+<p>Reiniciar Nginx:</p>
+<pre><code class="bash">$ systemctl restart nginx.service
+</code></pre>
+
+<h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
+<p>Ejecutar los tests unitarios (los servicios Elasticsearch y PostgreSQL deben estar activos y con los datos apropiados cargados):</p>
+<pre><code class="bash">(venv) $ make test_all
+</code></pre>
+
+<h2 id="archivos-de-datos">Archivos de datos<a class="headerlink" href="#archivos-de-datos" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p>La estructura de los archivos de datos JSON utilizados por Georef está detallada en <a href="../georef-api-data/">este documento</a>.</p>
+</li>
+<li>
+<p>El archivo de configuración <code>config/georef.cfg</code> debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en <code>georef.example.cfg</code>) utilizan el portal de descargas <code>infra.datos.gob.ar</code>, que siempre provee la última versión de los archivos JSON disponibles.</p>
+</li>
+</ul>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../applications/" title="Aplicaciones" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Aplicaciones
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../python3.6/" title="Instalación de Python 3.6" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Instalación de Python 3.6
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.583bbe55.js"></script>
+      
+      <script>app.initialize({version:"1.0",url:{base:".."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>
