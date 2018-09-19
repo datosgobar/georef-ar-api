@@ -1,0 +1,25 @@
+{
+  "name": "georef-api-docs",
+  "version": "1.0.0",
+  "description": "API del servicio de normalización y geocodificación para direcciones de Argentina.",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datosgobar/georef-api.git"
+  },
+  "author": "datosgobar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/datosgobar/georef-api/issues"
+  },
+  "homepage": "https://github.com/datosgobar/georef-api#readme",
+  "dependencies": {
+    "swagger-ui-dist": "^3.17.5",
+    "swagger-ui-themes": "^3.0.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
+}

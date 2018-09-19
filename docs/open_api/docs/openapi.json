@@ -1,0 +1,1807 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "georef-ar-api",
+        "description": "API del Servicio de Normalización de Datos Geográficos de Argentina.\n\nPara ver ejemplos de uso de la API, dirigirse a la [página de documentación del proyecto](https://apis.datos.gob.ar/georef).\n\nPara leer el código de la API, acceder a [GitHub](https://github.com/datosgobar/georef-ar-api).\n\n---\n\n[Equipo de Datos de la Nación Argentina - Página GitHub](https://github.com/datosgobar)\n\n[Enviar un mail al Equipo de Datos de la Nación Argentina](mailto:datos@modernizacion.gob.ar)",
+        "version": "0.1.6"
+    },
+    "tags": [
+        {
+            "name": "Recursos"
+        }
+    ],
+    "servers": [
+	{
+	    "url": "http://apis.datos.gob.ar/georef/api"
+	}
+    ],
+    "components": {
+        "schemas": {
+            "provincia_sin_coordenadas": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "82"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Santa Fe"
+                    }
+                }
+            },
+            "provincia": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "82"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Santa Fe"
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -30.706927
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.558832
+			    }
+			}
+		    },
+		    "fuente": {
+			"type": "string",
+			"example": "IGN"
+		    }
+                }
+            },
+            "provincias_single": {
+                "type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 24
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 24
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "provincias": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/provincia"
+			}
+		    }
+		}
+            },
+	    "provincias_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/provincias_single"
+			}
+		    }
+		}
+	    },
+	    "provincias_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "provincias": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["provincias"]
+	    },
+            "departamento": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "82084"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Rosario"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -33.127856
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -62.526029
+			    }
+			}
+		    },
+		    "fuente": {
+			"type": "string",
+			"example": "IGN"
+		    }
+                }
+            },
+            "departamento_sin_coordenadas": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "82084"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Rosario"
+                    }
+                }
+            },
+            "departamentos_single": {
+                "type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 529
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "departamentos": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/departamento"
+			}
+		    }
+		}
+            },
+	    "departamentos_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/departamentos_single"
+			}
+		    }
+		}
+	    },
+	    "departamentos_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "departamentos": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["departamentos"]
+	    },
+            "municipio": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "820196"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Granadero Baigorria"
+                    },
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.851319
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.704006
+			    }
+			}
+		    },
+		    "fuente": {
+			"type": "string",
+			"example": "IGN"
+		    }
+                }
+            },
+            "municipio_sin_coordenadas": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "820196"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Granadero Baigorria"
+                    }
+                }
+            },
+	    "municipios_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 1820
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "municipios": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/municipio"
+			}
+		    }
+		}
+	    },
+	    "municipios_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/municipios_single"
+			}
+		    }
+		}
+	    },
+	    "municipios_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "municipios": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["municipios"]
+	    },
+            "localidad": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "82084160000"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Granadero Baigorria"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+		    "municipio": {
+			"$ref": "#/components/schemas/municipio_sin_coordenadas"
+		    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "Componente de localidad compuesta (LC)",
+                        "enum": [
+                            "Entidad (E)",
+                            "Componente de localidad compuesta (LC)",
+                            "Localidad simple (LS)"
+                        ]
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.861364
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.706216
+			    }
+			}
+		    },
+		    "fuente": {
+			"type": "string",
+			"example": "BAHRA"
+		    }
+                }
+            },
+	    "localidades_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 4901
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "localidades": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/localidad"
+			}
+		    }
+		}
+	    },
+	    "localidades_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/localidades_single"
+			}
+		    }
+		}
+	    },
+	    "localidades_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "localidades": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"municipio": {
+				    "$ref": "#/components/schemas/param_municipio"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["localidades"]
+	    },
+            "direccion": {
+                "type": "object",
+                "properties": {
+                    "altura": {
+                        "type": "integer",
+                        "example": 400
+                    },
+                    "departamento": {
+			"$ref": "#/components/schemas/departamento_sin_coordenadas"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "8208416001280"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "URQUIZA"
+                    },
+                    "nomenclatura": {
+                        "type": "string",
+                        "example": "URQUIZA 400, Rosario, Santa Fe"
+                    },
+                    "provincia": {
+			"$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "CALLE"
+                    },
+		    "fuente": {
+			"type": "string",
+			"example": "INDEC"
+		    }
+                }
+            },
+	    "direcciones_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 28
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "direcciones": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/direccion"
+			}
+		    }
+		}
+	    },
+	    "direcciones_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/direcciones_single"
+			}
+		    }
+		}
+	    },
+	    "direcciones_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "direcciones": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"direccion": {
+				    "$ref": "#/components/schemas/param_direccion"
+				},
+				"tipo": {
+				    "$ref": "#/components/schemas/param_tipo_calle"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false,
+			    "required": ["direccion"]
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["localidades"]
+	    },
+            "calle": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+			"$ref": "#/components/schemas/departamento_sin_coordenadas"
+                    },
+		    "altura": {
+			"type": "object",
+			"properties": {
+			    "inicio": {
+				"type": "object",
+				"properties": {
+				    "derecha": {
+					"type": "integer",
+					"example": 0
+				    },
+				    "izquierda": {
+					"type": "integer",
+					"example": 0
+				    }
+				}
+			    },
+			    "fin": {
+				"type": "object",
+				"properties": {
+				    "derecha": {
+					"type": "integer",
+					"example": 599
+				    },
+				    "izquierda": {
+					"type": "integer",
+					"example": 598
+				    }
+				}
+			    }
+			}
+		    },
+                    "id": {
+                        "type": "string",
+                        "example": "8208416001280"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "URQUIZA"
+                    },
+                    "nomenclatura": {
+                        "type": "string",
+                        "example": "URQUIZA, Rosario, Santa Fe"
+                    },
+                    "provincia": {
+			"$ref": "#/components/schemas/provincia_sin_coordenadas"
+                    },
+                    "tipo": {
+                        "type": "string",
+                        "example": "CALLE",
+                        "enum": [
+                            "OTRO",
+                            "AV",
+                            "RUTA",
+                            "AUT",
+                            "CALLE",
+                            "PJE",
+                            "BV"                           
+                        ]
+                    },
+		    "fuente": {
+			"type": "string",
+			"example": "INDEC"
+		    }
+                }
+            },
+	    "calles_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 151500
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "calles": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/calle"
+			}
+		    }
+		}
+	    },
+	    "calles_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/calles_single"
+			}
+		    }
+		}
+	    },
+	    "calles_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "calles": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"tipo": {
+				    "$ref": "#/components/schemas/param_tipo_calle"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["calles"]
+	    },
+	    "ubicacion": {
+                "type": "object",
+		"properties": {
+		    "departamento": {
+			"$ref": "#/components/schemas/departamento_sin_coordenadas"
+		    },
+		    "provincia": {
+			"$ref": "#/components/schemas/provincia_sin_coordenadas"
+		    },
+		    "municipio": {
+			"$ref": "#/components/schemas/municipio_sin_coordenadas"
+		    },
+		    "lat": {
+			"type": "number",
+			"example": -32.8551545
+		    },
+		    "lon": {
+			"type": "number",
+			"example": -60.697636
+		    },
+		    "fuente": {
+			"type": "string",
+			"example": "IGN"
+		    }
+		}
+	    },
+	    "ubicacion_single": {
+		"type": "object",
+		"properties": {
+		    "ubicacion": {
+			"$ref": "#/components/schemas/ubicacion"
+		    }
+		}
+	    },
+	    "ubicacion_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/ubicacion_single"
+			}
+		    }
+		}
+	    },
+	    "ubicacion_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "ubicaciones": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"lat": {
+				    "$ref": "#/components/schemas/param_lat"
+				},
+				"lon": {
+				    "$ref": "#/components/schemas/param_lon"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["ubicaciones"]
+	    },
+	    "param_provincia": {
+		"type": "string",
+		"minLength": 1,
+		"example": "Santa Fe"
+	    },
+	    "param_departamento": {
+		"type": "string",
+		"minLength": 1,
+		"example": "Rosario"
+	    },
+	    "param_municipio": {
+		"type": "string",
+		"minLength": 1,
+		"example": "Granadero Baigorria"
+	    },
+	    "param_max": {
+		"type": "integer",
+		"minimum": 1,
+		"maximum": 5000,
+		"example": 10
+	    },
+	    "param_inicio": {
+		"type": "integer",
+		"minimum": 0,
+		"maximum": 10000,
+		"example": 0
+	    },
+	    "param_campos": {
+		"type": "string",
+		"minLength": 1,
+		"example": "id,nombre"
+	    },
+	    "param_aplanar": {
+		"enum": [true],
+		"example": true
+	    },
+	    "param_id": {
+		"type": "string",
+		"minLength": 1
+	    },
+	    "param_nombre": {
+		"type": "string",
+		"minLength": 1
+	    },
+	    "param_exacto": {
+		"enum": [true],
+		"example": true
+	    },
+	    "param_orden": {
+		"type": "string",
+                "enum": ["id", "nombre"]
+	    },
+	    "param_formato_all": {
+		"type": "string",
+		"enum": ["json", "csv", "geojson"]
+	    },
+	    "param_formato_json_csv": {
+		"type": "string",
+		"enum": ["json", "csv"]
+	    },
+	    "param_formato_json_geojson": {
+		"type": "string",
+		"enum": ["json", "geojson"]
+	    },
+	    "param_tipo_calle": {
+		"type": "string",
+		"minLength": 1,
+		"example": "calle",
+		"enum": ["calle", "avenida", "pasaje"]
+	    },
+	    "param_direccion": {
+		"type": "string",
+                "example": "Urquiza 400",
+		"minLength": 1
+	    },
+	    "param_lat": {
+                "type": "number",
+                "example": -32.8551545
+            },
+            "param_lon": {
+		"type": "number",
+		"example": -60.697636
+            },
+	    "param_error": {
+		"type": "object",
+		"properties": {
+		    "codigo_interno": {
+			"type": "integer",
+			"example": 1000
+		    },
+		    "mensaje": {
+			"type": "string",
+			"example": "El parámetro especificado no existe."
+		    },
+		    "nombre_parametro": {
+			"type": "string",
+			"example": "prueba"
+		    },
+		    "ubicacion": {
+			"type": "string",
+			"example": "querystring"
+		    }
+		}
+	    },
+	    "param_errors_single": {
+		"type": "object",
+		"properties": {
+		    "errores": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/param_error"
+			}
+		    }
+		}
+	    },
+	    "param_errors_bulk": {
+		"type": "object",
+		"properties": {
+		    "errores": {
+			"type": "array",
+			"items": {
+			    "type": "array",
+			    "items": {
+				"$ref": "#/components/schemas/param_error"
+			    }
+			}
+		    }
+		}
+	    },
+	    "internal_error": {
+		"type": "object",
+		"properties": {
+		    "errores": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"mensaje": {
+				    "type": "string",
+				    "example": "Ocurrió un error interno de servidor al procesar la petición."
+				}
+			    }
+			}
+		    }
+		}
+	    }
+        },
+        "parameters": {
+	    "direccion": {
+		"name": "direccion",
+                "description": "Dirección a normalizar.",
+                "in": "query",
+                "required": true,
+                "schema": {
+		    "$ref": "#/components/schemas/param_direccion"
+                }
+	    },
+            "provincia": {
+                "name": "provincia",
+                "description": "Filtrar por nombre o ID de provincia.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_provincia"
+                }
+            },
+            "departamento": {
+                "name": "departamento",
+                "description": "Filtrar por nombre o ID de departamento.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_departamento"
+                }
+            },
+            "municipio": {
+                "name": "municipio",
+                "description": "Filtrar por nombre o ID de municipio.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_municipio"
+                }
+            },
+            "max": {
+                "name": "max",
+                "description": "Cantidad máxima de resultados a devolver.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_max"
+                }
+            },
+            "inicio": {
+                "name": "inicio",
+                "description": "Cantidad de resultados a saltear.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_inicio"
+                }
+            },
+            "campos": {
+                "name": "campos",
+                "description": "Campos a incluir en la respuesta separados por comas, sin espacios. Algunos campos siempre serán incluidos, incluso si no se agregaron en la lista. Para incluir campos de sub-entidades, separar los nombres con un punto, por ejemplo: `provincia.id`.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_campos"
+                }
+            },
+            "aplanar": {
+                "name": "aplanar",
+                "description": "Cuando está presente, muestra el resultado JSON con una estructura plana.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_aplanar"
+                }
+            },
+            "id": {
+                "name": "id",
+                "description": "Filtrar por ID.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_id"
+                }
+            },
+            "nombre": {
+                "name": "nombre",
+                "description": "Filtrar por nombre.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_nombre"
+                }
+            },
+            "exacto": {
+                "name": "exacto",
+                "description": "Cuando está presente, se activa el modo de búsqueda por texto exacto. Sólo tiene efecto cuando se usan campos de búsqueda por texto (por ejemplo, `nombre`).",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_exacto"
+                }
+            },
+            "orden": {
+                "name": "orden",
+                "description": "Campo por el cual ordenar los resultados.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_orden"
+                }
+            },
+	    "formato_all": {
+		"name": "formato",
+		"description": "Formato de datos en el cual devolver los resultados.",
+		"in": "query",
+		"schema": {
+		    "$ref": "#/components/schemas/param_formato_all"
+		}
+	    },
+	    "formato_json_csv": {
+		"name": "formato",
+		"description": "Formato de datos en el cual devolver los resultados.",
+		"in": "query",
+		"schema": {
+		    "$ref": "#/components/schemas/param_formato_json_csv"
+		}
+	    },
+	    "formato_json_geojson": {
+		"name": "formato",
+		"description": "Formato de datos en el cual devolver los resultados.",
+		"in": "query",
+		"schema": {
+		    "$ref": "#/components/schemas/param_formato_json_geojson"
+		}
+	    },
+            "tipo_calle": {
+                "name": "tipo",
+                "description": "Tipo de calle.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_tipo_calle"
+                }
+            },
+	    "lat": {
+                "name": "lat",
+                "description": "Latitud del punto, en forma de número real con grados decimales.",
+                "in": "query",
+                "required": true,
+                "schema": {
+                    "type": "number",
+                    "example": -27.2741611173
+                }
+	    },
+            "lon": {
+                "name": "lon",
+                "description": "Longitud del punto, en forma de número real con grados decimales.",
+                "in": "query",
+                "required": true,
+                "schema": {
+		    "type": "number",
+		    "example": -66.7529296875
+                }
+	    }
+        },
+	"responses": {
+	    "400_single_error": {
+		"description": "Error al procesar la consulta.",
+		"content": {
+		    "application/json": {
+			"schema": {
+			    "$ref": "#/components/schemas/param_errors_single"
+			}
+		    }
+		}
+	    },
+	    "400_bulk_error": {
+		"description": "Error al procesar las consultas.",
+		"content": {
+		    "application/json": {
+			"schema": {
+			    "$ref": "#/components/schemas/param_errors_bulk"
+			}
+		    }
+		}
+	    },
+	    "500_error": {
+		"description": "Error interno del servidor.",
+		"content": {
+		    "application/json": {
+			"schema": {
+			    "$ref": "#/components/schemas/internal_error"
+			}
+		    }
+		}
+	    }
+	}
+    },
+    "paths": {
+        "/provincias": {
+            "get": {
+                "summary": "Retorna un listado de provincias.",
+                "description": "Permite realizar búsquedas sobre el listado de provincias.",
+                "tags": [
+                    "Recursos"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
+                    },
+                    {
+                        "$ref": "#/components/parameters/formato_all"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de provincias.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/provincias_single"
+                                }
+                            }
+                        }
+                    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+                }
+            },
+            "post": {
+                "summary": "Retorna uno o más listados de provincias.",
+                "description": "Permite realizar varias búsquedas sobre el listado de provincias en simultáneo.",
+                "tags": [
+                    "Recursos"
+                ],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/provincias_request_bulk"
+			    }
+			}
+		    }
+		},
+                "responses": {
+                    "200": {
+                        "description": "Listados de provincias.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/provincias_bulk"
+                                }
+                            }
+                        }
+                    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+                }
+            }
+        },
+        "/departamentos": {
+            "get": {
+                "summary": "Retorna un listado de departamentos.",
+                "description": "Permite realizar búsquedas sobre el listado de departamentos.",
+                "tags": [
+                    "Recursos"
+                ],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/provincia"
+                    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
+                    {
+                        "$ref": "#/components/parameters/aplanar"
+                    },
+                    {
+                        "$ref": "#/components/parameters/campos"
+                    },
+                    {
+                        "$ref": "#/components/parameters/max"
+                    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+                    {
+                        "$ref": "#/components/parameters/exacto"
+                    },
+                    {
+                        "$ref": "#/components/parameters/formato_all"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Listado de departamentos.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/departamentos_single"
+                                }
+                            }
+                        }
+                    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+                }
+            },
+            "post": {
+                "summary": "Retorna uno o más listados de departamentos.",
+                "description": "Permite realizar varias búsquedas sobre el listado de departamentos en simultáneo.",
+                "tags": [
+                    "Recursos"
+                ],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/departamentos_request_bulk"
+			    }
+			}
+		    }
+		},
+                "responses": {
+                    "200": {
+                        "description": "Listados de departamentos.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/departamentos_bulk"
+                                }
+                            }
+                        }
+                    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+                }
+            }
+        },
+	"/municipios": {
+	    "get": {
+		"summary": "Retorna un listado de municipios.",
+		"description": "Permite realizar búsquedas sobre el listado de municipios.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de municipios.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/municipios_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de municipios.",
+		"description": "Permite realizar varias búsquedas sobre el listado de municipios en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/municipios_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de municipios.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/municipios_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/localidades": {
+	    "get": {
+		"summary": "Retorna un listado de localidades.",
+		"description": "Permite realizar búsquedas sobre el listado de localidades.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/municipio"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de localidades.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/localidades_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de localidades.",
+		"description": "Permite realizar varias búsquedas sobre el listado de localidades en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/localidades_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de localidades.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/localidades_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/calles": {
+	    "get": {
+		"summary": "Retorna un listado de calles.",
+		"description": "Permite realizar búsquedas sobre el listado de vías de circulación.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/tipo_calle"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_json_csv"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de calles.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/calles_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de calles.",
+		"description": "Permite realizar varias búsquedas sobre el listado de vías de circulación en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/calles_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de calles.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/calles_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/direcciones": {
+	    "get": {
+		"summary": "Normaliza una dirección.",
+		"description": "Permite normalizar una dirección utilizando el listado de vías de circulación.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/direccion"
+		    },
+		    {
+			"$ref": "#/components/parameters/tipo_calle"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_json_csv"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de direcciones normalizadas.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/direcciones_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Normaliza un lote de direcciones.",
+		"description": "Permite normalizar un lote de direcciones utilizando el listado de vías de circulación.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/direcciones_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de direcciones normalizadas.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/direcciones_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/ubicacion": {
+	    "get": {
+		"summary": "Georreferenciación inversa para un punto dado.",
+		"description": "Permite realizar una georreferenciación inversa para un punto, informando cuales unidades territoriales lo contienen.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/lat"
+		    },
+		    {
+			"$ref": "#/components/parameters/lon"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_json_geojson"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Resultado de la georreferenciación inversa.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/ubicacion_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Georreferenciación inversa para una lista de puntos.",
+		"description": "Permite realizar una georreferenciación inversa para varios puntos, informando cuales unidades territoriales contienen cada uno.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/ubicacion_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Resultados de las georreferenciaciones inversas.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/ubicacion_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	}
+    }
+}
