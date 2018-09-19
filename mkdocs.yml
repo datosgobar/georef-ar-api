@@ -22,7 +22,7 @@ nav:
     - Historial de versiones: history.md
 
 theme:
-  name: readthedocs
+  name: datosgobar_docs
   highlightjs: true
   hljs_languages:
       - yaml
