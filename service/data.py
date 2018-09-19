@@ -8,6 +8,7 @@ import logging
 import elasticsearch
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
+from elasticsearch_dsl.query import Term
 import psycopg2.pool
 from service import names as N
 
@@ -243,26 +244,26 @@ def build_entity_search(entity_id=None, name=None, state=None,
     s = Search()
 
     if entity_id:
-        s = s.query(build_match_query(N.ID, entity_id))
+        s = s.filter(build_term_query(N.ID, entity_id))
 
     if name:
         s = s.query(build_name_query(N.NAME, name, exact))
 
     if municipality:
         if municipality.isdigit():
-            s = s.query(build_match_query(N.MUN_ID, municipality))
+            s = s.filter(build_term_query(N.MUN_ID, municipality))
         else:
             s = s.query(build_name_query(N.MUN_NAME, municipality, exact))
 
     if department:
         if department.isdigit():
-            s = s.query(build_match_query(N.DEPT_ID, department))
+            s = s.filter(build_term_query(N.DEPT_ID, department))
         else:
             s = s.query(build_name_query(N.DEPT_NAME, department, exact))
 
     if state:
         if state.isdigit():
-            s = s.query(build_match_query(N.STATE_ID, state))
+            s = s.filter(build_term_query(N.STATE_ID, state))
         else:
             s = s.query(build_name_query(N.STATE_NAME, state, exact))
 
@@ -307,7 +308,7 @@ def build_streets_search(street_id=None, road_name=None, department=None,
     s = Search()
 
     if street_id:
-        s = s.query(build_match_query(N.ID, street_id))
+        s = s.filter(build_term_query(N.ID, street_id))
 
     if road_name:
         s = s.query(build_name_query(N.NAME, road_name, exact))
@@ -323,13 +324,13 @@ def build_streets_search(street_id=None, road_name=None, department=None,
 
     if department:
         if department.isdigit():
-            s = s.query(build_match_query(N.DEPT_ID, department))
+            s = s.filter(build_term_query(N.DEPT_ID, department))
         else:
             s = s.query(build_name_query(N.DEPT_NAME, department, exact))
 
     if state:
         if state.isdigit():
-            s = s.query(build_match_query(N.STATE_ID, state))
+            s = s.filter(build_term_query(N.STATE_ID, state))
         else:
             s = s.query(build_name_query(N.STATE_NAME, state, exact))
 
@@ -372,10 +373,24 @@ def build_place_search(lat, lon, fields=None):
     return s[:1]
 
 
+def build_term_query(field, value):
+    """Crea una condición de búsqueda por término exacto para Elasticsearch.
+
+    Args:
+        field (str): Campo de la condición.
+        value (str): Valor de comparación.
+
+    Returns:
+        Query: Condición para Elasticsearch.
+
+    """
+    return Term(**{field: value})
+
+
 def build_name_query(field, value, exact=False):
     """Crea una condición de búsqueda por nombre para Elasticsearch.
-       Las entidades con nombres son, por el momento, las provincias, los
-       departamentos, los municipios, las localidades y las calles.
+    Las entidades con nombres son, por el momento, las provincias, los
+    departamentos, los municipios, las localidades y las calles.
 
     Args:
         field (str): Campo de la condición.
