@@ -115,9 +115,9 @@ class SearchAddressesTest(SearchEntitiesTest):
             ['altura', 'fuente', 'id', 'nombre', 'ubicacion.lat',
              'ubicacion.lon'],
             ['altura', 'fuente', 'id', 'nombre', 'nomenclatura',
-                'ubicacion.lat', 'ubicacion.lon'],
+             'ubicacion.lat', 'ubicacion.lon'],
             ['altura', 'departamento.id', 'fuente', 'id', 'nombre',
-                'ubicacion.lat']
+             'ubicacion.lat']
         ]
         fields_results = []
 
@@ -310,10 +310,10 @@ class SearchAddressesTest(SearchEntitiesTest):
             'direccion': COMMON_ADDRESS
         })
 
-        roadsValid = roads and all(road['tipo'] == 'CALLE' for road in roads)
-        avenuesValid = avenues and all(av['tipo'] == 'AV' for av in avenues)
+        roads_valid = roads and all(road['tipo'] == 'CALLE' for road in roads)
+        avenues_valid = avenues and all(av['tipo'] == 'AV' for av in avenues)
 
-        self.assertTrue(roadsValid and avenuesValid)
+        self.assertTrue(roads_valid and avenues_valid)
 
     def test_filter_by_state_name(self):
         """Se debe poder filtrar los resultados por nombre de provincia."""

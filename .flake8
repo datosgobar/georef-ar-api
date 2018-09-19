@@ -1,0 +1,2 @@
+[flake8]
+ignore = N814, N812

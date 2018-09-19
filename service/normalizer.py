@@ -357,12 +357,12 @@ def process_state(request):
 
     """
     return process_entity(request, N.STATES, params.PARAMS_STATES, {
-            N.ID: 'entity_id',
-            N.NAME: 'name',
-            N.EXACT: 'exact',
-            N.ORDER: 'order',
-            N.FIELDS: 'fields',
-            N.OFFSET: 'offset'
+        N.ID: 'entity_id',
+        N.NAME: 'name',
+        N.EXACT: 'exact',
+        N.ORDER: 'order',
+        N.FIELDS: 'fields',
+        N.OFFSET: 'offset'
     })
 
 
@@ -425,15 +425,15 @@ def process_locality(request):
 
     """
     return process_entity(request, N.LOCALITIES, params.PARAMS_LOCALITIES, {
-            N.ID: 'entity_id',
-            N.NAME: 'name',
-            N.STATE: 'state',
-            N.DEPT: 'department',
-            N.MUN: 'municipality',
-            N.EXACT: 'exact',
-            N.ORDER: 'order',
-            N.FIELDS: 'fields',
-            N.OFFSET: 'offset'
+        N.ID: 'entity_id',
+        N.NAME: 'name',
+        N.STATE: 'state',
+        N.DEPT: 'department',
+        N.MUN: 'municipality',
+        N.EXACT: 'exact',
+        N.ORDER: 'order',
+        N.FIELDS: 'fields',
+        N.OFFSET: 'offset'
     })
 
 

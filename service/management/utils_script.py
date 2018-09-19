@@ -41,19 +41,19 @@ TIMEOUT = 500
 def setup_logger(l, stream):
     l.setLevel(logging.INFO)
 
-    stdoutHandler = logging.StreamHandler()
-    stdoutHandler.setLevel(logging.INFO)
+    stdout_handler = logging.StreamHandler()
+    stdout_handler.setLevel(logging.INFO)
 
-    strHandler = logging.StreamHandler(stream)
-    strHandler.setLevel(logging.INFO)
+    str_handler = logging.StreamHandler(stream)
+    str_handler.setLevel(logging.INFO)
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s',
                                   '%Y-%m-%d %H:%M:%S')
-    stdoutHandler.setFormatter(formatter)
-    strHandler.setFormatter(formatter)
+    stdout_handler.setFormatter(formatter)
+    str_handler.setFormatter(formatter)
 
-    l.addHandler(stdoutHandler)
-    l.addHandler(strHandler)
+    l.addHandler(stdout_handler)
+    l.addHandler(str_handler)
 
 
 def send_email(host, user, password, subject, message, recipients,
@@ -327,9 +327,7 @@ def send_index_email(config, forced, env, log):
         forced)
 
     send_email(config['host'], config['user'], config['password'], subject,
-               msg, config['recipients'], {
-                   'log.txt': log
-               })
+               msg, config['recipients'], {'log.txt': log})
 
 
 def run_index(es, forced, name='all'):

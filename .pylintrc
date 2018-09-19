@@ -148,7 +148,6 @@ disable=print-statement,
 	too-few-public-methods,
 	too-many-branches,
 	missing-docstring,
-	bad-continuation,
 	too-many-locals,
 	logging-format-interpolation,
 	redefined-builtin

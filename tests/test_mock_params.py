@@ -250,8 +250,8 @@ class ParamParsingTest(TestCase):
     def test_max_offset(self):
         """El parámetro inicio debería tener un valor máximo permitido."""
         self.assert_errors_match(choice(ENDPOINTS) + '?inicio=100000', {
-                (T.VALUE_ERROR.value, 'inicio')
-            })
+            (T.VALUE_ERROR.value, 'inicio')
+        })
 
     def test_empty_int_param(self):
         """Los parámtros de tipo int no deberían aceptar strings
