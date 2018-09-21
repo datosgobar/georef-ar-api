@@ -26,7 +26,6 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 {
     "provincias": [
         {
-            "fuente": "IGN",
             "id": "14",
             "centroide": {
                 "lat": -32.142933,
@@ -47,7 +46,6 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 {
     "departamentos": [
         {
-            "fuente": "IGN",
             "id": "38042",
             "centroide": {
                 "lat": -24.194923,
@@ -68,31 +66,22 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 ```
 
 ### Búsqueda de municipios
-`GET` [`https://apis.datos.gob.ar/georef/api/municipios?departamento=graneros`](https://apis.datos.gob.ar/georef/api/municipios?departamento=graneros)
+`GET` [`https://apis.datos.gob.ar/georef/api/municipios?provincia=tucuman&aplanar`](https://apis.datos.gob.ar/georef/api/municipios?provincia=tucuman&aplanar)
 ```
 {
     "municipios": [
         {
-            "centroide": {
-                "lat": -27.816619,
-                "lon": -65.199594
-            },
-            "departamento": {
-                "id": "90035",
-                "nombre": "Graneros"
-            },
-            "fuente": "IGN",
+            "centroide_lat": -27.816619,
+            "centroide_lon": -65.199594,
             "id": "908210",
             "nombre": "Taco Ralo",
-            "provincia": {
-                "id": "90",
-                "nombre": "Tucumán"
-            }
+            "provincia_id": "90",
+            "provincia_nombre": "Tucumán"
         },
-        { ... } // 2 municipios omitidos
+        { ... } // 9 municipios omitidos
     ],
-    "cantidad": 3,
-    "total": 3,
+    "cantidad": 10,
+    "total": 112,
     "inicio": 0
 }
 ```
@@ -103,7 +92,6 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 {
     "localidades": [
         {
-            "fuente": "BAHRA",
             "id": "26007030000",
             "nombre": "PUERTO PIRAMIDE"
         },
@@ -126,36 +114,6 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
                 "id": "06270",
                 "nombre": "JOSÉ M. EZEIZA"
             },
-            "fuente": "INDEC",
-            "id": "0627001001875",
-            "nombre": "FLORIDA",
-            "nomenclatura": "FLORIDA 1801, JOSÉ M. EZEIZA, BUENOS AIRES",
-            "provincia": {
-                "id": "06",
-                "nombre": "BUENOS AIRES"
-            },
-            "tipo": "CALLE"
-        },
-        { ... } // 9 resultados omitidos
-    ],
-    "cantidad": 1,
-    "total": 13,
-    "inicio": 0
-}
-```
-
-### Normalización de direcciones
-`GET` [`https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida 1801`](https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida%201801)
-```
-{
-    "direcciones": [
-        {
-            "altura": 1801,
-            "departamento": {
-                "id": "06270",
-                "nombre": "JOSÉ M. EZEIZA"
-            },
-            "fuente": "INDEC",
             "id": "0627001001875",
             "nombre": "FLORIDA",
             "nomenclatura": "FLORIDA 1801, JOSÉ M. EZEIZA, BUENOS AIRES",
@@ -193,7 +151,6 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
                 "id": "90077",
                 "nombre": "Río Chico"
             },
-            "fuente": "INDEC",
             "id": "9007701000050",
             "nombre": "AV GRL SAVIO",
             "nomenclatura": "AV GRL SAVIO, Río Chico, Tucumán",
@@ -243,7 +200,6 @@ Resultados:
         {
             "municipios": [
                 {
-                    "fuente": "IGN",
                     "id": "060301",
                     "nombre": "General Belgrano"
                 }
@@ -257,9 +213,6 @@ Resultados:
                 {
                     "centroide_lat": -35.361211,
                     "centroide_lon": -64.294073,
-                    "departamento_id": "42133",
-                    "departamento_nombre": "Realicó",
-                    "fuente": "IGN",
                     "id": "420126",
                     "nombre": "Embajador Martini",
                     "provincia_id": "42",
@@ -303,7 +256,6 @@ Resultados:
             "direcciones": [
                 {
                     "altura": 3100,
-                    "fuente": "INDEC",
                     "id": "0642701011435",
                     "nombre": "SANTA FE"
                 }
@@ -316,7 +268,6 @@ Resultados:
             "direcciones": [
                 {
                     "altura": 4010,
-                    "fuente": "INDEC",
                     "id": "8204229000610",
                     "nombre": "CORRIENTES"
                 }
@@ -337,12 +288,14 @@ curl -X POST "https://apis.datos.gob.ar/georef/api/ubicacion" \
     "ubicaciones": [
         {
             "lat": -27.274161,
-            "lon": -66.752929
+            "lon": -66.752929,
+            "campos": "completo"
         },
         {
             "lat": -31.480693,
             "lon": -59.092813,
-            "aplanar": true
+            "aplanar": true,
+            "campos": "completo"
         }
     ]
 }

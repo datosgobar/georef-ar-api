@@ -38,15 +38,16 @@ Los datos utilizados por Georef API fueron obtenidos a través de un proceso de 
 - Enlace: [Portal de geoservicios de INDEC](https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas)
 
 ## Archivos
-A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `4.0.0`.
+A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `5.0.0`.
 
 ### Provincias
 El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:
 ```
 {
 	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "4.0.0", // Versión de archivo
+	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "5.0.0", // Versión de archivo
+	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
 			"id": "90", // ID de provincia
@@ -70,8 +71,9 @@ El archivo de datos de departamentos debe tener formato JSON. Su esquema de dato
 ```
 {
 	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "4.0.0", // Versión de archivo
+	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "5.0.0", // Versión de archivo
+	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
 			"id": "06427", // ID del departamento
@@ -99,8 +101,9 @@ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos d
 ```
 {
 	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "4.0.0", // Versión de archivo
+	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "5.0.0", // Versión de archivo
+	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
 			"id": "060105", // ID del municipio
@@ -112,10 +115,6 @@ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos d
 			"geometria": {
 				"type": "mutlipolygon", // Tipo de geometría
 				"coordinates": [[[[-58.4453, -34.4324], [-58.6463, -34.6841], ...]]] // Listado de coordenadas (formato WKT) del MultiPolygon
-			},
-			"departamento": { // Departamento que ocupa la mayor área del municipio
-				"id": "06105",
-				"nombre": "Bolívar"
 			},
 			"provincia": {  // Provincia que contiene al municipio
 				"id": "06",
@@ -132,8 +131,9 @@ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos 
 ```
 {
 	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "4.0.0", // Versión de archivo
+	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "5.0.0", // Versión de archivo
+	"fuente": "BAHRA", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
 			"id": "06189080000", // ID del asentamiento
@@ -170,8 +170,9 @@ El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe 
 ```
 {
 	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_actualizacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "4.0.0", // Versión de archivo
+	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "5.0.0", // Versión de archivo
+	"fuente": "INDEC", // Fuente de los datos
 	"datos": [ // Lista de vías de circulación
 		{
 			"nomenclatura": "LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires", // Nomenclatura: 'nombre, departamento, provincia'

@@ -38,7 +38,6 @@ provincias = get_similar("provincias", "San Juan")
         u'lat': -30.865368,
         u'lon': -68.889491
     },
-    u'fuente': u'IGN',
     u'id': u'70',
     u'nombre': u'San Juan'
 }]
@@ -79,7 +78,6 @@ provincias = get_similar_bulk("provincias", ["pxa", "sant fe"])
             u'lat': -30.706927,
             u'lon': -60.949837
         },
-        u'fuente': u'IGN',
         u'id': u'82',
         u'nombre': u'Santa Fe'
     }
@@ -124,7 +122,6 @@ ubicaciones = get_territorial_units([
     {
         u'departamento_id': u'30105',
         u'departamento_nombre': u'Victoria',
-        u'fuente': u'IGN',
         u'lat': -32.9477132,
         u'lon': -60.6304658,
         u'municipio_id': u'82210',
@@ -135,7 +132,6 @@ ubicaciones = get_territorial_units([
     {
         u'departamento_id': u'02007',
         u'departamento_nombre': u'Comuna 1',
-        u'fuente': u'IGN',
         u'lat': -34.6037389,
         u'lon': -58.3815704,
         u'municipio_id': None,

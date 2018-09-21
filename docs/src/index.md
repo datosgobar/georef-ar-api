@@ -21,7 +21,6 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
         {
             "nombre": "Santiago del Estero",
             "id": "86",
-            "fuente": "IGN",
             "centroide": {
                 "lat": -27.782412,
                 "lon": -63.252387
@@ -52,7 +51,6 @@ Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, pue
             "id": "10035",
             "nombre": "Belén"
         },
-        "fuente": "IGN",
         "lat": -27.2741,
         "lon": -66.7529,
         "municipio": {
@@ -79,8 +77,7 @@ Listar las provincias de la República Argentina:
     "provincias": [
         {
             "nombre": "Chaco",
-            "id": "22",
-            "fuente": "IGN"
+            "id": "22"
         },
 		{ ... } // 23 resultados omitidos
     ],
@@ -98,8 +95,7 @@ Asumiendo que el usuario selecciona **Chaco** (ID: **22**), se ejecutaría la si
     "municipios": [
         {
             "nombre": "Makallé",
-            "id": "220161",
-            "fuente": "IGN"
+            "id": "220161"
         },
 		{ ... } // 67 resultados omitidos
     ],

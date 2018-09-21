@@ -8,7 +8,9 @@ Página Swagger UI para la documentación OpenAPI de `georef-ar-api`. La documen
 
 `src/`: Archivos de `swagger-ui-dist` modificados para la documentación de `georef-ar-api`.
 
-## Desarrollo
+## Crear/Actualizar página Swagger UI
+
+**Nota**: Si solo se modifica el archivo `openapi.json`, **no** es necesario re-generar la página Swagger UI. La re-generación solo es útil si se necesita cambiar algún aspecto estético o estructural de la misma.
 
 1. Desde la raíz del proyecto, acceder al directorio `open_api`:
 ```bash
