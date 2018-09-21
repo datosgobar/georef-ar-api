@@ -69,17 +69,17 @@ docs_dist:
 # Generar tablas de contenidos, se requiere el comando 'doctoc'
 # https://github.com/thlorenz/doctoc
 doctoc:
-	doctoc --maxlevel 3 --github --title " " docs/src/quick_start.md
+	doctoc --maxlevel 3 --github --notitle docs/src/quick_start.md
 	bash docs/src/fix_github_links.sh docs/src/quick_start.md
-	doctoc --maxlevel 3 --github --title " " docs/src/spreadsheet_integration.md
+	doctoc --maxlevel 3 --github --notitle docs/src/spreadsheet_integration.md
 	bash docs/src/fix_github_links.sh docs/src/spreadsheet_integration.md
-	doctoc --maxlevel 3 --github --title " " docs/src/python_usage.md
+	doctoc --maxlevel 3 --github --notitle docs/src/python_usage.md
 	bash docs/src/fix_github_links.sh docs/src/python_usage.md
-	doctoc --maxlevel 3 --github --title " " docs/src/jwt-token.md
+	doctoc --maxlevel 3 --github --notitle docs/src/jwt-token.md
 	bash docs/src/fix_github_links.sh docs/src/jwt-token.md
-	doctoc --maxlevel 3 --github --title " " docs/src/developers/georef-api-development.md
-	bash docs/src/fix_github_links.sh docs/src/developers/georef-api-development.md
-	doctoc --maxlevel 3 --github --title " " docs/src/developers/python3.6.md
-	bash docs/src/fix_github_links.sh docs/src/developers/python3.6.md
-	doctoc --maxlevel 3 --github --title " " docs/src/developers/georef-api-data.md
-	bash docs/src/fix_github_links.sh docs/src/developers/georef-api-data.md
+	doctoc --maxlevel 3 --github --notitle docs/src/georef-api-development.md
+	bash docs/src/fix_github_links.sh docs/src/georef-api-development.md
+	doctoc --maxlevel 3 --github --notitle docs/src/python3.6.md
+	bash docs/src/fix_github_links.sh docs/src/python3.6.md
+	doctoc --maxlevel 3 --github --notitle docs/src/georef-api-data.md
+	bash docs/src/fix_github_links.sh docs/src/georef-api-data.md

@@ -4,17 +4,17 @@ En este documento se detallan los pasos a seguir si se desea configurar un servi
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
- 
+
 
 - [Dependencias](#dependencias)
 - [Instalación](#instalacion)
-    - [1. Base de datos](#1-base-de-datos)
-    - [2. Elasticsearch](#2-elasticsearch)
-    - [3. Repositorio y dependencias](#3-repositorio-y-dependencias)
-    - [4. Cargar las funciones SQL](#4-cargar-las-funciones-sql)
-    - [5. Crear los índices](#5-crear-los-indices)
-    - [6. (Opcional) Re-indexar datos](#6-opcional-re-indexar-datos)
-    - [7. Correr API](#7-correr-api)
+  - [1. Base de datos](#1-base-de-datos)
+  - [2. Elasticsearch](#2-elasticsearch)
+  - [3. Repositorio y dependencias](#3-repositorio-y-dependencias)
+  - [4. Cargar las funciones SQL](#4-cargar-las-funciones-sql)
+  - [5. Crear los índices](#5-crear-los-indices)
+  - [6. (Opcional) Re-indexar datos](#6-opcional-re-indexar-datos)
+  - [7. Correr API](#7-correr-api)
 - [Tests](#tests)
 - [Archivos de datos](#archivos-de-datos)
 

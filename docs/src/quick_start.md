@@ -2,7 +2,7 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
- 
+
 
 - [Ejemplos rápidos](#ejemplos-rapidos)
     - [Búsqueda de provincias](#busqueda-de-provincias)
@@ -10,10 +10,11 @@
     - [Búsqueda de municipios](#busqueda-de-municipios)
     - [Búsqueda de localidades](#busqueda-de-localidades)
     - [Normalización de direcciones](#normalizacion-de-direcciones)
-    - [Entidades geográficas en un punto](#entidades-geograficas-en-un-punto)
+    - [Listado de calles](#listado-de-calles)
 - [Ejemplos de operaciones por lotes](#ejemplos-de-operaciones-por-lotes)
     - [Búsqueda de municipios en lotes](#busqueda-de-municipios-en-lotes)
     - [Normalización de direcciones en lotes](#normalizacion-de-direcciones-en-lotes)
+    - [Entidades geográficas en varios puntos](#entidades-geograficas-en-varios-puntos)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
