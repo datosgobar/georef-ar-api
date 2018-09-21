@@ -524,7 +524,6 @@
 <pre><code>{
     &quot;provincias&quot;: [
         {
-            &quot;fuente&quot;: &quot;IGN&quot;,
             &quot;id&quot;: &quot;14&quot;,
             &quot;centroide&quot;: {
                 &quot;lat&quot;: -32.142933,
@@ -544,7 +543,6 @@
 <pre><code>{
     &quot;departamentos&quot;: [
         {
-            &quot;fuente&quot;: &quot;IGN&quot;,
             &quot;id&quot;: &quot;38042&quot;,
             &quot;centroide&quot;: {
                 &quot;lat&quot;: -24.194923,
@@ -565,30 +563,21 @@
 </code></pre>
 
 <h3 id="busqueda-de-municipios">Búsqueda de municipios<a class="headerlink" href="#busqueda-de-municipios" title="Permanent link">&para;</a></h3>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/municipios?departamento=graneros"><code>https://apis.datos.gob.ar/georef/api/municipios?departamento=graneros</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/municipios?provincia=tucuman&amp;aplanar"><code>https://apis.datos.gob.ar/georef/api/municipios?provincia=tucuman&amp;aplanar</code></a></p>
 <pre><code>{
     &quot;municipios&quot;: [
         {
-            &quot;centroide&quot;: {
-                &quot;lat&quot;: -27.816619,
-                &quot;lon&quot;: -65.199594
-            },
-            &quot;departamento&quot;: {
-                &quot;id&quot;: &quot;90035&quot;,
-                &quot;nombre&quot;: &quot;Graneros&quot;
-            },
-            &quot;fuente&quot;: &quot;IGN&quot;,
+            &quot;centroide_lat&quot;: -27.816619,
+            &quot;centroide_lon&quot;: -65.199594,
             &quot;id&quot;: &quot;908210&quot;,
             &quot;nombre&quot;: &quot;Taco Ralo&quot;,
-            &quot;provincia&quot;: {
-                &quot;id&quot;: &quot;90&quot;,
-                &quot;nombre&quot;: &quot;Tucumán&quot;
-            }
+            &quot;provincia_id&quot;: &quot;90&quot;,
+            &quot;provincia_nombre&quot;: &quot;Tucumán&quot;
         },
-        { ... } // 2 municipios omitidos
+        { ... } // 9 municipios omitidos
     ],
-    &quot;cantidad&quot;: 3,
-    &quot;total&quot;: 3,
+    &quot;cantidad&quot;: 10,
+    &quot;total&quot;: 112,
     &quot;inicio&quot;: 0
 }
 </code></pre>
@@ -598,7 +587,6 @@
 <pre><code>{
     &quot;localidades&quot;: [
         {
-            &quot;fuente&quot;: &quot;BAHRA&quot;,
             &quot;id&quot;: &quot;26007030000&quot;,
             &quot;nombre&quot;: &quot;PUERTO PIRAMIDE&quot;
         },
@@ -620,35 +608,6 @@
                 &quot;id&quot;: &quot;06270&quot;,
                 &quot;nombre&quot;: &quot;JOSÉ M. EZEIZA&quot;
             },
-            &quot;fuente&quot;: &quot;INDEC&quot;,
-            &quot;id&quot;: &quot;0627001001875&quot;,
-            &quot;nombre&quot;: &quot;FLORIDA&quot;,
-            &quot;nomenclatura&quot;: &quot;FLORIDA 1801, JOSÉ M. EZEIZA, BUENOS AIRES&quot;,
-            &quot;provincia&quot;: {
-                &quot;id&quot;: &quot;06&quot;,
-                &quot;nombre&quot;: &quot;BUENOS AIRES&quot;
-            },
-            &quot;tipo&quot;: &quot;CALLE&quot;
-        },
-        { ... } // 9 resultados omitidos
-    ],
-    &quot;cantidad&quot;: 1,
-    &quot;total&quot;: 13,
-    &quot;inicio&quot;: 0
-}
-</code></pre>
-
-<h3 id="normalizacion-de-direcciones_1">Normalización de direcciones<a class="headerlink" href="#normalizacion-de-direcciones_1" title="Permanent link">&para;</a></h3>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&amp;direccion=Florida%201801"><code>https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&amp;direccion=Florida 1801</code></a></p>
-<pre><code>{
-    &quot;direcciones&quot;: [
-        {
-            &quot;altura&quot;: 1801,
-            &quot;departamento&quot;: {
-                &quot;id&quot;: &quot;06270&quot;,
-                &quot;nombre&quot;: &quot;JOSÉ M. EZEIZA&quot;
-            },
-            &quot;fuente&quot;: &quot;INDEC&quot;,
             &quot;id&quot;: &quot;0627001001875&quot;,
             &quot;nombre&quot;: &quot;FLORIDA&quot;,
             &quot;nomenclatura&quot;: &quot;FLORIDA 1801, JOSÉ M. EZEIZA, BUENOS AIRES&quot;,
@@ -685,7 +644,6 @@
                 &quot;id&quot;: &quot;90077&quot;,
                 &quot;nombre&quot;: &quot;Río Chico&quot;
             },
-            &quot;fuente&quot;: &quot;INDEC&quot;,
             &quot;id&quot;: &quot;9007701000050&quot;,
             &quot;nombre&quot;: &quot;AV GRL SAVIO&quot;,
             &quot;nomenclatura&quot;: &quot;AV GRL SAVIO, Río Chico, Tucumán&quot;,
@@ -732,7 +690,6 @@
         {
             &quot;municipios&quot;: [
                 {
-                    &quot;fuente&quot;: &quot;IGN&quot;,
                     &quot;id&quot;: &quot;060301&quot;,
                     &quot;nombre&quot;: &quot;General Belgrano&quot;
                 }
@@ -746,9 +703,6 @@
                 {
                     &quot;centroide_lat&quot;: -35.361211,
                     &quot;centroide_lon&quot;: -64.294073,
-                    &quot;departamento_id&quot;: &quot;42133&quot;,
-                    &quot;departamento_nombre&quot;: &quot;Realicó&quot;,
-                    &quot;fuente&quot;: &quot;IGN&quot;,
                     &quot;id&quot;: &quot;420126&quot;,
                     &quot;nombre&quot;: &quot;Embajador Martini&quot;,
                     &quot;provincia_id&quot;: &quot;42&quot;,
@@ -791,7 +745,6 @@
             &quot;direcciones&quot;: [
                 {
                     &quot;altura&quot;: 3100,
-                    &quot;fuente&quot;: &quot;INDEC&quot;,
                     &quot;id&quot;: &quot;0642701011435&quot;,
                     &quot;nombre&quot;: &quot;SANTA FE&quot;
                 }
@@ -804,7 +757,6 @@
             &quot;direcciones&quot;: [
                 {
                     &quot;altura&quot;: 4010,
-                    &quot;fuente&quot;: &quot;INDEC&quot;,
                     &quot;id&quot;: &quot;8204229000610&quot;,
                     &quot;nombre&quot;: &quot;CORRIENTES&quot;
                 }
@@ -824,12 +776,14 @@
     &quot;ubicaciones&quot;: [
         {
             &quot;lat&quot;: -27.274161,
-            &quot;lon&quot;: -66.752929
+            &quot;lon&quot;: -66.752929,
+            &quot;campos&quot;: &quot;completo&quot;
         },
         {
             &quot;lat&quot;: -31.480693,
             &quot;lon&quot;: -59.092813,
-            &quot;aplanar&quot;: true
+            &quot;aplanar&quot;: true,
+            &quot;campos&quot;: &quot;completo&quot;
         }
     ]
 }
