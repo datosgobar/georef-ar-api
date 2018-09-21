@@ -788,11 +788,13 @@ def process_address(request):
         return formatter.create_internal_error_response()
 
 
-def build_place_result(query, dept, muni):
+def build_place_result(query, state, dept, muni):
     """Construye un resultado para una consulta al endpoint de ubicación.
 
     Args:
         query (dict): Query utilizada para obtener los resultados.
+        state (dict): Provincia encontrada en la ubicación especificada.
+            Puede ser None.
         dept (dict): Departamento encontrado en la ubicación especificada.
             Puede ser None.
         muni (dict): Municipio encontrado en la ubicación especificada. Puede
@@ -807,16 +809,14 @@ def build_place_result(query, dept, muni):
         N.NAME: None
     }
 
-    if not dept:
+    if not state:
+        # El punto no está en la República Argentina
         state = empty_entity.copy()
         dept = empty_entity.copy()
         muni = empty_entity.copy()
         source = None
     else:
-        # Remover la provincia del departamento y colocarla directamente
-        # en el resultado. Haciendo esto se logra evitar una consulta
-        # al índice de provincias.
-        state = dept.pop(N.STATE)
+        dept = dept or empty_entity.copy()
         muni = muni or empty_entity.copy()
         source = get_index_source(N.DEPARTMENTS)
 
@@ -871,6 +871,37 @@ def process_place_queries(es, queries):
         list: Resultados de ubicaciones con los campos apropiados
 
     """
+
+    # TODO:
+    # Por problemas con los datos de origen, se optó por utilizar una
+    # implementación simple para la la funcion 'process_place_queries'.
+    # Cuando los datos de departamentos cubran todo el departamento nacional,
+    # se podría modificar la función para que funcione de la siguiente forma:
+    #
+    # (Recordar que las provincias y departamentos cubren todo el territorio
+    # nacional, pero no los municipios.)
+    #
+    # 1) Tomar las N consultas recibidas y enviar todas al índice de
+    #    departamentos.
+    # 2) Tomar las consultas *que retornaron una entidad*, y re-enviarlas pero
+    #    esta vez al índice de municipios. Las consultas que *no* retornaron
+    #    una entidad (es decir, no cayeron dentro de un depto.) quedan marcadas
+    #    como nulas.
+    # 3) Combinar los resultados de los pasos 1 y 2: Si la consulta no tiene
+    #    depto. asociado, su resultado es nulo. Si tiene depto., entonces
+    #    también tiene provincia. Si la consulta tiene municipio, entonces
+    #    tiene provincia, departamento y municipio.
+
+    state_queries = []
+    for query in queries:
+        state_queries.append({
+            'lat': query['lat'],
+            'lon': query['lon'],
+            'fields': [N.ID, N.NAME]
+        })
+
+    state_results = data.search_places(es, N.STATES, state_queries)
+
     dept_queries = []
     for query in queries:
         dept_queries.append({
@@ -892,14 +923,17 @@ def process_place_queries(es, queries):
     muni_results = data.search_places(es, N.MUNICIPALITIES, muni_queries)
 
     places = []
-    for query, dept_result, muni_result in zip(queries, dept_results,
-                                               muni_results):
+    for query, state_result, dept_result, muni_result in zip(queries,
+                                                             state_results,
+                                                             dept_results,
+                                                             muni_results):
         # Ya que la query de tipo place retorna una o cero entidades,
         # extraer la primera entidad de los resultados, o tomar None si
         # no hay resultados.
+        state = state_result.hits[0] if state_result else None
         dept = dept_result.hits[0] if dept_result else None
         muni = muni_result.hits[0] if muni_result else None
-        places.append(build_place_result(query, dept, muni))
+        places.append(build_place_result(query, state, dept, muni))
 
     return places
 
