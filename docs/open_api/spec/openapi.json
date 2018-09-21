@@ -53,10 +53,6 @@
 				"example": -60.558832
 			    }
 			}
-		    },
-		    "fuente": {
-			"type": "string",
-			"example": "IGN"
 		    }
                 }
             },
@@ -161,10 +157,6 @@
 				"example": -62.526029
 			    }
 			}
-		    },
-		    "fuente": {
-			"type": "string",
-			"example": "IGN"
 		    }
                 }
             },
@@ -270,9 +262,6 @@
                         "type": "string",
                         "example": "Granadero Baigorria"
                     },
-                    "departamento": {
-                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
-                    },
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
@@ -288,10 +277,6 @@
 				"example": -60.704006
 			    }
 			}
-		    },
-		    "fuente": {
-			"type": "string",
-			"example": "IGN"
 		    }
                 }
             },
@@ -358,9 +343,6 @@
 				},
 				"provincia": {
 				    "$ref": "#/components/schemas/param_provincia"
-				},
-				"departamento": {
-				    "$ref": "#/components/schemas/param_departamento"
 				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
@@ -430,10 +412,6 @@
 				"example": -60.706216
 			    }
 			}
-		    },
-		    "fuente": {
-			"type": "string",
-			"example": "BAHRA"
 		    }
                 }
             },
@@ -549,11 +527,7 @@
                     "tipo": {
                         "type": "string",
                         "example": "CALLE"
-                    },
-		    "fuente": {
-			"type": "string",
-			"example": "INDEC"
-		    }
+                    }
                 }
             },
 	    "direcciones_single": {
@@ -609,6 +583,9 @@
 				},
 				"departamento": {
 				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
 				},
 				"aplanar": {
 				    "$ref": "#/components/schemas/param_aplanar"
@@ -699,11 +676,7 @@
                             "PJE",
                             "BV"                           
                         ]
-                    },
-		    "fuente": {
-			"type": "string",
-			"example": "INDEC"
-		    }
+                    }
                 }
             },
 	    "calles_single": {
@@ -763,6 +736,9 @@
 				"departamento": {
 				    "$ref": "#/components/schemas/param_departamento"
 				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
 				"aplanar": {
 				    "$ref": "#/components/schemas/param_aplanar"
 				},
@@ -806,10 +782,6 @@
 		    "lon": {
 			"type": "number",
 			"example": -60.697636
-		    },
-		    "fuente": {
-			"type": "string",
-			"example": "IGN"
 		    }
 		}
 	    },
@@ -1060,7 +1032,7 @@
             },
             "campos": {
                 "name": "campos",
-                "description": "Campos a incluir en la respuesta separados por comas, sin espacios. Algunos campos siempre serán incluidos, incluso si no se agregaron en la lista. Para incluir campos de sub-entidades, separar los nombres con un punto, por ejemplo: `provincia.id`.",
+                "description": "Campos a incluir en la respuesta separados por comas, sin espacios. Algunos campos siempre serán incluidos, incluso si no se agregaron en la lista. Para incluir campos de sub-entidades, separar los nombres con un punto, por ejemplo: `provincia.id`. También se pueden especificar los valores especiales: `basico`, `estandar` y `completo`.",
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_campos"
@@ -1384,9 +1356,6 @@
 			"$ref": "#/components/parameters/provincia"
 		    },
 		    {
-			"$ref": "#/components/parameters/departamento"
-		    },
-		    {
 			"$ref": "#/components/parameters/orden"
 		    },
 		    {
@@ -1574,6 +1543,9 @@
 		    {
 			"$ref": "#/components/parameters/departamento"
 		    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
 		    {
 			"$ref": "#/components/parameters/aplanar"
 		    },
@@ -1662,6 +1634,9 @@
 		    {
 			"$ref": "#/components/parameters/departamento"
 		    },
+                    {
+                        "$ref": "#/components/parameters/orden"
+                    },
 		    {
 			"$ref": "#/components/parameters/aplanar"
 		    },
@@ -1678,7 +1653,7 @@
 			"$ref": "#/components/parameters/exacto"
 		    },
 		    {
-			"$ref": "#/components/parameters/formato_json_csv"
+			"$ref": "#/components/parameters/formato_all"
 		    }
 		],
 		"responses": {
