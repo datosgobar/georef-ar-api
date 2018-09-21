@@ -495,6 +495,20 @@
                 
                 
                 <h1 id="historial-de-versiones">Historial de versiones<a class="headerlink" href="#historial-de-versiones" title="Permanent link">&para;</a></h1>
+<h2 id="020">0.2.0<a class="headerlink" href="#020" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Remueve campo 'departamento' de la entidad municipio. Esto se debe a que los departamentos no son padres jerárquicos de los municipios.</li>
+<li>Agrega parámetro <code>orden</code> a recursos <code>/calles</code> y <code>/direcciones</code>.</li>
+<li>Agrega formato GeoJSON a recurso <code>/direcciones</code>.</li>
+<li>Agrega conjuntos de campos predefinidos al parámetro <code>campos</code>: los valores posibles son:<ul>
+<li><code>basico</code></li>
+<li><code>estandar</code> (utilizado por defecto)</li>
+<li><code>completo</code></li>
+</ul>
+</li>
+<li>Mueve campo de respuestas <code>fuente</code> a conjunto <code>completo</code>.</li>
+<li>Permite el uso del parámetro <code>aplanar</code> en respuestas GeoJSON.</li>
+</ul>
 <h2 id="016">0.1.6<a class="headerlink" href="#016" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Actualiza proceso de indexación para utilizar datos de ETL versión <code>4.0.0</code>.</li>

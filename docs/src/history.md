@@ -1,5 +1,16 @@
 # Historial de versiones
 
+## 0.2.0
+- Remueve campo 'departamento' de la entidad municipio. Esto se debe a que los departamentos no son padres jerárquicos de los municipios.
+- Agrega parámetro `orden` a recursos `/calles` y `/direcciones`.
+- Agrega formato GeoJSON a recurso `/direcciones`.
+- Agrega conjuntos de campos predefinidos al parámetro `campos`: los valores posibles son:
+	- `basico`
+	- `estandar` (utilizado por defecto)
+	- `completo`
+- Mueve campo de respuestas `fuente` a conjunto `completo`.
+- Permite el uso del parámetro `aplanar` en respuestas GeoJSON.
+
 ## 0.1.6
 - Actualiza proceso de indexación para utilizar datos de ETL versión `4.0.0`.
 - Modifica manejo de altura en recurso `/direcciones`. La nueva versión del recurso intenta ubicar altura dentro de los extremos de la calle tomando en consideración que los datos pueden no siempre estar completos (o ser ideales). Este cambio también afecta la efectividad de la geolocalización de direcciones.
