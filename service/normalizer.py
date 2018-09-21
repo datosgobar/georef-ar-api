@@ -12,6 +12,14 @@ from service import names as N
 
 logger = logging.getLogger('georef')
 
+INDEX_SOURCES = {
+    N.STATES: N.SOURCE_IGN,
+    N.DEPARTMENTS: N.SOURCE_IGN,
+    N.MUNICIPALITIES: N.SOURCE_IGN,
+    N.LOCALITIES: N.SOURCE_BAHRA,
+    N.STREETS: N.SOURCE_INDEC
+}
+
 
 class QueryResult:
     """Representa el resultado de una consulta a la API.
@@ -157,29 +165,6 @@ def get_postgres_db_connection(pool):
         pool.putconn(connection)
 
 
-def get_index_source(index):
-    """Devuelve la fuente para un índice dado.
-
-    Args:
-        index (str): Nombre del índice.
-
-    Returns:
-        str: Nombre de la fuente.
-
-    """
-    if index in [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES]:
-        return N.SOURCE_IGN
-
-    if index == N.LOCALITIES:
-        return N.SOURCE_BAHRA
-
-    if index == N.STREETS:
-        return N.SOURCE_INDEC
-
-    raise ValueError(
-        'No se pudo determinar la fuente de: {}'.format(index))
-
-
 def translate_keys(d, translations, ignore=None):
     """Cambia las keys del diccionario 'd', utilizando las traducciones
     especificadas en 'translations'. Devuelve los resultados en un nuevo
@@ -245,7 +230,7 @@ def process_entity_single(request, name, param_parser, key_translations):
     es = get_elasticsearch()
     result = data.search_entities(es, name, [query])[0]
 
-    source = get_index_source(name)
+    source = INDEX_SOURCES[name]
     for match in result.hits:
         match[N.SOURCE] = source
 
@@ -302,7 +287,7 @@ def process_entity_bulk(request, name, param_parser, key_translations):
     es = get_elasticsearch()
     results = data.search_entities(es, name, queries)
 
-    source = get_index_source(name)
+    source = INDEX_SOURCES[name]
     for result in results:
         for match in result.hits:
             match[N.SOURCE] = source
@@ -405,7 +390,6 @@ def process_municipality(request):
                               N.ID: 'entity_id',
                               N.NAME: 'name',
                               N.STATE: 'state',
-                              N.DEPT: 'department',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
                               N.FIELDS: 'fields',
@@ -500,7 +484,7 @@ def process_street_single(request):
     es = get_elasticsearch()
     result = data.search_streets(es, [query])[0]
 
-    source = get_index_source(N.STREETS)
+    source = INDEX_SOURCES[N.STREETS]
     for match in result.hits:
         match[N.SOURCE] = source
 
@@ -541,7 +525,7 @@ def process_street_bulk(request):
     es = get_elasticsearch()
     results = data.search_streets(es, queries)
 
-    source = get_index_source(N.STREETS)
+    source = INDEX_SOURCES[N.STREETS]
     for result in results:
         for match in result.hits:
             match[N.SOURCE] = source
@@ -713,7 +697,7 @@ def process_address_single(request):
     es = get_elasticsearch()
     result = data.search_streets(es, [query])[0]
 
-    source = get_index_source(N.STREETS)
+    source = INDEX_SOURCES[N.STREETS]
     build_addresses_result(result, query, source)
 
     query_result = QueryResult.from_entity_list(result.hits, result.total,
@@ -753,7 +737,7 @@ def process_address_bulk(request):
     es = get_elasticsearch()
     results = data.search_streets(es, queries)
 
-    source = get_index_source(N.STREETS)
+    source = INDEX_SOURCES[N.STREETS]
     for result, query in zip(results, queries):
         build_addresses_result(result, query, source)
 
@@ -818,7 +802,8 @@ def build_place_result(query, state, dept, muni):
     else:
         dept = dept or empty_entity.copy()
         muni = muni or empty_entity.copy()
-        source = get_index_source(N.DEPARTMENTS)
+        # TODO: Cambiar a 'fuentes'?
+        source = INDEX_SOURCES[N.STATES]
 
     place = {
         N.STATE: state,

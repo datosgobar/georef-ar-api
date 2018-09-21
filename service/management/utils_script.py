@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizdo el código para tomar
 # nuevas versiones de los archivos.
-FILE_VERSION = '4.0.0'
+FILE_VERSION = '5.0.0'
 
 SEPARATOR_WIDTH = 60
 ACTIONS = ['index', 'index_stats', 'run_sql']
@@ -156,9 +156,11 @@ class GeorefIndex:
             return False
 
         timestamp = data['timestamp']
+        date = data['fecha_creacion']
         version = data['version']
         docs = data['datos']
 
+        logger.info('Fecha de creación de datos: {}'.format(date))
         logger.info('Versión de datos API: {}'.format(FILE_VERSION))
         logger.info('Versión de datos ETL: {}'.format(version))
         logger.info('')

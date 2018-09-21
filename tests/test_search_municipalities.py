@@ -101,8 +101,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]
-        fields = sorted(['id', 'centroide', 'nombre', 'provincia',
-                         'departamento'])
+        fields = sorted(['id', 'centroide', 'nombre', 'provincia'])
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
@@ -111,8 +110,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
             ['fuente', 'id', 'nombre'],
             ['fuente', 'id', 'centroide.lat', 'centroide.lon', 'nombre'],
             ['fuente', 'id', 'centroide.lat', 'nombre'],
-            ['fuente', 'id', 'centroide.lat', 'nombre', 'provincia.id'],
-            ['departamento.nombre', 'fuente', 'id', 'nombre']
+            ['fuente', 'id', 'centroide.lat', 'nombre', 'provincia.id']
         ]
         fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
@@ -135,8 +133,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         self.assert_fields_set_equals('estandar',
                                       ['id', 'nombre', 'centroide.lat',
                                        'centroide.lon', 'provincia.id',
-                                       'provincia.nombre', 'departamento.id',
-                                       'departamento.nombre'])
+                                       'provincia.nombre'])
 
     def test_complete_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
@@ -144,9 +141,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         self.assert_fields_set_equals('completo',
                                       ['id', 'fuente', 'nombre',
                                        'centroide.lat', 'centroide.lon',
-                                       'provincia.id', 'provincia.nombre',
-                                       'departamento.id',
-                                       'departamento.nombre'])
+                                       'provincia.id', 'provincia.nombre'])
 
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
@@ -290,21 +285,6 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         results = [mun['id'].startswith(state_id) for mun in data]
         self.assertTrue(all(results) and results)
 
-    def test_search_by_department(self):
-        """Se debe poder buscar municipios por departamento."""
-
-        # Algunos departamentos no tienen municipios, por el momento buscar
-        # utilizando un departamento que sabemos contiene uno o mas
-        dept_id, dept_name = '82021', 'CASTELLANOS'
-
-        data = self.get_response({'departamento': dept_id})
-        data.extend(self.get_response({'departamento': dept_name}))
-        data.extend(self.get_response({'departamento': dept_name,
-                                       'exacto': 1}))
-
-        results = [mun['departamento']['id'] == dept_id for mun in data]
-        self.assertTrue(all(results) and results)
-
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""
@@ -371,9 +351,6 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
                 'provincia': '54'
             },
             {
-                'departamento': '82021'
-            },
-            {
                 'orden': 'nombre'
             },
             {
@@ -436,9 +413,7 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
                                        'municipio_centroide_lat',
                                        'municipio_centroide_lon',
                                        'provincia_id',
-                                       'provincia_nombre',
-                                       'departamento_id',
-                                       'departamento_nombre'])
+                                       'provincia_nombre'])
 
 
 if __name__ == '__main__':
