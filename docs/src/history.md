@@ -4,7 +4,7 @@
 - Remueve campo 'departamento' de la entidad municipio. Esto se debe a que los departamentos no son padres jerárquicos de los municipios.
 - Agrega parámetro `orden` a recursos `/calles` y `/direcciones`.
 - Agrega formato GeoJSON a recurso `/direcciones`.
-- Agrega conjuntos de campos predefinidos al parámetro `campos`: los valores posibles son:
+- Agrega conjuntos de campos predefinidos al parámetro `campos`, los valores posibles son:
 	- `basico`
 	- `estandar` (utilizado por defecto)
 	- `completo`

@@ -2,27 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
      <loc>http://apis.datos.gob.ar/georef/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/quick_start/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/spreadsheet_integration/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/python_usage/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/jwt-token/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
@@ -32,27 +32,27 @@
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/applications/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/georef-api-development/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/python3.6/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/georef-api-data/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/history/</loc>
-     <lastmod>2018-09-21</lastmod>
+     <lastmod>2018-10-01</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>

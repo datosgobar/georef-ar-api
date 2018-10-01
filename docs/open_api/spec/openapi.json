@@ -3,7 +3,7 @@
     "info": {
         "title": "georef-ar-api",
         "description": "API del Servicio de Normalización de Datos Geográficos de Argentina.\n\nPara ver ejemplos de uso de la API, dirigirse a la [página de documentación del proyecto](https://apis.datos.gob.ar/georef).\n\nPara leer el código de la API, acceder a [GitHub](https://github.com/datosgobar/georef-ar-api).\n\n---\n\n[Equipo de Datos de la Nación Argentina - Página GitHub](https://github.com/datosgobar)\n\n[Enviar un mail al Equipo de Datos de la Nación Argentina](mailto:datos@modernizacion.gob.ar)",
-        "version": "0.1.6"
+        "version": "0.2.0"
     },
     "tags": [
         {
@@ -1032,7 +1032,7 @@
             },
             "campos": {
                 "name": "campos",
-                "description": "Campos a incluir en la respuesta separados por comas, sin espacios. Algunos campos siempre serán incluidos, incluso si no se agregaron en la lista. Para incluir campos de sub-entidades, separar los nombres con un punto, por ejemplo: `provincia.id`. También se pueden especificar los valores especiales: `basico`, `estandar` y `completo`.",
+                "description": "Campos a incluir en la respuesta separados por comas, sin espacios. Algunos campos siempre serán incluidos, incluso si no se agregaron en la lista. Para incluir campos de sub-entidades, separar los nombres con un punto, por ejemplo: `provincia.id`. También se pueden especificar los valores especiales `basico`, `estandar` y `completo`.",
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_campos"
