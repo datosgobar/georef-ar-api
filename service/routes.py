@@ -34,6 +34,11 @@ def handle_404(_):
     return formatter.create_404_error_response(app.url_map)
 
 
+@app.errorhandler(405)
+def handle_405(_):
+    return formatter.create_405_error_response(app.url_map)
+
+
 # API v1.0
 bp_v1_0 = Blueprint('georef_v1.0', __name__)
 

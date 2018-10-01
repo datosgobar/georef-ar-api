@@ -33,6 +33,7 @@ INT_VAL_BIG = 'El número debe ser menor o igual que {}.'
 INT_VAL_BIG_GLOBAL = 'La suma de parámetros {} debe ser menor o igual \
 que {}.'
 NOT_FOUND = 'No se encontró la URL especificada.'
+NOT_ALLOWED = 'Método no permitido en el recurso seleccionado.'
 ID_PARAM_INVALID = 'El ID debe ser numérico y de longitud {}.'
 FIELD_LIST_EMPTY = 'La lista no contiene valores.'
 FIELD_LIST_REPEATED = 'La lista contiene valores repetidos.'

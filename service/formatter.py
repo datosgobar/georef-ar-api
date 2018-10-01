@@ -5,7 +5,7 @@ las consultas a los índices o a la base de datos.
 """
 
 import csv
-from flask import make_response, jsonify, Response
+from flask import make_response, jsonify, Response, request
 import geojson
 from service import strings
 from service import names as N
@@ -266,6 +266,34 @@ def create_404_error_response(url_map):
     return make_response(jsonify({
         'errores': errors
     }), 404)
+
+
+def create_405_error_response(url_map):
+    """Retorna un error HTTP con código 405.
+
+    Args:
+        url_map (werkzeug.routing.Map): Mapa de URLs de la aplicación Flask.
+
+    Returns:
+        flask.Response: Respuesta HTTP con error 405.
+
+    """
+    methods = {
+        rule.rule: (list(rule.methods.difference({'HEAD', 'OPTIONS'})))
+        for rule
+        in url_map.iter_rules()
+    }
+
+    errors = [
+        {
+            'mensaje': strings.NOT_ALLOWED,
+            'metodos_disponibles': methods[request.path]
+        }
+    ]
+
+    return make_response(jsonify({
+        'errores': errors
+    }), 405)
 
 
 def create_internal_error_response():
