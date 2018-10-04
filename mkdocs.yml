@@ -24,6 +24,8 @@ nav:
 docs_dir: docs/src
 site_dir: docs/site
 
+google_analytics: ['UA-91435482-1', "https://datosgobar.github.io/georef-ar-api/"]
+
 theme:
   name: datosgobar_docs
   highlightjs: true
