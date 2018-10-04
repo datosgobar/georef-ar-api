@@ -6,6 +6,7 @@ Los archivos de datos de Georef consisten de cinco (5) archivos en formato JSON,
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
+- [ETL](#etl)
 - [Fuentes](#fuentes)
     - [Unidades Territoriales](#unidades-territoriales)
     - [BAHRA](#bahra)
@@ -19,8 +20,11 @@ Los archivos de datos de Georef consisten de cinco (5) archivos en formato JSON,
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## ETL
+Los datos utilizados por Georef API son obtenidos a través de un proceso de ETL. El código del mismo se encuentra en el repositorio GitHub [georef-ar-etl](https://github.com/datosgobar/georef-ar-etl), así también como su [guía de instalación y uso](https://github.com/datosgobar/georef-ar-etl/blob/master/docs/install.md).
+
 ## Fuentes
-Los datos utilizados por Georef API fueron obtenidos a través de un proceso de ETL. Los orígenes de los datos procesados son:
+Los orígenes de los datos procesados en el ETL son:
 
 ### Unidades Territoriales
 - Recursos: `/provincias`, `/departamentos`, `/municipios`, `/ubicacion`
