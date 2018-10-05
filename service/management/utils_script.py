@@ -26,7 +26,12 @@ from . import download
 
 
 loggerStream = StringIO()
+"""StringIO: Buffer donde se almacenan los logs generados como strings.
+"""
+
 logger = logging.getLogger(__name__)
+"""Logger: logger global para almacenar información sobre acciones ejecutadas.
+"""
 
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizdo el código para tomar
@@ -39,6 +44,16 @@ TIMEOUT = 500
 
 
 def setup_logger(l, stream):
+    """Configura un objeto Logger para imprimir eventos de nivel INFO o
+    superiores. Los eventos se envían a sys.stdout y a un buffer de tipo
+    StringIO.
+
+    Args:
+        l (Logger): Objeto logger a configurar.
+        stream (StringIO): Buffer donde almacenar adicionalmente los eventos
+            enviados a 'l'.
+
+    """
     l.setLevel(logging.INFO)
 
     stdout_handler = logging.StreamHandler()
@@ -58,6 +73,20 @@ def setup_logger(l, stream):
 
 def send_email(host, user, password, subject, message, recipients,
                attachments=None):
+    """Envía un mail a un listado de destinatarios.
+
+    Args:
+        host (str): Hostname de servidor SMTP.
+        user (str): Usuario del servidor SMTP.
+        password (str): Contraseña para el usuario.
+        subject (str): Asunto a utilizar en el mail enviado.
+        message (str): Contenido del mail a enviar.
+        recipients (list): Lista de destinatarios.
+        attachments (dict): Diccionario de contenidos <str, str> a adjuntar en
+            el mail. Las claves representan los nombres de los contenidos y los
+            valores representan los contenidos en sí.
+
+    """
     with smtplib.SMTP_SSL(host) as smtp:
         smtp.login(user, password)
 
@@ -77,6 +106,13 @@ def send_email(host, user, password, subject, message, recipients,
 
 
 def print_log_separator(l, message):
+    """Imprime un separador de logs con forma de rectángulo con texto.
+
+    Args:
+        l (Logger): Objeto Logger sobre el cual imprimir el separador.
+        message (str): Mensaje a utilizar como separador.
+
+    """
     l.info("=" * SEPARATOR_WIDTH)
     l.info("|" + " " * (SEPARATOR_WIDTH - 2) + "|")
 
@@ -87,7 +123,51 @@ def print_log_separator(l, message):
 
 
 class GeorefIndex:
+    """La clase GeorefIndex representa un índice Elasticsearch a ser utilizado
+    por la API. Actualmente se utilizan 5 índices:
+
+    - provincias
+    - departamentos
+    - municipios
+    - localidades
+    - calles
+
+    La clase GeorefIndex existe para simplificar la creación y actualización de
+    los datos de los índices. La clase también permite crear respaldos
+    (backups) de los datos siendo utilizados.
+
+    El flujo de creación de los índices es el siguiente:
+
+        1) Creación inicial del índice y su alias
+        2) Se crea un respaldo de los datos utilizados
+
+    El flujo de actualización del los índices es el siguiente:
+
+        1) Se crea un nuevo índice con los datos actualizados
+        2) Se modifica el alias para que referencie a la nueva versión
+        3) Se elimina el índice antiguo
+        4) Se crea un respaldo de los datos utilizados
+
+    Attributes:
+        _alias (str): Alias a utilizar para el índice (por ejemplo, 'calles').
+        _filepath (str): Path o URL de archivo de datos a utilizar como datos.
+        _backup_filepath (str): Path donde colocar un respaldo de los últimos
+            datos indexados.
+        _mapping (dict): Información de mapeos de tipos/analizadores/etc. de
+            Elasticsearch.
+
+    """
+
     def __init__(self, alias, filepath, backup_filepath, mapping):
+        """Inicializa un nuevo objeto de tipo GeorefIndex.
+
+        Args:
+            alias (str): Ver el atributo '_alias'.
+            filepath (str): Ver el atributo '_filepath'.
+            back (str): Ver el atributo '_backup_filepath'.
+            mapping (str): Ver el atributo '_mapping'.
+
+        """
         self._alias = alias
         self._filepath = filepath
         self._backup_filepath = backup_filepath
@@ -97,7 +177,16 @@ class GeorefIndex:
     def alias(self):
         return self._alias
 
-    def fetch_data(self, filepath):
+    def _fetch_data(self, filepath):
+        """Retorna los contenidos de un archivo JSON.
+
+        Args:
+            filepath (str): Path o URL HTTP/HTTPS donde leer el archivo.
+
+        Returns:
+            dict: Contenido del archivo JSON.
+
+        """
         data = None
 
         if urllib.parse.urlparse(filepath).scheme in ['http', 'https']:
@@ -126,31 +215,78 @@ class GeorefIndex:
         return data
 
     def create_or_reindex(self, es, forced=False):
+        """Punto de entrada de la clase GeorefIndex. Permite crear o actualizar
+        el índice.
+
+        El índice se crea/actualiza siguiendo el flujo de pasos mencionados en
+        la documentación principal de la clase GeorefIndex.
+
+        Al momento de actualizar, se comprueba que los datos nuevos a utilizar
+        sean más recientes (en fecha de creación) que los datos ya existentes
+        e indexados. En caso de no serlos, se saltea la actualización. Este
+        comportamiento se puede desactivar utilizando el parámetro 'forced' con
+        valor True. Si el índice se está creando por primera vez, el valor del
+        parámetro 'forced' no tiene relevancia.
+
+        Si se está actualizando, y el valor de 'forced' es True, y por alguna
+        razón no es posible acceder al archivo de datos a utilizar, se intenta
+        utilizar un archivo de respaldo creado anteriormente. Si no se puede
+        utilizar el archivo de respaldo, se cancela la actualización.
+
+        La versión de los datos a utilizar para indexar debe ser idéntica a la
+        versión utilizada por la API, especificada en la variable
+        'FILE_VERSION'. En caso de no serlo, la indexación falla, sin importar
+        el valor de 'forced'.
+
+        Luego de una actualización/creación exitosa, se crea un respaldo de los
+        datos utilizado.
+
+        Args:
+            es (Elasticsearch): Cliente Elasticsearch.
+            forced (bool): Activa modo de actuaización forzada (se ignoran los
+                timestamps).
+
+        """
         print_log_separator(logger,
                             'Creando/reindexando {}'.format(self._alias))
         logger.info('')
 
-        data = self.fetch_data(self._filepath)
-        ok = self.create_or_reindex_with_data(es, data,
-                                              check_timestamp=not forced)
+        data = self._fetch_data(self._filepath)
+        ok = self._create_or_reindex_with_data(es, data,
+                                               check_timestamp=not forced)
 
         if forced and not ok:
             logger.warning('No se pudo indexar utilizando fuente primaria.')
             logger.warning('Intentando nuevamente con backup...')
             logger.warning('')
 
-            data = self.fetch_data(self._backup_filepath)
-            ok = self.create_or_reindex_with_data(es, data,
-                                                  check_timestamp=False)
+            data = self._fetch_data(self._backup_filepath)
+            ok = self._create_or_reindex_with_data(es, data,
+                                                   check_timestamp=False)
 
             if not ok:
                 logger.error('No se pudo indexar utilizando backups.')
                 logger.error('')
 
         if ok:
-            self.write_backup(data)
+            self._write_backup(data)
 
-    def create_or_reindex_with_data(self, es, data, check_timestamp=True):
+    def _create_or_reindex_with_data(self, es, data, check_timestamp=True):
+        """Crea o actualiza el índice. Ver la documentación de
+        'create_or_reindex' para más detalles del flujo de creación y
+        actualización de índices.
+
+        Args:
+            es (Elasticsearch): Cliente Elasticsearch.
+            data (dict): Diccionario con datos a indexar y sus metadatos.
+            check_timestamp (bool): Cuando es falso, permite indexar datos con
+                timestamp anterior a los que ya están almacenados.
+
+        Returns:
+            bool: Verdadero si la creación/actualización se ejecutó
+                correctamente.
+
+        """
         if not data:
             logger.warning('No existen datos a indexar.')
             return False
@@ -171,12 +307,22 @@ class GeorefIndex:
             logger.info('')
             return False
 
+        # El nombre real del índice (no su alias) está compuesto de tres
+        # componentes: el alias, un número al azar, y el timestamp de los
+        # datos que contiene. Por ejemplo: provincias-965d5f6b-1538377538.
+        #
+        # La primera parte identifica el propósito del índice, la tercera
+        # describe la fecha de creación de los datos que contiene, y la segunda
+        # se utiliza para distinguir entre índices de una misma entidad que
+        # contienen los mismos datos (este caso se puede dar en casos de
+        # utilizar forced=True).
+
         new_index = '{}-{}-{}'.format(self._alias,
                                       uuid.uuid4().hex[:8], timestamp)
-        old_index = self.get_old_index(es)
+        old_index = self._get_old_index(es)
 
         if check_timestamp:
-            if not self.check_index_newer(new_index, old_index):
+            if not self._check_index_newer(new_index, old_index):
                 logger.warning(
                     'Salteando creación de índice {}'.format(new_index))
                 logger.warning(
@@ -188,23 +334,39 @@ class GeorefIndex:
             logger.info('Omitiendo chequeo de timestamp.')
             logger.info('')
 
-        self.create_index(es, new_index)
-        self.insert_documents(es, new_index, docs)
+        self._create_index(es, new_index)
+        self._insert_documents(es, new_index, docs)
 
-        self.update_aliases(es, new_index, old_index)
+        self._update_aliases(es, new_index, old_index)
         if old_index:
-            self.delete_index(es, old_index)
+            self._delete_index(es, old_index)
 
         return True
 
-    def write_backup(self, data):
+    def _write_backup(self, data):
+        """Crea un archivo de respaldo situado en el path
+        'self._backup_filepath'.
+
+        Args:
+            data (dict): Diccionario con datos indexados y sus metadatos.
+
+        """
         logger.info('Creando archivo de backup...')
         with open(self._backup_filepath, 'w') as f:
             json.dump(data, f)
         logger.info('Archivo creado.')
         logger.info('')
 
-    def create_index(self, es, index):
+    def _create_index(self, es, index):
+        """Crea un índice Elasticsearch con settings default y
+        mapeos establecidos por 'self._mapping'.
+
+        Args:
+            es (Elasticsearch): Cliente Elasticsearch.
+            index (str): Nombre del índice a crear. Notar que el nombre no es
+                igual al alias del índice.
+
+        """
         logger.info('Creando nuevo índice: {}...'.format(index))
         logger.info('')
         es.indices.create(index=index, body={
@@ -212,8 +374,16 @@ class GeorefIndex:
             'mappings': self._mapping
         })
 
-    def insert_documents(self, es, index, docs):
-        operations = self.bulk_update_generator(docs, index)
+    def _insert_documents(self, es, index, docs):
+        """Inserta documentos dentro de un índice.
+
+        Args:
+            es (Elasticsearch): Cliente Elasticsearch.
+            index (str): Nombre de índice.
+            docs (list): Lista de documentos a insertar.
+
+        """
+        operations = self._bulk_update_generator(docs, index)
         creations, errors = 0, 0
 
         logger.info('Insertando documentos...')
@@ -239,13 +409,29 @@ class GeorefIndex:
         logger.info(' + Errores: {}'.format(errors))
         logger.info('')
 
-    def delete_index(self, es, old_index):
+    def _delete_index(self, es, old_index):
+        """Borra un índice.
+
+        Args:
+            es (Elasticsearch): Cliente Elasticsearch.
+            old_index (str): Nombre de índice.
+
+        """
         logger.info('Eliminando índice anterior ({})...'.format(old_index))
         es.indices.delete(old_index)
         logger.info('Índice eliminado.')
         logger.info('')
 
-    def update_aliases(self, es, index, old_index):
+    def _update_aliases(self, es, index, old_index):
+        """Transfiere el alias 'self._alias' de un índice a otro.
+
+        Args:
+            es (Elasticsearch): Cliente Elasticsearch.
+            index (str): Nombre de índice al que self._alias debe referenciar.
+            old_index (list): Nombre de índice al que self._alias referencia
+                actualmente.
+
+        """
         logger.info('Actualizando aliases...')
 
         alias_ops = []
@@ -280,7 +466,17 @@ class GeorefIndex:
         logger.info('Aliases actualizados.')
         logger.info('')
 
-    def check_index_newer(self, new_index, old_index):
+    def _check_index_newer(self, new_index, old_index):
+        """Comprueba si un índice es mas reciente que otro.
+
+        Args:
+            new_index (str): Nombre del nuevo índice.
+            old_index (str): Nombre del índice antiguo.
+
+        Returns:
+            bool: Verdadero si new_index es más reciente que old_index.
+
+        """
         if not old_index:
             return True
 
@@ -289,18 +485,31 @@ class GeorefIndex:
 
         return new_date > old_date
 
-    def get_old_index(self, es):
+    def _get_old_index(self, es):
+        """Retorna el índice al que 'self._alias' apunta actualmente.
+
+        Args:
+            es (Elasticsearch): Cliente Elasticsearch.
+
+        Returns:
+            str: Nombre del índice apuntado por self._alias.
+
+        """
         if not es.indices.exists_alias(name=self._alias):
             return None
+
         return list(es.indices.get_alias(name=self._alias).keys())[0]
 
-    def bulk_update_generator(self, docs, index):
+    def _bulk_update_generator(self, docs, index):
         """Crea un generador de operaciones 'create' para Elasticsearch a
         partir de una lista de documentos a indexar.
 
         Args:
             docs (list): Documentos a indexar.
             index (str): Nombre del índice.
+
+        Yields:
+            dict: Acción a ejecutar en un índice Elasticsearch.
 
         """
         for doc in docs:
@@ -316,6 +525,16 @@ class GeorefIndex:
 
 
 def send_index_email(config, forced, env, log):
+    """Envía los contenidos de los logs generados por mail, utilizando la
+    configuración de Flask para leer los parámetros.
+
+    Args:
+        config (flask.Config): Configuración Flask de la API.
+        forced (bool): Verdadero si se activó el modo de re-indexación forzada.
+        env (str): Ambiente actual (dev/stg/prod).
+        log (str): Contenidos de los logs generados.
+
+    """
     lines = log.splitlines()
     warnings = len([line for line in lines if 'WARNING' in line])
     errors = len([line for line in lines if 'ERROR' in line])
@@ -333,6 +552,17 @@ def send_index_email(config, forced, env, log):
 
 
 def run_index(es, forced, name='all'):
+    """Ejecuta la rutina de creación/actualización de los índices utilizados
+    por Georef API.
+
+    Args:
+        es (Elasticsearch): Cliente Elasticsearch.
+        forced (bool): Verdadero si se especificó el modo de re-indexación
+            forzada.
+        name (str): Nombre del índice a crear/actualizar. Si se utiliza el
+            valor 'all', se crean/actualizan todos los índices.
+
+    """
     backups_dir = app.config['BACKUPS_DIR']
     os.makedirs(backups_dir, exist_ok=True)
 
@@ -387,6 +617,13 @@ def run_index(es, forced, name='all'):
 
 
 def run_info(es):
+    """Imprime en pantalla información sobre el estado del cluster
+    Elasticsearch.
+
+    Args:
+        es (Elasticsearch): Cliente Elasticsearch.
+
+    """
     logger.info('INDICES:')
     for line in es.cat.indices(v=True).splitlines():
         logger.info(line)
@@ -403,6 +640,13 @@ def run_info(es):
 
 
 def run_sql(script):
+    """Ejecuta un script SQL en la base de de datos PostgreSQL utilizada por
+    Georef API.
+
+    Args:
+        script (io.IOBase): Archivo con el contenido del script SQL.
+
+    """
     try:
         conn = psycopg2.connect(host=app.config['SQL_DB_HOST'],
                                 dbname=app.config['SQL_DB_NAME'],
@@ -422,7 +666,12 @@ def run_sql(script):
 
 
 def main():
-    print(os.getcwd())
+    """Punto de entrada para utils_script.py
+
+    Utilizar 'python utils_script.py -h' para información sobre el uso de éste
+    archivo en la línea de comandos.
+
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', metavar='<action>', required=True,
                         choices=ACTIONS)
