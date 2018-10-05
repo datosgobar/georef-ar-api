@@ -14,6 +14,12 @@ from service import strings
 MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
 MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
 
+STATE_ID_LEN = 2
+DEPT_ID_LEN = 5
+MUNI_ID_LEN = 6
+LOCALITY_ID_LEN = 11
+STREET_ID_LEN = 13
+
 
 class ParameterParsingException(Exception):
     """Excepción lanzada al finalizar la recolección de errores para todos los
@@ -799,7 +805,7 @@ class EndpointParameters():
 
 
 PARAMS_STATES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=2),
+    N.ID: IdParameter(length=STATE_ID_LEN),
     N.NAME: StrParameter(),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
@@ -820,9 +826,9 @@ PARAMS_STATES = EndpointParameters(shared_params={
 )
 
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=5),
+    N.ID: IdParameter(length=DEPT_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=2),
+    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -843,9 +849,9 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
 )
 
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=6),
+    N.ID: IdParameter(length=MUNI_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=2),
+    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -866,11 +872,11 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
 )
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=11),
+    N.ID: IdParameter(length=LOCALITY_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=2),
-    N.DEPT: StrOrIdParameter(id_length=5),
-    N.MUN: StrOrIdParameter(id_length=6),
+    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
+    N.MUN: StrOrIdParameter(id_length=MUNI_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -895,8 +901,8 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=2),
-    N.DEPT: StrOrIdParameter(id_length=5),
+    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.DOOR_NUM],
@@ -919,11 +925,11 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 )
 
 PARAMS_STREETS = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=13),
+    N.ID: IdParameter(length=STREET_ID_LEN),
     N.NAME: StrParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=2),
-    N.DEPT: StrOrIdParameter(id_length=5),
+    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
