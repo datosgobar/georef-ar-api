@@ -28,39 +28,6 @@ class DataConnectionException(Exception):
     pass
 
 
-class ElasticsearchResult:
-    """Representa resultados para una consulta a Elasticsearch.
-
-    Attributes:
-        _hits (list): Lista de resultados (diccionarios).
-        _total (int): Total de resultados encontrados, no necesariamente
-            incluidos en la respuesta.
-        _offset (int): Cantidad de resultados salteados, comenzando desde el
-            primero.
-
-    """
-
-    def __init__(self, response, offset):
-        self._hits = [hit.to_dict() for hit in response.hits]
-        self._total = response.hits.total
-        self._offset = offset
-
-    @property
-    def hits(self):
-        return self._hits
-
-    @property
-    def total(self):
-        return self._total
-
-    @property
-    def offset(self):
-        return self._offset
-
-    def __len__(self):
-        return len(self._hits)
-
-
 def postgres_db_connection_pool(host, name, user, password, maxconn):
     """Crea una pool de conexiones a la base de datos PostgreSQL.
 
@@ -120,41 +87,111 @@ def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
         raise DataConnectionException()
 
 
-def run_searches(es, index, searches):
-    """Ejecuta una lista de búsquedas Elasticsearch. Internamente, se utiliza
-    la función MultiSearch.
+class ElasticsearchSearch:
+    """TODO: Representa una búsqueda Elasticsearch y potencialmente sus
+    resultados.
 
-    Args:
-        es (Elasticsearch): Conexión a Elasticsearch.
-        index (str): Nombre del índice sobre el cual se deberían ejecutar las
-            queries.
-        searches (list): Lista de búsquedas, de tipo Search.
-
-    Raises:
-        DataConnectionException: si ocurrió un error al ejecutar las búsquedas.
-
-    Returns:
-        list: Lista de resultados, cada resultado contiene una lista de 'hits'
-            (documentos encontrados) y otros metadatos.
+    Attributes:
+        _es_search (elasticsearch_dsl.Search): Búsqueda Elasticsearch a
+            ejecutar.
+        _result (ElasticsearchResult): Resultados de la búsqueda, luego de ser
+            ejecutada.
 
     """
-    ms = MultiSearch(index=index, using=es)
 
-    for search in searches:
-        ms = ms.add(search)
+    def __init__(self, es_search):
+        """Inicializa un objeto de tipo ElasticsearchSearch.
 
-    try:
-        responses = ms.execute(raise_on_error=True)
-        es_results = []
+        Args:
+            es_search (elasticsearch_dsl.Search): Ver atributo '_es_search'.
 
-        for search, response in zip(searches, responses):
-            # Incluir offset (inicio) en los resultados
-            offset = search.to_dict()['from']
-            es_results.append(ElasticsearchResult(response, offset))
+        """
+        self._es_search = es_search
+        self._result = None
 
-        return es_results
-    except elasticsearch.ElasticsearchException:
-        raise DataConnectionException()
+    @property
+    def es_search(self):
+        return self._es_search
+
+    @property
+    def result(self):
+        if self._result is None:
+            raise ValueError('Search has not been executed yet.')
+
+        return self._result
+
+    def set_result(self, result):
+        if self._result is not None:
+            raise ValueError('Search has already been executed.')
+
+        self._result = result
+
+    @staticmethod
+    def run_searches(es, index, searches):
+        """Ejecuta una lista de búsquedas ElasticsearchSearch. Internamente, se
+        utiliza la función MultiSearch para ejecutarlas. Los resultados de cada
+        búsqueda se almacenan en el objeto representando la búsqueda en sí
+        (campo 'result').
+
+        Args:
+            es (Elasticsearch): Conexión a Elasticsearch.
+            index (str): Nombre del índice sobre el cual se deberían ejecutar
+                las queries.
+            searches (list): Lista de búsquedas, de tipo ElasticsearchSearch.
+
+        Raises:
+            DataConnectionException: si ocurrió un error al ejecutar las
+                búsquedas.
+
+        """
+        ms = MultiSearch(index=index, using=es)
+
+        for search in searches:
+            ms = ms.add(search.es_search)
+
+        try:
+            responses = ms.execute(raise_on_error=True)
+
+            for search, response in zip(searches, responses):
+                # Incluir offset (inicio) en los resultados
+                offset = search.es_search.to_dict()['from']
+                search.set_result(ElasticsearchResult(response, offset))
+
+        except elasticsearch.ElasticsearchException:
+            raise DataConnectionException()
+
+
+class ElasticsearchResult:
+    """Representa resultados para una consulta a Elasticsearch.
+
+    Attributes:
+        _hits (list): Lista de resultados (diccionarios).
+        _total (int): Total de resultados encontrados, no necesariamente
+            incluidos en la respuesta.
+        _offset (int): Cantidad de resultados salteados, comenzando desde el
+            primero.
+
+    """
+
+    def __init__(self, response, offset):
+        self._hits = [hit.to_dict() for hit in response.hits]
+        self._total = response.hits.total
+        self._offset = offset
+
+    @property
+    def hits(self):
+        return self._hits
+
+    @property
+    def total(self):
+        return self._total
+
+    @property
+    def offset(self):
+        return self._offset
+
+    def __len__(self):
+        return len(self._hits)
 
 
 def search_entities(es, index, params_list):
@@ -172,8 +209,11 @@ def search_entities(es, index, params_list):
         list: Resultados de búsqueda de entidades.
 
     """
-    searches = [build_entity_search(**params) for params in params_list]
-    return run_searches(es, index, searches)
+    searches = [ElasticsearchSearch(build_entity_search(**params))
+                for params in params_list]
+
+    ElasticsearchSearch.run_searches(es, index, searches)
+    return [search.result for search in searches]
 
 
 def search_places(es, index, params_list):
@@ -191,8 +231,11 @@ def search_places(es, index, params_list):
         list: Resultados de búsqueda de entidades.
 
     """
-    searches = [build_place_search(**params) for params in params_list]
-    return run_searches(es, index, searches)
+    searches = [ElasticsearchSearch(build_place_search(**params))
+                for params in params_list]
+
+    ElasticsearchSearch.run_searches(es, index, searches)
+    return [search.result for search in searches]
 
 
 def search_streets(es, params_list):
@@ -208,8 +251,11 @@ def search_streets(es, params_list):
         list: Resultados de búsqueda de vías de circulación.
 
     """
-    searches = [build_streets_search(**params) for params in params_list]
-    return run_searches(es, N.STREETS, searches)
+    searches = [ElasticsearchSearch(build_streets_search(**params))
+                for params in params_list]
+
+    ElasticsearchSearch.run_searches(es, N.STREETS, searches)
+    return [search.result for search in searches]
 
 
 def build_entity_search(entity_id=None, name=None, state=None,
@@ -283,7 +329,6 @@ def build_streets_search(street_id=None, road_name=None, department=None,
     según parámetros de búsqueda de una consulta.
 
     Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
         street_id (str): ID de la calle a buscar (opcional).
         road_name (str): Nombre de la calle para filtrar (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
@@ -292,6 +337,7 @@ def build_streets_search(street_id=None, road_name=None, department=None,
         max (int): Limita la cantidad de resultados (opcional).
         order (str): Campo por el cual ordenar los resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
+        number (int): Altura de la dirección (opcional).
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
             'department'.) (opcional).
