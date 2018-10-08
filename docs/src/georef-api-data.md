@@ -140,8 +140,8 @@ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos 
 	"fuente": "BAHRA", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
-			"id": "06189080000", // ID del asentamiento
-			"nombre": "San Roman", // Nombre del asentamiento
+			"id": "06189080000", // ID de la localidad
+			"nombre": "San Roman", // Nombre de la localidad
 			"tipo": "Localidad simple (LS)", // Tipo de asentamiento BAHRA
 			"centroide": {
 				"lat": -38.741555, // Latitud de centroide
@@ -151,15 +151,15 @@ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos 
 				"type": "multipoint", // Tipo de geometría
 				"coordinates": [[-61.5377, -38.7415], ...] // Listado de coordenadas (formato WKT) del MultiPoint
 			},
-			"municipio": { // Municipio que contiene al asentamiento
+			"municipio": { // Municipio que contiene a la localidad
 				"id": "060189", // Puede ser null
 				"nombre": "Coronel Dorrego" // Puede ser null
 			},
-			"departamento": { // Departamento que contiene al asentamiento
+			"departamento": { // Departamento que contiene a la localidad
 				"id": "06070",
 				"nombre": "Baradero"
 			},
-			"provincia": {  // Provincia que contiene al asentamiento
+			"provincia": {  // Provincia que contiene a la localidad
 				"id": "06",
 				"nombre": "Buenos Aires"
 			}

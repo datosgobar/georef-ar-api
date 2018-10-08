@@ -25,7 +25,7 @@ LOCALITIES = [
 
 
 class SearchLocalityTest(SearchEntitiesTest):
-    """Pruebas de búsqueda de localidades (índice de asentamientos)."""
+    """Pruebas de búsqueda de localidades (índice de localidades)."""
 
     def setUp(self):
         self.endpoint = '/api/v1.0/localidades'
