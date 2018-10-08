@@ -137,7 +137,7 @@ MAP_MUNI = {
     }
 }
 
-MAP_SETTLEMENT = {
+MAP_LOCALITY = {
     '_doc': {
         '_source': {
             'excludes': ['geometria']

@@ -20,7 +20,7 @@ from .elasticsearch_params import DEFAULT_SETTINGS
 from .elasticsearch_mappings import MAP_STATE
 from .elasticsearch_mappings import MAP_DEPT
 from .elasticsearch_mappings import MAP_MUNI
-from .elasticsearch_mappings import MAP_SETTLEMENT
+from .elasticsearch_mappings import MAP_LOCALITY
 from .elasticsearch_mappings import MAP_STREET
 from . import download
 
@@ -590,7 +590,7 @@ def run_index(es, forced, name='all'):
                     filepath=app.config['LOCALITIES_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'localidades.json'),
-                    mapping=MAP_SETTLEMENT),
+                    mapping=MAP_LOCALITY),
         GeorefIndex(alias='calles',
                     filepath=app.config['STREETS_FILE'],
                     backup_filepath=os.path.join(backups_dir, 'calles.json'),
