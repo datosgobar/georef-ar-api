@@ -338,6 +338,36 @@ class FieldListParameter(Parameter):
         if set(val) - self._complete:
             raise InvalidChoiceException(strings.FIELD_LIST_INVALID_CHOICE)
 
+    def _expand_prefixes(self, received):
+        """Dada un conjunto de campos recibidos, expande los campos con valores
+        prefijos de otros.
+
+        Por ejemplo, el valor 'provincia' se expande a 'provincia.id' y
+        'provincia.nombre'. 'altura' se expande a 'altura.fin.derecha',
+        'altura.fin.izquierda', etc.
+
+        Args:
+            received (set): Campos recibidos.
+
+        Returns:
+            set: Conjunto de campos con campos prefijos expandidos.
+
+        """
+        expanded = set()
+        prefixes = set()
+
+        for part in received:
+            for field in self._complete:
+                field_prefix = '.'.join(field.split('.')[:-1]) + '.'
+
+                if field_prefix.startswith(part + '.'):
+                    expanded.add(field)
+                    prefixes.add(part)
+
+        # Resultado: campos recibidos, menos los prefijos, con los campos
+        # expandidos.
+        return (received - prefixes) | expanded
+
     def _parse_value(self, val):
         if not val:
             raise ValueError(strings.FIELD_LIST_EMPTY)
@@ -356,6 +386,8 @@ class FieldListParameter(Parameter):
         received = set(parts)
         if len(parts) != len(received):
             raise ValueError(strings.FIELD_LIST_REPEATED)
+
+        received = self._expand_prefixes(received)
 
         # Siempre se agregan los valores básicos
         return list(self._basic | received)

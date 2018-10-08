@@ -149,6 +149,15 @@ class SearchStreetsTest(SearchEntitiesTest):
                                        'provincia.id', 'provincia.nombre',
                                        'tipo'])
 
+    def test_field_prefixes(self):
+        """Se debería poder especificar prefijos de otros campos como campos
+        a incluir en la respuesta."""
+        self.assert_fields_set_equals('altura', ['id', 'nombre',
+                                                 'altura.fin.derecha',
+                                                 'altura.fin.izquierda',
+                                                 'altura.inicio.derecha',
+                                                 'altura.inicio.izquierda'])
+
     def assert_street_search_id_matches(self, term_matches, exact=False):
         results = []
         for code, query in term_matches:

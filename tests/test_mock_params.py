@@ -197,6 +197,14 @@ class ParamParsingTest(TestCase):
             (T.INVALID_CHOICE.value, 'campos')
         })
 
+    def test_field_invalid_prefix(self):
+        """No se debería aceptar un prefijo arbitrario de un campo. Si se
+        separa el nombre del campo por puntos, el prefijo debe ser igual
+        a una o más de las partes concatenadas."""
+        self.assert_errors_match('/calles?campos=altura.inic', {
+            (T.INVALID_CHOICE.value, 'campos')
+        })
+
     def test_empty_string_param(self):
         """Los parámtros de tipo string no deberían aceptar strings
         vacíos."""

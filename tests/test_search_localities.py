@@ -139,6 +139,13 @@ class SearchLocalityTest(SearchEntitiesTest):
                                        'municipio.id', 'municipio.nombre',
                                        'tipo'])
 
+    def test_field_prefixes(self):
+        """Se debería poder especificar prefijos de otros campos como campos
+        a incluir en la respuesta."""
+        self.assert_fields_set_equals('provincia', ['id', 'nombre',
+                                                    'provincia.nombre',
+                                                    'provincia.id'])
+
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
         data = [
