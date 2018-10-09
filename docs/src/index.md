@@ -2,7 +2,7 @@
 
 La API del Servicio de Normalización de Datos Geográficos, permite normalizar y codificar los nombres de unidades territoriales de la Argentina (provincias, departamentos, municipios y localidades) y de sus calles, así como ubicar coordenadas dentro de ellas.
 
----
+## Normalizar
 
 Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usan, los datos son difíciles de cruzar entre sí y hay que normalizarlos antes.
 
@@ -15,6 +15,7 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
 </table>
 
 `GET`[`https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero`](https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
+
 ```json
 {
     "provincias": [
@@ -33,7 +34,7 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
 }
 ```
 
----
+## Enriquecer
 
 Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, puede cruzarse con muchos datos más, relacionados a las unidades territoriales que lo contienen. Para esto hay que agregarlas a los datos originales.
 
@@ -65,7 +66,7 @@ Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, pue
 }
 ```
 
----
+## Referencia
 
 Finalmente, se puede utilizar la API como punto de referencia al momento de crear datos que estén vinculados a datos geográficos. Por ejemplo, si se cuenta con un formulario en el que se debe mostrar a un usuario un listado de provincias, y luego un listado de municipios a partir de la provincia seleccionada, se podrían ejecutar las siguientes consultas:
 

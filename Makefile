@@ -56,7 +56,6 @@ code_checks:
 
 docs:
 	mkdocs build
-	$(BROWSER) docs/site/index.html
 
 servedocs:
 	mkdocs serve
@@ -69,12 +68,12 @@ docs_dist:
 # Generar tablas de contenidos, se requiere el comando 'doctoc'
 # https://github.com/thlorenz/doctoc
 doctoc:
-	doctoc --maxlevel 3 --github --notitle docs/src/quick_start.md
-	bash docs/src/fix_github_links.sh docs/src/quick_start.md
-	doctoc --maxlevel 3 --github --notitle docs/src/spreadsheet_integration.md
-	bash docs/src/fix_github_links.sh docs/src/spreadsheet_integration.md
-	doctoc --maxlevel 3 --github --notitle docs/src/python_usage.md
-	bash docs/src/fix_github_links.sh docs/src/python_usage.md
+	doctoc --maxlevel 3 --github --notitle docs/src/quick-start.md
+	bash docs/src/fix_github_links.sh docs/src/quick-start.md
+	doctoc --maxlevel 3 --github --notitle docs/src/spreadsheet-integration.md
+	bash docs/src/fix_github_links.sh docs/src/spreadsheet-integration.md
+	doctoc --maxlevel 3 --github --notitle docs/src/python-usage.md
+	bash docs/src/fix_github_links.sh docs/src/python-usage.md
 	doctoc --maxlevel 3 --github --notitle docs/src/jwt-token.md
 	bash docs/src/fix_github_links.sh docs/src/jwt-token.md
 	doctoc --maxlevel 3 --github --notitle docs/src/georef-api-development.md
