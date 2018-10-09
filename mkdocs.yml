@@ -23,7 +23,7 @@ nav:
     - Historial de versiones: history.md
 
 docs_dir: docs/src
-site_dir: docs
+site_dir: docs/site
 
 theme:
   name: datosgobar_docs
