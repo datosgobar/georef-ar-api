@@ -56,6 +56,8 @@ code_checks:
 
 docs:
 	mkdocs build
+	rsync -vau --remove-source-files docs/site/ docs/
+	rm -rf docs/site
 
 servedocs:
 	mkdocs serve

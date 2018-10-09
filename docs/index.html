@@ -38,7 +38,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0, mkdocs-material-3.0.4">
+      <meta name="generator" content="mkdocs-1.0, mkdocs-material-3.0.3">
     
     
       
@@ -60,8 +60,8 @@
     <script src="js/extra.js"></script>
 
     
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
       
-        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
       
@@ -285,9 +285,15 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Inicio
+      </label>
+    
     <a href="." title="Inicio" class="md-nav__link md-nav__link--active">
       Inicio
     </a>
+    
+      
     
   </li>
 
@@ -318,7 +324,7 @@
 
 
   <li class="md-nav__item">
-    <a href="quick_start/" title="Ejemplos de uso" class="md-nav__link">
+    <a href="quick-start/" title="Ejemplos de uso" class="md-nav__link">
       Ejemplos de uso
     </a>
   </li>
@@ -330,7 +336,7 @@
 
 
   <li class="md-nav__item">
-    <a href="spreadsheet_integration/" title="Usar en planillas de cálculo" class="md-nav__link">
+    <a href="spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-nav__link">
       Usar en planillas de cálculo
     </a>
   </li>
@@ -342,7 +348,7 @@
 
 
   <li class="md-nav__item">
-    <a href="python_usage/" title="Usar en Python" class="md-nav__link">
+    <a href="python-usage/" title="Usar en Python" class="md-nav__link">
       Usar en Python
     </a>
   </li>
@@ -366,8 +372,20 @@
 
 
   <li class="md-nav__item">
-    <a href="https://datosgobar.github.io/georef-ar-api/open_api" title="Referencia API" class="md-nav__link">
+    <a href="https://datosgobar.github.io/georef-ar-api/open-api" title="Referencia API" class="md-nav__link">
       Referencia API
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="terms/" title="Condiciones de uso" class="md-nav__link">
+      Condiciones de uso
     </a>
   </li>
 
@@ -488,7 +506,7 @@
                 
                 <h1 id="api-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina">API del Servicio de Normalización de Datos Geográficos de Argentina<a class="headerlink" href="#api-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina" title="Permanent link">&para;</a></h1>
 <p>La API del Servicio de Normalización de Datos Geográficos, permite normalizar y codificar los nombres de unidades territoriales de la Argentina (provincias, departamentos, municipios y localidades) y de sus calles, así como ubicar coordenadas dentro de ellas.</p>
-<hr />
+<h2 id="normalizar">Normalizar<a class="headerlink" href="#normalizar" title="Permanent link">&para;</a></h2>
 <p>Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usan, los datos son difíciles de cruzar entre sí y hay que normalizarlos antes.</p>
 <table>
     <tr><td>provincia</td></tr>
@@ -516,7 +534,7 @@
 }
 </code></pre>
 
-<hr />
+<h2 id="enriquecer">Enriquecer<a class="headerlink" href="#enriquecer" title="Permanent link">&para;</a></h2>
 <p>Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, puede cruzarse con muchos datos más, relacionados a las unidades territoriales que lo contienen. Para esto hay que agregarlas a los datos originales.</p>
 <table>
     <tr><td>lat</td><td>lon</td></tr>
@@ -545,7 +563,7 @@
 }
 </code></pre>
 
-<hr />
+<h2 id="referencia">Referencia<a class="headerlink" href="#referencia" title="Permanent link">&para;</a></h2>
 <p>Finalmente, se puede utilizar la API como punto de referencia al momento de crear datos que estén vinculados a datos geográficos. Por ejemplo, si se cuenta con un formulario en el que se debe mostrar a un usuario un listado de provincias, y luego un listado de municipios a partir de la provincia seleccionada, se podrían ejecutar las siguientes consultas:</p>
 <p>Listar las provincias de la República Argentina:</p>
 <p><code>GET</code><a href="https://apis.datos.gob.ar/georef/api/provincias"><code>https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre</code></a></p>
@@ -601,7 +619,7 @@
       <nav class="md-footer-nav__inner md-grid">
         
         
-          <a href="quick_start/" title="Ejemplos de uso" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="quick-start/" title="Ejemplos de uso" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">

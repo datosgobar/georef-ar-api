@@ -13,7 +13,7 @@
         <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
       
       
-        <link rel="canonical" href="http://apis.datos.gob.ar/georef/applications/">
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/spreadsheet-integration/">
       
       
         <meta name="author" content="Datos Argentina">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Aplicaciones - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+        <title>Usar en planillas de cálculo - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
       
     
     
@@ -104,7 +104,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="../#aplicaciones" tabindex="1" class="md-skip">
+      <a href="../#integracion-con-planillas-de-calculo" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -130,7 +130,7 @@
                 API del Servicio de Normalización de Datos Geográficos de Argentina
               </span>
               <span class="md-header-nav__topic">
-                Aplicaciones
+                Usar en planillas de cálculo
               </span>
             
           
@@ -288,10 +288,12 @@
             
             
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
     
     <label class="md-nav__link" for="nav-2">
       Usuarios
@@ -319,11 +321,26 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Usar en planillas de cálculo
+      </label>
+    
+    <a href="./" title="Usar en planillas de cálculo" class="md-nav__link md-nav__link--active">
       Usar en planillas de cálculo
     </a>
+    
+      
+    
   </li>
 
         
@@ -385,26 +402,11 @@
             
             
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Aplicaciones
-      </label>
-    
-    <a href="./" title="Aplicaciones" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../applications/" title="Aplicaciones" class="md-nav__link">
       Aplicaciones
     </a>
-    
-      
-    
   </li>
 
             <hr/>
@@ -504,15 +506,56 @@
               
                 
                 
-                <h1 id="aplicaciones">Aplicaciones<a class="headerlink" href="#aplicaciones" title="Permanent link">&para;</a></h1>
-<p>Lista de proyectos y aplicaciones que utilizan, extienden o documentan la API del Servicio de Normalización de Datos Geográficos.</p>
-<h2 id="de-terceros">De terceros<a class="headerlink" href="#de-terceros" title="Permanent link">&para;</a></h2>
+                <h1 id="integracion-con-planillas-de-calculo">Integración con planillas de cálculo<a class="headerlink" href="#integracion-con-planillas-de-calculo" title="Permanent link">&para;</a></h1>
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 <ul>
-<li><a href="https://github.com/pdelboca/georefar">pdelboca/georefar</a>: Interface en R para usar la API por <a href="https://twitter.com/pdelboca">@pdelboca</a>.</li>
+<li><a href="#google-drive">Google Drive</a></li>
+<li><a href="#1-modificar-la-configuracion-regional">1. Modificar la configuración regional</a></li>
+<li><a href="#2-importar-listados-de-unidades-territoriales">2. Importar listados de unidades territoriales</a></li>
+<li><a href="#3-normalizar-un-listado-de-unidades-territoriales">3. Normalizar un listado de unidades territoriales</a></li>
 </ul>
-<h2 id="contacto">Contacto<a class="headerlink" href="#contacto" title="Permanent link">&para;</a></h2>
-<p>¿Desarrollaste una librería o tenés un proyecto que usa la API? Te <a href="https://twitter.com/datosgobar">invitamos a contarnos</a> así la agregamos a esta lista.</p>
-<p>Para todo lo demás, podés mandarnos tu comentario o consulta a <a href="mailto:datos@modernizacion.gob.ar">datos@modernizacion.gob.ar</a>.</p>
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+<h2 id="google-drive">Google Drive<a class="headerlink" href="#google-drive" title="Permanent link">&para;</a></h2>
+<h3 id="1-modificar-la-configuracion-regional">1. Modificar la configuración regional<a class="headerlink" href="#1-modificar-la-configuracion-regional" title="Permanent link">&para;</a></h3>
+<p>La API genera archivos CSV usando “.” como separador decimal. Para que Google Spreadsheet lea correctamente el archivo debe elegirse “Estados Unidos” o cualquier otra región compatible (esto sólo afecta a la lectura de coordenadas).</p>
+<p><img alt="" src="../assets/google_drive_1.png" />
+<br><br>
+<img alt="" src="../assets/google_drive_2.png" />
+<br><br>
+<img alt="" src="../assets/google_drive_3.png" /></p>
+<h3 id="2-importar-listados-de-unidades-territoriales">2. Importar listados de unidades territoriales<a class="headerlink" href="#2-importar-listados-de-unidades-territoriales" title="Permanent link">&para;</a></h3>
+<p>Utilizamos la función <code>IMPORTDATA()</code> de Google Sheets y armamos la url de la entidad territorial que queremos importar. Por ejemplo "localidades de la provincia de Santa Fé":</p>
+<p><a href="https://apis.datos.gob.ar/georef/api/localidades?formato=csv&amp;max=1000&amp;provincia=santa%20fe"><code>https://apis.datos.gob.ar/georef/api/localidades?formato=csv&amp;max=1000&amp;provincia=santa%20fe</code></a></p>
+<p><img alt="" src="../assets/google_drive_4.png" />
+<br><br></p>
+<p>y obtendremos:</p>
+<p><img alt="" src="../assets/google_drive_5.png" />
+<br><br></p>
+<h3 id="3-normalizar-un-listado-de-unidades-territoriales">3. Normalizar un listado de unidades territoriales<a class="headerlink" href="#3-normalizar-un-listado-de-unidades-territoriales" title="Permanent link">&para;</a></h3>
+<p>Si tenemos un listado de provincias que queremos normalizar, como el siguiente:</p>
+<p><img alt="" src="../assets/google_drive_6.png" />
+<br><br></p>
+<p>Podemos armar urls individuales para normalizar los nombres y traer alguno de sus atributos. Imaginemos que queremos el ID y el nombre normalizado.</p>
+<p>Primero generamos la url para cada una de las provincias:</p>
+<p><img alt="" src="../assets/google_drive_7.png" />
+<br><br></p>
+<p>y luego necesitamos importar una nueva función en la hoja de cálculo. Para eso, desde el menú:</p>
+<ol>
+<li>Herramientas → Editor de secuencia de comandos.</li>
+<li>Borramos todo lo que hay en el editor y pegamos el siguiente <a href="https://raw.githubusercontent.com/bradjasper/ImportJSON/master/ImportJSON.gs">script</a> de <a href="https://github.com/bradjasper">Bradjasper</a>.</li>
+<li>Renombremos el script como ImportJson.gs y guardamos.</li>
+<li>Ahora ya podemos usar la función <code>=importJSON()</code> en una celda.</li>
+</ol>
+<p><img alt="" src="../assets/google_drive_8.png" />
+<br><br></p>
+<p><code>=ImportJSON(B2;”/provincias/id,/provincias/nombre”;”noInherit,noTruncate,noHeaders”)</code></p>
+<p>y obtendremos:</p>
+<p><img alt="" src="../assets/google_drive_9.png" />
+<br><br></p>
                 
                   
                 
@@ -533,7 +576,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../terms/" title="Condiciones de uso" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../quick-start/" title="Ejemplos de uso" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -542,19 +585,19 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Condiciones de uso
+                Ejemplos de uso
               </span>
             </div>
           </a>
         
         
-          <a href="../georef-api-development/" title="Ambiente de desarrollo y deploy" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../python-usage/" title="Usar en Python" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Ambiente de desarrollo y deploy
+                Usar en Python
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
