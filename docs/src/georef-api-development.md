@@ -165,8 +165,11 @@ Cualquiera de las dos opciones también permite indexar datos selectivamente: se
 Los nombres de los índices disponibles son:
 
 - `provincias`
+- `provincias-geometria`
 - `departamentos`
+- `departamentos-geometria`
 - `municipios`
+- `municipios-geometria`
 - `localidades`
 - `calles`
 
@@ -175,6 +178,11 @@ Los nombres de los índices disponibles son:
 Correr la API de Georef utilizando un servidor de prueba (no apto para producción):
 ```bash
 (venv) $ make start_dev_server
+```
+
+O También:
+```bash
+(venv) $ make start_gunicorn_dev_server
 ```
 
 #### Entornos productivos

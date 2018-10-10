@@ -1,18 +1,47 @@
+"""Mappeos de entidades para Elasticsearch
+"""
+
+import copy
+
 from .elasticsearch_params import LOWCASE_ASCII_NORMALIZER
 from .elasticsearch_params import NAME_ANALYZER
 from .elasticsearch_params import NAME_ANALYZER_SYNONYMS
 
-# Mapeos de entidades para Elasticsearch
-# El excluimiento del campo 'geometria' en _source se debe a que las geometrías
-# tienden a aumentar significativamente el tamaño de los documentos, por lo que
-# la performance de la búsqueda por id/texto/etc se ve disminuida.
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
+
+def with_geom(original):
+    """Dado un mappeo de una entidad, crea una copia con un campo 'geometria'
+    agregado.
+
+    Por cada entidad geográfica con geometría, se crean dos mappeos: uno sin
+    geometría y otro con. Esto se debe a que las geometría aumentan
+    significativamente el tamaño de los documentos, lo cual hace que la
+    performance de búsqueda por nombre/id/etc. se vea disminuida (incluso si no
+    se incluye la geometría en los resultados). Una forma de evitar este
+    problema es indexar las geometrías, pero no incluirlas en los documentos
+    almacenados (utilizando _source 'excludes'). El problema de esta solución
+    es que no permite utilizar queries como GeoShape con los datos indexados,
+    ya que las geometrías originales se perdieron.
+
+    Para más información, ver:
+    https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
+
+    Args:
+        original (dict): Mappeo Elasticsearch de una entidad.
+
+    Returns:
+        dict: Mappeo basado en el original, con campo 'geometria' adicional.
+
+    """
+    mapping = copy.deepcopy(original)
+    mapping['_doc']['properties']['geometria'] = {
+        'type': 'geo_shape'
+    }
+
+    return mapping
+
 
 MAP_STATE = {
     '_doc': {
-        '_source': {
-            'excludes': ['geometria']
-        },
         'properties': {
             'id': {'type': 'keyword'},
             'nombre': {
@@ -26,7 +55,6 @@ MAP_STATE = {
                     }
                 }
             },
-            'geometria': {'type': 'geo_shape'},
             'centroide': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -38,12 +66,11 @@ MAP_STATE = {
         }
     }
 }
+
+MAP_STATE_GEOM = with_geom(MAP_STATE)
 
 MAP_DEPT = {
     '_doc': {
-        '_source': {
-            'excludes': ['geometria']
-        },
         'properties': {
             'id': {'type': 'keyword'},
             'nombre': {
@@ -65,7 +92,6 @@ MAP_DEPT = {
                     'lon': {'type': 'float', 'index': False}
                 }
             },
-            'geometria': {'type': 'geo_shape'},
             'provincia': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -87,12 +113,11 @@ MAP_DEPT = {
         }
     }
 }
+
+MAP_DEPT_GEOM = with_geom(MAP_DEPT)
 
 MAP_MUNI = {
     '_doc': {
-        '_source': {
-            'excludes': ['geometria']
-        },
         'properties': {
             'id': {'type': 'keyword'},
             'nombre': {
@@ -106,7 +131,6 @@ MAP_MUNI = {
                     }
                 }
             },
-            'geometria': {'type': 'geo_shape'},
             'centroide': {
                 'type': 'object',
                 'dynamic': 'strict',
@@ -137,11 +161,10 @@ MAP_MUNI = {
     }
 }
 
+MAP_MUNI_GEOM = with_geom(MAP_MUNI)
+
 MAP_LOCALITY = {
     '_doc': {
-        '_source': {
-            'excludes': ['geometria']
-        },
         'properties': {
             'id': {'type': 'keyword'},
             'nombre': {
@@ -156,7 +179,6 @@ MAP_LOCALITY = {
                 }
             },
             'tipo': {'type': 'keyword'},
-            'geometria': {'type': 'geo_shape'},
             'centroide': {
                 'type': 'object',
                 'dynamic': 'strict',

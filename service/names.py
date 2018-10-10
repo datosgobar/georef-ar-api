@@ -78,3 +78,6 @@ EXACT_SUFFIX = '.exacto'
 SOURCE_INDEC = 'INDEC'
 SOURCE_BAHRA = 'BAHRA'
 SOURCE_IGN = 'IGN'
+
+# Índices
+GEOM_INDEX = '{}-geometria'

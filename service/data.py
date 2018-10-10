@@ -234,7 +234,7 @@ def search_places(es, index, params_list):
     searches = [ElasticsearchSearch(build_place_search(**params))
                 for params in params_list]
 
-    ElasticsearchSearch.run_searches(es, index, searches)
+    ElasticsearchSearch.run_searches(es, N.GEOM_INDEX.format(index), searches)
     return [search.result for search in searches]
 
 
