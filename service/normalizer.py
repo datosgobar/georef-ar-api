@@ -5,7 +5,6 @@ de los recursos que expone la API.
 """
 
 import logging
-from contextlib import contextmanager
 from flask import current_app
 from service import data, params, formatter
 from service import names as N
@@ -122,47 +121,6 @@ def get_elasticsearch():
         )
 
     return current_app.elasticsearch
-
-
-def get_postgres_db_connection_pool():
-    """Devuelve la pool de conexiones a PostgreSQL activa para la sesión
-    de flask. La pool es creada si no existía.
-
-    Returns:
-        psycopg2.pool.ThreadedConnectionPool: Pool de conexiones.
-
-    Raises:
-        data.DataConnectionException: En caso de ocurrir un error de
-            conexión con la capa de manejo de datos.
-
-    """
-    if not hasattr(current_app, 'postgres_pool'):
-        current_app.postgres_pool = data.postgres_db_connection_pool(
-            name=current_app.config['SQL_DB_NAME'],
-            host=current_app.config['SQL_DB_HOST'],
-            user=current_app.config['SQL_DB_USER'],
-            password=current_app.config['SQL_DB_PASS'],
-            maxconn=current_app.config['SQL_DB_MAX_CONNECTIONS']
-        )
-
-    return current_app.postgres_pool
-
-
-@contextmanager
-def get_postgres_db_connection(pool):
-    """Crea un contexto que extrae una conexión del pool de conexiones. La
-    conexión es devuelta al pool incondicionalmente al terminar la ejecución
-    del contexto.
-
-    Args:
-        pool (psycopg2.pool.AbstractConnectionPool): Pool de conexiones.
-
-    """
-    connection = pool.getconn()
-    try:
-        yield connection
-    finally:
-        pool.putconn(connection)
 
 
 def translate_keys(d, translations, ignore=None):
@@ -609,29 +567,26 @@ def build_addresses_result(result, query, source):
     """
     fields = query['fields']
     number = query['number']
-    pool = get_postgres_db_connection_pool()
 
-    with get_postgres_db_connection(pool) as connection:
-        for street in result.hits:
-            if N.FULL_NAME in fields:
-                parts = street[N.FULL_NAME].split(',')
-                parts[0] += ' {}'.format(number)
-                street[N.FULL_NAME] = ','.join(parts)
+    for street in result.hits:
+        if N.FULL_NAME in fields:
+            parts = street[N.FULL_NAME].split(',')
+            parts[0] += ' {}'.format(number)
+            street[N.FULL_NAME] = ','.join(parts)
 
-            door_nums = street.pop(N.DOOR_NUM)
-            start, end = street_extents(door_nums, number)
-            geom = street.pop(N.GEOM)
+        door_nums = street.pop(N.DOOR_NUM)
+        start, end = street_extents(door_nums, number)
+        geom = street.pop(N.GEOM)
 
-            if N.DOOR_NUM in fields:
-                street[N.DOOR_NUM] = number
+        if N.DOOR_NUM in fields:
+            street[N.DOOR_NUM] = number
 
-            if (N.LOCATION_LAT in fields or N.LOCATION_LON in fields) and \
-               start is not None and end is not None:
-                loc = data.street_number_location(connection, geom, number,
-                                                  start, end)
-                street[N.LOCATION] = loc
+        if (N.LOCATION_LAT in fields or N.LOCATION_LON in fields) and \
+           start is not None and end is not None:
+            loc = data.street_number_location(geom, number, start, end)
+            street[N.LOCATION] = loc
 
-            street[N.SOURCE] = source
+        street[N.SOURCE] = source
 
 
 def build_address_query_format(parsed_params):

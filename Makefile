@@ -20,10 +20,6 @@ print_index_stats: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
 	python -m $(UTILS_PY) -m index_stats -i
 
-load_sql: check_config_file
-	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m run_sql -s service/management/function_geocodificar.sql
-
 start_dev_server: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
 	FLASK_APP=service/__init__.py \

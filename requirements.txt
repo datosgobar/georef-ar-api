@@ -3,5 +3,5 @@ elasticsearch-dsl==6.2.0
 Flask==1.0.2
 geojson==2.3.0
 gunicorn==19.8.1
-psycopg2-binary==2.7.4
 requests==2.18.4
+shapely==1.6.4.post2

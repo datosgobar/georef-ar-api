@@ -3,7 +3,6 @@ import random
 from unittest import TestCase
 from unittest import mock
 import elasticsearch
-import psycopg2
 from flask import current_app
 from service import app
 
@@ -44,8 +43,6 @@ class NormalizerTest(TestCase):
         with app.app_context():
             if hasattr(current_app, 'elasticsearch'):
                 delattr(current_app, 'elasticsearch')
-            if hasattr(current_app, 'postgres_pool'):
-                delattr(current_app, 'postgres_pool')
 
     @mock.patch("elasticsearch.Elasticsearch", autospec=True)
     def test_elasticsearch_connection_error(self, es):
@@ -53,25 +50,6 @@ class NormalizerTest(TestCase):
         Elasticsearch."""
         es.side_effect = elasticsearch.ElasticsearchException()
         self.assert_500_error(random.choice(ENDPOINTS))
-
-    @mock.patch("psycopg2.connect", autospec=True)
-    @mock.patch("elasticsearch.Elasticsearch", autospec=True)
-    def test_postgres_connection_error(self, es, pg_connect):
-        """Se debería devolver un error 500 cuando falla la conexión a
-        PostgreSQL."""
-        self.set_msearch_results(es, [MOCK_STREET])
-        pg_connect.side_effect = psycopg2.Error('Mock error')
-        self.assert_500_error('/direcciones?direccion=santa fe 1000')
-
-    @mock.patch("psycopg2.connect", autospec=True)
-    @mock.patch("elasticsearch.Elasticsearch", autospec=True)
-    def test_postgres_connection_error_location(self, es, pg_connect):
-        """Se debería devolver un error 500 cuando falla la conexión a
-        PostgreSQL (durante georreferenciación)."""
-        self.set_msearch_results(es, [MOCK_STREET])
-        pg_connect.return_value.cursor.side_effect = psycopg2.Error(
-            'Mock error')
-        self.assert_500_error('/direcciones?direccion=santa fe 1000')
 
     @mock.patch("elasticsearch.Elasticsearch", autospec=True)
     def test_elasticsearch_msearch_error(self, es):

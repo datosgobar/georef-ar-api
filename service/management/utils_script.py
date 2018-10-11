@@ -11,7 +11,6 @@ from datetime import datetime
 from io import StringIO
 
 from elasticsearch import helpers
-import psycopg2
 import requests
 
 from .. import app
@@ -40,7 +39,7 @@ logger = logging.getLogger(__name__)
 FILE_VERSION = '5.0.0'
 
 SEPARATOR_WIDTH = 60
-ACTIONS = ['index', 'index_stats', 'run_sql']
+ACTIONS = ['index', 'index_stats']
 INDEX_NAMES = [
     N.STATES,
     N.GEOM_INDEX.format(N.STATES),
@@ -690,32 +689,6 @@ def run_info(es):
         logger.info(line)
 
 
-def run_sql(script):
-    """Ejecuta un script SQL en la base de de datos PostgreSQL utilizada por
-    Georef API.
-
-    Args:
-        script (io.IOBase): Archivo con el contenido del script SQL.
-
-    """
-    try:
-        conn = psycopg2.connect(host=app.config['SQL_DB_HOST'],
-                                dbname=app.config['SQL_DB_NAME'],
-                                user=app.config['SQL_DB_USER'],
-                                password=app.config['SQL_DB_PASS'])
-
-        sql = script.read()
-        with conn:
-            with conn.cursor() as cursor:
-                cursor.execute(sql)
-
-        conn.close()
-        logger.info('El script SQL fue ejecutado correctamente.')
-    except psycopg2.Error as e:
-        logger.error('Ocurrió un error al ejecutar el script SQL:')
-        logger.error(e)
-
-
 def main():
     """Punto de entrada para utils_script.py
 
@@ -739,16 +712,14 @@ def main():
     setup_logger(logger, loggerStream)
 
     with app.app_context():
-        if args.mode in ['index', 'index_stats']:
-            es = normalizer.get_elasticsearch()
+        es = normalizer.get_elasticsearch()
 
-            if args.mode == 'index':
-                run_index(es, args.forced, args.name)
-            else:
-                run_info(es)
-
-        elif args.mode == 'run_sql':
-            run_sql(args.script)
+        if args.mode == 'index':
+            run_index(es, args.forced, args.name)
+        elif args.mode == 'index_stats':
+            run_info(es)
+        else:
+            raise ValueError('Modo inválido.')
 
 
 if __name__ == '__main__':

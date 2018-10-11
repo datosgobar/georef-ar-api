@@ -1,16 +1,16 @@
 """Módulo 'data' de georef-api
 
-Contiene funciones que ejecutan consultas a índices de Elasticsearch, o a la
-base de datos PostgreSQL.
+Contiene funciones que ejecutan consultas a índices de Elasticsearch.
 """
 
 import logging
 import elasticsearch
+from shapely.wkb import loads
+from shapely import ops, geometry
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
 from elasticsearch_dsl.query import MatchNone
 from elasticsearch_dsl.query import Term
-import psycopg2.pool
 from service import names as N
 
 
@@ -23,39 +23,10 @@ logger = logging.getLogger('georef')
 
 class DataConnectionException(Exception):
     """Representa un error sucedido al intentar realizar una operación
-    utilizando Elasticsearch o PostgreSQL.
+    utilizando Elasticsearch.
     """
 
     pass
-
-
-def postgres_db_connection_pool(host, name, user, password, maxconn):
-    """Crea una pool de conexiones a la base de datos PostgreSQL.
-
-    Args:
-        host (str): Host de la base de datos.
-        name (str): Nombre de la base de datos.
-        user (str): Usuario de la base de datos.
-        password (str): Contraseña de la base de datos.
-        maxconn (int): Número máximo de conexiones a crear.
-
-    Raises:
-        DataConnectionException: si la conexión no pudo ser establecida.
-
-    Returns:
-        psycopg2.pool.ThreadedConnectionPool: Pool de conexiones a la base de
-            datos SQL.
-
-    """
-    try:
-        return psycopg2.pool.ThreadedConnectionPool(1, maxconn, host=host,
-                                                    dbname=name, user=user,
-                                                    password=password)
-    except psycopg2.Error as e:
-        logger.error(
-            'Error al crear pool de conexiones a la base de datos PostgreSQL:')
-        logger.error(e)
-        raise DataConnectionException()
 
 
 def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
@@ -632,11 +603,10 @@ def build_match_query(field, value, fuzzy=False, operator='or'):
     return Match(**{field: options})
 
 
-def street_number_location(connection, geom, number, start, end):
+def street_number_location(geom, number, start, end):
     """Obtiene las coordenadas de un punto dentro de un tramo de calle.
 
     Args:
-        connection (psycopg2.connection): Conexión a base de datos.
         geom (str): Geometría de un tramo de calle.
         number (int or None): Número de puerta o altura.
         start (int): Numeración inicial del tramo de calle.
@@ -646,25 +616,25 @@ def street_number_location(connection, geom, number, start, end):
         dict: Coordenadas del punto.
 
     """
-    args = geom, number, start, end
-    query = """SELECT geocodificar('%s', %s, %s, %s);""" % args
+    shape = loads(bytes.fromhex(geom))
+    line = ops.linemerge(shape)
 
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(query)
-            location = cursor.fetchall()[0][0]
-    except psycopg2.Error as e:
-        logger.error('Ocurrieron errores en la consulta SQL:')
-        logger.error(e)
-        raise DataConnectionException()
+    if isinstance(line, geometry.LineString):
+        # Si la geometría de la calle pudo ser combinada para formar un único
+        # tramo, encontrar la ubicación interpolando la altura con el inicio y
+        # fin de altura de la calle.
+        ip = line.interpolate((number - start) / (end - start),
+                              normalized=True)
 
-    if location['code']:
-        parts = location['result'].split(',')
-        lat, lon = float(parts[0]), float(parts[1])
-    else:
-        lat, lon = None, None
+        return {
+            # TODO:
+            # line.interpolate retorna un shapely Point pero pylint solo mira
+            # los atributos de BaseGeometry.
+            N.LAT: ip.y,  # pylint: disable=no-member
+            N.LON: ip.x   # pylint: disable=no-member
+        }
 
     return {
-        N.LAT: lat,
-        N.LON: lon
+        N.LAT: None,
+        N.LON: None
     }
