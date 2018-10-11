@@ -59,6 +59,7 @@ EXACT = 'exacto'
 BASIC = 'basico'
 STANDARD = 'estandar'
 COMPLETE = 'completo'
+INTERSECTION = 'interseccion'
 
 # Results
 RESULTS = 'resultados'

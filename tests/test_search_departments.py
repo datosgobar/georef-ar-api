@@ -9,7 +9,7 @@ DEPARTMENTS = [
     (['54063'], 'IGUAZÚ'),
     (['74042'], 'GOBERNADOR DUPUY'),
     (['86021'], 'ATAMISQUI'),
-    (['94014'], 'USHUAIA'),
+    (['94015'], 'USHUAIA'),
     (['18161'], 'SAN ROQUE'),
     (['30063'], 'ISLAS DEL IBICUY'),
     (['34042'], 'PILAGÁS'),
@@ -351,6 +351,12 @@ class SearchDepartmentsTest(SearchEntitiesTest):
             {
                 'exacto': True,
                 'nombre': 'SAN BLAS DE LOS SAUCES'
+            },
+            {
+                'interseccion': 'municipio:180315'
+            },
+            {
+                'interseccion': 'provincia:14'
             }
         ]
 

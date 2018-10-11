@@ -10,7 +10,7 @@ opciones de valores.'
 ADDRESS_FORMAT = 'La dirección debe tener el siguiente formato: <nombre de \
 calle> <altura>.'
 ADDRESS_INVALID_NUM = 'La dirección debe tener una altura positiva.'
-STRING_EMPTY = 'El campo de texto no tiene contenido.'
+STRING_EMPTY = 'El campo no tiene contenido.'
 INT_VAL_ERROR = 'El parámetro no es un número entero.'
 FLOAT_VAL_ERROR = 'El parámetro no es un número real.'
 INVALID_CHOICE = 'El parámetro debe consistir en una lista de ítems separados \
@@ -39,3 +39,5 @@ FIELD_LIST_EMPTY = 'La lista no contiene valores.'
 FIELD_LIST_REPEATED = 'La lista contiene valores repetidos.'
 FIELD_LIST_INVALID_CHOICE = INVALID_CHOICE + ' Alternativamente, se pueden \
 especificar los valores \'basico\', \'estandar\' o \'completo\'.'
+FIELD_INTERSECTION_FORMAT = 'El parámetro debe seguir el siguiente formato: \
+<tipo de entidad>:<id>, <tipo de entidad>:<id>, ...'

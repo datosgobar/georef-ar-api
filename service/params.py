@@ -109,8 +109,18 @@ class Parameter:
     HTTP.
 
     La clase se encarga de validar el valor recibido vía HTTP (en forma de
-    string), comprobando también que el valor haya sido recibido (en caso de
-    ser un parámetro requerido).
+    string), y retornar su valor convertido. Por ejemplo, el parámetro
+    IntParameter podría recibir el valor '100' (str) y retornar 100 (int).
+    La clase Parameter también se encarga de validar que los parámetros
+    requeridos hayan sido envíados en la petición HTTP.
+
+    La clase Parameter y todos sus derivadas deben definir su estado interno
+    exclusivamente en el método __init__. Los métodos de validación/conversión
+    'get_value', 'validate_values', etc. *no* deben modificar el estado interno
+    de sus instancias. En otras palabras, la clase Parameter y sus derivadas
+    deberían ser consideradas inmutables. Esto facilita el desarrollo de
+    Parameter ya que el comportamiento sus métodos internos solo depende de un
+    estado inicial estático.
 
     Attributes:
         _choices (list): Lista de valores permitidos (o None si se permite
@@ -487,6 +497,53 @@ class AddressParameter(Parameter):
         return address
 
 
+class IntersectionParameter(Parameter):
+    """Representa un parámetro utilizado para especificar búsqueda de entidades
+    por intersección geográfica.
+
+    Se heredan las propiedades y métodos de la clase Parameter, definiendo
+    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    validación propias de IntersectionParameter.
+
+    """
+    def __init__(self, required=False):
+        self._state_id_param = IdParameter(STATE_ID_LEN)
+        self._dept_id_param = IdParameter(DEPT_ID_LEN)
+        self._muni_id_param = IdParameter(MUNI_ID_LEN)
+        super().__init__(required)
+
+    def _parse_value(self, val):
+        if not val:
+            raise ValueError(strings.STRING_EMPTY)
+
+        ids = {
+            N.STATES: set(),
+            N.DEPARTMENTS: set(),
+            N.MUNICIPALITIES: set()
+        }
+
+        for part in [p.strip() for p in val.split(',')]:
+            sections = [s.strip() for s in part.split(':')]
+            if len(sections) < 2:
+                raise ValueError(strings.FIELD_INTERSECTION_FORMAT)
+
+            entity = sections[0]
+
+            for entry in sections[1:]:
+                if entity == N.STATE:
+                    ids[N.STATES].add(self._state_id_param.get_value(entry))
+                elif entity == N.DEPT:
+                    ids[N.DEPARTMENTS].add(self._dept_id_param.get_value(
+                        entry))
+                elif entity == N.MUN:
+                    ids[N.MUNICIPALITIES].add(self._muni_id_param.get_value(
+                        entry))
+                else:
+                    raise ValueError(strings.FIELD_INTERSECTION_FORMAT)
+
+        return ids if any(ids) else {}
+
+
 class ParamValidator:
     """Interfaz para realizar una validación de valores de parámetros HTTP.
 
@@ -839,6 +896,7 @@ class EndpointParameters():
 PARAMS_STATES = EndpointParameters(shared_params={
     N.ID: IdParameter(length=STATE_ID_LEN),
     N.NAME: StrParameter(),
+    N.INTERSECTION: IntersectionParameter(),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -860,6 +918,7 @@ PARAMS_STATES = EndpointParameters(shared_params={
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.ID: IdParameter(length=DEPT_ID_LEN),
     N.NAME: StrParameter(),
+    N.INTERSECTION: IntersectionParameter(),
     N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
@@ -883,6 +942,7 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.ID: IdParameter(length=MUNI_ID_LEN),
     N.NAME: StrParameter(),
+    N.INTERSECTION: IntersectionParameter(),
     N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),

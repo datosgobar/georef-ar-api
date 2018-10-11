@@ -170,13 +170,14 @@ class GeorefIndex:
         _filepath (str): Path o URL de archivo de datos a utilizar como datos.
         _backup_filepath (str): Path donde colocar un respaldo de los últimos
             datos indexados.
-        _excludes (list): Lista de atributos a ignorar cuando se leen los
-            documentos del archivo de datos.
+        _includes  (list): Lista de atributos a incluir cuando se leen los
+            documentos del archivo de datos. Si no se especifica, se incluyen
+            todos los campos.
 
     """
 
     def __init__(self, alias, mapping, filepath, backup_filepath=None,
-                 excludes=None):
+                 includes=None):
         """Inicializa un nuevo objeto de tipo GeorefIndex.
 
         Args:
@@ -184,14 +185,14 @@ class GeorefIndex:
             mapping (str): Ver el atributo '_mapping'.
             filepath (str): Ver el atributo '_filepath'.
             backup_filepath (str): Ver el atributo '_backup_filepath'.
-            excludes (list): Ver el atributo '_excludes'.
+            includes (list): Ver el atributo '_includes'.
 
         """
         self._alias = alias
         self._filepath = filepath
         self._backup_filepath = backup_filepath
         self._mapping = mapping
-        self._excludes = excludes
+        self._includes = includes
 
     @property
     def alias(self):
@@ -544,10 +545,10 @@ class GeorefIndex:
 
         """
         for doc in docs:
-            if self._excludes:
+            if self._includes:
                 doc = {key: doc[key]
                        for key in doc
-                       if key not in self._excludes}
+                       if key in self._includes}
 
             action = {
                 '_op_type': 'create',
@@ -611,29 +612,29 @@ def run_index(es, forced, name='all'):
                     mapping=MAP_STATE,
                     filepath=app.config['STATES_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'provincias.json'),
-                    excludes=['geometria']),
+                                                 'provincias.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.STATES),
                     mapping=MAP_STATE_GEOM,
-                    filepath=app.config['STATES_FILE']),
+                    filepath=app.config['STATES_FILE'],
+                    includes=[N.ID, N.GEOM]),
         GeorefIndex(alias=N.DEPARTMENTS,
                     mapping=MAP_DEPT,
                     filepath=app.config['DEPARTMENTS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'departamentos.json'),
-                    excludes=['geometria']),
+                                                 'departamentos.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.DEPARTMENTS),
                     mapping=MAP_DEPT_GEOM,
-                    filepath=app.config['DEPARTMENTS_FILE']),
+                    filepath=app.config['DEPARTMENTS_FILE'],
+                    includes=[N.ID, N.GEOM]),
         GeorefIndex(alias=N.MUNICIPALITIES,
                     mapping=MAP_MUNI,
                     filepath=app.config['MUNICIPALITIES_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'municipios.json'),
-                    excludes=['geometria']),
+                                                 'municipios.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.MUNICIPALITIES),
                     mapping=MAP_MUNI_GEOM,
-                    filepath=app.config['MUNICIPALITIES_FILE']),
+                    filepath=app.config['MUNICIPALITIES_FILE'],
+                    includes=[N.ID, N.GEOM]),
         GeorefIndex(alias=N.LOCALITIES,
                     mapping=MAP_LOCALITY,
                     filepath=app.config['LOCALITIES_FILE'],

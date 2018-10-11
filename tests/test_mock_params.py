@@ -418,6 +418,46 @@ class ParamParsingTest(TestCase):
             }
         ], body=body)
 
+    def test_invalid_intersection_empty(self):
+        """El parámetro 'interseccion' no debería aceptar valores vacíos."""
+        self.assert_errors_match('/provincias?interseccion=', {
+            (T.VALUE_ERROR.value, 'interseccion')
+        })
+
+    def test_invalid_intersection_empty_list(self):
+        """El parámetro 'interseccion' no debería aceptar listas de IDs
+        vacías."""
+        self.assert_errors_match('/provincias?interseccion=municipio:', {
+            (T.VALUE_ERROR.value, 'interseccion')
+        })
+
+    def test_invalid_intersection_entity(self):
+        """El parámetro 'interseccion' no debería aceptar tipos de entidades
+        desconocidas."""
+        self.assert_errors_match('/provincias?interseccion=foobar:1', {
+            (T.VALUE_ERROR.value, 'interseccion')
+        })
+
+    def test_invalid_intersection_id_len(self):
+        """El parámetro 'interseccion' debería comprobar la longitud de los
+        IDs recibidos."""
+        self.assert_errors_match('/provincias?interseccion=municipio:99', {
+            (T.VALUE_ERROR.value, 'interseccion')
+        })
+
+    def test_invalid_intersection_id_empty(self):
+        """El parámetro 'interseccion' no debería aceptar IDs vacíos."""
+        self.assert_errors_match('/departamentos?interseccion=municipio:::', {
+            (T.VALUE_ERROR.value, 'interseccion')
+        })
+
+    def test_invalid_intersection_empty_set(self):
+        """El parámetro 'interseccion' no debería aceptar conjuntos
+        entidad-IDs vacíos."""
+        self.assert_errors_match('/municipios?interseccion=provincia:02,,,', {
+            (T.VALUE_ERROR.value, 'interseccion')
+        })
+
     def assert_errors_match(self, url, errors_set, body=None, method=None):
         url = self.url_base + url
         if not method:

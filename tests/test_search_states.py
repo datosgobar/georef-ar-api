@@ -346,6 +346,12 @@ class SearchStatesTest(SearchEntitiesTest):
             {
                 'exacto': True,
                 'nombre': 'BUENOS AIRES'
+            },
+            {
+                'interseccion': 'departamento:82133'
+            },
+            {
+                'interseccion': 'municipio:060014'
             }
         ]
 

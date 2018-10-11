@@ -344,6 +344,7 @@ def process_state(request):
     return process_entity(request, N.STATES, params.PARAMS_STATES, {
         N.ID: 'entity_id',
         N.NAME: 'name',
+        N.INTERSECTION: 'intersection',
         N.EXACT: 'exact',
         N.ORDER: 'order',
         N.FIELDS: 'fields',
@@ -366,6 +367,7 @@ def process_department(request):
                           params.PARAMS_DEPARTMENTS, {
                               N.ID: 'entity_id',
                               N.NAME: 'name',
+                              N.INTERSECTION: 'intersection',
                               N.STATE: 'state',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
@@ -389,6 +391,7 @@ def process_municipality(request):
                           params.PARAMS_MUNICIPALITIES, {
                               N.ID: 'entity_id',
                               N.NAME: 'name',
+                              N.INTERSECTION: 'intersection',
                               N.STATE: 'state',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',

@@ -356,6 +356,12 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
             {
                 'exacto': True,
                 'nombre': 'NECOCHEA'
+            },
+            {
+                'interseccion': 'departamento:82133'
+            },
+            {
+                'interseccion': 'provincia:26'
             }
         ]
 

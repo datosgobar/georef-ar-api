@@ -17,7 +17,7 @@ PLACES = [
     }),
     ('-53.873', '-67.825', {
         'provincia': '94',
-        'departamento': '94007',
+        'departamento': '94008',
         'municipio': '940007'
     }),
     ('-25.718', '-53.994', {
