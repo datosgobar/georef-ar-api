@@ -515,13 +515,11 @@
 <ul>
 <li><a href="#dependencias">Dependencias</a></li>
 <li><a href="#instalacion">Instalación</a></li>
-<li><a href="#1-base-de-datos">1. Base de datos</a></li>
-<li><a href="#2-elasticsearch">2. Elasticsearch</a></li>
-<li><a href="#3-repositorio-y-dependencias">3. Repositorio y dependencias</a></li>
-<li><a href="#4-cargar-las-funciones-sql">4. Cargar las funciones SQL</a></li>
-<li><a href="#5-crear-los-indices">5. Crear los índices</a></li>
-<li><a href="#6-opcional-re-indexar-datos">6. (Opcional) Re-indexar datos</a></li>
-<li><a href="#7-correr-api">7. Correr API</a></li>
+<li><a href="#1-elasticsearch">1. Elasticsearch</a></li>
+<li><a href="#2-repositorio-y-dependencias">2. Repositorio y dependencias</a></li>
+<li><a href="#3-crear-los-indices">3. Crear los índices</a></li>
+<li><a href="#4-opcional-re-indexar-datos">4. (Opcional) Re-indexar datos</a></li>
+<li><a href="#5-correr-api">5. Correr API</a></li>
 <li><a href="#tests">Tests</a></li>
 <li><a href="#archivos-de-datos">Archivos de datos</a></li>
 </ul>
@@ -529,35 +527,25 @@
 
 <h2 id="dependencias">Dependencias<a class="headerlink" href="#dependencias" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html">Elasticsearch &gt;=6.2.0</a></li>
+<li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html">Elasticsearch &gt;=6.4.2</a></li>
 <li><a href="https://www.python.org/downloads/">Python &gt;=3.6.x</a></li>
-<li><a href="https://www.postgresql.org/download/">PostgreSQL 9.6</a></li>
-<li><a href="http://postgis.net/install/">PostGIS 2.3</a></li>
 <li><a href="https://nginx.org/">Nginx</a> <em>(para entornos productivos)</em></li>
 </ul>
 <h2 id="instalacion">Instalación<a class="headerlink" href="#instalacion" title="Permanent link">&para;</a></h2>
-<h3 id="1-base-de-datos">1. Base de datos<a class="headerlink" href="#1-base-de-datos" title="Permanent link">&para;</a></h3>
-<p>Crear una base de datos en PostgreSQL con la extensión PostGIS. A continuación, se muestra un ejemplo utilizando <code>georef_api</code> como nombre para la base de datos:</p>
-<pre><code class="sql">-- Crear la base de datos:
-CREATE DATABASE georef_api WITH ENCODING='UTF8';
-
--- Agregar PostGIS a la base de datos creada:
-CREATE EXTENSION postgis;
-</code></pre>
-
-<h3 id="2-elasticsearch">2. Elasticsearch<a class="headerlink" href="#2-elasticsearch" title="Permanent link">&para;</a></h3>
+<h3 id="1-elasticsearch">1. Elasticsearch<a class="headerlink" href="#1-elasticsearch" title="Permanent link">&para;</a></h3>
 <p>Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más servidores (nodos).</p>
-<h4 id="21-instalar-el-entorno-de-ejecucion-para-java">2.1 Instalar el entorno de ejecución para Java:<a class="headerlink" href="#21-instalar-el-entorno-de-ejecucion-para-java" title="Permanent link">&para;</a></h4>
+<h4 id="11-instalar-el-entorno-de-ejecucion-para-java">1.1 Instalar el entorno de ejecución para Java:<a class="headerlink" href="#11-instalar-el-entorno-de-ejecucion-para-java" title="Permanent link">&para;</a></h4>
 <pre><code class="bash">$ sudo apt install default-jre
 </code></pre>
 
-<h4 id="22-instalar-elasticsearch">2.2 Instalar Elasticsearch:<a class="headerlink" href="#22-instalar-elasticsearch" title="Permanent link">&para;</a></h4>
-<pre><code class="bash">$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.0.deb
-$ sudo dpkg -i elasticsearch-6.2.0.deb
-$ sudo systemctl enable elasticsearch # utilizando systemd para administrar el servicio
+<h4 id="12-instalar-elasticsearch">1.2 Instalar Elasticsearch<a class="headerlink" href="#12-instalar-elasticsearch" title="Permanent link">&para;</a></h4>
+<p>Instalar Elasticsearch e iniciar el servicio con <code>systemctl</code>:</p>
+<pre><code class="bash">$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.4.2.deb
+$ sudo dpkg -i elasticsearch-6.4.2.deb
+$ sudo systemctl enable elasticsearch
 </code></pre>
 
-<h4 id="23-aplicar-las-configuraciones-recomendadas">2.3 Aplicar las configuraciones recomendadas<a class="headerlink" href="#23-aplicar-las-configuraciones-recomendadas" title="Permanent link">&para;</a></h4>
+<h4 id="13-aplicar-las-configuraciones-recomendadas">1.3 Aplicar las configuraciones recomendadas<a class="headerlink" href="#13-aplicar-las-configuraciones-recomendadas" title="Permanent link">&para;</a></h4>
 <p>Editar el archivo  <code>/etc/elasticsearch/elasticsearch.yml</code> (el valor de <code>node.name</code> debe ser único por nodo):</p>
 <pre><code class="text">node.name: node-1
 http.max_content_length: 100mb
@@ -571,44 +559,39 @@ http.max_content_length: 100mb
 -Xmx4g
 </code></pre>
 
-<h3 id="3-repositorio-y-dependencias">3. Repositorio y dependencias<a class="headerlink" href="#3-repositorio-y-dependencias" title="Permanent link">&para;</a></h3>
-<h4 id="31-clonar-el-repositorio">3.1 Clonar el repositorio:<a class="headerlink" href="#31-clonar-el-repositorio" title="Permanent link">&para;</a></h4>
+<h3 id="2-repositorio-y-dependencias">2. Repositorio y dependencias<a class="headerlink" href="#2-repositorio-y-dependencias" title="Permanent link">&para;</a></h3>
+<h4 id="21-clonar-el-repositorio">2.1 Clonar el repositorio:<a class="headerlink" href="#21-clonar-el-repositorio" title="Permanent link">&para;</a></h4>
 <pre><code class="bash">$ git clone https://github.com/datosgobar/georef-api.git
 $ cd georef-api
 </code></pre>
 
-<h4 id="32-crear-un-entorno-virtual-y-activarlo">3.2 Crear un entorno virtual y activarlo:<a class="headerlink" href="#32-crear-un-entorno-virtual-y-activarlo" title="Permanent link">&para;</a></h4>
+<h4 id="22-crear-un-entorno-virtual-y-activarlo">2.2 Crear un entorno virtual y activarlo<a class="headerlink" href="#22-crear-un-entorno-virtual-y-activarlo" title="Permanent link">&para;</a></h4>
 <pre><code class="bash">$ python3 -m venv venv
 $ source venv/bin/activate
 </code></pre>
 
-<h4 id="33-instalar-dependencias-con-pip">3.3 Instalar dependencias con <code>pip</code>:<a class="headerlink" href="#33-instalar-dependencias-con-pip" title="Permanent link">&para;</a></h4>
+<h4 id="23-instalar-dependencias-con-pip">2.3 Instalar dependencias con <code>pip</code><a class="headerlink" href="#23-instalar-dependencias-con-pip" title="Permanent link">&para;</a></h4>
 <pre><code class="bash">(venv) $ pip3 install -r requirements.txt -r requirements-dev.txt
 </code></pre>
 
-<h4 id="34-copiar-el-archivo-de-configuracion">3.4 Copiar el archivo de configuración:<a class="headerlink" href="#34-copiar-el-archivo-de-configuracion" title="Permanent link">&para;</a></h4>
+<h4 id="24-copiar-el-archivo-de-configuracion">2.4 Copiar el archivo de configuración<a class="headerlink" href="#24-copiar-el-archivo-de-configuracion" title="Permanent link">&para;</a></h4>
 <pre><code class="bash">(venv) $ cp config/georef.example.cfg config/georef.cfg
 </code></pre>
 
 <p>Luego, completar el archivo <code>config/georef.cfg</code> con los valores apropiados.</p>
-<h4 id="35-copiar-el-archivo-de-configuracion-de-logs">3.5 Copiar el archivo de configuración de logs:<a class="headerlink" href="#35-copiar-el-archivo-de-configuracion-de-logs" title="Permanent link">&para;</a></h4>
+<h4 id="25-copiar-el-archivo-de-configuracion-de-logs">2.5 Copiar el archivo de configuración de logs<a class="headerlink" href="#25-copiar-el-archivo-de-configuracion-de-logs" title="Permanent link">&para;</a></h4>
 <pre><code class="bash">(venv) $ cp config/logging.example.ini config/logging.ini
 </code></pre>
 
 <p>Luego, completar el archivo <code>config/logging.ini</code> con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.</p>
-<h4 id="36-crear-el-archivo-de-sinonimos">3.6 Crear el archivo de sinónimos<a class="headerlink" href="#36-crear-el-archivo-de-sinonimos" title="Permanent link">&para;</a></h4>
+<h4 id="26-crear-el-archivo-de-sinonimos">2.6 Crear el archivo de sinónimos<a class="headerlink" href="#26-crear-el-archivo-de-sinonimos" title="Permanent link">&para;</a></h4>
 <p>Adicionalmente, se debe crear un archivo <code>georef_synonyms.txt</code>, en la ubicación del archivo de configuración de Elasticsearch (<code>$ES_HOME/config</code>). El archivo contiene la base de sinónimos utilizados al momento de indexar documentos. Su contenido puede ser vacío o contener, por ejemplo, el siguiente contenido:</p>
 <pre><code class="text">buenos aires, bsas
 ciudad autonoma de buenos aires, caba, capital federal
 santiago, sgo, stgo
 </code></pre>
 
-<h3 id="4-cargar-las-funciones-sql">4. Cargar las funciones SQL<a class="headerlink" href="#4-cargar-las-funciones-sql" title="Permanent link">&para;</a></h3>
-<p>Cargar las funciones SQL necesarias para el funcionamiento de la API:</p>
-<pre><code class="bash">(venv) $ make load_sql
-</code></pre>
-
-<h3 id="5-crear-los-indices">5. Crear los índices<a class="headerlink" href="#5-crear-los-indices" title="Permanent link">&para;</a></h3>
+<h3 id="3-crear-los-indices">3. Crear los índices<a class="headerlink" href="#3-crear-los-indices" title="Permanent link">&para;</a></h3>
 <p>Generar índices de entidades y calles:</p>
 <pre><code class="bash">(venv) $ make index
 </code></pre>
@@ -617,7 +600,7 @@ santiago, sgo, stgo
 <pre><code class="bash">(venv) $ make print_index_stats
 </code></pre>
 
-<h3 id="6-opcional-re-indexar-datos">6. (Opcional) Re-indexar datos<a class="headerlink" href="#6-opcional-re-indexar-datos" title="Permanent link">&para;</a></h3>
+<h3 id="4-opcional-re-indexar-datos">4. (Opcional) Re-indexar datos<a class="headerlink" href="#4-opcional-re-indexar-datos" title="Permanent link">&para;</a></h3>
 <p>Si se modifican los archivos de datos JSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:</p>
 <h4 id="indexar-datos-nuevos">Indexar datos nuevos<a class="headerlink" href="#indexar-datos-nuevos" title="Permanent link">&para;</a></h4>
 <p>Si se desea actualizar los índices con los nuevos datos, solo si los datos entrantes son más recientes, se puede utilizar nuevamente:</p>
@@ -644,35 +627,42 @@ santiago, sgo, stgo
 <p>Los nombres de los índices disponibles son:</p>
 <ul>
 <li><code>provincias</code></li>
+<li><code>provincias-geometria</code></li>
 <li><code>departamentos</code></li>
+<li><code>departamentos-geometria</code></li>
 <li><code>municipios</code></li>
+<li><code>municipios-geometria</code></li>
 <li><code>localidades</code></li>
 <li><code>calles</code></li>
 </ul>
-<h3 id="7-correr-api">7. Correr API<a class="headerlink" href="#7-correr-api" title="Permanent link">&para;</a></h3>
+<h3 id="5-correr-api">5. Correr API<a class="headerlink" href="#5-correr-api" title="Permanent link">&para;</a></h3>
 <h4 id="entornos-de-desarrollo">Entornos de desarrollo<a class="headerlink" href="#entornos-de-desarrollo" title="Permanent link">&para;</a></h4>
 <p>Correr la API de Georef utilizando un servidor de prueba (no apto para producción):</p>
 <pre><code class="bash">(venv) $ make start_dev_server
 </code></pre>
 
+<p>O También:</p>
+<pre><code class="bash">(venv) $ make start_gunicorn_dev_server
+</code></pre>
+
 <h4 id="entornos-productivos">Entornos productivos<a class="headerlink" href="#entornos-productivos" title="Permanent link">&para;</a></h4>
-<h5 id="71-configurar-servicio-georef-api-para-systemd">7.1 Configurar servicio <code>georef-api</code> para <code>systemd</code><a class="headerlink" href="#71-configurar-servicio-georef-api-para-systemd" title="Permanent link">&para;</a></h5>
+<h5 id="51-configurar-servicio-georef-api-para-systemd">5.1 Configurar servicio <code>georef-api</code> para <code>systemd</code><a class="headerlink" href="#51-configurar-servicio-georef-api-para-systemd" title="Permanent link">&para;</a></h5>
 <p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-api.service"><code>config/georef-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>', que deben ser reemplazados por el usuario.</p>
-<h5 id="72-activar-y-arrancar-el-servicio">7.2 Activar y arrancar el servicio<a class="headerlink" href="#72-activar-y-arrancar-el-servicio" title="Permanent link">&para;</a></h5>
+<h5 id="52-activar-y-arrancar-el-servicio">5.2 Activar y arrancar el servicio<a class="headerlink" href="#52-activar-y-arrancar-el-servicio" title="Permanent link">&para;</a></h5>
 <pre><code class="bash">$ sudo systemctl daemon-reload
 $ sudo systemctl enable georef-api.service
 $ sudo systemctl start georef-api.service
 </code></pre>
 
-<h5 id="73-configurar-nginx">7.3 Configurar <code>nginx</code><a class="headerlink" href="#73-configurar-nginx" title="Permanent link">&para;</a></h5>
+<h5 id="53-configurar-nginx">5.3 Configurar <code>nginx</code><a class="headerlink" href="#53-configurar-nginx" title="Permanent link">&para;</a></h5>
 <p>Primero, crear <code>/etc/nginx/sites-available/georef-api</code> tomando como base la configuración del archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-api.nginx"><code>georef-api.nginx</code></a>.</p>
-<h5 id="74-opcional-crear-cache-para-nginx">7.4 (Opcional) Crear cache para <code>nginx</code><a class="headerlink" href="#74-opcional-crear-cache-para-nginx" title="Permanent link">&para;</a></h5>
+<h5 id="54-opcional-crear-cache-para-nginx">5.4 (Opcional) Crear cache para <code>nginx</code><a class="headerlink" href="#54-opcional-crear-cache-para-nginx" title="Permanent link">&para;</a></h5>
 <p>Si se desea activar el uso del cache de <code>nginx</code>, descomentar las líneas contentiendo las directivas <code>proxy_cache</code> y <code>proxy_cache_valid</code> del archivo <code>georef-api</code> creado. Luego, activar el cache <code>georef</code> agregando la siguiente línea al archivo de configuración <code>nginx.conf</code> (sección <code>http</code>):</p>
 <pre><code class="nginx">proxy_cache_path /data/nginx/cache levels=1:2 inactive=120m keys_zone=georef:10m use_temp_path=off;
 </code></pre>
 
 <p>Finalmente, crear el directorio <code>/data/nginx/cache</code>.</p>
-<h5 id="75-activar-y-validar-configuracion-nginx">7.5 Activar y validar configuración <code>nginx</code><a class="headerlink" href="#75-activar-y-validar-configuracion-nginx" title="Permanent link">&para;</a></h5>
+<h5 id="55-activar-y-validar-configuracion-nginx">5.5 Activar y validar configuración <code>nginx</code><a class="headerlink" href="#55-activar-y-validar-configuracion-nginx" title="Permanent link">&para;</a></h5>
 <p>Generar un link simbólico a la configuración del sitio:</p>
 <pre><code class="bash">$ sudo ln -s /etc/nginx/sites-available/georef-api /etc/nginx/sites-enabled/georef-api
 </code></pre>
@@ -690,8 +680,12 @@ $ sudo systemctl start georef-api.service
 </code></pre>
 
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
-<p>Ejecutar los tests unitarios (los servicios Elasticsearch y PostgreSQL deben estar activos y con los datos apropiados cargados):</p>
+<p>Ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):</p>
 <pre><code class="bash">(venv) $ make test_all
+</code></pre>
+
+<p>Comprobar que no existan errores comunes en el código, y que su estilo sea correcto:</p>
+<pre><code class="bash">(venv) $ make code_checks
 </code></pre>
 
 <h2 id="archivos-de-datos">Archivos de datos<a class="headerlink" href="#archivos-de-datos" title="Permanent link">&para;</a></h2>

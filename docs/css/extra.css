@@ -122,8 +122,3 @@ tbody {
 .md-typeset .admonition, .md-typeset details {
     font-size: 1.6rem
 }
-
-p img {
-    margin: 0 auto;
-    display: block;
-}
