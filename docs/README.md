@@ -5,7 +5,7 @@ Este directorio contiene todos los archivos relacionados a la documentación de 
 ## Archivos
 
 El propósito de cada archivo/directorio incluido se detalla a continuación:
-- `open_api/`:  Contiene el archivo de documentación OpenAPI, y archivos de la página Swagger UI generada a partir del mismo. Para más información, acceder al archivo [REAMDE.md](open_api/README.md) dentro del directorio.
+- `open-api/`:  Contiene el archivo de documentación OpenAPI, y archivos de la página Swagger UI generada a partir del mismo. Para más información, acceder al archivo [REAMDE.md](open-api/README.md) dentro del directorio.
 - `src/`: Contiene archivos Markdown que documentan el uso y desarrollo de `georef-ar-api`. También contiene imágenes y archivos CSS necesarios para generar las páginas de documentación HTML utilizando *Read the Docs*.
 - `.gitignore`: Se asegura que el directorio `site/` (donde se generan inicialmente las páginas *Read the Docs*) no se incluya en el repositorio remoto.
 - `*`: Cualquier otro archivo o directorio forma parte de las páginas de documentación generadas por *Read the Docs*. Estos contenidos están contenidos directamente bajo el directorio `docs/` para permitir su uso con GitHub Pages.
