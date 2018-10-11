@@ -12,7 +12,7 @@
     ],
     "servers": [
 	{
-	    "url": "http://apis.datos.gob.ar/georef/api"
+	    "url": "https://apis.datos.gob.ar/georef/api"
 	}
     ],
     "components": {
@@ -103,6 +103,9 @@
 				},
 				"nombre": {
 				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"interseccion": {
+				    "$ref": "#/components/schemas/param_interseccion"
 				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
@@ -224,6 +227,9 @@
 				"provincia": {
 				    "$ref": "#/components/schemas/param_provincia"
 				},
+				"interseccion": {
+				    "$ref": "#/components/schemas/param_interseccion"
+				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
 				},
@@ -343,6 +349,9 @@
 				},
 				"provincia": {
 				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"interseccion": {
+				    "$ref": "#/components/schemas/param_interseccion"
 				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
@@ -916,6 +925,10 @@
 		"type": "number",
 		"example": -60.697636
             },
+	    "param_interseccion": {
+		"type": "string",
+		"example": "provincia:82,departamento:82084,municipio:820196"
+	    },
 	    "param_error": {
 		"type": "object",
 		"properties": {
@@ -1116,8 +1129,7 @@
                 "in": "query",
                 "required": true,
                 "schema": {
-                    "type": "number",
-                    "example": -27.2741611173
+		    "$ref": "#/components/schemas/param_lat"
                 }
 	    },
             "lon": {
@@ -1126,9 +1138,16 @@
                 "in": "query",
                 "required": true,
                 "schema": {
-		    "type": "number",
-		    "example": -66.7529296875
+		    "$ref": "#/components/schemas/param_lon"
                 }
+	    },
+	    "interseccion": {
+		"name": "interseccion",
+		"description": "Filtrar por intersección con otras entidades geográficas. El valor del campo debe tener el siguiente formato:\n\n < tipo de entidad A>:<id 1>:<id 2>, < tipo de entidad B>:<id 1>:<id 2>, ...\n\nSe incluye en la respuesta cualquier entidad que intereseccione con una o más de las entidades con los IDs especificados.",
+		"in": "query",
+		"schema": {
+		    "$ref": "#/components/schemas/param_interseccion"
+		}
 	    }
         },
 	"responses": {
@@ -1178,6 +1197,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/nombre"
+                    },
+                    {
+                        "$ref": "#/components/parameters/interseccion"
                     },
                     {
                         "$ref": "#/components/parameters/orden"
@@ -1268,6 +1290,9 @@
                         "$ref": "#/components/parameters/provincia"
                     },
                     {
+                        "$ref": "#/components/parameters/interseccion"
+                    },
+                    {
                         "$ref": "#/components/parameters/orden"
                     },
                     {
@@ -1355,6 +1380,9 @@
 		    {
 			"$ref": "#/components/parameters/provincia"
 		    },
+                    {
+                        "$ref": "#/components/parameters/interseccion"
+                    },
 		    {
 			"$ref": "#/components/parameters/orden"
 		    },
