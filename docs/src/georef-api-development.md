@@ -65,8 +65,8 @@ Editar el archivo `/etc/elasticsearch/jvm.options` (siguiendo las [recomendacion
 
 #### 2.1 Clonar el repositorio:
 ```bash
-$ git clone https://github.com/datosgobar/georef-api.git
-$ cd georef-api
+$ git clone https://github.com/datosgobar/georef-ar-api.git
+$ cd georef-ar-api
 ```
 
 #### 2.2 Crear un entorno virtual y activarlo
