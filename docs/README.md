@@ -26,7 +26,7 @@ Luego de editar/crear cualquier archivo `.md` dentro de `src/`, se deben actuali
 
 3. Generar las nuevas páginas con *Read the Docs*:
 ```bash
-(venv) $ make docs_dist
+(venv) $ make docs
 ```
 
 4. Subir los cambios a la rama `master`:

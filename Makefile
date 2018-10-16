@@ -58,11 +58,6 @@ docs:
 servedocs:
 	mkdocs serve
 
-docs_dist:
-	mkdocs build
-	rsync -avu docs/site/ docs/
-	rm -rf docs/site
-
 # Generar tablas de contenidos, se requiere el comando 'doctoc'
 # https://github.com/thlorenz/doctoc
 doctoc:
