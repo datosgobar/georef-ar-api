@@ -5,18 +5,15 @@ Contiene funciones que ejecutan consultas a índices de Elasticsearch.
 
 import logging
 import elasticsearch
-from shapely.wkb import loads
-from shapely import ops, geometry
+import shapely.ops
+import shapely.geometry
+import shapely.wkb
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
-from elasticsearch_dsl.query import MatchNone
-from elasticsearch_dsl.query import Term
+from elasticsearch_dsl.query import MatchNone, Term, Prefix
 from service import names as N
+from service import constants
 
-
-MIN_AUTOCOMPLETE_CHARS = 4
-DEFAULT_MAX = 10
-DEFAULT_FUZZINESS = 'AUTO:4,8'
 
 logger = logging.getLogger('georef')
 
@@ -336,7 +333,7 @@ def build_entity_search(index, entity_id=None, name=None, state=None,
         s = s.sort(order)
 
     s = s.source(include=fields)
-    return s[offset: offset + (max or DEFAULT_MAX)]
+    return s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
 
 
 def build_streets_search(street_id=None, road_name=None, department=None,
@@ -403,7 +400,7 @@ def build_streets_search(street_id=None, road_name=None, department=None,
         s = s.sort(order)
 
     s = s.source(include=fields)
-    return s[offset: offset + (max or DEFAULT_MAX)]
+    return s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
 
 
 def build_place_search(index, lat, lon, fields=None):
@@ -469,7 +466,8 @@ def build_intersection_query(field, ids):
 
 def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
     """Crea una condición de búsqueda por intersección con una geometría
-    pre-indexada.
+    pre-indexada. La geometría debe pertenecer a una entidad de tipo provincia,
+    departamento o municipio.
 
     Args:
         field (str): Campo de la condición.
@@ -482,6 +480,9 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
         Query: Condición para Elasticsearch.
 
     """
+    if index not in [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES]:
+        raise ValueError('Invalid entity type.')
+
     options = {
         'indexed_shape': {
             'index': N.GEOM_INDEX.format(index),
@@ -491,7 +492,15 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
         }
     }
 
-    return GeoShape(**{field: options})
+    # Debido a la forma en la que Elasticsearch indexa geometrías, es posible
+    # obtener falsos positivos en las búsquedas por intersección de geometrías.
+    # Una forma simple de resolver este problema es agregar un filtro Prefix
+    # adicional, que remueva todos los resultados que no pertenezcan a la misma
+    # provincia que la entidad con ID == entity_id, ya que dos geometrías de
+    # provincias distintas nunca pueden tener una intersección (sin importar el
+    # tipo de entidad).
+    prefix_query = Prefix(id=entity_id[:constants.STATE_ID_LEN])
+    return GeoShape(**{field: options}) & prefix_query
 
 
 def build_term_query(field, value):
@@ -528,7 +537,7 @@ def build_name_query(field, value, exact=False):
 
     match_query = build_match_query(field, value, True, operator='and')
 
-    if len(value.strip()) >= MIN_AUTOCOMPLETE_CHARS:
+    if len(value.strip()) >= constants.MIN_AUTOCOMPLETE_CHARS:
         prefix_query = build_match_phrase_prefix_query(field, value)
         return prefix_query | match_query
 
@@ -598,7 +607,7 @@ def build_match_query(field, value, fuzzy=False, operator='or'):
     }
 
     if fuzzy:
-        options['fuzziness'] = DEFAULT_FUZZINESS
+        options['fuzziness'] = constants.DEFAULT_FUZZINESS
 
     return Match(**{field: options})
 
@@ -616,10 +625,10 @@ def street_number_location(geom, number, start, end):
         dict: Coordenadas del punto.
 
     """
-    shape = loads(bytes.fromhex(geom))
-    line = ops.linemerge(shape)
+    shape = shapely.wkb.loads(bytes.fromhex(geom))
+    line = shapely.ops.linemerge(shape)
 
-    if isinstance(line, geometry.LineString):
+    if isinstance(line, shapely.geometry.LineString):
         # Si la geometría de la calle pudo ser combinada para formar un único
         # tramo, encontrar la ubicación interpolando la altura con el inicio y
         # fin de altura de la calle.

@@ -1,3 +1,8 @@
+"""Script 'utils_script' de georef-ar-api
+
+Contiene funciones de utilidad para descargar e indexar datos.
+"""
+
 import argparse
 import os
 import urllib.parse

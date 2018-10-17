@@ -9,16 +9,10 @@ from enum import Enum, unique
 from collections import defaultdict
 from flask import current_app
 import service.names as N
-from service import strings
+from service import strings, constants
 
 MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
 MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
-
-STATE_ID_LEN = 2
-DEPT_ID_LEN = 5
-MUNI_ID_LEN = 6
-LOCALITY_ID_LEN = 11
-STREET_ID_LEN = 13
 
 
 class ParameterParsingException(Exception):
@@ -507,9 +501,9 @@ class IntersectionParameter(Parameter):
 
     """
     def __init__(self, required=False):
-        self._state_id_param = IdParameter(STATE_ID_LEN)
-        self._dept_id_param = IdParameter(DEPT_ID_LEN)
-        self._muni_id_param = IdParameter(MUNI_ID_LEN)
+        self._state_id_param = IdParameter(constants.STATE_ID_LEN)
+        self._dept_id_param = IdParameter(constants.DEPT_ID_LEN)
+        self._muni_id_param = IdParameter(constants.MUNI_ID_LEN)
         super().__init__(required)
 
     def _parse_value(self, val):
@@ -894,7 +888,7 @@ class EndpointParameters():
 
 
 PARAMS_STATES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=STATE_ID_LEN),
+    N.ID: IdParameter(length=constants.STATE_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
@@ -916,10 +910,10 @@ PARAMS_STATES = EndpointParameters(shared_params={
 )
 
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=DEPT_ID_LEN),
+    N.ID: IdParameter(length=constants.DEPT_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -940,10 +934,10 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
 )
 
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=MUNI_ID_LEN),
+    N.ID: IdParameter(length=constants.MUNI_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -964,11 +958,11 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
 )
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=LOCALITY_ID_LEN),
+    N.ID: IdParameter(length=constants.LOCALITY_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
-    N.MUN: StrOrIdParameter(id_length=MUNI_ID_LEN),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
+    N.MUN: StrOrIdParameter(id_length=constants.MUNI_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -993,8 +987,8 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.DOOR_NUM],
@@ -1017,11 +1011,11 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 )
 
 PARAMS_STREETS = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=STREET_ID_LEN),
+    N.ID: IdParameter(length=constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],

@@ -50,6 +50,19 @@ class SearchStatesTest(SearchEntitiesTest):
             ['62035', '62014', '62049', '62091']
         )
 
+    def test_intersection_dept_muni_bounds(self):
+        """Cuando se buscan departamentos por intersección con geometría de
+        municipio, los departamentos resultantes siempre deben pertenecer a la
+        misma provincia que el municipio utilizado."""
+        resp = self.get_response({
+            'interseccion': 'municipio:620133',
+            'max': 5000,
+            'aplanar': True
+        }, endpoint='/api/departamentos', entity='departamentos')
+
+        self.assertTrue(resp and
+                        all(dept['provincia_id'] == '62' for dept in resp))
+
     def test_intersection_dept_muni_state(self):
         """Se debería poder buscar departamentos utilizando geometrías de
         municipios y provincias por intersección."""
@@ -76,6 +89,19 @@ class SearchStatesTest(SearchEntitiesTest):
             {'interseccion': 'departamento:18105', 'max': 1000},
             ['180231', '180245', '180238']
         )
+
+    def test_intersection_muni_dept_bounds(self):
+        """Cuando se buscan municipios por intersección con geometría de
+        departamento, los municipios resultantes siempre deben pertenecer a la
+        misma provincia que el departamento utilizado."""
+        resp = self.get_response({
+            'interseccion': 'departamento:82042',
+            'max': 5000,
+            'aplanar': True
+        }, endpoint='/api/municipios', entity='municipios')
+
+        self.assertTrue(resp and
+                        all(mun['provincia_id'] == '82' for mun in resp))
 
     def test_intersection_muni_dept_state(self):
         """Se debería poder buscar municipios utilizando geometrías de
