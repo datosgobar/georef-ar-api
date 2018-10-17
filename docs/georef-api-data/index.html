@@ -554,13 +554,13 @@
 <li>Enlace: <a href="https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas">Portal de geoservicios de INDEC</a></li>
 </ul>
 <h2 id="archivos">Archivos<a class="headerlink" href="#archivos" title="Permanent link">&para;</a></h2>
-<p>A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo <code>version</code> se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la <code>5.0.0</code>.</p>
+<p>A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo <code>version</code> se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la <code>6.0.0</code>.</p>
 <h3 id="provincias">Provincias<a class="headerlink" href="#provincias" title="Permanent link">&para;</a></h3>
 <p>El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;5.0.0&quot;, // Versión de archivo
+    &quot;version&quot;: &quot;6.0.0&quot;, // Versión de archivo
     &quot;fuente&quot;: &quot;IGN&quot;, // Fuente de los datos
     &quot;datos&quot;: [ // Lista de entidades
         {
@@ -585,7 +585,7 @@
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;5.0.0&quot;, // Versión de archivo
+    &quot;version&quot;: &quot;6.0.0&quot;, // Versión de archivo
     &quot;fuente&quot;: &quot;IGN&quot;, // Fuente de los datos
     &quot;datos&quot;: [ // Lista de entidades
         {
@@ -601,7 +601,8 @@
             },
             &quot;provincia&quot;: { // Provincia que contiene al departamento
                 &quot;id&quot;: &quot;06&quot;,
-                &quot;nombre&quot;: &quot;Buenos Aires&quot;
+                &quot;nombre&quot;: &quot;Buenos Aires&quot;,
+                &quot;interseccion&quot;: &quot;0.0412936&quot; // Porcentaje del área de la provincia que ocupa el depto.
             }
         },
         { ... },
@@ -614,7 +615,7 @@
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;5.0.0&quot;, // Versión de archivo
+    &quot;version&quot;: &quot;6.0.0&quot;, // Versión de archivo
     &quot;fuente&quot;: &quot;IGN&quot;, // Fuente de los datos
     &quot;datos&quot;: [ // Lista de entidades
         {
@@ -630,7 +631,8 @@
             },
             &quot;provincia&quot;: {  // Provincia que contiene al municipio
                 &quot;id&quot;: &quot;06&quot;,
-                &quot;nombre&quot;: &quot;Buenos Aires&quot;
+                &quot;nombre&quot;: &quot;Buenos Aires&quot;,
+                &quot;interseccion&quot;: &quot;0.0100845&quot; // Porcentaje del área de la provincia que ocupa el municipio
             }
         },
         { ... },
@@ -643,7 +645,7 @@
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;5.0.0&quot;, // Versión de archivo
+    &quot;version&quot;: &quot;6.0.0&quot;, // Versión de archivo
     &quot;fuente&quot;: &quot;BAHRA&quot;, // Fuente de los datos
     &quot;datos&quot;: [ // Lista de entidades
         {
@@ -681,7 +683,7 @@
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;5.0.0&quot;, // Versión de archivo
+    &quot;version&quot;: &quot;6.0.0&quot;, // Versión de archivo
     &quot;fuente&quot;: &quot;INDEC&quot;, // Fuente de los datos
     &quot;datos&quot;: [ // Lista de vías de circulación
         {

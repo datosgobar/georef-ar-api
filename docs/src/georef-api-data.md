@@ -42,7 +42,7 @@ Los orígenes de los datos procesados en el ETL son:
 - Enlace: [Portal de geoservicios de INDEC](https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas)
 
 ## Archivos
-A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `5.0.0`.
+A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `6.0.0`.
 
 ### Provincias
 El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:
@@ -50,7 +50,7 @@ El archivo de datos de provincias debe tener formato JSON. Su esquema de datos d
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "5.0.0", // Versión de archivo
+	"version": "6.0.0", // Versión de archivo
 	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
@@ -76,7 +76,7 @@ El archivo de datos de departamentos debe tener formato JSON. Su esquema de dato
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "5.0.0", // Versión de archivo
+	"version": "6.0.0", // Versión de archivo
 	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
@@ -92,7 +92,8 @@ El archivo de datos de departamentos debe tener formato JSON. Su esquema de dato
 			},
 			"provincia": { // Provincia que contiene al departamento
 				"id": "06",
-				"nombre": "Buenos Aires"
+				"nombre": "Buenos Aires",
+				"interseccion": "0.0412936" // Porcentaje del área de la provincia que ocupa el depto.
 			}
 		},
 		{ ... },
@@ -106,7 +107,7 @@ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos d
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "5.0.0", // Versión de archivo
+	"version": "6.0.0", // Versión de archivo
 	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
@@ -122,7 +123,8 @@ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos d
 			},
 			"provincia": {  // Provincia que contiene al municipio
 				"id": "06",
-				"nombre": "Buenos Aires"
+				"nombre": "Buenos Aires",
+				"interseccion": "0.0100845" // Porcentaje del área de la provincia que ocupa el municipio
 			}
 		},
 		{ ... },
@@ -136,7 +138,7 @@ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos 
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "5.0.0", // Versión de archivo
+	"version": "6.0.0", // Versión de archivo
 	"fuente": "BAHRA", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
@@ -175,7 +177,7 @@ El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe 
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "5.0.0", // Versión de archivo
+	"version": "6.0.0", // Versión de archivo
 	"fuente": "INDEC", // Fuente de los datos
 	"datos": [ // Lista de vías de circulación
 		{
