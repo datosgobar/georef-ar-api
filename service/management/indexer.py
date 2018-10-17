@@ -1,4 +1,4 @@
-"""Script 'utils_script' de georef-ar-api
+"""Script 'indexer' de georef-ar-api
 
 Contiene funciones de utilidad para descargar e indexar datos.
 """
@@ -726,21 +726,22 @@ def run_info(es):
 
 
 def main():
-    """Punto de entrada para utils_script.py
+    """Punto de entrada para indexer.py
 
-    Utilizar 'python utils_script.py -h' para información sobre el uso de éste
-    archivo en la línea de comandos.
+    Utilizar 'python indexer.py -h' para información sobre el uso de éste
+    archivo en la línea de comandos. Se recomienda utilizar el Makefile
+    incluido en la raíz del proyecto en lugar de ejecutar indexer.py
+    directamente.
 
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', metavar='<action>', required=True,
-                        choices=ACTIONS)
-    parser.add_argument('-s', '--script', metavar='<path>',
-                        type=argparse.FileType())
+                        choices=ACTIONS, help='Acción a ejecutar.')
     parser.add_argument('-n', '--name', metavar='<index name>',
-                        choices=INDEX_NAMES,
-                        default='all')
-    parser.add_argument('-f', '--forced', action='store_true')
+                        choices=INDEX_NAMES, default='all',
+                        help='Nombre del índice (o "all").')
+    parser.add_argument('-f', '--forced', action='store_true',
+                        help='Omitir chequeo de timestamp.')
     parser.add_argument('-i', '--info', action='store_true',
                         help='Mostrar información de índices y salir.')
     args = parser.parse_args()
