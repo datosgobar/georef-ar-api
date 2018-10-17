@@ -925,7 +925,7 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME],
-                                 complete=[N.SOURCE]),
+                                 complete=[N.SOURCE, N.STATE_INTERSECTION]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
@@ -949,7 +949,7 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME, N.DEPT_ID],
-                                 complete=[N.SOURCE]),
+                                 complete=[N.SOURCE, N.STATE_INTERSECTION]),
     N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()

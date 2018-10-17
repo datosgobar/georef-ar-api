@@ -141,7 +141,8 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
         self.assert_fields_set_equals('completo',
                                       ['id', 'fuente', 'nombre',
                                        'centroide.lat', 'centroide.lon',
-                                       'provincia.id', 'provincia.nombre'])
+                                       'provincia.id', 'provincia.nombre',
+                                       'provincia.interseccion'])
 
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""

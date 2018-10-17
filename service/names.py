@@ -69,6 +69,7 @@ QUANTITY = 'cantidad'
 # Elasticsearch
 STATE_ID = 'provincia.id'
 STATE_NAME = 'provincia.nombre'
+STATE_INTERSECTION = 'provincia.interseccion'
 DEPT_ID = 'departamento.id'
 DEPT_NAME = 'departamento.nombre'
 MUN_ID = 'municipio.id'

@@ -97,7 +97,8 @@ MAP_DEPT = {
                                 'normalizer': LOWCASE_ASCII_NORMALIZER
                             }
                         }
-                    }
+                    },
+                    'interseccion': {'type': 'float', 'index': False}
                 }
             }
         }
@@ -155,7 +156,8 @@ MAP_MUNI = {
                                 'normalizer': LOWCASE_ASCII_NORMALIZER
                             }
                         }
-                    }
+                    },
+                    'interseccion': {'type': 'float', 'index': False}
                 }
             }
         }
