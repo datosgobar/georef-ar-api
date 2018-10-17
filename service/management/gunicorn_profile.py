@@ -1,13 +1,15 @@
-"""
-Gunicorn - profiler para endpoints
+"""gunicorn_profile.py - profiler para endpoints
 Requiere: git, imagemagick tools, graphviz
 
 Para utilizar, cargar el módulo al inicializar Gunicorn (desde el directorio
 raíz del proyecto):
 
-$ gunicorn service:app -c scripts/gunicorn_profile.py
+$ export GEOREF_CONFIG=config/georef.cfg
+$ gunicorn service:app -c service/management/gunicorn_profile.py -b :5000
 
-Luego, agregar el header 'X-Gunicorn-Profile' a los requests HTTP realizados.
+Luego, agregar el header 'X-Gunicorn-Profile' a los requests HTTP realizados
+para activar el análisis de performance. Los resultados se depositan en el
+directorio 'profile'.
 """
 
 import cProfile
@@ -92,6 +94,6 @@ def post_request(worker, req, *_):
         if req.query:
             run_cmd(cmd_template.format(txt=req.query))
         run_cmd(cmd_template.format(txt=git_commit))
+
     except subprocess.CalledProcessError:
-        # Ignorar excepción completamente
-        pass
+        print('No se pudo generar imagen utilizando gprof2dot y dot.')

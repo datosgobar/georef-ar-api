@@ -1,3 +1,7 @@
+"""Definiciones de los analizadores, normalizadores y filtros utilizados en los
+mappeos de entidades de Elasticsearch.
+"""
+
 SPANISH_STOP_WORDS = [
     'la', 'las', 'el', 'los', 'de', 'del', 'y', 'e', 'lo', 'al'
 ]

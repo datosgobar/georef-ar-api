@@ -10,6 +10,7 @@ import json
 import smtplib
 import logging
 import uuid
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
@@ -27,7 +28,6 @@ from .elasticsearch_mappings import MAP_DEPT, MAP_DEPT_GEOM
 from .elasticsearch_mappings import MAP_MUNI, MAP_MUNI_GEOM
 from .elasticsearch_mappings import MAP_LOCALITY
 from .elasticsearch_mappings import MAP_STREET
-from . import download
 
 
 loggerStream = StringIO()
@@ -119,6 +119,37 @@ def send_email(host, user, password, subject, message, recipients,
             msg.attach(attachment)
 
         smtp.send_message(msg)
+
+
+def download(url, tries=1, retry_delay=1, try_timeout=None, proxies=None,
+             verify=True):
+    """
+    Descarga un archivo a través del protocolo HTTP, en uno o más intentos.
+
+    Args:
+        url (str): URL (schema HTTP) del archivo a descargar.
+        tries (int): Intentos a realizar (default: 1).
+        retry_delay (int o float): Tiempo a esperar, en segundos, entre cada
+            intento.
+        try_timeout (int o float): Tiempo máximo a esperar por intento.
+        proxies (dict): Proxies a utilizar. El diccionario debe contener los
+            valores 'http' y 'https', cada uno asociados a la URL del proxy
+            correspondiente.
+
+    Returns:
+        bytes: Contenido del archivo
+    """
+    for i in range(tries):
+        try:
+            return requests.get(url, timeout=try_timeout, proxies=proxies,
+                                verify=verify).content
+        except requests.exceptions.RequestException as e:
+            download_exception = e
+
+            if i < tries - 1:
+                time.sleep(retry_delay)
+
+    raise download_exception
 
 
 def print_log_separator(l, message):
@@ -228,7 +259,7 @@ class GeorefIndex:
             logger.info('')
 
             try:
-                content = download.download(filepath)
+                content = download(filepath)
                 data = json.loads(content.decode())
             except requests.exceptions.RequestException:
                 logger.warning('No se pudo descargar el archivo.')

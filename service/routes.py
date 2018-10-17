@@ -1,4 +1,4 @@
-"""Módulo 'routes' de georef-api
+"""Módulo 'routes' de georef-ar-api
 
 Declara las rutas de los recursos que expone la API e
 invoca las funciones que procesan dichos recursos.

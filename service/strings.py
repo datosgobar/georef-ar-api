@@ -1,4 +1,4 @@
-"""Módulo 'strings' de georef-api
+"""Módulo 'strings' de georef-ar-api
 
 Contiene mensajes de error en forma de texto para usuarios.
 """

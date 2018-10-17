@@ -1,4 +1,4 @@
-"""Módulo 'params' de georef-api
+"""Módulo 'params' de georef-ar-api
 
 Contiene clases utilizadas para leer y validar parámetros recibidos en requests
 HTTP.

@@ -1,4 +1,4 @@
-"""Módulo 'formatter' de georef-api
+"""Módulo 'formatter' de georef-ar-api
 
 Contiene funciones que establecen la presentación de los datos obtenidos desde
 las consultas a los índices o a la base de datos.

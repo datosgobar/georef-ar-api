@@ -1,4 +1,4 @@
-"""Módulo '__init__' de georef-api
+"""Módulo '__init__' de georef-ar-api
 
 Crea la aplicación Flask de la API de Georef.
 """

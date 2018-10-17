@@ -1,4 +1,4 @@
-"""Módulo 'data' de georef-api
+"""Módulo 'data' de georef-ar-api
 
 Contiene funciones que ejecutan consultas a índices de Elasticsearch.
 """

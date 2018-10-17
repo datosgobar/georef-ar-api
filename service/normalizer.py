@@ -1,4 +1,4 @@
-"""Módulo 'normalizer' de georef-api
+"""Módulo 'normalizer' de georef-ar-api
 
 Contiene funciones que manejan la lógica de procesamiento
 de los recursos que expone la API.
