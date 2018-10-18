@@ -214,7 +214,7 @@ $ systemctl restart nginx.service
 ## Tests
 Ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):
 ```bash
-(venv) $ make test_all
+(venv) $ make test
 ```
 
 Comprobar que no existan errores comunes en el código, y que su estilo sea correcto:
