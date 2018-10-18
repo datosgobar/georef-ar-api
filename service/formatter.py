@@ -248,11 +248,8 @@ def create_param_error_response_bulk(errors):
     }), 400)
 
 
-def create_404_error_response(url_map):
+def create_404_error_response():
     """Retorna un error HTTP con código 404.
-
-    Args:
-        url_map (werkzeug.routing.Map): Mapa de URLs de la aplicación Flask.
 
     Returns:
         flask.Response: Respuesta HTTP con error 404.
@@ -261,7 +258,18 @@ def create_404_error_response(url_map):
     errors = [
         {
             'mensaje': strings.NOT_FOUND,
-            'recursos_disponibles': list(str(r) for r in url_map.iter_rules())
+            # El listado de recursos podría utilizar app.url_map, pero es mejor
+            # listar los elementos más importantes manualmente para que la
+            # respuesta sea de mayor utilidad para el usuario.
+            'recursos_disponibles': [
+                '/api/provincias',
+                '/api/departamentos',
+                '/api/municipios',
+                '/api/localidades',
+                '/api/calles',
+                '/api/direcciones',
+                '/api/ubicacion'
+            ]
         }
     ]
 

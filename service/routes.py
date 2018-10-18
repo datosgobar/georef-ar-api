@@ -5,8 +5,9 @@ invoca las funciones que procesan dichos recursos.
 """
 
 from functools import wraps
-from flask import request, Blueprint
+from flask import current_app, request, redirect, Blueprint
 from service import app, normalizer, formatter
+from service import names as N
 
 
 def disable_cache(f):
@@ -29,9 +30,39 @@ def disable_cache(f):
     return decorated_func
 
 
+def add_complete_downloads(bp, urls):
+    """Agrega endpoints de descarga completa de datos a un Flask Blueprint.
+
+    Args:
+        bp (flask.Blueprint): Objeto donde agregar los endpoints de descarga.
+        urls (dict): Diccionario con tipos de entidades como claves, y
+            diccionarios como valores. Cada subdiccionario debe contener, por
+            cada formato (CSV, JSON, GEOJSON), una URL a donde redirigir (o
+            None para no agregar el endpoint). Ver el archivo
+            georef.example.cfg para más detalles.
+
+    """
+    entities = [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES, N.LOCALITIES,
+                N.STREETS]
+    formats = ['json', 'csv', 'geojson']
+
+    for entity in entities:
+        entity_urls = urls[entity]
+
+        for fmt in formats:
+            if entity_urls.get(fmt):
+                url = entity_urls[fmt]
+                # e.g: /provincias.csv
+                endpoint = '{}-{}'.format(entity, fmt)
+                rule = '/{}.{}'.format(entity, fmt)
+
+                bp.add_url_rule(rule, endpoint,
+                                lambda location=url: redirect(location))
+
+
 @app.errorhandler(404)
 def handle_404(_):
-    return formatter.create_404_error_response(app.url_map)
+    return formatter.create_404_error_response()
 
 
 @app.errorhandler(405)
@@ -41,6 +72,8 @@ def handle_405(_):
 
 # API v1.0
 bp_v1_0 = Blueprint('georef_v1.0', __name__)
+
+add_complete_downloads(bp_v1_0, current_app.config['COMPLETE_DOWNLOAD_URLS'])
 
 
 @bp_v1_0.route('/provincias', methods=['GET', 'POST'])

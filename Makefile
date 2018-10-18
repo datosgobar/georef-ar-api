@@ -1,4 +1,9 @@
-CFG_PATH ?= config/georef.cfg
+# Makefile para georef-ar-api
+#
+# Contiene recetas para ejecutar tests, correr servidores de prueba
+# y generar la documentación.
+
+CFG_PATH ?= config/georef.example.cfg
 INDEX_NAME ?= all
 INDEXER_PY = service.management.indexer
 
