@@ -19,51 +19,69 @@ NAME_ANALYZER = 'name_analyzer'
 NAME_ANALYZER_SYNONYMS = 'name_analyzer_synonyms'
 
 
-DEFAULT_SETTINGS = {
-    'index': {
-        'number_of_shards': 5,
-        'number_of_replicas': 2
-    },
-    'analysis': {
-        'filter': {
-            SPANISH_STOP_FILTER: {
-                'type': 'stop',
-                'stopwords': SPANISH_STOP_WORDS
-            },
-            NAME_SYNONYMS_FILTER: {
-                'type': 'synonym',
-                'synonyms_path': 'georef_synonyms.txt'
-            }
+def get_defaults(shards=5, replicas=2, synonyms=None):
+    """Construye la configuración default para índices Elasticsearch de Georef.
+
+    Args:
+        shards (int): Número de 'shards' a utilizar.
+        replicas (int): Número de réplicas a utilizar.
+        synonyms (list): Lista de sinónimos a utilizar para el analizador de
+            nombres.
+
+    Returns:
+        dict: Configuración para índice Elasticsearch.
+
+    """
+    if not synonyms:
+        synonyms = []
+
+    defaults = {
+        'index': {
+            'number_of_shards': shards,
+            'number_of_replicas': replicas
         },
-        'normalizer': {
-            LOWCASE_ASCII_NORMALIZER: {
-                'type': 'custom',
-                'filter': [
-                    'lowercase',
-                    'asciifolding'
-                ]
-            }
-        },
-        'analyzer': {
-            NAME_ANALYZER: {
-                'type': 'custom',
-                'tokenizer': 'standard',
-                'filter': [
-                    'lowercase',
-                    'asciifolding',
-                    SPANISH_STOP_FILTER
-                ]
+        'analysis': {
+            'filter': {
+                SPANISH_STOP_FILTER: {
+                    'type': 'stop',
+                    'stopwords': SPANISH_STOP_WORDS
+                },
+                NAME_SYNONYMS_FILTER: {
+                    'type': 'synonym',
+                    'synonyms': synonyms
+                }
             },
-            NAME_ANALYZER_SYNONYMS: {
-                'type': 'custom',
-                'tokenizer': 'standard',
-                'filter': [
-                    'lowercase',
-                    'asciifolding',
-                    NAME_SYNONYMS_FILTER,
-                    SPANISH_STOP_FILTER
-                ]
+            'normalizer': {
+                LOWCASE_ASCII_NORMALIZER: {
+                    'type': 'custom',
+                    'filter': [
+                        'lowercase',
+                        'asciifolding'
+                    ]
+                }
+            },
+            'analyzer': {
+                NAME_ANALYZER: {
+                    'type': 'custom',
+                    'tokenizer': 'standard',
+                    'filter': [
+                        'lowercase',
+                        'asciifolding',
+                        SPANISH_STOP_FILTER
+                    ]
+                },
+                NAME_ANALYZER_SYNONYMS: {
+                    'type': 'custom',
+                    'tokenizer': 'standard',
+                    'filter': [
+                        'lowercase',
+                        'asciifolding',
+                        NAME_SYNONYMS_FILTER,
+                        SPANISH_STOP_FILTER
+                    ]
+                }
             }
         }
     }
-}
+
+    return defaults

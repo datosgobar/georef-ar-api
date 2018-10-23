@@ -22,7 +22,7 @@ import requests
 from .. import app
 from .. import normalizer
 from .. import names as N
-from .elasticsearch_params import DEFAULT_SETTINGS
+from . import elasticsearch_params
 from .elasticsearch_mappings import MAP_STATE, MAP_STATE_GEOM
 from .elasticsearch_mappings import MAP_DEPT, MAP_DEPT_GEOM
 from .elasticsearch_mappings import MAP_MUNI, MAP_MUNI_GEOM
@@ -136,13 +136,21 @@ def download(url, tries=1, retry_delay=1, try_timeout=None, proxies=None,
             valores 'http' y 'https', cada uno asociados a la URL del proxy
             correspondiente.
 
+    Raises:
+        requests.exceptions.RequestException, requests.exceptions.HTTPError: en
+            caso de ocurrir un error durante la descarga.
+
     Returns:
         bytes: Contenido del archivo
+
     """
     for i in range(tries):
         try:
-            return requests.get(url, timeout=try_timeout, proxies=proxies,
-                                verify=verify).content
+            response = requests.get(url, timeout=try_timeout, proxies=proxies,
+                                verify=verify)
+            response.raise_for_status()
+            return response.content
+
         except requests.exceptions.RequestException as e:
             download_exception = e
 
@@ -203,6 +211,7 @@ class GeorefIndex:
         _mapping (dict): Información de mapeos de tipos/analizadores/etc. de
             Elasticsearch.
         _filepath (str): Path o URL de archivo de datos a utilizar como datos.
+        _synonyms_filepath (str): Path o URL de archivo de sinónimos.
         _backup_filepath (str): Path donde colocar un respaldo de los últimos
             datos indexados.
         _includes  (list): Lista de atributos a incluir cuando se leen los
@@ -211,20 +220,22 @@ class GeorefIndex:
 
     """
 
-    def __init__(self, alias, mapping, filepath, backup_filepath=None,
-                 includes=None):
+    def __init__(self, alias, mapping, filepath, synonyms_filepath=None,
+                 backup_filepath=None, includes=None):
         """Inicializa un nuevo objeto de tipo GeorefIndex.
 
         Args:
             alias (str): Ver el atributo '_alias'.
             mapping (str): Ver el atributo '_mapping'.
             filepath (str): Ver el atributo '_filepath'.
+            synonyms_filepath (str): Ver el atributo '_synonyms_filepath'.
             backup_filepath (str): Ver el atributo '_backup_filepath'.
             includes (list): Ver el atributo '_includes'.
 
         """
         self._alias = alias
         self._filepath = filepath
+        self._synonyms_filepath = synonyms_filepath
         self._backup_filepath = backup_filepath
         self._mapping = mapping
         self._includes = includes
@@ -233,18 +244,22 @@ class GeorefIndex:
     def alias(self):
         return self._alias
 
-    def _fetch_data(self, filepath, files_cache):
-        """Retorna los contenidos de un archivo JSON.
+    def _fetch_data(self, filepath, files_cache, fmt='json'):
+        """Retorna los contenidos de un archivo.
 
         Args:
             filepath (str): Path o URL HTTP/HTTPS donde leer el archivo.
             files_cache (dict): Cache de archivos descargados/leídos
                 anteriormente durante el proceso de indexación actual.
+            fmt (str): Formato de los contenidos del archivo.
 
         Returns:
-            dict: Contenido del archivo JSON.
+            dict, str: Contenido del archivo.
 
         """
+        if fmt not in ['json', 'txt']:
+            raise ValueError('Unknown file type')
+
         if filepath in files_cache:
             logger.info('Utilizando archivo cacheado:')
             logger.info(' + {}'.format(filepath))
@@ -252,28 +267,35 @@ class GeorefIndex:
             return files_cache[filepath]
 
         data = None
+        loadfn = json.loads if fmt == 'json' else str
 
         if urllib.parse.urlparse(filepath).scheme in ['http', 'https']:
-            logger.info('Descargando archivo:')
+            logger.info('Descargando archivo remoto:')
             logger.info(' + {}'.format(filepath))
             logger.info('')
 
             try:
                 content = download(filepath)
-                data = json.loads(content.decode())
+                data = loadfn(content.decode())
             except requests.exceptions.RequestException:
                 logger.warning('No se pudo descargar el archivo.')
                 logger.warning('')
+            except ValueError:
+                logger.warning('No se pudo leer los contenidos del archivo.')
+                logger.warning('')
         else:
-            logger.info('Accediendo al archivo:')
+            logger.info('Accediendo al archivo local:')
             logger.info(' + {}'.format(filepath))
             logger.info('')
 
             try:
                 with open(filepath) as f:
-                    data = json.load(f)
-            except (OSError, ValueError):
-                logger.warning('No se pudo acceder al archivo JSON.')
+                    data = loadfn(f.read())
+            except OSError:
+                logger.warning('No se pudo acceder al archivo local.')
+                logger.warning('')
+            except ValueError:
+                logger.warning('No se pudo leer los contenidos del archivo.')
                 logger.warning('')
 
         files_cache[filepath] = data
@@ -319,7 +341,14 @@ class GeorefIndex:
         logger.info('')
 
         data = self._fetch_data(self._filepath, files_cache)
-        ok = self._create_or_reindex_with_data(es, data,
+
+        synonyms = None
+        if self._synonyms_filepath:
+            synonyms_str = self._fetch_data(self._synonyms_filepath,
+                                            files_cache, fmt='txt')
+            synonyms = synonyms_str.splitlines() if synonyms_str else []
+
+        ok = self._create_or_reindex_with_data(es, data, synonyms,
                                                check_timestamp=not forced)
 
         if forced and not ok:
@@ -328,7 +357,7 @@ class GeorefIndex:
             logger.warning('')
 
             data = self._fetch_data(self._backup_filepath, files_cache)
-            ok = self._create_or_reindex_with_data(es, data,
+            ok = self._create_or_reindex_with_data(es, data, synonyms,
                                                    check_timestamp=False)
 
             if not ok:
@@ -338,7 +367,8 @@ class GeorefIndex:
         if ok and self._backup_filepath:
             self._write_backup(data)
 
-    def _create_or_reindex_with_data(self, es, data, check_timestamp=True):
+    def _create_or_reindex_with_data(self, es, data, synonyms=None,
+                                     check_timestamp=True):
         """Crea o actualiza el índice. Ver la documentación de
         'create_or_reindex' para más detalles del flujo de creación y
         actualización de índices.
@@ -346,6 +376,8 @@ class GeorefIndex:
         Args:
             es (Elasticsearch): Cliente Elasticsearch.
             data (dict): Diccionario con datos a indexar y sus metadatos.
+            synonyms (list): Lista de sinónimos a utilizar en la configuración
+                de Elasticsearch.
             check_timestamp (bool): Cuando es falso, permite indexar datos con
                 timestamp anterior a los que ya están almacenados.
 
@@ -401,7 +433,7 @@ class GeorefIndex:
             logger.info('Omitiendo chequeo de timestamp.')
             logger.info('')
 
-        self._create_index(es, new_index)
+        self._create_index(es, new_index, synonyms)
         self._insert_documents(es, new_index, docs)
 
         self._update_aliases(es, new_index, old_index)
@@ -424,7 +456,7 @@ class GeorefIndex:
         logger.info('Archivo creado.')
         logger.info('')
 
-    def _create_index(self, es, index):
+    def _create_index(self, es, index, synonyms=None):
         """Crea un índice Elasticsearch con settings default y
         mapeos establecidos por 'self._mapping'.
 
@@ -432,12 +464,15 @@ class GeorefIndex:
             es (Elasticsearch): Cliente Elasticsearch.
             index (str): Nombre del índice a crear. Notar que el nombre no es
                 igual al alias del índice.
+            synonyms (list): Lista de sinónimos a utilizar en la configuración
+                de Elasticsearch.
 
         """
         logger.info('Creando nuevo índice: {}...'.format(index))
         logger.info('')
+
         es.indices.create(index=index, body={
-            'settings': DEFAULT_SETTINGS,
+            'settings': elasticsearch_params.get_defaults(synonyms=synonyms),
             'mappings': self._mapping
         })
 
@@ -646,6 +681,7 @@ def run_index(es, forced, name='all'):
         GeorefIndex(alias=N.STATES,
                     mapping=MAP_STATE,
                     filepath=app.config['STATES_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'provincias.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.STATES),
@@ -655,6 +691,7 @@ def run_index(es, forced, name='all'):
         GeorefIndex(alias=N.DEPARTMENTS,
                     mapping=MAP_DEPT,
                     filepath=app.config['DEPARTMENTS_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'departamentos.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.DEPARTMENTS),
@@ -664,6 +701,7 @@ def run_index(es, forced, name='all'):
         GeorefIndex(alias=N.MUNICIPALITIES,
                     mapping=MAP_MUNI,
                     filepath=app.config['MUNICIPALITIES_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'municipios.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.MUNICIPALITIES),
@@ -673,11 +711,13 @@ def run_index(es, forced, name='all'):
         GeorefIndex(alias=N.LOCALITIES,
                     mapping=MAP_LOCALITY,
                     filepath=app.config['LOCALITIES_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'localidades.json')),
         GeorefIndex(alias=N.STREETS,
                     mapping=MAP_STREET,
                     filepath=app.config['STREETS_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir, 'calles.json'))
     ]
 
