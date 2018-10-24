@@ -147,7 +147,7 @@ def download(url, tries=1, retry_delay=1, try_timeout=None, proxies=None,
     for i in range(tries):
         try:
             response = requests.get(url, timeout=try_timeout, proxies=proxies,
-                                verify=verify)
+                                    verify=verify)
             response.raise_for_status()
             return response.content
 

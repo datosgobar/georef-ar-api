@@ -257,6 +257,7 @@ class IdParameter(Parameter):
     validación propias de IdParameter.
 
     """
+
     def __init__(self, length, padding_char='0', padding_length=1):
         self._length = length
         self._padding_char = padding_char
@@ -280,6 +281,7 @@ class StrOrIdParameter(Parameter):
     validación propias de StrOrIdParameter.
 
     """
+
     def __init__(self, id_length, id_padding_char='0'):
         self._id_param = IdParameter(id_length, id_padding_char)
         self._str_param = StrParameter()
@@ -406,6 +408,7 @@ class IntParameter(Parameter):
     o más parámetros 'max' recibidos en conjunto.
 
     """
+
     def __init__(self, required=False, default=0, choices=None,
                  lower_limit=None, upper_limit=None):
         self._lower_limit = lower_limit
@@ -500,21 +503,58 @@ class IntersectionParameter(Parameter):
     validación propias de IntersectionParameter.
 
     """
-    def __init__(self, required=False):
-        self._state_id_param = IdParameter(constants.STATE_ID_LEN)
-        self._dept_id_param = IdParameter(constants.DEPT_ID_LEN)
-        self._muni_id_param = IdParameter(constants.MUNI_ID_LEN)
+
+    def __init__(self, entities, required=False):
+        """Inicializa un objeto de tipo IntersectionParameter.
+
+        Args:
+            entities (list): Lista de tipos de entidades que debería aceptar el
+                parámetro a inicializar.
+            required (bool): Indica si el parámetro HTTP debería ser
+                obligatorio.
+
+        """
+        if any(e not in [N.STATE, N.DEPT, N.MUN] for e in entities):
+            raise ValueError('Unknown entity type')
+
+        self._id_params = {}
+
+        if N.STATE in entities:
+            self._id_params[N.STATE] = IdParameter(constants.STATE_ID_LEN)
+        if N.DEPT in entities:
+            self._id_params[N.DEPT] = IdParameter(constants.DEPT_ID_LEN)
+        if N.MUN in entities:
+            self._id_params[N.MUN] = IdParameter(constants.MUNI_ID_LEN)
+
         super().__init__(required)
 
     def _parse_value(self, val):
+        """Toma un string con una lista de tipos de entidades con IDs, y
+        retorna un diccionario con los IDs asociados a los tipos.
+
+        El formato del string debe ser el siguiente:
+
+            <tipo 1>:<ID 1>[:<ID 2>...][,<tipo 2>:<ID 1>[:<ID 2>...]...]
+
+        Por ejemplo:
+
+            provincia:02,departamento:90098:02007
+
+        Args:
+            val (str): Valor del parámetro recibido vía HTTP.
+
+        Raises:
+            ValueError: En caso de que el string recibido no tenga el formato
+                adecuado.
+
+        Returns:
+            dict: Tipos de entidades asociados a conjuntos de IDs
+
+        """
         if not val:
             raise ValueError(strings.STRING_EMPTY)
 
-        ids = {
-            N.STATES: set(),
-            N.DEPARTMENTS: set(),
-            N.MUNICIPALITIES: set()
-        }
+        ids = defaultdict(set)
 
         for part in [p.strip() for p in val.split(',')]:
             sections = [s.strip() for s in part.split(':')]
@@ -524,18 +564,20 @@ class IntersectionParameter(Parameter):
             entity = sections[0]
 
             for entry in sections[1:]:
-                if entity == N.STATE:
-                    ids[N.STATES].add(self._state_id_param.get_value(entry))
-                elif entity == N.DEPT:
-                    ids[N.DEPARTMENTS].add(self._dept_id_param.get_value(
-                        entry))
-                elif entity == N.MUN:
-                    ids[N.MUNICIPALITIES].add(self._muni_id_param.get_value(
-                        entry))
+                if entity in self._id_params:
+                    if entity == N.STATE:
+                        ids[N.STATES].add(
+                            self._id_params[entity].get_value(entry))
+                    elif entity == N.DEPT:
+                        ids[N.DEPARTMENTS].add(
+                            self._id_params[entity].get_value(entry))
+                    elif entity == N.MUN:
+                        ids[N.MUNICIPALITIES].add(
+                            self._id_params[entity].get_value(entry))
                 else:
                     raise ValueError(strings.FIELD_INTERSECTION_FORMAT)
 
-        return ids if any(ids) else {}
+        return ids if any(list(ids.values())) else {}
 
 
 class ParamValidator:
@@ -890,7 +932,7 @@ class EndpointParameters():
 PARAMS_STATES = EndpointParameters(shared_params={
     N.ID: IdParameter(length=constants.STATE_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.MUN]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -912,7 +954,7 @@ PARAMS_STATES = EndpointParameters(shared_params={
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.ID: IdParameter(length=constants.DEPT_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(),
+    N.INTERSECTION: IntersectionParameter(entities=[N.STATE, N.MUN]),
     N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
@@ -936,7 +978,7 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.ID: IdParameter(length=constants.MUNI_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE]),
     N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
