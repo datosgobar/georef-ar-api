@@ -22,12 +22,7 @@ import requests
 from .. import app
 from .. import normalizer
 from .. import names as N
-from . import elasticsearch_params
-from .elasticsearch_mappings import MAP_STATE, MAP_STATE_GEOM
-from .elasticsearch_mappings import MAP_DEPT, MAP_DEPT_GEOM
-from .elasticsearch_mappings import MAP_MUNI, MAP_MUNI_GEOM
-from .elasticsearch_mappings import MAP_LOCALITY
-from .elasticsearch_mappings import MAP_STREET
+from . import es_config
 
 
 loggerStream = StringIO()
@@ -208,8 +203,8 @@ class GeorefIndex:
 
     Attributes:
         _alias (str): Alias a utilizar para el índice (por ejemplo, 'calles').
-        _mapping (dict): Información de mapeos de tipos/analizadores/etc. de
-            Elasticsearch.
+        _doc_class (type): Tipo del documento Elasticsearch, debe heredar de
+            elasticsearch_dsl.Document.
         _filepath (str): Path o URL de archivo de datos a utilizar como datos.
         _synonyms_filepath (str): Path o URL de archivo de sinónimos.
         _backup_filepath (str): Path donde colocar un respaldo de los últimos
@@ -220,13 +215,13 @@ class GeorefIndex:
 
     """
 
-    def __init__(self, alias, mapping, filepath, synonyms_filepath=None,
+    def __init__(self, alias, doc_class, filepath, synonyms_filepath=None,
                  backup_filepath=None, includes=None):
         """Inicializa un nuevo objeto de tipo GeorefIndex.
 
         Args:
             alias (str): Ver el atributo '_alias'.
-            mapping (str): Ver el atributo '_mapping'.
+            doc_class (str): Ver el atributo '_doc_class'.
             filepath (str): Ver el atributo '_filepath'.
             synonyms_filepath (str): Ver el atributo '_synonyms_filepath'.
             backup_filepath (str): Ver el atributo '_backup_filepath'.
@@ -234,10 +229,10 @@ class GeorefIndex:
 
         """
         self._alias = alias
+        self._doc_class = doc_class
         self._filepath = filepath
         self._synonyms_filepath = synonyms_filepath
         self._backup_filepath = backup_filepath
-        self._mapping = mapping
         self._includes = includes
 
     @property
@@ -388,6 +383,7 @@ class GeorefIndex:
         """
         if not data:
             logger.warning('No existen datos a indexar.')
+            logger.warning('')
             return False
 
         timestamp = data['timestamp']
@@ -458,7 +454,7 @@ class GeorefIndex:
 
     def _create_index(self, es, index, synonyms=None):
         """Crea un índice Elasticsearch con settings default y
-        mapeos establecidos por 'self._mapping'.
+        mapeos establecidos por 'self._doc_class'.
 
         Args:
             es (Elasticsearch): Cliente Elasticsearch.
@@ -471,10 +467,7 @@ class GeorefIndex:
         logger.info('Creando nuevo índice: {}...'.format(index))
         logger.info('')
 
-        es.indices.create(index=index, body={
-            'settings': elasticsearch_params.get_defaults(synonyms=synonyms),
-            'mappings': self._mapping
-        })
+        es_config.create_index(es, index, self._doc_class, synonyms)
 
     def _insert_documents(self, es, index, docs):
         """Inserta documentos dentro de un índice.
@@ -622,7 +615,7 @@ class GeorefIndex:
 
             action = {
                 '_op_type': 'create',
-                '_type': '_doc',
+                '_type': es_config.DOC_TYPE,
                 '_id': doc['id'],
                 '_index': index,
                 '_source': doc
@@ -679,43 +672,43 @@ def run_index(es, forced, name='all'):
 
     indices = [
         GeorefIndex(alias=N.STATES,
-                    mapping=MAP_STATE,
+                    doc_class=es_config.State,
                     filepath=app.config['STATES_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'provincias.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.STATES),
-                    mapping=MAP_STATE_GEOM,
+                    doc_class=es_config.StateGeom,
                     filepath=app.config['STATES_FILE'],
                     includes=[N.ID, N.GEOM]),
         GeorefIndex(alias=N.DEPARTMENTS,
-                    mapping=MAP_DEPT,
+                    doc_class=es_config.Department,
                     filepath=app.config['DEPARTMENTS_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'departamentos.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.DEPARTMENTS),
-                    mapping=MAP_DEPT_GEOM,
+                    doc_class=es_config.DepartmentGeom,
                     filepath=app.config['DEPARTMENTS_FILE'],
                     includes=[N.ID, N.GEOM]),
         GeorefIndex(alias=N.MUNICIPALITIES,
-                    mapping=MAP_MUNI,
+                    doc_class=es_config.Municipality,
                     filepath=app.config['MUNICIPALITIES_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'municipios.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.MUNICIPALITIES),
-                    mapping=MAP_MUNI_GEOM,
+                    doc_class=es_config.MunicipalityGeom,
                     filepath=app.config['MUNICIPALITIES_FILE'],
                     includes=[N.ID, N.GEOM]),
         GeorefIndex(alias=N.LOCALITIES,
-                    mapping=MAP_LOCALITY,
+                    doc_class=es_config.Locality,
                     filepath=app.config['LOCALITIES_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'localidades.json')),
         GeorefIndex(alias=N.STREETS,
-                    mapping=MAP_STREET,
+                    doc_class=es_config.Street,
                     filepath=app.config['STREETS_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     backup_filepath=os.path.join(backups_dir, 'calles.json'))

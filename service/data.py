@@ -13,6 +13,7 @@ from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
 from elasticsearch_dsl.query import MatchNone, Term, Prefix
 from service import names as N
 from service import constants
+from service.management.es_config import DOC_TYPE
 
 
 logger = logging.getLogger('georef')
@@ -486,7 +487,7 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
     options = {
         'indexed_shape': {
             'index': N.GEOM_INDEX.format(index),
-            'type': '_doc',
+            'type': DOC_TYPE,
             'id': entity_id,
             'path': entity_geom_path
         }
