@@ -1,5 +1,19 @@
 # Historial de versiones
 
+## 0.2.1
+- Actualiza proceso de indexación para utilizar datos de ETL versión `6.0.0`.
+- Agrega mensaje de error descriptivo para errores HTTP 405.
+- Mejora parámetro 'campos': se permite especificar un prefixo para referirse a varios campos (por ejemplo, `provincia` para `provincia.id` y `provincia.nombre`).
+- Agrega parámetro `interseccion`. El mismo permite buscar provincias, departamentos y municipios utilizando intersección de geometrías con otras entidades geográficas.
+	- Se pueden buscar provincias por intersección con municipios y departamentos.
+	- Se pueden buscar departamentos por intersección con provincias y municipios.
+	- Se pueden buscar municipios por intersección con provincias y departamentos.
+- Agrega nuevo campo de datos `provincia.interseccion` a recursos `/municipios` y `/departamentos`. El campo especifica qué porcentaje del área de la provincia ocupa la entidad en sí.
+- Agrega nuevos recursos de descarga de datos completos. Estos recursos permiten descargar la totalidad de los datos utilizados por cada recurso, en distintos formatos. Por ejemplo, para descargar los datos de provincias, se puede acceder a las siguientes URLs:
+	- [https://apis.datos.gob.ar/georef/api/provincias.json](https://apis.datos.gob.ar/georef/api/provincias.json)
+	- [https://apis.datos.gob.ar/georef/api/provincias.csv](https://apis.datos.gob.ar/georef/api/provincias.csv)
+	- [https://apis.datos.gob.ar/georef/api/provincias.geojson](https://apis.datos.gob.ar/georef/api/provincias.geojson)
+
 ## 0.2.0
 - Remueve campo 'departamento' de la entidad municipio. Esto se debe a que los departamentos no son padres jerárquicos de los municipios.
 - Agrega parámetro `orden` a recursos `/calles` y `/direcciones`.

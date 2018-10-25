@@ -507,6 +507,25 @@
                 
                 
                 <h1 id="historial-de-versiones">Historial de versiones<a class="headerlink" href="#historial-de-versiones" title="Permanent link">&para;</a></h1>
+<h2 id="021">0.2.1<a class="headerlink" href="#021" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Actualiza proceso de indexación para utilizar datos de ETL versión <code>6.0.0</code>.</li>
+<li>Agrega mensaje de error descriptivo para errores HTTP 405.</li>
+<li>Mejora parámetro 'campos': se permite especificar un prefixo para referirse a varios campos (por ejemplo, <code>provincia</code> para <code>provincia.id</code> y <code>provincia.nombre</code>).</li>
+<li>Agrega parámetro <code>interseccion</code>. El mismo permite buscar provincias, departamentos y municipios utilizando intersección de geometrías con otras entidades geográficas.<ul>
+<li>Se pueden buscar provincias por intersección con municipios y departamentos. </li>
+<li>Se pueden buscar departamentos por intersección con provincias y municipios. </li>
+<li>Se pueden buscar municipios por intersección con provincias y departamentos.</li>
+</ul>
+</li>
+<li>Agrega nuevo campo de datos <code>provincia.interseccion</code> a recursos <code>/municipios</code> y <code>/departamentos</code>. El campo especifica qué porcentaje del área de la provincia ocupa la entidad en sí.</li>
+<li>Agrega nuevos recursos de descarga de datos completos. Estos recursos permiten descargar la totalidad de los datos utilizados por cada recurso, en distintos formatos. Por ejemplo, para descargar los datos de provincias, se puede acceder a las siguientes URLs:<ul>
+<li><a href="https://apis.datos.gob.ar/georef/api/provincias.json">https://apis.datos.gob.ar/georef/api/provincias.json</a></li>
+<li><a href="https://apis.datos.gob.ar/georef/api/provincias.csv">https://apis.datos.gob.ar/georef/api/provincias.csv</a></li>
+<li><a href="https://apis.datos.gob.ar/georef/api/provincias.geojson">https://apis.datos.gob.ar/georef/api/provincias.geojson</a></li>
+</ul>
+</li>
+</ul>
 <h2 id="020">0.2.0<a class="headerlink" href="#020" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Remueve campo 'departamento' de la entidad municipio. Esto se debe a que los departamentos no son padres jerárquicos de los municipios.</li>
