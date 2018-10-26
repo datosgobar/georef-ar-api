@@ -10,6 +10,7 @@ nav:
   - Inicio: index.md
   - Usuarios:
     - Ejemplos de uso: quick-start.md
+    - Consultas por lotes: bulk.md
     - Usar en planillas de cálculo: spreadsheet-integration.md
     - Usar en Python: python-usage.md
     - Autenticarse con JWT: jwt-token.md
@@ -48,3 +49,4 @@ markdown_extensions:
   - attr_list
   - fenced_code
   - sane_lists
+  - admonition

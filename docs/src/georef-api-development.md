@@ -8,11 +8,11 @@ En este documento se detallan los pasos a seguir si se desea configurar un servi
 
 - [Dependencias](#dependencias)
 - [Instalación](#instalacion)
-  - [1. Elasticsearch](#1-elasticsearch)
-  - [2. Repositorio y dependencias](#2-repositorio-y-dependencias)
-  - [3. Crear los índices](#3-crear-los-indices)
-  - [4. (Opcional) Re-indexar datos](#4-opcional-re-indexar-datos)
-  - [5. Correr API](#5-correr-api)
+    - [1. Elasticsearch](#1-elasticsearch)
+    - [2. Repositorio y dependencias](#2-repositorio-y-dependencias)
+    - [3. Crear los índices](#3-crear-los-indices)
+    - [4. (Opcional) Re-indexar datos](#4-opcional-re-indexar-datos)
+    - [5. Correr API](#5-correr-api)
 - [Tests](#tests)
 - [Archivos de datos](#archivos-de-datos)
 
