@@ -293,8 +293,31 @@ class GeorefIndex:
                 logger.warning('No se pudo leer los contenidos del archivo.')
                 logger.warning('')
 
-        files_cache[filepath] = data
+        if data:
+            files_cache[filepath] = data
+
         return data
+
+    def _parse_elasticsearch_synonyms(self, contents):
+        """Interpreta los contenidos de un archivo de sinónimos utilizado por
+        Elasticsearch (formato Solr).
+
+        Args:
+            contents (str): Contenido de un archivo de sinónimos.
+
+        Returns:
+            list: Lista de sinónimos apta para ser utilizada para construir
+                filtros de tokens.
+
+        """
+        if not contents:
+            return []
+
+        lines = [line.strip() for line in contents.splitlines()]
+        return [
+            line for line in lines
+            if line and not line.startswith('#')
+        ]
 
     def create_or_reindex(self, es, files_cache, forced=False):
         """Punto de entrada de la clase GeorefIndex. Permite crear o actualizar
@@ -341,7 +364,7 @@ class GeorefIndex:
         if self._synonyms_filepath:
             synonyms_str = self._fetch_data(self._synonyms_filepath,
                                             files_cache, fmt='txt')
-            synonyms = synonyms_str.splitlines() if synonyms_str else []
+            synonyms = self._parse_elasticsearch_synonyms(synonyms_str)
 
         ok = self._create_or_reindex_with_data(es, data, synonyms,
                                                check_timestamp=not forced)

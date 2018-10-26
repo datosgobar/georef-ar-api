@@ -51,10 +51,30 @@ name_analyzer = analyzer(
     ]
 )
 
+
 name_analyzer_synonyms = 'name_analyzer_synonyms'
+"""El analizador 'name_analyzer_synonyms' no puede ser definido estáticamente,
+ya que su definición depende del listado de sinónimos a utilizar. En cambio, se
+lo define como un valor string que puede ser utilizado en los mapeos de los
+documentos Elasticsearch, ya que los mismos aceptan analizadores (object) o
+nombres de analizadores (str).
+
+El analizador en sí se crea utilizando 'gen_name_analyzer_synonyms', si es
+necesario.
+"""
 
 
 def gen_name_analyzer_synonyms(synonyms):
+    """Crea un analizador para nombres con sinónimos.
+
+    Args:
+        synonyms (list): Lista de sinónimos a utilizar, en formato Solr.
+
+    Returns:
+        elasticsearch_dsl.analysis.Analyzer: analizador de texto con nombre
+            'name_analyzer_synonyms'.
+
+    """
     name_synonyms_filter = token_filter(
         'name_synonyms_filter',
         type='synonym',
@@ -83,7 +103,7 @@ lowcase_ascii_normalizer = normalizer(
 
 
 # -----------------------------------------------------------------------------
-# Campos
+# Campos comunes
 # -----------------------------------------------------------------------------
 
 
@@ -155,6 +175,9 @@ StreetNumbersField = Object(
 
 
 class Entity(Document):
+    """Clase base para todos los documentos que representan entidades
+    geograficas.
+    """
     id = IdField
 
 
@@ -226,8 +249,22 @@ class Street(Entity):
 
 
 def create_index(es, name, doc_class, synonyms=None):
+    """Crea un índice Elasticsearch utilizando un nombre y una clase de
+    documento.
+
+    Args:
+        es (elasticsearch.Elasticsearch): Cliente Elasticsearch.
+        name (str): Nombre del índice a crear.
+        doc_class (type): Clase del documento (debe heredar de Document).
+        synonyms (list): Lista de sinónimos a utilizar en caso de necesitar el
+            analizador 'name_analyzer_synonyms'.
+
+    """
     index = Index(name)
 
+    # Crear el analizador 'name_analyzer_synonyms' solo si se lo pidió
+    # explícitamente. Si el documento tipo 'doc_class' utiliza el analizador
+    # en algún punto de su mapeo, la lista 'synonyms' debería estar presente.
     if synonyms is not None:
         index.analyzer(gen_name_analyzer_synonyms(synonyms))
 
