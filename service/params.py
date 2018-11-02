@@ -453,12 +453,21 @@ class AddressParameter(Parameter):
     nuevamente el método '_parse_value' para implementar lógica de parseo y
     validación propias de AddressParameter.
 
+    TODO: El análisis del campo 'direccion' es una tarea compleja y no debería
+    resolverse utilizando expresiones regulares. Se debería implementar algún
+    método más efectivo, que probablemente tenga una complejidad mucho mayor.
+    Como referencia, ver: https://github.com/openvenues/libpostal. La
+    implementación de la solución probablemente sea un proyecto en sí.
+
     """
 
     def __init__(self):
         super().__init__(required=True)
 
     def _parse_value(self, val):
+        if not val:
+            raise ValueError(strings.STRING_EMPTY)
+
         # 1) Remover ítems entre paréntesis e indicadores de número (N°, n°)
         val = re.sub(r'\(.*?\)|[nN][°º]', '', val.strip('\'" '))
 
@@ -488,8 +497,13 @@ class AddressParameter(Parameter):
                 else:
                     raise ValueError(strings.ADDRESS_INVALID_NUM)
 
+        # 5) Último intento: tomar la primera parte de la dirección (que ya se
+        # sabe que no tiene número) y utilizarla como nombre de calle.
         if not address:
-            raise ValueError(strings.ADDRESS_FORMAT)
+            if parts[0]:
+                address = parts[0], None  # Dirección sin altura
+            else:
+                raise ValueError(strings.ADDRESS_FORMAT)
 
         return address
 

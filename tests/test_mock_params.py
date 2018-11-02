@@ -401,8 +401,8 @@ class ParamParsingTest(TestCase):
         })
 
     def test_address_param(self):
-        """Un parámetro de dirección sin altura no debería ser válido."""
-        self.assert_errors_match('/direcciones?direccion=SANTA FE', {
+        """Un parámetro de dirección vacío no debería ser válido."""
+        self.assert_errors_match('/direcciones?direccion=', {
             (T.VALUE_ERROR.value, 'direccion')
         })
 

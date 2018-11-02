@@ -132,15 +132,24 @@ class SearchAddressesTest(SearchEntitiesTest):
 
         self.assertListEqual(fields_lists, fields_results)
 
-    def test_no_number_returns_400(self):
-        """La búsqueda debe fallar si no se especifica una altura."""
-        response = self.app.get(self.endpoint + '?direccion=Corrientes')
-        self.assertEqual(response.status_code, 400)
-
     def test_number_0_returns_400(self):
         """La búsqueda debe fallar si la altura es cero."""
-        response = self.app.get(self.endpoint + '?direccion=Corrientes 0')
-        self.assertEqual(response.status_code, 400)
+        status = self.get_response({
+            'direccion': 'Corrientes 0'
+        }, return_value='status')
+
+        self.assertEqual(status, 400)
+
+    def test_no_number_returns_null(self):
+        """Si se especifica una dirección sin altura, se debería normalizar por
+        lo menos el nombre de la calle, y el resultado debería tener null como
+        valor para la altura."""
+        response = self.get_response({
+            'direccion': 'Mattieto',
+            'departamento': '82084'
+        })
+
+        self.assertTrue(all(addr['altura'] is None for addr in response))
 
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
