@@ -1,5 +1,9 @@
 # Historial de versiones
 
+## 0.2.2
+- El parámetro 'direccion' del recurso `/direcciones` ahora acepta direcciones sin altura (por ejemplo, "Avenida Santa Fe"). Este cambio permite utilizar la versión `POST` del recurso con mayor facilidad, en caso de tener grandes cantidades de datos con y sin alturas en un mismo conjunto.
+- Mejoras a mensajes de error para parámetros 'direccion' e 'interseccion'.
+
 ## 0.2.1
 - Actualiza proceso de indexación para utilizar datos de ETL versión `6.0.0`.
 - Agrega mensaje de error descriptivo para errores HTTP 405.
