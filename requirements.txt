@@ -3,5 +3,5 @@ elasticsearch-dsl==6.2.0
 Flask==1.0.2
 geojson==2.3.0
 gunicorn==19.8.1
-requests==2.18.4
+requests==2.20.0
 shapely==1.6.4.post2

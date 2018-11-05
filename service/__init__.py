@@ -1,4 +1,4 @@
-"""Módulo '__init__' de georef-api
+"""Módulo '__init__' de georef-ar-api
 
 Crea la aplicación Flask de la API de Georef.
 """
@@ -11,5 +11,5 @@ app.config.from_envvar('GEOREF_CONFIG')
 with app.app_context():
     # Crear parsers de parámetros utilizando configuración de Flask app
     import service.params
-
-import service.routes  # noqa: E402,F401 pylint: disable=wrong-import-position
+    # Crear rutas utilizando también configuración de Flask
+    import service.routes  # noqa: F401 pylint: disable=wrong-import-position

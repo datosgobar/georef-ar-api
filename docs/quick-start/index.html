@@ -38,7 +38,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-3.0.5">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-3.0.6">
     
     
       
@@ -392,40 +392,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#ejemplos-de-operaciones-por-lotes" title="Ejemplos de operaciones por lotes" class="md-nav__link">
-    Ejemplos de operaciones por lotes
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#busqueda-de-municipios-en-lotes" title="Búsqueda de municipios en lotes" class="md-nav__link">
-    Búsqueda de municipios en lotes
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#normalizacion-de-direcciones-en-lotes" title="Normalización de direcciones en lotes" class="md-nav__link">
-    Normalización de direcciones en lotes
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#entidades-geograficas-en-varios-puntos" title="Entidades geográficas en varios puntos" class="md-nav__link">
-    Entidades geográficas en varios puntos
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
       
       
       
@@ -434,6 +400,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../bulk/" title="Consultas por lotes" class="md-nav__link">
+      Consultas por lotes
+    </a>
   </li>
 
         
@@ -665,40 +643,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#ejemplos-de-operaciones-por-lotes" title="Ejemplos de operaciones por lotes" class="md-nav__link">
-    Ejemplos de operaciones por lotes
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#busqueda-de-municipios-en-lotes" title="Búsqueda de municipios en lotes" class="md-nav__link">
-    Búsqueda de municipios en lotes
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#normalizacion-de-direcciones-en-lotes" title="Normalización de direcciones en lotes" class="md-nav__link">
-    Normalización de direcciones en lotes
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#entidades-geograficas-en-varios-puntos" title="Entidades geográficas en varios puntos" class="md-nav__link">
-    Entidades geográficas en varios puntos
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
       
       
       
@@ -882,175 +826,6 @@
     &quot;inicio&quot;: 0
 }
 </code></pre>
-
-<h2 id="ejemplos-de-operaciones-por-lotes">Ejemplos de operaciones por lotes<a class="headerlink" href="#ejemplos-de-operaciones-por-lotes" title="Permanent link">&para;</a></h2>
-<p>Todos los recursos de la API tienen una variante <code>POST</code>, que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo.</p>
-<p>A diferencia de los recursos <code>GET</code>, los ejemplos de operaciones por lotes se muestran utilizando comandos construídos sobre <code>curl</code>.</p>
-<h3 id="busqueda-de-municipios-en-lotes">Búsqueda de municipios en lotes<a class="headerlink" href="#busqueda-de-municipios-en-lotes" title="Permanent link">&para;</a></h3>
-<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/municipios&quot; \
--H 'Content-Type: application/json' -d'
-{
-    &quot;municipios&quot;: [
-        {
-            &quot;nombre&quot;: &quot;belgrano&quot;,
-            &quot;max&quot;: 1,
-            &quot;campos&quot;: &quot;id, nombre&quot;
-        },
-        {
-            &quot;nombre&quot;: &quot;martin&quot;,
-            &quot;max&quot;: 1,
-            &quot;provincia&quot;: &quot;la pampa&quot;,
-            &quot;aplanar&quot;: true
-        }
-    ]
-}
-'
-</code></pre>
-
-<p>Resultados:</p>
-<pre><code class="json">{
-    &quot;resultados&quot;: [
-        {
-            &quot;municipios&quot;: [
-                {
-                    &quot;id&quot;: &quot;060301&quot;,
-                    &quot;nombre&quot;: &quot;General Belgrano&quot;
-                }
-            ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 8,
-            &quot;inicio&quot;: 0
-        },
-        {
-            &quot;municipios&quot;: [
-                {
-                    &quot;centroide_lat&quot;: -35.361211,
-                    &quot;centroide_lon&quot;: -64.294073,
-                    &quot;id&quot;: &quot;420126&quot;,
-                    &quot;nombre&quot;: &quot;Embajador Martini&quot;,
-                    &quot;provincia_id&quot;: &quot;42&quot;,
-                    &quot;provincia_nombre&quot;: &quot;La Pampa&quot;
-                }
-            ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 2,
-            &quot;inicio&quot;: 0
-        }
-    ]
-}
-</code></pre>
-
-<h3 id="normalizacion-de-direcciones-en-lotes">Normalización de direcciones en lotes<a class="headerlink" href="#normalizacion-de-direcciones-en-lotes" title="Permanent link">&para;</a></h3>
-<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/direcciones&quot; \
--H 'Content-Type: application/json' -d'
-{
-    &quot;direcciones&quot;: [
-        {
-            &quot;direccion&quot;: &quot;santa fe 3100&quot;,
-            &quot;max&quot;: 1,
-            &quot;campos&quot;: &quot;id, nombre, altura&quot;
-        },
-        {
-            &quot;direccion&quot;: &quot;corientes 4010&quot;,
-            &quot;max&quot;: 1,
-            &quot;campos&quot;: &quot;id, nombre, altura&quot;,
-            &quot;departamento&quot;: &quot;General López&quot;
-        }
-    ]
-}
-'
-</code></pre>
-
-<p>Resultados:</p>
-<pre><code class="json">{
-    &quot;resultados&quot;: [
-        {
-            &quot;direcciones&quot;: [
-                {
-                    &quot;altura&quot;: 3100,
-                    &quot;id&quot;: &quot;0642701011435&quot;,
-                    &quot;nombre&quot;: &quot;SANTA FE&quot;
-                }
-            ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 25,
-            &quot;inicio&quot;: 0
-        },
-        {
-            &quot;direcciones&quot;: [
-                {
-                    &quot;altura&quot;: 4010,
-                    &quot;id&quot;: &quot;8204229000610&quot;,
-                    &quot;nombre&quot;: &quot;CORRIENTES&quot;
-                }
-            ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 1,
-            &quot;inicio&quot;: 0
-        }
-    ]
-}
-</code></pre>
-
-<h3 id="entidades-geograficas-en-varios-puntos">Entidades geográficas en varios puntos<a class="headerlink" href="#entidades-geograficas-en-varios-puntos" title="Permanent link">&para;</a></h3>
-<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/ubicacion&quot; \
--H 'Content-Type: application/json' -d'
-{
-    &quot;ubicaciones&quot;: [
-        {
-            &quot;lat&quot;: -27.274161,
-            &quot;lon&quot;: -66.752929,
-            &quot;campos&quot;: &quot;completo&quot;
-        },
-        {
-            &quot;lat&quot;: -31.480693,
-            &quot;lon&quot;: -59.092813,
-            &quot;aplanar&quot;: true,
-            &quot;campos&quot;: &quot;completo&quot;
-        }
-    ]
-}
-'
-</code></pre>
-
-<p>Resultados:</p>
-<pre><code class="json">{
-    &quot;resultados&quot;: [
-        {
-            &quot;ubicacion&quot;: {
-                &quot;fuente&quot;: &quot;IGN&quot;,
-                &quot;municipio&quot;: {
-                    &quot;nombre&quot;: &quot;Hualfín&quot;,
-                    &quot;id&quot;: &quot;100077&quot;
-                },
-                &quot;lon&quot;: -66.752929,
-                &quot;provincia&quot;: {
-                    &quot;nombre&quot;: &quot;Catamarca&quot;,
-                    &quot;id&quot;: &quot;10&quot;
-                },
-                &quot;lat&quot;: -27.274161,
-                &quot;departamento&quot;: {
-                    &quot;nombre&quot;: &quot;Belén&quot;,
-                    &quot;id&quot;: &quot;10035&quot;
-                }
-            }
-        },
-        {
-            &quot;ubicacion&quot;: {
-                &quot;departamento_nombre&quot;: &quot;Villaguay&quot;,
-                &quot;lon&quot;: -59.092813,
-                &quot;municipio_id&quot;: null,
-                &quot;lat&quot;: -31.480693,
-                &quot;fuente&quot;: &quot;IGN&quot;,
-                &quot;provincia_nombre&quot;: &quot;Entre Ríos&quot;,
-                &quot;provincia_id&quot;: &quot;30&quot;,
-                &quot;departamento_id&quot;: &quot;30113&quot;,
-                &quot;municipio_nombre&quot;: null
-            }
-        }
-    ]
-}
-</code></pre>
                 
                   
                 
@@ -1086,13 +861,13 @@
           </a>
         
         
-          <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../bulk/" title="Consultas por lotes" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Usar en planillas de cálculo
+                Consultas por lotes
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
@@ -1122,7 +897,7 @@
       
     </div>
     
-      <script src="../assets/javascripts/application.583bbe55.js"></script>
+      <script src="../assets/javascripts/application.5e60981f.js"></script>
       
         
         

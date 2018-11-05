@@ -1,4 +1,4 @@
-"""Módulo 'normalizer' de georef-api
+"""Módulo 'normalizer' de georef-ar-api
 
 Contiene funciones que manejan la lógica de procesamiento
 de los recursos que expone la API.
@@ -534,8 +534,11 @@ def street_extents(door_nums, number):
 
     Returns:
         tuple (int, int): Altura inicial y final de la calle que contienen la
-            altura especificada. Si la altura no está contenida dentro de
-            ninguna combinación de extremos, devolver (None, None).
+            altura especificada.
+
+    Raises:
+        ValueError: Si la altura no está contenida dentro de ninguna
+            combinación de extremos.
 
     """
     start_r = door_nums[N.START][N.RIGHT]
@@ -550,7 +553,7 @@ def street_extents(door_nums, number):
         if start <= number <= end:
             return start, end
 
-    return None, None
+    raise ValueError('Street number out of range.')
 
 
 def build_addresses_result(result, query, source):
@@ -569,21 +572,30 @@ def build_addresses_result(result, query, source):
     number = query['number']
 
     for street in result.hits:
-        if N.FULL_NAME in fields:
+        if number and N.FULL_NAME in fields:
             parts = street[N.FULL_NAME].split(',')
             parts[0] += ' {}'.format(number)
             street[N.FULL_NAME] = ','.join(parts)
 
         door_nums = street.pop(N.DOOR_NUM)
-        start, end = street_extents(door_nums, number)
         geom = street.pop(N.GEOM)
 
         if N.DOOR_NUM in fields:
             street[N.DOOR_NUM] = number
 
-        if (N.LOCATION_LAT in fields or N.LOCATION_LON in fields) and \
-           start is not None and end is not None:
-            loc = data.street_number_location(geom, number, start, end)
+        if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
+            if number:
+                # El llamado a street_extents() no puede lanzar una excepción
+                # porque los resultados de Elasticsearch aseguran que 'number'
+                # está dentro de alguna combinación de extremos de la calle.
+                start, end = street_extents(door_nums, number)
+                loc = data.street_number_location(geom, number, start, end)
+            else:
+                loc = {
+                    N.LAT: None,
+                    N.LON: None
+                }
+
             street[N.LOCATION] = loc
 
         street[N.SOURCE] = source

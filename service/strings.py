@@ -1,4 +1,4 @@
-"""Módulo 'strings' de georef-api
+"""Módulo 'strings' de georef-ar-api
 
 Contiene mensajes de error en forma de texto para usuarios.
 """
@@ -7,8 +7,12 @@ OBLIGATORY_NO_DEFAULT = 'Los parámetros obligatorios no pueden tener valor \
 default.'
 DEFAULT_INVALID_CHOICE = 'El valor default no se encuentra dentro de las \
 opciones de valores.'
-ADDRESS_FORMAT = 'La dirección debe tener el siguiente formato: <nombre de \
-calle> <altura>.'
+ADDRESS_FORMAT = 'La dirección debe seguir alguno de los formatos listados \
+bajo la clave \'ayuda\'.'
+ADDRESS_FORMAT_HELP = [
+    '<nombre de calle>',
+    '<nombre de calle> <altura>'
+]
 ADDRESS_INVALID_NUM = 'La dirección debe tener una altura positiva.'
 STRING_EMPTY = 'El campo no tiene contenido.'
 INT_VAL_ERROR = 'El parámetro no es un número entero.'
@@ -40,4 +44,12 @@ FIELD_LIST_REPEATED = 'La lista contiene valores repetidos.'
 FIELD_LIST_INVALID_CHOICE = INVALID_CHOICE + ' Alternativamente, se pueden \
 especificar los valores \'basico\', \'estandar\' o \'completo\'.'
 FIELD_INTERSECTION_FORMAT = 'El parámetro debe seguir el siguiente formato: \
-<tipo de entidad>:<id>, <tipo de entidad>:<id>, ...'
+<tipo de entidad>:<id>, <tipo de entidad>:<id>, ... (ver ejemplos bajo la \
+clave ayuda).'
+FIELD_INTERSECTION_FORMAT_HELP = [
+    'provincia:94:38',
+    'municipio:740038, departamento:74049',
+    'departamento:62035:62007:62084',
+    'municipio:700070:700049, provincia:02',
+    'departamento:14028'
+]

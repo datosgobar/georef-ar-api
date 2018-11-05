@@ -48,8 +48,8 @@ $ pyenv install 3.6.5
 ## 6. Activar Python 3.6
 Una vez instalado Python 3.6, se debe activar su uso. `pyenv` permite establecer versiones de Python por directorio: de esta forma, es posible clonar el repositorio `georef-ar-api` en una ubicación, y activar el uso de Python 3.6 en la misma:
 ```bash
-$ git clone https://github.com/datosgobar/georef-api.git
-$ cd georef-api
+$ git clone https://github.com/datosgobar/georef-ar-api.git
+$ cd georef-ar-api
 $ pyenv version 3.6.5 # activar el uso de Python 3.6
 $ python --version    # el comando 'python' ahora utiliza Python 3.6, en este directorio
 Python 3.6.5

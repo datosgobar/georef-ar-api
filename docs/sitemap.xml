@@ -11,6 +11,11 @@
      <changefreq>daily</changefreq>
     </url>
     <url>
+     <loc>http://apis.datos.gob.ar/georef/bulk/</loc>
+     <lastmod>2018-11-05</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
      <loc>http://apis.datos.gob.ar/georef/spreadsheet-integration/</loc>
      <lastmod>2018-11-05</lastmod>
      <changefreq>daily</changefreq>

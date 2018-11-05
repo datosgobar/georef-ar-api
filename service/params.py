@@ -1,4 +1,4 @@
-"""Módulo 'params' de georef-api
+"""Módulo 'params' de georef-ar-api
 
 Contiene clases utilizadas para leer y validar parámetros recibidos en requests
 HTTP.
@@ -9,16 +9,10 @@ from enum import Enum, unique
 from collections import defaultdict
 from flask import current_app
 import service.names as N
-from service import strings
+from service import strings, constants
 
 MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
 MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
-
-STATE_ID_LEN = 2
-DEPT_ID_LEN = 5
-MUNI_ID_LEN = 6
-LOCALITY_ID_LEN = 11
-STREET_ID_LEN = 13
 
 
 class ParameterParsingException(Exception):
@@ -34,6 +28,26 @@ class ParameterParsingException(Exception):
     @property
     def errors(self):
         return self._errors
+
+
+class ParameterValueError(Exception):
+    """Excepción lanzada durante el parseo de valores de parámetros. Puede
+    incluir un objeto conteniendo información de ayuda para el usuario.
+
+    """
+
+    def __init__(self, message, help):
+        self._message = message
+        self._help = help
+        super().__init__()
+
+    @property
+    def message(self):
+        return self._message
+
+    @property
+    def help(self):
+        return self._help
 
 
 class ParameterRequiredException(Exception):
@@ -231,6 +245,10 @@ class Parameter:
         Returns:
             El valor parseado.
 
+        Raises:
+            ValueError, ParameterValueError: si el valor recibido no pudo ser
+                interpretado como un valor válido por el parámetro.
+
         """
         raise NotImplementedError()
 
@@ -263,6 +281,7 @@ class IdParameter(Parameter):
     validación propias de IdParameter.
 
     """
+
     def __init__(self, length, padding_char='0', padding_length=1):
         self._length = length
         self._padding_char = padding_char
@@ -286,6 +305,7 @@ class StrOrIdParameter(Parameter):
     validación propias de StrOrIdParameter.
 
     """
+
     def __init__(self, id_length, id_padding_char='0'):
         self._id_param = IdParameter(id_length, id_padding_char)
         self._str_param = StrParameter()
@@ -412,6 +432,7 @@ class IntParameter(Parameter):
     o más parámetros 'max' recibidos en conjunto.
 
     """
+
     def __init__(self, required=False, default=0, choices=None,
                  lower_limit=None, upper_limit=None):
         self._lower_limit = lower_limit
@@ -456,12 +477,21 @@ class AddressParameter(Parameter):
     nuevamente el método '_parse_value' para implementar lógica de parseo y
     validación propias de AddressParameter.
 
+    TODO: El análisis del campo 'direccion' es una tarea compleja y no debería
+    resolverse utilizando expresiones regulares. Se debería implementar algún
+    método más efectivo, que probablemente tenga una complejidad mucho mayor.
+    Como referencia, ver: https://github.com/openvenues/libpostal. La
+    implementación de la solución probablemente sea un proyecto en sí.
+
     """
 
     def __init__(self):
         super().__init__(required=True)
 
     def _parse_value(self, val):
+        if not val:
+            raise ValueError(strings.STRING_EMPTY)
+
         # 1) Remover ítems entre paréntesis e indicadores de número (N°, n°)
         val = re.sub(r'\(.*?\)|[nN][°º]', '', val.strip('\'" '))
 
@@ -491,8 +521,14 @@ class AddressParameter(Parameter):
                 else:
                     raise ValueError(strings.ADDRESS_INVALID_NUM)
 
+        # 5) Último intento: tomar la primera parte de la dirección (que ya se
+        # sabe que no tiene número) y utilizarla como nombre de calle.
         if not address:
-            raise ValueError(strings.ADDRESS_FORMAT)
+            if parts and parts[0]:
+                address = parts[0], None  # Dirección sin altura
+            else:
+                raise ParameterValueError(strings.ADDRESS_FORMAT,
+                                          strings.ADDRESS_FORMAT_HELP)
 
         return address
 
@@ -506,42 +542,84 @@ class IntersectionParameter(Parameter):
     validación propias de IntersectionParameter.
 
     """
-    def __init__(self, required=False):
-        self._state_id_param = IdParameter(STATE_ID_LEN)
-        self._dept_id_param = IdParameter(DEPT_ID_LEN)
-        self._muni_id_param = IdParameter(MUNI_ID_LEN)
+
+    def __init__(self, entities, required=False):
+        """Inicializa un objeto de tipo IntersectionParameter.
+
+        Args:
+            entities (list): Lista de tipos de entidades que debería aceptar el
+                parámetro a inicializar.
+            required (bool): Indica si el parámetro HTTP debería ser
+                obligatorio.
+
+        """
+        if any(e not in [N.STATE, N.DEPT, N.MUN] for e in entities):
+            raise ValueError('Unknown entity type')
+
+        self._id_params = {}
+
+        if N.STATE in entities:
+            self._id_params[N.STATE] = IdParameter(constants.STATE_ID_LEN)
+        if N.DEPT in entities:
+            self._id_params[N.DEPT] = IdParameter(constants.DEPT_ID_LEN)
+        if N.MUN in entities:
+            self._id_params[N.MUN] = IdParameter(constants.MUNI_ID_LEN)
+
         super().__init__(required)
 
     def _parse_value(self, val):
+        """Toma un string con una lista de tipos de entidades con IDs, y
+        retorna un diccionario con los IDs asociados a los tipos.
+
+        El formato del string debe ser el siguiente:
+
+            <tipo 1>:<ID 1>[:<ID 2>...][,<tipo 2>:<ID 1>[:<ID 2>...]...]
+
+        Por ejemplo:
+
+            provincia:02,departamento:90098:02007
+
+        Args:
+            val (str): Valor del parámetro recibido vía HTTP.
+
+        Raises:
+            ValueError: En caso de que el string recibido no tenga el formato
+                adecuado.
+
+        Returns:
+            dict: Tipos de entidades asociados a conjuntos de IDs
+
+        """
         if not val:
             raise ValueError(strings.STRING_EMPTY)
 
-        ids = {
-            N.STATES: set(),
-            N.DEPARTMENTS: set(),
-            N.MUNICIPALITIES: set()
-        }
+        ids = defaultdict(set)
 
         for part in [p.strip() for p in val.split(',')]:
             sections = [s.strip() for s in part.split(':')]
             if len(sections) < 2:
-                raise ValueError(strings.FIELD_INTERSECTION_FORMAT)
+                raise ParameterValueError(
+                    strings.FIELD_INTERSECTION_FORMAT,
+                    strings.FIELD_INTERSECTION_FORMAT_HELP)
 
             entity = sections[0]
+            if entity not in self._id_params:
+                raise ParameterValueError(
+                    strings.FIELD_INTERSECTION_FORMAT,
+                    strings.FIELD_INTERSECTION_FORMAT_HELP)
 
             for entry in sections[1:]:
                 if entity == N.STATE:
-                    ids[N.STATES].add(self._state_id_param.get_value(entry))
+                    ids[N.STATES].add(
+                        self._id_params[entity].get_value(entry))
                 elif entity == N.DEPT:
-                    ids[N.DEPARTMENTS].add(self._dept_id_param.get_value(
-                        entry))
+                    ids[N.DEPARTMENTS].add(
+                        self._id_params[entity].get_value(entry))
                 elif entity == N.MUN:
-                    ids[N.MUNICIPALITIES].add(self._muni_id_param.get_value(
-                        entry))
-                else:
-                    raise ValueError(strings.FIELD_INTERSECTION_FORMAT)
+                    ids[N.MUNICIPALITIES].add(
+                        self._id_params[entity].get_value(entry))
 
-        return ids if any(ids) else {}
+        return ids if any(list(ids.values())) else {}
 
 
 class ParamValidator:
@@ -710,6 +788,9 @@ class EndpointParameters():
             except ValueError as e:
                 errors[param_name] = ParamError(ParamErrorType.VALUE_ERROR,
                                                 str(e), from_source)
+            except ParameterValueError as e:
+                errors[param_name] = ParamError(ParamErrorType.VALUE_ERROR,
+                                                e.message, from_source, e.help)
             except InvalidChoiceException as e:
                 errors[param_name] = ParamError(ParamErrorType.INVALID_CHOICE,
                                                 str(e), from_source,
@@ -894,9 +975,9 @@ class EndpointParameters():
 
 
 PARAMS_STATES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=STATE_ID_LEN),
+    N.ID: IdParameter(length=constants.STATE_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.MUN]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -916,10 +997,10 @@ PARAMS_STATES = EndpointParameters(shared_params={
 )
 
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=DEPT_ID_LEN),
+    N.ID: IdParameter(length=constants.DEPT_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
+    N.INTERSECTION: IntersectionParameter(entities=[N.STATE, N.MUN]),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -940,10 +1021,10 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
 )
 
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=MUNI_ID_LEN),
+    N.ID: IdParameter(length=constants.MUNI_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE]),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -964,11 +1045,11 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
 )
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=LOCALITY_ID_LEN),
+    N.ID: IdParameter(length=constants.LOCALITY_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
-    N.MUN: StrOrIdParameter(id_length=MUNI_ID_LEN),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
+    N.MUN: StrOrIdParameter(id_length=constants.MUNI_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -993,8 +1074,8 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.DOOR_NUM],
@@ -1017,11 +1098,11 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 )
 
 PARAMS_STREETS = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=STREET_ID_LEN),
+    N.ID: IdParameter(length=constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=DEPT_ID_LEN),
+    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],

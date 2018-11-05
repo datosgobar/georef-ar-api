@@ -1,6 +1,12 @@
+# Makefile para georef-ar-api
+#
+# Contiene recetas para ejecutar tests, correr servidores de prueba
+# y generar la documentación.
+
 CFG_PATH ?= config/georef.cfg
+EXAMPLE_CFG_PATH = config/georef.example.cfg
 INDEX_NAME ?= all
-UTILS_PY = service.management.utils_script
+INDEXER_PY = service.management.indexer
 
 .PHONY: docs
 
@@ -10,15 +16,15 @@ check_config_file:
 
 index: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m index -n $(INDEX_NAME)
+	python -m $(INDEXER_PY) -m index -n $(INDEX_NAME)
 
 index_forced: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m index -f -n $(INDEX_NAME)
+	python -m $(INDEXER_PY) -m index -f -n $(INDEX_NAME)
 
 print_index_stats: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(UTILS_PY) -m index_stats -i
+	python -m $(INDEXER_PY) -m index_stats -i
 
 start_dev_server: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
@@ -30,20 +36,20 @@ start_gunicorn_dev_server: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
 	gunicorn service:app -w 4 --log-config=config/logging.ini -b 127.0.0.1:5000
 
-test_live: check_config_file
-	GEOREF_CONFIG=$(CFG_PATH) \
+test_live:
+	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
 	python -m unittest discover -p test_search_*
 
-test_mock: check_config_file
-	GEOREF_CONFIG=$(CFG_PATH) \
+test_mock:
+	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
 	python -m unittest discover -p test_mock_*
 
-test_custom: check_config_file
-	GEOREF_CONFIG=$(CFG_PATH) \
+test_custom:
+	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
 	python -m unittest discover -p $(TEST_FILES) # Variable de entorno definida por el usuario
 
-test_all: check_config_file
-	GEOREF_CONFIG=$(CFG_PATH) \
+test:
+	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
 	python -m unittest
 
 code_checks:

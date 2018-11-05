@@ -401,8 +401,8 @@ class ParamParsingTest(TestCase):
         })
 
     def test_address_param(self):
-        """Un parámetro de dirección sin altura no debería ser válido."""
-        self.assert_errors_match('/direcciones?direccion=SANTA FE', {
+        """Un parámetro de dirección vacío no debería ser válido."""
+        self.assert_errors_match('/direcciones?direccion=', {
             (T.VALUE_ERROR.value, 'direccion')
         })
 
@@ -437,6 +437,31 @@ class ParamParsingTest(TestCase):
         self.assert_errors_match('/provincias?interseccion=foobar:1', {
             (T.VALUE_ERROR.value, 'interseccion')
         })
+
+    def test_invalid_intersection_state(self):
+        """El parámetro 'interseccion' no debería aceptar buscar entidades
+        utilizando la misma entidad como argumento."""
+        self.assert_errors_match('/provincias?interseccion=provincia:14', {
+            (T.VALUE_ERROR.value, 'interseccion')
+        })
+
+    def test_invalid_intersection_department(self):
+        """El parámetro 'interseccion' no debería aceptar buscar entidades
+        utilizando la misma entidad como argumento."""
+        self.assert_errors_match(
+            '/departamentos?interseccion=departamento:90084', {
+                (T.VALUE_ERROR.value, 'interseccion')
+            }
+        )
+
+    def test_invalid_intersection_municipality(self):
+        """El parámetro 'interseccion' no debería aceptar buscar entidades
+        utilizando la misma entidad como argumento."""
+        self.assert_errors_match(
+            '/municipios?interseccion=municipio:900105', {
+                (T.VALUE_ERROR.value, 'interseccion')
+            }
+        )
 
     def test_invalid_intersection_id_len(self):
         """El parámetro 'interseccion' debería comprobar la longitud de los

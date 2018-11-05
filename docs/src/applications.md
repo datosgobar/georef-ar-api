@@ -5,6 +5,7 @@ Lista de proyectos y aplicaciones que utilizan, extienden o documentan la API de
 ## De terceros
 
 * [pdelboca/georefar](https://github.com/pdelboca/georefar): Interface en R para usar la API por [@pdelboca](https://twitter.com/pdelboca).
+* [juancarlospaco/nim-georefar](https://github.com/juancarlospaco/nim-georefar): Inferface en Nim para usar la API por [juancarlospaco (GitHub)](https://github.com/juancarlospaco).
 
 ## Contacto
 

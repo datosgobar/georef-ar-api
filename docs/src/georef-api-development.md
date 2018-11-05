@@ -8,11 +8,11 @@ En este documento se detallan los pasos a seguir si se desea configurar un servi
 
 - [Dependencias](#dependencias)
 - [Instalación](#instalacion)
-  - [1. Elasticsearch](#1-elasticsearch)
-  - [2. Repositorio y dependencias](#2-repositorio-y-dependencias)
-  - [3. Crear los índices](#3-crear-los-indices)
-  - [4. (Opcional) Re-indexar datos](#4-opcional-re-indexar-datos)
-  - [5. Correr API](#5-correr-api)
+    - [1. Elasticsearch](#1-elasticsearch)
+    - [2. Repositorio y dependencias](#2-repositorio-y-dependencias)
+    - [3. Crear los índices](#3-crear-los-indices)
+    - [4. (Opcional) Re-indexar datos](#4-opcional-re-indexar-datos)
+    - [5. Correr API](#5-correr-api)
 - [Tests](#tests)
 - [Archivos de datos](#archivos-de-datos)
 
@@ -91,16 +91,8 @@ Luego, completar el archivo `config/georef.cfg` con los valores apropiados.
 ```bash
 (venv) $ cp config/logging.example.ini config/logging.ini
 ```
-	
+
 Luego, completar el archivo `config/logging.ini` con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.
- 
-#### 2.6 Crear el archivo de sinónimos
-Adicionalmente, se debe crear un archivo `georef_synonyms.txt`, en la ubicación del archivo de configuración de Elasticsearch (`$ES_HOME/config`). El archivo contiene la base de sinónimos utilizados al momento de indexar documentos. Su contenido puede ser vacío o contener, por ejemplo, el siguiente contenido:
-```text
-buenos aires, bsas
-ciudad autonoma de buenos aires, caba, capital federal
-santiago, sgo, stgo
-```
 
 ### 3. Crear los índices
 Generar índices de entidades y calles:
@@ -214,7 +206,7 @@ $ systemctl restart nginx.service
 ## Tests
 Ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):
 ```bash
-(venv) $ make test_all
+(venv) $ make test
 ```
 
 Comprobar que no existan errores comunes en el código, y que su estilo sea correcto:
@@ -227,3 +219,5 @@ Comprobar que no existan errores comunes en el código, y que su estilo sea corr
 - La estructura de los archivos de datos JSON utilizados por Georef está detallada en [este documento](georef-api-data.md).
 
 - El archivo de configuración `config/georef.cfg` debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en `georef.example.cfg`) utilizan el portal de descargas `infra.datos.gob.ar`, que siempre provee la última versión de los archivos JSON disponibles. La rama `master` de `georef-ar-api` siempre se mantiene compatible con la última versión de los datos disponibles en `infra.datos.gob.ar`.
+
+- El archivo de configuración `config/georef.cfg` también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto, en `georef.example.cfg`, puede ser utilizado.

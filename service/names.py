@@ -1,4 +1,4 @@
-"""Módulo 'names' de georef-api
+"""Módulo 'names' de georef-ar-api
 
 Declara los nombres que usa la API para campos,
 parámetros, y otras claves que se usan frecuentemente.

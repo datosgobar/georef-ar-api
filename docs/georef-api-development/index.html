@@ -38,7 +38,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-3.0.5">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-3.0.6">
     
     
       
@@ -321,6 +321,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../bulk/" title="Consultas por lotes" class="md-nav__link">
+      Consultas por lotes
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-nav__link">
       Usar en planillas de cálculo
     </a>
@@ -535,13 +547,6 @@
           <li class="md-nav__item">
   <a href="#25-copiar-el-archivo-de-configuracion-de-logs" title="2.5 Copiar el archivo de configuración de logs" class="md-nav__link">
     2.5 Copiar el archivo de configuración de logs
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#26-crear-el-archivo-de-sinonimos" title="2.6 Crear el archivo de sinónimos" class="md-nav__link">
-    2.6 Crear el archivo de sinónimos
   </a>
   
 </li>
@@ -838,13 +843,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#26-crear-el-archivo-de-sinonimos" title="2.6 Crear el archivo de sinónimos" class="md-nav__link">
-    2.6 Crear el archivo de sinónimos
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -996,12 +994,14 @@
 
 <ul>
 <li><a href="#dependencias">Dependencias</a></li>
-<li><a href="#instalacion">Instalación</a></li>
+<li><a href="#instalacion">Instalación</a><ul>
 <li><a href="#1-elasticsearch">1. Elasticsearch</a></li>
 <li><a href="#2-repositorio-y-dependencias">2. Repositorio y dependencias</a></li>
 <li><a href="#3-crear-los-indices">3. Crear los índices</a></li>
 <li><a href="#4-opcional-re-indexar-datos">4. (Opcional) Re-indexar datos</a></li>
 <li><a href="#5-correr-api">5. Correr API</a></li>
+</ul>
+</li>
 <li><a href="#tests">Tests</a></li>
 <li><a href="#archivos-de-datos">Archivos de datos</a></li>
 </ul>
@@ -1066,13 +1066,6 @@ $ source venv/bin/activate
 </code></pre>
 
 <p>Luego, completar el archivo <code>config/logging.ini</code> con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.</p>
-<h4 id="26-crear-el-archivo-de-sinonimos">2.6 Crear el archivo de sinónimos<a class="headerlink" href="#26-crear-el-archivo-de-sinonimos" title="Permanent link">&para;</a></h4>
-<p>Adicionalmente, se debe crear un archivo <code>georef_synonyms.txt</code>, en la ubicación del archivo de configuración de Elasticsearch (<code>$ES_HOME/config</code>). El archivo contiene la base de sinónimos utilizados al momento de indexar documentos. Su contenido puede ser vacío o contener, por ejemplo, el siguiente contenido:</p>
-<pre><code class="text">buenos aires, bsas
-ciudad autonoma de buenos aires, caba, capital federal
-santiago, sgo, stgo
-</code></pre>
-
 <h3 id="3-crear-los-indices">3. Crear los índices<a class="headerlink" href="#3-crear-los-indices" title="Permanent link">&para;</a></h3>
 <p>Generar índices de entidades y calles:</p>
 <pre><code class="bash">(venv) $ make index
@@ -1163,7 +1156,7 @@ $ sudo systemctl start georef-api.service
 
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>Ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):</p>
-<pre><code class="bash">(venv) $ make test_all
+<pre><code class="bash">(venv) $ make test
 </code></pre>
 
 <p>Comprobar que no existan errores comunes en el código, y que su estilo sea correcto:</p>
@@ -1177,6 +1170,9 @@ $ sudo systemctl start georef-api.service
 </li>
 <li>
 <p>El archivo de configuración <code>config/georef.cfg</code> debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en <code>georef.example.cfg</code>) utilizan el portal de descargas <code>infra.datos.gob.ar</code>, que siempre provee la última versión de los archivos JSON disponibles. La rama <code>master</code> de <code>georef-ar-api</code> siempre se mantiene compatible con la última versión de los datos disponibles en <code>infra.datos.gob.ar</code>.</p>
+</li>
+<li>
+<p>El archivo de configuración <code>config/georef.cfg</code> también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto, en <code>georef.example.cfg</code>, puede ser utilizado.</p>
 </li>
 </ul>
                 
@@ -1250,7 +1246,7 @@ $ sudo systemctl start georef-api.service
       
     </div>
     
-      <script src="../assets/javascripts/application.583bbe55.js"></script>
+      <script src="../assets/javascripts/application.5e60981f.js"></script>
       
         
         

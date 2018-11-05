@@ -13,7 +13,7 @@
         <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
       
       
-        <link rel="canonical" href="http://apis.datos.gob.ar/georef/jwt-token/">
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/bulk/">
       
       
         <meta name="author" content="Datos Argentina">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Autenticarse con JWT - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+        <title>Consultas por lotes - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
       
     
     
@@ -104,7 +104,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#tokens-jwt" tabindex="1" class="md-skip">
+      <a href="#consutas-por-lotes" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -130,7 +130,7 @@
                 API del Servicio de Normalización de Datos Geográficos de Argentina
               </span>
               <span class="md-header-nav__topic">
-                Autenticarse con JWT
+                Consultas por lotes
               </span>
             
           
@@ -321,11 +321,76 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../bulk/" title="Consultas por lotes" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Consultas por lotes
+      </label>
+    
+    <a href="./" title="Consultas por lotes" class="md-nav__link md-nav__link--active">
       Consultas por lotes
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Contenidos de la sección</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ejemplos-de-uso" title="Ejemplos de uso" class="md-nav__link">
+    Ejemplos de uso
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#busqueda-de-municipios-en-lotes" title="Búsqueda de municipios en lotes" class="md-nav__link">
+    Búsqueda de municipios en lotes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normalizacion-de-direcciones-en-lotes" title="Normalización de direcciones en lotes" class="md-nav__link">
+    Normalización de direcciones en lotes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entidades-geograficas-en-varios-puntos" title="Entidades geográficas en varios puntos" class="md-nav__link">
+    Entidades geográficas en varios puntos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -357,56 +422,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Autenticarse con JWT
-      </label>
-    
-    <a href="./" title="Autenticarse con JWT" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../jwt-token/" title="Autenticarse con JWT" class="md-nav__link">
       Autenticarse con JWT
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Contenidos de la sección</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#python" title="Python" class="md-nav__link">
-    Python
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#nodejs" title="Node.js" class="md-nav__link">
-    Node.js
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -548,16 +568,36 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#python" title="Python" class="md-nav__link">
-    Python
+  <a href="#ejemplos-de-uso" title="Ejemplos de uso" class="md-nav__link">
+    Ejemplos de uso
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#busqueda-de-municipios-en-lotes" title="Búsqueda de municipios en lotes" class="md-nav__link">
+    Búsqueda de municipios en lotes
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#nodejs" title="Node.js" class="md-nav__link">
-    Node.js
+        
+          <li class="md-nav__item">
+  <a href="#normalizacion-de-direcciones-en-lotes" title="Normalización de direcciones en lotes" class="md-nav__link">
+    Normalización de direcciones en lotes
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entidades-geograficas-en-varios-puntos" title="Entidades geográficas en varios puntos" class="md-nav__link">
+    Entidades geográficas en varios puntos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -578,78 +618,241 @@
               
                 
                 
-                <h1 id="tokens-jwt">Tokens JWT<a class="headerlink" href="#tokens-jwt" title="Permanent link">&para;</a></h1>
-<p>Si pertenecés a un organismo de la Administración Pública Nacional y querés incrementar la cuota de uso de la API de Georef, podés pedir un token y autenticarte utilizando <a href="https://jwt.io/">JWT</a>.</p>
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-<ul>
-<li><a href="#python">Python</a></li>
-<li><a href="#nodejs">Node.js</a></li>
-</ul>
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-<p>Para generar un token JWT, se requieren dos elementos: una <em>key</em> y un <em>secret</em> generados para el uso con la API.</p>
-<p>Una vez obtenidos ambos elementos, se puede generar un token JWT utilizando, por ejemplo, Python o Node.js. A continuación, se muestran ejemplos utilizando los siguientes valores demostrativos:</p>
-<ul>
-<li><code>key = YXNkc2Rhc2RmYXNkZmFzZmRhc2RmYXNk</code></li>
-<li><code>secret = dnVvODY4Yzc2bzhzNzZqOG83czY4b2Nq</code></li>
-</ul>
-<p>El algoritmo de autentificación de mensajes con <em>hash</em> utilizado es HMAC-SHA256 (<code>HS256</code>).</p>
-<h2 id="python">Python<a class="headerlink" href="#python" title="Permanent link">&para;</a></h2>
-<p>Utilizando la librería <a href="https://github.com/jpadilla/pyjwt"><code>pyjwt</code></a>:</p>
-<pre><code class="bash">$ pip install pyjwt
-$ python
-</code></pre>
-
-<pre><code class="python">&gt;&gt;&gt; import jwt
-&gt;&gt;&gt; key = 'YXNkc2Rhc2RmYXNkZmFzZmRhc2RmYXNk'
-&gt;&gt;&gt; message = { 'iss': key }
-&gt;&gt;&gt; secret = 'dnVvODY4Yzc2bzhzNzZqOG83czY4b2Nq'
-&gt;&gt;&gt; token_bytes = jwt.encode(message, secret, algorithm='HS256')
-&gt;&gt;&gt; token = token_bytes.decode()
-&gt;&gt;&gt; token
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJZWE5rYzJSaGMyUm1ZWE5rWm1GelptUmhjMlJtWVhOayJ9.P4leoe9q_H3lmIlnpZuVFSt7ORgLhLfQ3JN_3FMexSo'
-</code></pre>
-
-<p>Finalmente, para consumir la API de Georef, adjuntar el token generado en las cabeceras HTTP. A continuación, se muestra un ejemplo utilizando la librería <a href="http://docs.python-requests.org/en/master/"><code>requests</code></a>:</p>
-<pre><code class="python">&gt;&gt;&gt; import requests
-&gt;&gt;&gt; headers = { 'Authorization': 'Bearer {}'.format(token) }
-&gt;&gt;&gt; resp = requests.get('https://apis.datos.gob.ar/georef/api/provincias', headers=headers)
-&gt;&gt;&gt; resp.json()
-{
-    'provincias': [
-        { ... }
+                <h1 id="consutas-por-lotes">Consutas por lotes<a class="headerlink" href="#consutas-por-lotes" title="Permanent link">&para;</a></h1>
+<p>Todos los recursos de la API tienen una variante <code>POST</code> que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo. Las versiones de los recursos <code>POST</code> aceptan los mismos parámetros que las <code>GET</code>, con la excepción del parámetro <code>formato</code>, que necesariamente toma el valor <code>json</code>. Adicionalmente, todos los parámetros se envían a través del cuerpo de la consulta HTTP, y no como parte del <em>query string</em>.</p>
+<p>Por ejemplo, las siguientes tres consultas:</p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&amp;campos=nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&amp;campos=nombre</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&amp;campos=nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&amp;campos=nombre</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=san luis&amp;campos=nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=san luis&amp;campos=nombre</code></a></p>
+<p>Son equivalentes a la siguiente consulta <code>POST</code> por lotes:</p>
+<p><code>POST</code> <code>https://apis.datos.gob.ar/georef/api/provincias</code></p>
+<pre><code class="json">{
+    &quot;provincias&quot;: [
+        {
+            &quot;nombre&quot;: &quot;cordoba&quot;
+        },
+        {
+            &quot;nombre&quot;: &quot;chaco&quot;
+        },
+        {
+            &quot;nombre&quot;: &quot;san luis&quot;
+        }
     ]
 }
 </code></pre>
 
-<h2 id="nodejs">Node.js<a class="headerlink" href="#nodejs" title="Permanent link">&para;</a></h2>
-<p>Utilizando la librería <a href="https://github.com/auth0/node-jsonwebtoken"><code>jswonwebtoken</code></a>:</p>
-<pre><code class="bash">$ npm install jsonwebtoken
-$ node
+<p>Que resultaría en la siguiente respuesta JSON:</p>
+<pre><code class="json">{
+    &quot;resultados&quot;: [
+        {
+            &quot;cantidad&quot;: 1,
+            &quot;inicio&quot;: 0,
+            &quot;provincias&quot;: [
+                {
+                    &quot;id&quot;: &quot;14&quot;,
+                    &quot;nombre&quot;: &quot;Córdoba&quot;
+                }
+            ],
+            &quot;total&quot;: 1
+        },
+        {
+            &quot;cantidad&quot;: 1,
+            &quot;inicio&quot;: 0,
+            &quot;provincias&quot;: [
+                {
+                    &quot;id&quot;: &quot;22&quot;,
+                    &quot;nombre&quot;: &quot;Chaco&quot;
+                }
+            ],
+            &quot;total&quot;: 1
+        },
+        {
+            &quot;cantidad&quot;: 1,
+            &quot;inicio&quot;: 0,
+            &quot;provincias&quot;: [
+                {
+                    &quot;id&quot;: &quot;74&quot;,
+                    &quot;nombre&quot;: &quot;San Luis&quot;
+                }
+            ],
+            &quot;total&quot;: 1
+        }
+    ]
+}
 </code></pre>
 
-<pre><code class="javascript">&gt; var jwt = require('jsonwebtoken')
-&gt; var payload = { 'iss': 'YXNkc2Rhc2RmYXNkZmFzZmRhc2RmYXNk' }
-&gt; var secret = 'dnVvODY4Yzc2bzhzNzZqOG83czY4b2Nq'
-&gt; var token = jwt.sign(payload, secret, { 'noTimestamp': true })
-&gt; token
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJZWE5rYzJSaGMyUm1ZWE5rWm1GelptUmhjMlJtWVhOayJ9.P4leoe9q_H3lmIlnpZuVFSt7ORgLhLfQ3JN_3FMexSo'
+<p>Como se muestra en el ejemplo, la respuesta contiene una lista <code>resultados</code>, con los resultados de cada consulta individual adentro. Las estructuras de las respuestas se mantienen idénticas que los recursos <code>GET</code>.</p>
+<div class="admonition note">
+<p>El total de los parámetros <code>max</code> sumados de todas las consultas no debe superar los 5000.
+Por ejemplo, se permite enviar 5000 consultas con <code>max=1</code>, o 100 consultas con <code>max=50</code>, pero no 5000 consultas con <code>max=10</code>.</p>
+</div>
+<p>Utilizando los recursos por lotes, se pueden normalizar mayores cantidades de datos en menos tiempo. Por ejemplo, si se cuenta con 50000 direcciones, tan solo se necesitan 10 consultas para normalizar el activo de datos entero. Utilizando los recursos <code>GET</code>, se necesitarían 50000 (una por dato).</p>
+<h2 id="ejemplos-de-uso">Ejemplos de uso<a class="headerlink" href="#ejemplos-de-uso" title="Permanent link">&para;</a></h2>
+<p>A diferencia de los recursos <code>GET</code>, los ejemplos de operaciones por lotes se muestran utilizando comandos construídos sobre la herramienta <code>curl</code>. La sección de <a href="../python-usage/">ejemplos con Python</a> también contiene ejemplos de uso de los recursos <code>POST</code>.</p>
+<h3 id="busqueda-de-municipios-en-lotes">Búsqueda de municipios en lotes<a class="headerlink" href="#busqueda-de-municipios-en-lotes" title="Permanent link">&para;</a></h3>
+<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/municipios&quot; \
+-H 'Content-Type: application/json' -d'
+{
+    &quot;municipios&quot;: [
+        {
+            &quot;nombre&quot;: &quot;belgrano&quot;,
+            &quot;max&quot;: 1,
+            &quot;campos&quot;: &quot;id, nombre&quot;
+        },
+        {
+            &quot;nombre&quot;: &quot;martin&quot;,
+            &quot;max&quot;: 1,
+            &quot;provincia&quot;: &quot;la pampa&quot;,
+            &quot;aplanar&quot;: true
+        }
+    ]
+}
+'
 </code></pre>
 
-<p>Finalmente, para consumir la API de Georef, adjuntar el token generado en las cabeceras HTTP:</p>
-<pre><code class="javascript">&gt; var http = require('http')
-&gt; http.get({
-    'hostname': 'apis.datos.gob.ar',
-    'path': '/georef/api/provincias',
-    'headers': {
-        'authorization': 'Bearer ' + token
-      }
-  }, function(response) {
-    ...
-  })
+<p>Resultados:</p>
+<pre><code class="json">{
+    &quot;resultados&quot;: [
+        {
+            &quot;municipios&quot;: [
+                {
+                    &quot;id&quot;: &quot;060301&quot;,
+                    &quot;nombre&quot;: &quot;General Belgrano&quot;
+                }
+            ],
+            &quot;cantidad&quot;: 1,
+            &quot;total&quot;: 8,
+            &quot;inicio&quot;: 0
+        },
+        {
+            &quot;municipios&quot;: [
+                {
+                    &quot;centroide_lat&quot;: -35.361211,
+                    &quot;centroide_lon&quot;: -64.294073,
+                    &quot;id&quot;: &quot;420126&quot;,
+                    &quot;nombre&quot;: &quot;Embajador Martini&quot;,
+                    &quot;provincia_id&quot;: &quot;42&quot;,
+                    &quot;provincia_nombre&quot;: &quot;La Pampa&quot;
+                }
+            ],
+            &quot;cantidad&quot;: 1,
+            &quot;total&quot;: 2,
+            &quot;inicio&quot;: 0
+        }
+    ]
+}
+</code></pre>
+
+<h3 id="normalizacion-de-direcciones-en-lotes">Normalización de direcciones en lotes<a class="headerlink" href="#normalizacion-de-direcciones-en-lotes" title="Permanent link">&para;</a></h3>
+<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/direcciones&quot; \
+-H 'Content-Type: application/json' -d'
+{
+    &quot;direcciones&quot;: [
+        {
+            &quot;direccion&quot;: &quot;santa fe 3100&quot;,
+            &quot;max&quot;: 1,
+            &quot;campos&quot;: &quot;id, nombre, altura&quot;
+        },
+        {
+            &quot;direccion&quot;: &quot;corientes 4010&quot;,
+            &quot;max&quot;: 1,
+            &quot;campos&quot;: &quot;id, nombre, altura&quot;,
+            &quot;departamento&quot;: &quot;General López&quot;
+        }
+    ]
+}
+'
+</code></pre>
+
+<p>Resultados:</p>
+<pre><code class="json">{
+    &quot;resultados&quot;: [
+        {
+            &quot;direcciones&quot;: [
+                {
+                    &quot;altura&quot;: 3100,
+                    &quot;id&quot;: &quot;0642701011435&quot;,
+                    &quot;nombre&quot;: &quot;SANTA FE&quot;
+                }
+            ],
+            &quot;cantidad&quot;: 1,
+            &quot;total&quot;: 25,
+            &quot;inicio&quot;: 0
+        },
+        {
+            &quot;direcciones&quot;: [
+                {
+                    &quot;altura&quot;: 4010,
+                    &quot;id&quot;: &quot;8204229000610&quot;,
+                    &quot;nombre&quot;: &quot;CORRIENTES&quot;
+                }
+            ],
+            &quot;cantidad&quot;: 1,
+            &quot;total&quot;: 1,
+            &quot;inicio&quot;: 0
+        }
+    ]
+}
+</code></pre>
+
+<h3 id="entidades-geograficas-en-varios-puntos">Entidades geográficas en varios puntos<a class="headerlink" href="#entidades-geograficas-en-varios-puntos" title="Permanent link">&para;</a></h3>
+<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/ubicacion&quot; \
+-H 'Content-Type: application/json' -d'
+{
+    &quot;ubicaciones&quot;: [
+        {
+            &quot;lat&quot;: -27.274161,
+            &quot;lon&quot;: -66.752929,
+            &quot;campos&quot;: &quot;completo&quot;
+        },
+        {
+            &quot;lat&quot;: -31.480693,
+            &quot;lon&quot;: -59.092813,
+            &quot;aplanar&quot;: true,
+            &quot;campos&quot;: &quot;completo&quot;
+        }
+    ]
+}
+'
+</code></pre>
+
+<p>Resultados:</p>
+<pre><code class="json">{
+    &quot;resultados&quot;: [
+        {
+            &quot;ubicacion&quot;: {
+                &quot;fuente&quot;: &quot;IGN&quot;,
+                &quot;municipio&quot;: {
+                    &quot;nombre&quot;: &quot;Hualfín&quot;,
+                    &quot;id&quot;: &quot;100077&quot;
+                },
+                &quot;lon&quot;: -66.752929,
+                &quot;provincia&quot;: {
+                    &quot;nombre&quot;: &quot;Catamarca&quot;,
+                    &quot;id&quot;: &quot;10&quot;
+                },
+                &quot;lat&quot;: -27.274161,
+                &quot;departamento&quot;: {
+                    &quot;nombre&quot;: &quot;Belén&quot;,
+                    &quot;id&quot;: &quot;10035&quot;
+                }
+            }
+        },
+        {
+            &quot;ubicacion&quot;: {
+                &quot;departamento_nombre&quot;: &quot;Villaguay&quot;,
+                &quot;lon&quot;: -59.092813,
+                &quot;municipio_id&quot;: null,
+                &quot;lat&quot;: -31.480693,
+                &quot;fuente&quot;: &quot;IGN&quot;,
+                &quot;provincia_nombre&quot;: &quot;Entre Ríos&quot;,
+                &quot;provincia_id&quot;: &quot;30&quot;,
+                &quot;departamento_id&quot;: &quot;30113&quot;,
+                &quot;municipio_nombre&quot;: null
+            }
+        }
+    ]
+}
 </code></pre>
                 
                   
@@ -671,7 +874,7 @@ $ node
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../python-usage/" title="Usar en Python" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../quick-start/" title="Ejemplos de uso" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -680,19 +883,19 @@ $ node
                 <span class="md-footer-nav__direction">
                   Anterior
                 </span>
-                Usar en Python
+                Ejemplos de uso
               </span>
             </div>
           </a>
         
         
-          <a href="../terms/" title="Condiciones de uso" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Condiciones de uso
+                Usar en planillas de cálculo
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

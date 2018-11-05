@@ -65,3 +65,5 @@ environment.sh
 georef.cfg
 logging.ini
 /site/
+/profile/
+/config/georef_synonyms.txt
