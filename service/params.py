@@ -30,6 +30,26 @@ class ParameterParsingException(Exception):
         return self._errors
 
 
+class ParameterValueError(Exception):
+    """Excepción lanzada durante el parseo de valores de parámetros. Puede
+    incluir un objeto conteniendo información de ayuda para el usuario.
+
+    """
+
+    def __init__(self, message, help):
+        self._message = message
+        self._help = help
+        super().__init__()
+
+    @property
+    def message(self):
+        return self._message
+
+    @property
+    def help(self):
+        return self._help
+
+
 class ParameterRequiredException(Exception):
     """Excepción lanzada cuando se detecta la ausencia de un parámetro
     requerido.
@@ -224,6 +244,10 @@ class Parameter:
 
         Returns:
             El valor parseado.
+
+        Raises:
+            ValueError, ParameterValueError: si el valor recibido no pudo ser
+                interpretado como un valor válido por el parámetro.
 
         """
         raise NotImplementedError()
@@ -500,10 +524,11 @@ class AddressParameter(Parameter):
         # 5) Último intento: tomar la primera parte de la dirección (que ya se
         # sabe que no tiene número) y utilizarla como nombre de calle.
         if not address:
-            if parts[0]:
+            if parts and parts[0]:
                 address = parts[0], None  # Dirección sin altura
             else:
-                raise ValueError(strings.ADDRESS_FORMAT)
+                raise ParameterValueError(strings.ADDRESS_FORMAT,
+                                          strings.ADDRESS_FORMAT_HELP)
 
         return address
 
@@ -573,23 +598,26 @@ class IntersectionParameter(Parameter):
         for part in [p.strip() for p in val.split(',')]:
             sections = [s.strip() for s in part.split(':')]
             if len(sections) < 2:
-                raise ValueError(strings.FIELD_INTERSECTION_FORMAT)
+                raise ParameterValueError(
+                    strings.FIELD_INTERSECTION_FORMAT,
+                    strings.FIELD_INTERSECTION_FORMAT_HELP)
 
             entity = sections[0]
+            if entity not in self._id_params:
+                raise ParameterValueError(
+                    strings.FIELD_INTERSECTION_FORMAT,
+                    strings.FIELD_INTERSECTION_FORMAT_HELP)
 
             for entry in sections[1:]:
-                if entity in self._id_params:
-                    if entity == N.STATE:
-                        ids[N.STATES].add(
-                            self._id_params[entity].get_value(entry))
-                    elif entity == N.DEPT:
-                        ids[N.DEPARTMENTS].add(
-                            self._id_params[entity].get_value(entry))
-                    elif entity == N.MUN:
-                        ids[N.MUNICIPALITIES].add(
-                            self._id_params[entity].get_value(entry))
-                else:
-                    raise ValueError(strings.FIELD_INTERSECTION_FORMAT)
+                if entity == N.STATE:
+                    ids[N.STATES].add(
+                        self._id_params[entity].get_value(entry))
+                elif entity == N.DEPT:
+                    ids[N.DEPARTMENTS].add(
+                        self._id_params[entity].get_value(entry))
+                elif entity == N.MUN:
+                    ids[N.MUNICIPALITIES].add(
+                        self._id_params[entity].get_value(entry))
 
         return ids if any(list(ids.values())) else {}
 
@@ -760,6 +788,9 @@ class EndpointParameters():
             except ValueError as e:
                 errors[param_name] = ParamError(ParamErrorType.VALUE_ERROR,
                                                 str(e), from_source)
+            except ParameterValueError as e:
+                errors[param_name] = ParamError(ParamErrorType.VALUE_ERROR,
+                                                e.message, from_source, e.help)
             except InvalidChoiceException as e:
                 errors[param_name] = ParamError(ParamErrorType.INVALID_CHOICE,
                                                 str(e), from_source,
