@@ -1,7 +1,3 @@
-body {
-    color: rgba(0, 0, 0, 0.9);
-}
-
 .md-header {
     background-color: hsl(0, 0%, 100%);
     color: #0695c8;
@@ -123,7 +119,16 @@ tbody {
     font-size: 1.6rem
 }
 
-p img {
+h1 .toclink, h2 .toclink, h3 .toclink, h4 .toclink, h5 .toclink, h6 .toclink, p, li {
+    color: rgba(0, 0, 0, 0.54);
+}
+
+body {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.md-typeset iframe, .md-typeset img, .md-typeset svg {
+    max-width: 100%;
     margin: 0 auto;
-    display: block;
+    display: inherit;
 }
