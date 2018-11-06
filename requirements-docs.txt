@@ -1,3 +1,1 @@
-mkdocs==1.0
-mkdocs-material==3.0.3
-mkdocs-datosgobar
+mkdocs-datosgobar==1.0.6

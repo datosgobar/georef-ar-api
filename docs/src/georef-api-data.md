@@ -2,24 +2,6 @@
 
 Los archivos de datos de Georef consisten de cinco (5) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades y calles.
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-
-- [ETL](#etl)
-- [Fuentes](#fuentes)
-    - [Unidades Territoriales](#unidades-territoriales)
-    - [BAHRA](#bahra)
-    - [Vías de Circulación](#vias-de-circulacion)
-- [Archivos](#archivos)
-    - [Provincias](#provincias)
-    - [Departamentos](#departamentos)
-    - [Municipios](#municipios)
-    - [Localidades](#localidades)
-    - [Calles](#calles)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## ETL
 Los datos utilizados por Georef API son obtenidos a través de un proceso de ETL. El código del mismo se encuentra en el repositorio GitHub [georef-ar-etl](https://github.com/datosgobar/georef-ar-etl), así también como su [guía de instalación y uso](https://github.com/datosgobar/georef-ar-etl/blob/master/docs/install.md).
 

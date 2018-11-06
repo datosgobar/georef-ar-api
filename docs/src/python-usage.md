@@ -1,19 +1,5 @@
 # Usar en Python
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-
-- [Con `requests`](#con-requests)
-    - [Normalizar una entidad](#normalizar-una-entidad)
-    - [Normalizar varias entidades](#normalizar-varias-entidades)
-    - [Enriquecer coordenadas con las unidades territoriales que las contienen](#enriquecer-coordenadas-con-las-unidades-territoriales-que-las-contienen)
-- [Con `pandas`](#con-pandas)
-    - [Consultar listas de referencia](#consultar-listas-de-referencia)
-    - [Enriquecer coordenadas](#enriquecer-coordenadas)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## Con `requests`
 
 ### Normalizar una entidad
