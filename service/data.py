@@ -273,8 +273,8 @@ def build_entity_search(index, entity_id=None, name=None, state=None,
                         order=None, fields=None, exact=False, offset=0,
                         intersection=None):
     """Construye una búsqueda con Elasticsearch DSL para entidades políticas
-    (localidades, departamentos, o provincias) según parámetros de búsqueda
-    de una consulta.
+    (localidades, departamentos, provincias o países) según parámetros de
+    búsqueda de una consulta.
 
     Args:
         index (str): Índice sobre el cual se debería ejecutar la búsqueda.

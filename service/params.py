@@ -974,6 +974,27 @@ class EndpointParameters():
                                       'querystring')
 
 
+PARAMS_COUNTRIES = EndpointParameters(shared_params={
+    N.NAME: StrParameter(),
+    N.ORDER: StrParameter(choices=[N.NAME]),
+    N.FLATTEN: BoolParameter(),
+    N.FIELDS: FieldListParameter(basic=[N.NAME],
+                                 standard=[N.C_LAT, N.C_LON],
+                                 complete=[N.SOURCE]),
+    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'geojson'])
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+)
+
+
 PARAMS_STATES = EndpointParameters(shared_params={
     N.ID: IdParameter(length=constants.STATE_ID_LEN),
     N.NAME: StrParameter(),

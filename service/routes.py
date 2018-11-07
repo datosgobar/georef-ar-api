@@ -76,6 +76,11 @@ bp_v1_0 = Blueprint('georef_v1.0', __name__)
 add_complete_downloads(bp_v1_0, current_app.config['COMPLETE_DOWNLOAD_URLS'])
 
 
+@bp_v1_0.route('/paises', methods=['GET', 'POST'])
+def get_countries():
+    return normalizer.process_country(request)
+
+
 @bp_v1_0.route('/provincias', methods=['GET', 'POST'])
 def get_states():
     return normalizer.process_state(request)

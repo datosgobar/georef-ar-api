@@ -15,6 +15,7 @@ class RoutesTest(TestCase):
         """Los endpoints con prefijo /api/v1.0 deberían existir incluso si no
         se cuenta con más de una versión de la API."""
         urls = [
+            '/api/v1.0/paises',
             '/api/v1.0/provincias',
             '/api/v1.0/departamentos',
             '/api/v1.0/municipios',

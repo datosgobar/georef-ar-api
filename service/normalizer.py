@@ -12,6 +12,7 @@ from service import names as N
 logger = logging.getLogger('georef')
 
 INDEX_SOURCES = {
+    N.COUNTRIES: N.SOURCE_IGN,
     N.STATES: N.SOURCE_IGN,
     N.DEPARTMENTS: N.SOURCE_IGN,
     N.MUNICIPALITIES: N.SOURCE_IGN,
@@ -286,6 +287,26 @@ def process_entity(request, name, param_parser, key_translations):
         logger.exception(
             'Excepción en manejo de consulta para recurso: {}'.format(name))
         return formatter.create_internal_error_response()
+
+
+def process_country(request):
+    """Procesa una request GET o POST para consultar datos de países.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    return process_entity(request, N.COUNTRIES, params.PARAMS_COUNTRIES, {
+        N.NAME: 'name',
+        N.EXACT: 'exact',
+        N.ORDER: 'order',
+        N.FIELDS: 'fields',
+        N.OFFSET: 'offset'
+    })
 
 
 def process_state(request):

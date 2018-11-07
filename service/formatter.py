@@ -15,6 +15,13 @@ CSV_ESCAPE = '"'
 CSV_NEWLINE = '\n'
 FLAT_SEP = '_'
 
+COUNTRIES_CSV_FIELDS = [
+    (N.NAME, [N.COUNTRY, N.NAME]),
+    (N.C_LAT, [N.COUNTRY, N.CENTROID, N.LAT]),
+    (N.C_LON, [N.COUNTRY, N.CENTROID, N.LON]),
+    (N.SOURCE, [N.COUNTRY, N.SOURCE])
+]
+
 STATES_CSV_FIELDS = [
     (N.ID, [N.STATE, N.ID]),
     (N.NAME, [N.STATE, N.NAME]),
@@ -93,6 +100,7 @@ ADDRESSES_CSV_FIELDS = [
 
 
 ENDPOINT_CSV_FIELDS = {
+    N.COUNTRIES: COUNTRIES_CSV_FIELDS,
     N.STATES: STATES_CSV_FIELDS,
     N.DEPARTMENTS: DEPARTMENTS_CSV_FIELDS,
     N.MUNICIPALITIES: MUNICIPALITIES_CSV_FIELDS,
@@ -262,6 +270,7 @@ def create_404_error_response():
             # listar los elementos más importantes manualmente para que la
             # respuesta sea de mayor utilidad para el usuario.
             'recursos_disponibles': [
+                '/api/paises',
                 '/api/provincias',
                 '/api/departamentos',
                 '/api/municipios',

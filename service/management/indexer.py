@@ -36,11 +36,12 @@ logger = logging.getLogger(__name__)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizdo el código para tomar
 # nuevas versiones de los archivos.
-FILE_VERSION = '6.0.0'
+FILE_VERSION = '7.0.0'
 
 SEPARATOR_WIDTH = 60
 ACTIONS = ['index', 'index_stats']
 INDEX_NAMES = [
+    N.COUNTRIES,
     N.STATES,
     N.GEOM_INDEX.format(N.STATES),
     N.DEPARTMENTS,
@@ -630,7 +631,7 @@ class GeorefIndex:
             dict: Acción a ejecutar en un índice Elasticsearch.
 
         """
-        for doc in docs:
+        for i, doc in enumerate(docs):
             if self._includes:
                 doc = {key: doc[key]
                        for key in doc
@@ -639,7 +640,7 @@ class GeorefIndex:
             action = {
                 '_op_type': 'create',
                 '_type': es_config.DOC_TYPE,
-                '_id': doc['id'],
+                '_id': doc.get('id', i),
                 '_index': index,
                 '_source': doc
             }
@@ -694,6 +695,11 @@ def run_index(es, forced, name='all'):
     logger.info('')
 
     indices = [
+        GeorefIndex(alias=N.COUNTRIES,
+                    doc_class=es_config.Country,
+                    filepath=app.config['COUNTRIES_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    backup_filepath=os.path.join(backups_dir, 'paises.json')),
         GeorefIndex(alias=N.STATES,
                     doc_class=es_config.State,
                     filepath=app.config['STATES_FILE'],

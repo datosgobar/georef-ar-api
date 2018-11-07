@@ -174,9 +174,17 @@ StreetNumbersField = Object(
 # -----------------------------------------------------------------------------
 
 
+class Country(Document):
+    nombre = NameField
+    geometria = GeoShape()
+
+    class Meta:
+        source = MetaField(excludes=['geometria'])
+
+
 class Entity(Document):
     """Clase base para todos los documentos que representan entidades
-    geograficas.
+    geográficas Argentinas.
     """
     id = IdField
 

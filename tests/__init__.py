@@ -142,11 +142,24 @@ class SearchEntitiesTest(TestCase):
         for _, query in term_matches:
             params = {'nombre': query}
             if exact:
-                params['exacto'] = 1
+                params['exacto'] = True
             res = self.get_response(params)
             results.append(sorted([p['id'] for p in res]))
 
         self.assertListEqual([sorted(ids) for ids, _ in term_matches], results)
+
+    def assert_name_search_hit_matches(self, term_matches, exact=False):
+        results = []
+        for _, query in term_matches:
+            params = {'nombre': query, 'orden': 'nombre'}
+            if exact:
+                params['exacto'] = True
+            res = self.get_response(params)
+            results.append(sorted([p['nombre'] for p in res]))
+
+        self.assertListEqual([sorted(names)
+                              for names, _
+                              in term_matches], results)
 
     def assert_empty_params_return_400(self, params):
         statuses = []
