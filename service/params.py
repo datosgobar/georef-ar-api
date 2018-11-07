@@ -1154,7 +1154,7 @@ PARAMS_PLACE = EndpointParameters(shared_params={
                                         N.LON],
                                  standard=[N.DEPT_ID, N.DEPT_NAME, N.MUN_ID,
                                            N.MUN_NAME],
-                                 complete=[N.SOURCE])
+                                 complete=[N.SOURCE, N.COUNTRY_NAME])
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson'])
 })

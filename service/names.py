@@ -69,6 +69,7 @@ TOTAL = 'total'
 QUANTITY = 'cantidad'
 
 # Elasticsearch
+COUNTRY_NAME = 'pais.nombre'
 STATE_ID = 'provincia.id'
 STATE_NAME = 'provincia.nombre'
 STATE_INTERSECTION = 'provincia.interseccion'

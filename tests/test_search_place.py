@@ -89,7 +89,7 @@ class SearchPlaceTest(SearchEntitiesTest):
                                        'lat', 'lon', 'departamento.id',
                                        'departamento.nombre',
                                        'municipio.id', 'municipio.nombre',
-                                       'fuente'],
+                                       'fuente', 'pais.nombre'],
                                       {'lat': place[0], 'lon': place[1]},
                                       iterable=False)
 
@@ -148,6 +148,30 @@ class SearchPlaceTest(SearchEntitiesTest):
 
         self.assertTrue(validations and all(validations))
 
+    def test_place_argentina(self):
+        """Los puntos dentro del territorio de la República Argentina deberían
+        traer en su campo 'pais.nombre' el valor 'República Argentina'."""
+        place = PLACES[0]
+        resp = self.get_response({
+            'lat': place[0],
+            'lon': place[1],
+            'campos': 'completo'
+        })
+
+        self.assertEqual(resp['pais']['nombre'], 'República Argentina')
+
+    def test_place_outside_argentina(self):
+        """Los puntos fuera del territorio de la República Argentina deberían
+        traer en su campo 'pais.nombre' el nombre del país respectivo."""
+        resp = self.get_response({
+            'lat': '-33',
+            'lon': '-56',
+            'campos': 'completo'
+        })
+
+        self.assertEqual(resp['pais']['nombre'],
+                         'República Oriental del Uruguay')
+
     def test_no_muni(self):
         """Cuando se especifican coordenadas que no contienen un municipio,
         el campo 'municipio' debe tener un valor nulo."""
@@ -172,7 +196,7 @@ class SearchPlaceTest(SearchEntitiesTest):
         resp = self.get_response({
             'lat': place[0],
             'lon': place[1],
-            'aplanar': 1
+            'aplanar': True
         })
 
         self.assertTrue(all([
