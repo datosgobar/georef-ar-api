@@ -17,13 +17,16 @@ Son equivalentes a la siguiente consulta `POST` por lotes:
 {
     "provincias": [
         {
-            "nombre": "cordoba"
+            "nombre": "cordoba",
+            "campos": "nombre"
         },
         {
-            "nombre": "chaco"
+            "nombre": "chaco",
+            "campos": "nombre"
         },
         {
-            "nombre": "san luis"
+            "nombre": "san luis",
+            "campos": "nombre"
         }
     ]
 }
