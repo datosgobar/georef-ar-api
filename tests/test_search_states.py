@@ -401,6 +401,18 @@ class SearchStatesTest(SearchEntitiesTest):
                                        'provincia_centroide_lat',
                                        'provincia_centroide_lon'])
 
+    def test_csv_quoting(self):
+        """El primer campo de la respuesta CSV (ID) siempre debe estar
+        entrecomillado para que sea interpretado como texto."""
+        resp = self.get_response({'formato': 'csv'},
+                                 return_value='raw').decode()
+        first_row = resp.splitlines()[1]  # Saltear la cabecera CSV
+        first_value = first_row.split(formatter.CSV_SEP)[0]  # ID de la fila
+
+        self.assertTrue(first_value.startswith('"') and
+                        first_value.endswith('"') and
+                        len(first_value) > 2)
+
     def test_geojson_format(self):
         """Se debería poder obtener resultados en formato
         GEOJSON (sin parámetros)."""

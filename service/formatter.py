@@ -11,7 +11,7 @@ from service import strings
 from service import names as N
 
 CSV_SEP = ','
-CSV_ESCAPE = '"'
+CSV_QUOTE = '"'
 CSV_NEWLINE = '\n'
 FLAT_SEP = '_'
 
@@ -139,18 +139,31 @@ class CSVLineWriter:
         self._dummy_writer = CSVLineWriter.DummyWriter()
         self._csv_writer = csv.writer(self._dummy_writer, *args, **kwargs)
 
-    def row_to_str(self, row):
+    def row_to_str(self, row, quote_positions=None):
         """Retorna una fila de valores como string en formato CSV.
 
         Args:
             row (list): Lista de valores.
+            quote_positions (list): Lista de posiciones (índices) de 'row' que
+                se deben entrecomillar obligatoriamente.
 
         Returns:
             str: Valores como fila en formato CSV.
 
         """
         self._csv_writer.writerow(row)
-        return self._dummy_writer.getvalue()
+        row = self._dummy_writer.getvalue()
+
+        if quote_positions:
+            parts = row.split(CSV_SEP)
+
+            for index in quote_positions:
+                parts[index] = '{quot}{val}{quot}'.format(quot=CSV_QUOTE,
+                                                          val=parts[index])
+
+            row = CSV_SEP.join(parts)
+
+        return row
 
 
 def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
@@ -340,7 +353,7 @@ def create_csv_response(name, result, fmt):
     def csv_generator():
         csv_writer = CSVLineWriter(delimiter=CSV_SEP,
                                    lineterminator=CSV_NEWLINE,
-                                   quotechar=CSV_ESCAPE)
+                                   quotechar=CSV_QUOTE)
 
         keys = []
         field_names = []
@@ -355,7 +368,7 @@ def create_csv_response(name, result, fmt):
             flatten_dict(match, max_depth=3)
             values = [match[key] for key in keys]
 
-            yield csv_writer.row_to_str(values)
+            yield csv_writer.row_to_str(values, quote_positions=[0])
 
     resp = Response(csv_generator(), mimetype='text/csv')
     return make_response((resp, {

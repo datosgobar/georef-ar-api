@@ -67,7 +67,7 @@ class SearchEntitiesTest(TestCase):
                 if fmt == 'csv':
                     return csv.reader(response.data.decode().splitlines(),
                                       delimiter=formatter.CSV_SEP,
-                                      quotechar=formatter.CSV_ESCAPE,
+                                      quotechar=formatter.CSV_QUOTE,
                                       lineterminator=formatter.CSV_NEWLINE)
 
                 raise ValueError('Formato desconocido.')

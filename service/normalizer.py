@@ -32,9 +32,9 @@ class QueryResult:
         _entities (list): Lista de entidades (provincias, municipios,
             ubicaciones, calles, etc.).
         _iterable (bool): Falso si el resultado representa una entidad
-            singular (como en el caso de una ubicación). Verdadero cuando
-            se representa una lista de entidades (como en el caso de,
-            por ejemplo, provincias).
+            singular (como en el caso de una ubicación). Verdadero cuando se
+            representa una lista de entidades (como en el caso de, por ejemplo,
+            provincias).
         _total (int): Total de entidades encontradas, no necesariamente
             incluidas en la respuesta. En caso de iterable == False, se utiliza
             1 como valor default, ya que el 'total' de entidades posibles a ser
