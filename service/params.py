@@ -514,12 +514,9 @@ class AddressParameter(Parameter):
             if match:
                 name, num_str = match.groups()
                 num = int(num_str)
-
-                if num > 0:
-                    address = name, num
-                    break
-                else:
-                    raise ValueError(strings.ADDRESS_INVALID_NUM)
+                # Interpetar direcciones con altura 0 como sin altura
+                address = name, (num if num > 0 else None)
+                break
 
         # 5) Último intento: tomar la primera parte de la dirección (que ya se
         # sabe que no tiene número) y utilizarla como nombre de calle.

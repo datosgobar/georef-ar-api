@@ -13,7 +13,6 @@ ADDRESS_FORMAT_HELP = [
     '<nombre de calle>',
     '<nombre de calle> <altura>'
 ]
-ADDRESS_INVALID_NUM = 'La dirección debe tener una altura positiva.'
 STRING_EMPTY = 'El campo no tiene contenido.'
 INT_VAL_ERROR = 'El parámetro no es un número entero.'
 FLOAT_VAL_ERROR = 'El parámetro no es un número real.'

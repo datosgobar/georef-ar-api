@@ -132,13 +132,11 @@ class SearchAddressesTest(SearchEntitiesTest):
 
         self.assertListEqual(fields_lists, fields_results)
 
-    def test_number_0_returns_400(self):
-        """La búsqueda debe fallar si la altura es cero."""
-        status = self.get_response({
-            'direccion': 'Corrientes 0'
-        }, return_value='status')
-
-        self.assertEqual(status, 400)
+    def test_number_0(self):
+        """Las direcciones con altura 0 deben ser tratadas como alturas sin
+        número."""
+        resp = self.get_response({'direccion': 'Corrientes 0'})
+        self.assertIsNone(resp[0]['altura'])
 
     def test_no_number_returns_null(self):
         """Si se especifica una dirección sin altura, se debería normalizar por
