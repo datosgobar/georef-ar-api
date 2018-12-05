@@ -41,6 +41,12 @@ spanish_stopwords_filter = token_filter(
     ]
 )
 
+synonyms_only_filter = token_filter(
+    'synonyms_only_filter',
+    type='keep_types',
+    types=['SYNONYM']
+)
+
 name_analyzer = analyzer(
     'name_analyzer',
     tokenizer='standard',
@@ -61,6 +67,12 @@ nombres de analizadores (str).
 
 El analizador en sí se crea utilizando 'gen_name_analyzer_synonyms', si es
 necesario.
+"""
+
+name_analyzer_excluding_terms = 'name_analyzer_excluding_terms'
+"""El analizador 'name_analyzer_excluding_terms' sigue el mismo proceso de
+construcción que 'name_analyzer_synonyms', ya que su definición también depende
+de un listado de términos excluyentes externo.
 """
 
 
@@ -88,6 +100,49 @@ def gen_name_analyzer_synonyms(synonyms):
             'lowercase',
             'asciifolding',
             name_synonyms_filter,
+            spanish_stopwords_filter
+        ]
+    )
+
+
+def gen_name_analyzer_excluding_terms(excluding_terms):
+    """Crea un analizador para nombres que sólo retorna TE (términos
+    excluyentes).
+
+    Por ejemplo, si el archivo de configuración de TE contiene las siguientes
+    reglas:
+
+    santa, salta, santo
+    caba, cba
+
+    Entonces, aplicar el analizador a la búsqueda 'salta' debería retornar
+    'santa' y 'santo', mientras que buscar 'caba' debería retornar 'cba'.
+
+    El analizador se utiliza para excluir resultados de búsquedas específicas.
+
+    Args:
+        excluding_terms (list): Lista de TE a utilizar especificados como
+            sinónimos Solr.
+
+    Returns:
+        elasticsearch_dsl.analysis.Analyzer: analizador de texto con nombre
+            'name_analyzer_excluding_terms'.
+
+    """
+    name_excluding_terms_filter = token_filter(
+        'name_excluding_terms_filter',
+        type='synonym',
+        synonyms=excluding_terms
+    )
+
+    return analyzer(
+        name_analyzer_excluding_terms,
+        tokenizer='standard',
+        filter=[
+            'lowercase',
+            'asciifolding',
+            name_excluding_terms_filter,
+            synonyms_only_filter,
             spanish_stopwords_filter
         ]
     )
@@ -248,7 +303,7 @@ class Street(Entity):
     departamento = DepartmentSimpleField
 
 
-def create_index(es, name, doc_class, synonyms=None):
+def create_index(es, name, doc_class, synonyms=None, excluding_terms=None):
     """Crea un índice Elasticsearch utilizando un nombre y una clase de
     documento.
 
@@ -258,6 +313,8 @@ def create_index(es, name, doc_class, synonyms=None):
         doc_class (type): Clase del documento (debe heredar de Document).
         synonyms (list): Lista de sinónimos a utilizar en caso de necesitar el
             analizador 'name_analyzer_synonyms'.
+        excluding_terms (list): Lista de términos excluyentes a utilizar en
+            caso de necesitar el analizador 'name_analyzer_excluding_terms'.
 
     """
     index = Index(name)
@@ -267,6 +324,10 @@ def create_index(es, name, doc_class, synonyms=None):
     # en algún punto de su mapeo, la lista 'synonyms' debería estar presente.
     if synonyms is not None:
         index.analyzer(gen_name_analyzer_synonyms(synonyms))
+
+    # Mismo razonamiento que con 'name_analyzer_synonyms'.
+    if excluding_terms is not None:
+        index.analyzer(gen_name_analyzer_excluding_terms(excluding_terms))
 
     index.document(doc_class)
     index.create(using=es)

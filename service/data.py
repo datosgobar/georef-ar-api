@@ -13,7 +13,7 @@ from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
 from elasticsearch_dsl.query import MatchNone, Term, Prefix
 from service import names as N
 from service import constants
-from service.management.es_config import DOC_TYPE
+from service.management import es_config
 
 
 logger = logging.getLogger('georef')
@@ -487,7 +487,7 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
     options = {
         'indexed_shape': {
             'index': N.GEOM_INDEX.format(index),
-            'type': DOC_TYPE,
+            'type': es_config.DOC_TYPE,
             'id': entity_id,
             'path': entity_geom_path
         }
@@ -536,13 +536,15 @@ def build_name_query(field, value, exact=False):
         field += N.EXACT_SUFFIX
         return build_match_query(field, value, False)
 
-    match_query = build_match_query(field, value, True, operator='and')
+    query = build_match_query(field, value, True, operator='and')
 
     if len(value.strip()) >= constants.MIN_AUTOCOMPLETE_CHARS:
-        prefix_query = build_match_phrase_prefix_query(field, value)
-        return prefix_query | match_query
+        query |= build_match_phrase_prefix_query(field, value)
 
-    return match_query
+    query &= ~build_match_query(
+        field, value, analyzer=es_config.name_analyzer_excluding_terms)
+
+    return query
 
 
 def build_match_phrase_prefix_query(field, value):
@@ -589,7 +591,7 @@ def build_range_query(field, operator, value):
     return Range(**{field: options})
 
 
-def build_match_query(field, value, fuzzy=False, operator='or'):
+def build_match_query(field, value, fuzzy=False, operator='or', analyzer=None):
     """Crea una condición 'Match' para Elasticsearch.
 
     Args:
@@ -597,6 +599,8 @@ def build_match_query(field, value, fuzzy=False, operator='or'):
         value (str): Valor de comparación.
         fuzzy (bool): Bandera para habilitar tolerancia a errores.
         operator (bool): Operador a utilizar para conectar clausulas 'term'
+        analyzer (str): Analizador a utilizar para el análisis del texto de
+            búsqueda.
 
     Returns:
         Query: Condición para Elasticsearch.
@@ -609,6 +613,9 @@ def build_match_query(field, value, fuzzy=False, operator='or'):
 
     if fuzzy:
         options['fuzziness'] = constants.DEFAULT_FUZZINESS
+
+    if analyzer:
+        options['analyzer'] = analyzer
 
     return Match(**{field: options})
 
@@ -628,6 +635,7 @@ def street_number_location(geom, number, start, end):
     """
     shape = shapely.wkb.loads(bytes.fromhex(geom))
     line = shapely.ops.linemerge(shape)
+    lat, lon = None, None
 
     if isinstance(line, shapely.geometry.LineString):
         # Si la geometría de la calle pudo ser combinada para formar un único
@@ -635,16 +643,13 @@ def street_number_location(geom, number, start, end):
         # fin de altura de la calle.
         ip = line.interpolate((number - start) / (end - start),
                               normalized=True)
-
-        return {
-            # TODO:
-            # line.interpolate retorna un shapely Point pero pylint solo mira
-            # los atributos de BaseGeometry.
-            N.LAT: ip.y,  # pylint: disable=no-member
-            N.LON: ip.x   # pylint: disable=no-member
-        }
+        # TODO:
+        # line.interpolate retorna un shapely Point pero pylint solo mira
+        # los atributos de BaseGeometry.
+        lat = ip.y  # pylint: disable=no-member
+        lon = ip.x  # pylint: disable=no-member
 
     return {
-        N.LAT: None,
-        N.LON: None
+        N.LAT: lat,
+        N.LON: lon
     }

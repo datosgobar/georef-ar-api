@@ -257,7 +257,7 @@ class SearchStatesTest(SearchEntitiesTest):
         """La búsqueda por nombre aproximado debe intercambiar términos
         equivalentes."""
         expected = [
-            (['02', '14'], 'CABA'),
+            (['02'], 'CABA'),
             (['02'], 'Capital Federal'),
             (['02'], 'C.A.B.A.'),
             (['02'], 'Ciudad Autónoma de Buenos Aires'),
@@ -265,6 +265,19 @@ class SearchStatesTest(SearchEntitiesTest):
             (['06'], 'Bs.As.'),
             (['94'], 'tdf'),
             (['86'], 'stgo del estero')
+        ]
+
+        self.assert_name_search_id_matches(expected)
+
+    def test_name_search_excluding_terms(self):
+        """La búsqueda por nombre aproximado debe tener en cuenta términos
+        excluyentes. Por ejemplo, buscar 'salta' no debería traer resultados
+        con 'santa', aunque las dos palabras sean textualmente similares."""
+        expected = [
+            (['02'], 'caba'),
+            (['14'], 'cba'),
+            (['66'], 'salta'),
+            (['78', '82'], 'santa')
         ]
 
         self.assert_name_search_id_matches(expected)

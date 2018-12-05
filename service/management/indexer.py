@@ -207,6 +207,8 @@ class GeorefIndex:
             elasticsearch_dsl.Document.
         _filepath (str): Path o URL de archivo de datos a utilizar como datos.
         _synonyms_filepath (str): Path o URL de archivo de sinónimos.
+        _excluding_terms_filepath (str): Path o URL de archivo de términos
+            excluyentes.
         _backup_filepath (str): Path donde colocar un respaldo de los últimos
             datos indexados.
         _includes  (list): Lista de atributos a incluir cuando se leen los
@@ -216,7 +218,8 @@ class GeorefIndex:
     """
 
     def __init__(self, alias, doc_class, filepath, synonyms_filepath=None,
-                 backup_filepath=None, includes=None):
+                 excluding_terms_filepath=None, backup_filepath=None,
+                 includes=None):
         """Inicializa un nuevo objeto de tipo GeorefIndex.
 
         Args:
@@ -224,6 +227,8 @@ class GeorefIndex:
             doc_class (str): Ver el atributo '_doc_class'.
             filepath (str): Ver el atributo '_filepath'.
             synonyms_filepath (str): Ver el atributo '_synonyms_filepath'.
+            excluding_terms_filepath (str): Ver el atributo
+                '_excluding_terms_filepath'.
             backup_filepath (str): Ver el atributo '_backup_filepath'.
             includes (list): Ver el atributo '_includes'.
 
@@ -232,6 +237,7 @@ class GeorefIndex:
         self._doc_class = doc_class
         self._filepath = filepath
         self._synonyms_filepath = synonyms_filepath
+        self._excluding_terms_filepath = excluding_terms_filepath
         self._backup_filepath = backup_filepath
         self._includes = includes
 
@@ -366,7 +372,22 @@ class GeorefIndex:
                                             files_cache, fmt='txt')
             synonyms = self._parse_elasticsearch_synonyms(synonyms_str)
 
+            if not synonyms:
+                logger.warning('Lista de sinónimos vacía.')
+                logger.warning('')
+
+        excluding_terms = None
+        if self._excluding_terms_filepath:
+            ex_terms_str = self._fetch_data(self._excluding_terms_filepath,
+                                            files_cache, fmt='txt')
+            excluding_terms = self._parse_elasticsearch_synonyms(ex_terms_str)
+
+            if not excluding_terms:
+                logger.warning('Lista de términos excluyentes vacía.')
+                logger.warning('')
+
         ok = self._create_or_reindex_with_data(es, data, synonyms,
+                                               excluding_terms,
                                                check_timestamp=not forced)
 
         if forced and not ok:
@@ -376,6 +397,7 @@ class GeorefIndex:
 
             data = self._fetch_data(self._backup_filepath, files_cache)
             ok = self._create_or_reindex_with_data(es, data, synonyms,
+                                                   excluding_terms,
                                                    check_timestamp=False)
 
             if not ok:
@@ -385,8 +407,8 @@ class GeorefIndex:
         if ok and self._backup_filepath:
             self._write_backup(data)
 
-    def _create_or_reindex_with_data(self, es, data, synonyms=None,
-                                     check_timestamp=True):
+    def _create_or_reindex_with_data(self, es, data, synonyms, excluding_terms,
+                                     check_timestamp):
         """Crea o actualiza el índice. Ver la documentación de
         'create_or_reindex' para más detalles del flujo de creación y
         actualización de índices.
@@ -396,6 +418,8 @@ class GeorefIndex:
             data (dict): Diccionario con datos a indexar y sus metadatos.
             synonyms (list): Lista de sinónimos a utilizar en la configuración
                 de Elasticsearch.
+            excluding_terms (list): Lista de términos excluyentes a utilizar en
+                la configuración de Elasticsearch.
             check_timestamp (bool): Cuando es falso, permite indexar datos con
                 timestamp anterior a los que ya están almacenados.
 
@@ -452,7 +476,7 @@ class GeorefIndex:
             logger.info('Omitiendo chequeo de timestamp.')
             logger.info('')
 
-        self._create_index(es, new_index, synonyms)
+        self._create_index(es, new_index, synonyms, excluding_terms)
         self._insert_documents(es, new_index, docs)
 
         self._update_aliases(es, new_index, old_index)
@@ -475,7 +499,7 @@ class GeorefIndex:
         logger.info('Archivo creado.')
         logger.info('')
 
-    def _create_index(self, es, index, synonyms=None):
+    def _create_index(self, es, index, synonyms, excluding_terms):
         """Crea un índice Elasticsearch con settings default y
         mapeos establecidos por 'self._doc_class'.
 
@@ -485,12 +509,15 @@ class GeorefIndex:
                 igual al alias del índice.
             synonyms (list): Lista de sinónimos a utilizar en la configuración
                 de Elasticsearch.
+            excluding_terms (list): Lista de términos excluyentes a utilizar en
+                la configuración de Elasticsearch.
 
         """
         logger.info('Creando nuevo índice: {}...'.format(index))
         logger.info('')
 
-        es_config.create_index(es, index, self._doc_class, synonyms)
+        es_config.create_index(es, index, self._doc_class, synonyms,
+                               excluding_terms)
 
     def _insert_documents(self, es, index, docs):
         """Inserta documentos dentro de un índice.
@@ -698,6 +725,8 @@ def run_index(es, forced, name='all'):
                     doc_class=es_config.State,
                     filepath=app.config['STATES_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'provincias.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.STATES),
@@ -708,6 +737,8 @@ def run_index(es, forced, name='all'):
                     doc_class=es_config.Department,
                     filepath=app.config['DEPARTMENTS_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'departamentos.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.DEPARTMENTS),
@@ -718,6 +749,8 @@ def run_index(es, forced, name='all'):
                     doc_class=es_config.Municipality,
                     filepath=app.config['MUNICIPALITIES_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'municipios.json')),
         GeorefIndex(alias=N.GEOM_INDEX.format(N.MUNICIPALITIES),
@@ -728,12 +761,16 @@ def run_index(es, forced, name='all'):
                     doc_class=es_config.Locality,
                     filepath=app.config['LOCALITIES_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
                                                  'localidades.json')),
         GeorefIndex(alias=N.STREETS,
                     doc_class=es_config.Street,
                     filepath=app.config['STREETS_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir, 'calles.json'))
     ]
 
