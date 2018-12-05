@@ -42,6 +42,12 @@ class SearchDepartmentsTest(SearchEntitiesTest):
         self.entity = 'departamentos'
         super().setUp()
 
+    @unittest.skip('Existen departamentos con geometrías inválidas.')
+    def test_529_departments_present(self):
+        """Deben existir 529 departamentos."""
+        data = self.get_response(return_value='full')
+        self.assertEqual(data['total'], 529)
+
     def test_max_results_returned(self):
         """La cantidad máxima de resultados debe ser configurable."""
         lengths = [1, 5, 25, 50]

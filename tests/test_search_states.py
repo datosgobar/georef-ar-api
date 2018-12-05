@@ -42,8 +42,8 @@ class SearchStatesTest(SearchEntitiesTest):
 
     def test_24_states_present(self):
         """Deben existir 24 provincias."""
-        data = self.get_response()
-        self.assertEqual(len(data), 24)
+        data = self.get_response(return_value='full')
+        self.assertEqual(data['total'], 24)
 
     def test_max_results_returned(self):
         """La cantidad máxima de resultados debe ser configurable."""
