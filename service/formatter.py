@@ -5,10 +5,13 @@ las consultas a los índices o a la base de datos.
 """
 
 import csv
+import io
+from xml.etree import ElementTree
 from flask import make_response, jsonify, Response, request
 import geojson
 from service import strings
 from service import names as N
+
 
 CSV_SEP = ','
 CSV_QUOTE = '"'
@@ -102,6 +105,17 @@ ENDPOINT_CSV_FIELDS = {
 }
 
 
+XML_LIST_ITEM_NAMES = {
+    N.STATES: N.STATE,
+    N.DEPARTMENTS: N.DEPT,
+    N.MUNICIPALITIES: N.MUN,
+    N.LOCALITIES: N.LOCALITY,
+    N.STREETS: N.STREET,
+    N.ADDRESSES: N.ADDRESSES,
+    N.RESULTS: N.RESULT
+}
+
+
 class CSVLineWriter:
     """La clase CSVWriter permite escribir contenido CSV de a líneas, sin la
     necesidad de un objeto file-like como intermediario.
@@ -181,6 +195,45 @@ def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
                 d[flat_key] = subval
 
             del d[key]
+
+
+def create_xml_element(tag, content=None):
+    element = ElementTree.Element(tag)
+    if content is not None:
+        element.text = str(content)
+    return element
+
+
+def xml_flask_response(element):
+    contents = io.StringIO()
+    root = create_xml_element(N.API_NAME)
+    root.append(element)
+
+    ElementTree.ElementTree(root).write(contents, encoding='unicode',
+                                        xml_declaration=True)
+
+    return Response(contents.getvalue(), mimetype='application/xml')
+
+
+def value_to_xml(tag, val, list_item_names=None, max_depth=5):
+    if max_depth <= 0:
+        raise RuntimeError("Profundidad máxima alcanzada.")
+
+    root = create_xml_element(tag)
+
+    if isinstance(val, dict):
+        for key in sorted(val):
+            elem = value_to_xml(key, val[key], list_item_names, max_depth - 1)
+            root.append(elem)
+    elif isinstance(val, list):
+        for value in val:
+            elem = value_to_xml(list_item_names[tag], value, list_item_names,
+                                max_depth - 1)
+            root.append(elem)
+    else:
+        root.text = str(val)
+
+    return root
 
 
 def format_params_error_dict(error_dict):
@@ -324,7 +377,27 @@ def create_internal_error_response():
     }), 500)
 
 
-def create_csv_response(name, result, fmt):
+def format_result_xml(name, result):
+    root = create_xml_element(N.RESULT)
+
+    if result.iterable:
+        root.append(value_to_xml(name, result.entities,
+                                 list_item_names=XML_LIST_ITEM_NAMES))
+        root.append(create_xml_element(N.QUANTITY, len(result.entities)))
+        root.append(create_xml_element(N.TOTAL, result.total))
+        root.append(create_xml_element(N.OFFSET, result.offset))
+    else:
+        root.append(value_to_xml(name, result.first_entity()))
+
+    return root
+
+
+def create_xml_response_single(name, result):
+    root = format_result_xml(name, result)
+    return xml_flask_response(root)
+
+
+def create_csv_response_single(name, result, fmt):
     """Toma un resultado (iterable) de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato CSV.
 
@@ -365,7 +438,7 @@ def create_csv_response(name, result, fmt):
     }))
 
 
-def create_geojson_response(result, fmt):
+def create_geojson_response_single(result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato GeoJSON.
 
@@ -574,10 +647,13 @@ def create_ok_response(name, result, fmt):
             raise RuntimeError(
                 'Se requieren datos iterables para crear una respuesta CSV.')
 
-        return create_csv_response(name, result, fmt)
+        return create_csv_response_single(name, result, fmt)
+
+    if fmt[N.FORMAT] == 'xml':
+        return create_xml_response_single(name, result)
 
     if fmt[N.FORMAT] == 'geojson':
-        return create_geojson_response(result, fmt)
+        return create_geojson_response_single(result, fmt)
 
     raise RuntimeError('Formato desconocido.')
 

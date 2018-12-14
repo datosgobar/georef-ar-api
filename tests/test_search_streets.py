@@ -336,6 +336,20 @@ class SearchStreetsTest(SearchEntitiesTest):
                                        'departamento_id',
                                        'departamento_nombre'])
 
+    def test_xml_format(self):
+        """Se debería poder obtener resultados en formato XML (sin
+        parámetros)."""
+        self.assert_valid_xml()
+
+    def test_xml_format_query(self):
+        """Se debería poder obtener resultados en formato XML (con
+        parámetros)."""
+        self.assert_valid_xml({
+            'max': 100,
+            'nombre': 'mayo',
+            'tipo': 'avenida'
+        })
+
 
 if __name__ == '__main__':
     unittest.main()

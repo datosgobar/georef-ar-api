@@ -63,6 +63,7 @@ INTERSECTION = 'interseccion'
 
 # Results
 RESULTS = 'resultados'
+RESULT = 'resultado'
 TOTAL = 'total'
 QUANTITY = 'cantidad'
 
@@ -83,3 +84,6 @@ SOURCE_IGN = 'IGN'
 
 # Índices
 GEOM_INDEX = '{}-geometria'
+
+# API
+API_NAME = 'georef-ar-api'

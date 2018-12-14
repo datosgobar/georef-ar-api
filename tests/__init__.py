@@ -1,4 +1,5 @@
 import csv
+from xml.etree import ElementTree
 import json
 import urllib
 from unittest import TestCase
@@ -70,6 +71,9 @@ class SearchEntitiesTest(TestCase):
                                       quotechar=formatter.CSV_QUOTE,
                                       lineterminator=formatter.CSV_NEWLINE)
 
+                if fmt == 'xml':
+                    return ElementTree.fromstring(response.data.decode())
+
                 raise ValueError('Formato desconocido.')
 
             if return_value == 'full':
@@ -113,6 +117,25 @@ class SearchEntitiesTest(TestCase):
     def assert_valid_geojson(self, params=None):
         geodata = self.get_geojson(params)
         self.assertTrue(len(geodata['features']) > 0)
+
+    def assert_valid_xml(self, params=None):
+        if not params:
+            params = {}
+
+        entity_plural = self.endpoint.split('/')[-1]
+
+        json_resp = self.get_response(params=params, return_value='full')
+        json_as_xml = formatter.value_to_xml(
+            entity_plural, json_resp[entity_plural],
+            list_item_names=formatter.XML_LIST_ITEM_NAMES)
+
+        params['formato'] = 'xml'
+        xml_resp = self.get_response(params=params, fmt='xml')
+        xml_entities = xml_resp.find('resultado').find(entity_plural)
+
+        self.assertEqual(ElementTree.tostring(xml_entities,
+                                              encoding='unicode'),
+                         ElementTree.tostring(json_as_xml, encoding='unicode'))
 
     def assert_flat_results(self):
         resp = self.get_response({'aplanar': 1, 'max': 1})

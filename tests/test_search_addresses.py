@@ -554,6 +554,13 @@ class SearchAddressesTest(SearchEntitiesTest):
         GEOJSON (sin parámetros)."""
         self.assert_valid_geojson({'direccion': COMMON_ADDRESS})
 
+    def test_xml_format_query(self):
+        """Se debería poder obtener resultados en formato XML (con
+        parámetros)."""
+        self.assert_valid_xml({
+            'direccion': COMMON_ADDRESS
+        })
+
 
 if __name__ == '__main__':
     unittest.main()

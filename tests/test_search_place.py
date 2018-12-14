@@ -366,6 +366,16 @@ class SearchPlaceTest(SearchEntitiesTest):
             'lon': place[1]
         })
 
+    def test_xml_format(self):
+        """Se debería poder obtener resultados en formato XML (con
+        parámetros)."""
+        place = PLACES[1]
+
+        self.assert_valid_xml({
+            'lat': place[0],
+            'lon': place[1]
+        })
+
 
 if __name__ == '__main__':
     unittest.main()

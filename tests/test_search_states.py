@@ -439,6 +439,19 @@ class SearchStatesTest(SearchEntitiesTest):
             'max': 10
         })
 
+    def test_xml_format(self):
+        """Se debería poder obtener resultados en formato XML (sin
+        parámetros)."""
+        self.assert_valid_xml()
+
+    def test_xml_format_query(self):
+        """Se debería poder obtener resultados en formato XML (con
+        parámetros)."""
+        self.assert_valid_xml({
+            'max': 1,
+            'nombre': 'santa'
+        })
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -422,6 +422,19 @@ class SearchMunicipalitiesTest(SearchEntitiesTest):
                                        'provincia_id',
                                        'provincia_nombre'])
 
+    def test_xml_format(self):
+        """Se debería poder obtener resultados en formato XML (sin
+        parámetros)."""
+        self.assert_valid_xml()
+
+    def test_xml_format_query(self):
+        """Se debería poder obtener resultados en formato XML (con
+        parámetros)."""
+        self.assert_valid_xml({
+            'max': 50,
+            'nombre': 'mitre'
+        })
+
 
 if __name__ == '__main__':
     unittest.main()
