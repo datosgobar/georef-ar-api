@@ -1,8 +1,9 @@
 import csv
 from xml.etree import ElementTree
+from unittest import mock, TestCase
 import json
 import urllib
-from unittest import TestCase
+from flask import current_app
 import geojson
 from service import app, formatter
 
@@ -20,7 +21,7 @@ def asciifold(text):
     return text.upper().translate(text.maketrans(conv))
 
 
-class SearchEntitiesTest(TestCase):
+class GeorefLiveTest(TestCase):
     def __init__(self, *args, **kwargs):
         self.endpoint = None
         self.entity = None
@@ -178,3 +179,20 @@ class SearchEntitiesTest(TestCase):
             statuses.append(response.status_code)
 
         self.assertListEqual([400] * len(params), statuses)
+
+
+class GeorefMockTest(GeorefLiveTest):
+    def setUp(self):
+        self.patcher = mock.patch('elasticsearch.Elasticsearch', autospec=True)
+        self.es = self.patcher.start()
+        super().setUp()
+
+    def tearDown(self):
+        with app.app_context():
+            if hasattr(current_app, 'elasticsearch'):
+                delattr(current_app, 'elasticsearch')
+
+        self.es = None
+        self.patcher.stop()
+        self.patcher = None
+        super().tearDown()

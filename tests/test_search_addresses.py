@@ -1,13 +1,13 @@
 import unittest
 import random
 from service import formatter
-from . import SearchEntitiesTest, asciifold
+from . import GeorefLiveTest, asciifold
 
 
 COMMON_ADDRESS = 'Corrientes 1000'
 
 
-class SearchAddressesTest(SearchEntitiesTest):
+class SearchAddressesTest(GeorefLiveTest):
     """Pruebas de búsqueda por dirección."""
 
     def setUp(self):

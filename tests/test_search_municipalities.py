@@ -1,7 +1,7 @@
 import unittest
 import random
 from service import formatter
-from . import SearchEntitiesTest, asciifold
+from . import GeorefLiveTest, asciifold
 
 
 MUNICIPALITIES = [
@@ -44,7 +44,7 @@ MUNICIPALITIES = [
 ]
 
 
-class SearchMunicipalitiesTest(SearchEntitiesTest):
+class SearchMunicipalitiesTest(GeorefLiveTest):
     """Pruebas de búsqueda de municipios."""
 
     def setUp(self):

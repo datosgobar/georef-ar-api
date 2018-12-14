@@ -1,10 +1,10 @@
 import unittest
 import random
 from service import formatter
-from . import SearchEntitiesTest, asciifold
+from . import GeorefLiveTest, asciifold
 
 
-class SearchStreetsTest(SearchEntitiesTest):
+class SearchStreetsTest(GeorefLiveTest):
     """
     Pruebas de búsqueda de calles.
 

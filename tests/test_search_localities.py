@@ -1,7 +1,7 @@
 import random
 import unittest
 from service import formatter
-from . import SearchEntitiesTest, asciifold
+from . import GeorefLiveTest, asciifold
 from .test_search_states import STATES
 
 
@@ -24,7 +24,7 @@ LOCALITIES = [
 ]
 
 
-class SearchLocalityTest(SearchEntitiesTest):
+class SearchLocalityTest(GeorefLiveTest):
     """Pruebas de búsqueda de localidades (índice de localidades)."""
 
     def setUp(self):

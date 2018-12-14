@@ -1,7 +1,7 @@
 import random
 import unittest
 from service import formatter
-from . import SearchEntitiesTest
+from . import GeorefLiveTest
 
 
 PLACES = [
@@ -35,7 +35,7 @@ PLACES_NO_MUNI = [
 ]
 
 
-class SearchPlaceTest(SearchEntitiesTest):
+class SearchPlaceTest(GeorefLiveTest):
     """Pruebas de búsqueda por ubicación."""
 
     def setUp(self):

@@ -1,8 +1,8 @@
 import unittest
-from . import SearchEntitiesTest
+from . import GeorefLiveTest
 
 
-class SearchStatesTest(SearchEntitiesTest):
+class IntersectionsTest(GeorefLiveTest):
     """Pruebas de búsqueda de entidades por intersección."""
 
     def test_intersection_state_dept(self):

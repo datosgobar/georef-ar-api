@@ -1,7 +1,7 @@
 import random
 import unittest
 from service import formatter
-from . import SearchEntitiesTest, asciifold
+from . import GeorefLiveTest, asciifold
 
 
 STATES = [
@@ -32,7 +32,7 @@ STATES = [
 ]
 
 
-class SearchStatesTest(SearchEntitiesTest):
+class SearchStatesTest(GeorefLiveTest):
     """Pruebas de búsqueda de provincias."""
 
     def setUp(self):
