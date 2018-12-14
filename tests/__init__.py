@@ -1,4 +1,5 @@
 import csv
+import copy
 from xml.etree import ElementTree
 from unittest import mock, TestCase
 import json
@@ -196,3 +197,26 @@ class GeorefMockTest(GeorefLiveTest):
         self.patcher.stop()
         self.patcher = None
         super().tearDown()
+
+    def set_msearch_results(self, results):
+        """Establece los valores que debería retornar el método msearch() de
+        Elasticsearch. Notar que se establecen los resultados para una sola
+        query: si se llega a utilizar uno de los recursos POST con más de una
+        query, ocurriría un error interno en la API.
+
+        Args:
+            results (list): Lista de 'hits' (documentos) para una única query.
+
+        """
+        hits = [{'_source': copy.deepcopy(result)} for result in results]
+
+        self.es.return_value.msearch.return_value = {
+            'responses': [
+                {
+                    'hits': {
+                        'hits': hits,
+                        'total': len(hits)
+                    }
+                }
+            ]
+        }

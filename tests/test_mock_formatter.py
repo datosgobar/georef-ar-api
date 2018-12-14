@@ -1,8 +1,8 @@
-from unittest import TestCase
 from service import formatter
+from . import GeorefMockTest
 
 
-class FormattingTest(TestCase):
+class FormattingTest(GeorefMockTest):
     def test_fields_list_to_dict(self):
         """El resultado de fields_list_to_dict debería ser un diccionario
         equivalente a los valores de una lista, desaplanados."""
@@ -91,3 +91,13 @@ class FormattingTest(TestCase):
                 }
             }
         })
+
+    def test_xml_structure(self):
+        """La estructura de las respuestas en formato XML deberían seguir una
+        estructura predeterminada."""
+        self.set_msearch_results([])
+        resp = self.get_response(params={'formato': 'xml'}, fmt='xml',
+                                 endpoint='/api/provincias',
+                                 entity='provincias')
+
+        self.assertEqual(resp.tag, 'georef-ar-api')
