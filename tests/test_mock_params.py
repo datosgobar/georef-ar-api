@@ -1,5 +1,6 @@
 from random import choice
 from service.params import ParamErrorType as T
+from service.formatter import value_to_xml, XML_ERROR_LIST_ITEM_NAMES
 from . import GeorefMockTest
 
 ENDPOINTS = [
@@ -480,24 +481,50 @@ class ParamParsingTest(GeorefMockTest):
             (T.VALUE_ERROR.value, 'interseccion')
         })
 
+    def test_xml_error_unknown_param(self):
+        """Se deberían generar errores al especificar parámetros no existentes
+        (con formato=xml)."""
+        self.assert_xml_errors_valid(choice(ENDPOINTS), {'foo': 'bar'})
+
+    def test_xml_error_missing_param(self):
+        """Se deberían generar errores al no especificar parámetros requeridos
+        (con formato=xml)."""
+        self.assert_xml_errors_valid('/direcciones', {})
+
+    def test_xml_error_invalid_value(self):
+        """Se deberían generar errores al especificar valores inválidos para
+        parámetros (con formato=xml)."""
+        self.assert_xml_errors_valid(choice(ENDPOINTS), {'id': 'foobar'})
+
+    def assert_xml_errors_valid(self, endpoint, params):
+        """Si se especifica formato=xml y se produce un error, los errores
+        deben ser devueltos en formato XML y deben contener la misma
+        información que cuando se utiliza JSON."""
+        endpoint = self.url_base + endpoint
+
+        json_resp = self.get_response(params=params, endpoint=endpoint,
+                                      return_value='full', expect_status=[400])
+
+        params['formato'] = 'xml'
+        xml_resp = self.get_response(params=params, endpoint=endpoint,
+                                     expect_status=[400])
+
+        json_as_xml = value_to_xml('errores', json_resp['errores'],
+                                   list_item_names=XML_ERROR_LIST_ITEM_NAMES)
+
+        self.assert_xml_equal(xml_resp.find('errores'), json_as_xml)
+
     def assert_errors_match(self, url, errors_set, body=None, method=None):
         url = self.url_base + url
         if not method:
             method = 'POST' if body else 'GET'
 
-        if method == 'POST':
-            resp = self.app.post(url, json=body)
-        elif method == 'GET':
-            resp = self.app.get(url)
-        else:
-            raise ValueError('Método HTTP desconocido.')
-
-        if resp.status_code == 200:
-            raise Exception('La petición no devolvió errores.')
+        resp = self.get_response(method=method, body=body, return_value='full',
+                                 url=url, expect_status=[400, 404])
 
         if method == 'POST':
             resp_errors = []
-            for errors in resp.json['errores']:
+            for errors in resp['errores']:
                 query_errors = {
                     (e['codigo_interno'], e['nombre_parametro'])
                     for e in errors
@@ -506,7 +533,7 @@ class ParamParsingTest(GeorefMockTest):
         else:
             resp_errors = {
                 (e['codigo_interno'], e['nombre_parametro'])
-                for e in resp.json['errores']
+                for e in resp['errores']
             }
 
         self.assertEqual(errors_set, resp_errors)

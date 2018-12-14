@@ -49,7 +49,8 @@ class GeorefLiveTest(TestCase):
         self.app = app.test_client()
 
     def get_response(self, params=None, method='GET', body=None,
-                     return_value='data', endpoint=None, entity=None):
+                     return_value='data', endpoint=None, entity=None,
+                     expect_status=None, url=None):
         """Método de uso general para obtener respuestas de la API. El método
         permite consultar la API especificando parámetros, formato de la
         respuesta, valor de retorno deseado y más. Internamente, se utiliza una
@@ -81,18 +82,21 @@ class GeorefLiveTest(TestCase):
                 utiliza el valor de 'self.endpoint'.
             entity (str): Nombre (plural) de la entidad que se desea consultar.
                 Por defecto, se utiliza el valor de 'self.entity'.
+            expect_status (list): Lista de códigos HTTP que se deberían tomar
+                como válidos en las respuestas.
+            url (str): Utilizar una URL predeterminada en vez de construir una
+                utilizando 'endpoint' y 'params'.
 
         Returns:
             ElementTree, dict, csv.Reader, int, bytes: resultado dependiendo de
                 los parámetros especificados.
 
         """
-        if not params:
-            params = {}
-
+        params = params or {}
+        expect_status = expect_status or [200]
         endpoint = endpoint or self.endpoint
         entity = entity or self.entity
-        url = '{}?{}'.format(endpoint, urllib.parse.urlencode(params))
+        url = url or '{}?{}'.format(endpoint, urllib.parse.urlencode(params))
         fmt = params.get('formato', 'json')
 
         if method == 'POST' and fmt != 'json':
@@ -106,15 +110,15 @@ class GeorefLiveTest(TestCase):
         else:
             raise ValueError('Método desconocido.')
 
+        if response.status_code not in expect_status:
+            raise Exception(
+                'La petición devolvió un código inesperado: {}'.format(
+                    response.status_code))
+
         if return_value == 'status':
             return response.status_code
 
         if return_value in ['data', 'full', 'raw']:
-            if response.status_code != 200:
-                raise Exception(
-                    'La petición no devolvió código 200: {}'.format(
-                        response.data))
-
             if return_value == 'data':
                 if fmt == 'json':
                     key = entity if method == 'GET' else 'resultados'
@@ -188,9 +192,11 @@ class GeorefLiveTest(TestCase):
         xml_resp = self.get_response(params=params)
         xml_entities = xml_resp.find('resultado').find(entity_plural)
 
-        self.assertEqual(ElementTree.tostring(xml_entities,
-                                              encoding='unicode'),
-                         ElementTree.tostring(json_as_xml, encoding='unicode'))
+        self.assert_xml_equal(json_as_xml, xml_entities)
+
+    def assert_xml_equal(self, element_a, element_b):
+        self.assertEqual(ElementTree.tostring(element_a, encoding='unicode'),
+                         ElementTree.tostring(element_b, encoding='unicode'))
 
     def assert_flat_results(self):
         resp = self.get_response({'aplanar': 1, 'max': 1})

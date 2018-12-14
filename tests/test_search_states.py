@@ -183,7 +183,8 @@ class SearchStatesTest(GeorefLiveTest):
     def test_id_invalid_search(self):
         """La búsqueda por ID debe devolver error 400 cuando se
         utiliza un ID no válido."""
-        status = self.get_response(params={'id': 99999}, return_value='status')
+        status = self.get_response(params={'id': 99999}, return_value='status',
+                                   expect_status=[400])
         self.assertEqual(status, 400)
 
     def test_short_id_search(self):
@@ -308,7 +309,7 @@ class SearchStatesTest(GeorefLiveTest):
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""
         status = self.get_response(method='POST', body={},
-                                   return_value='status')
+                                   return_value='status', expect_status=[400])
         self.assertEqual(status, 400)
 
     def test_bulk_response_len(self):

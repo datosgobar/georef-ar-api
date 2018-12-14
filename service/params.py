@@ -19,15 +19,23 @@ class ParameterParsingException(Exception):
     """Excepción lanzada al finalizar la recolección de errores para todos los
     parámetros.
 
+    La variable 'self._errors' puede contener un diccionario de error por
+    parámetro (GET) o una lista de diccionarios de error por parámetro (POST).
+
     """
 
-    def __init__(self, errors):
+    def __init__(self, errors, fmt='json'):
         self._errors = errors
+        self._fmt = fmt
         super().__init__()
 
     @property
     def errors(self):
         return self._errors
+
+    @property
+    def fmt(self):
+        return self._fmt
 
 
 class ParameterValueError(Exception):
@@ -801,7 +809,10 @@ class EndpointParameters():
                                                 list(params.keys()))
 
         if errors:
-            raise ParameterParsingException(errors)
+            # Si no se especificó un formato válido, utilizar JSON para mostrar
+            # los errores.
+            fmt = parsed.get(N.FORMAT, 'json')
+            raise ParameterParsingException(errors, fmt)
 
         self.cross_validate_params(parsed)
         return parsed

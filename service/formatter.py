@@ -116,6 +116,12 @@ XML_LIST_ITEM_NAMES = {
 }
 
 
+XML_ERROR_LIST_ITEM_NAMES = {
+    'errores': 'error',
+    'ayuda': 'item'
+}
+
+
 class CSVLineWriter:
     """La clase CSVWriter permite escribir contenido CSV de a líneas, sin la
     necesidad de un objeto file-like como intermediario.
@@ -204,7 +210,7 @@ def create_xml_element(tag, content=None):
     return element
 
 
-def xml_flask_response(element):
+def xml_flask_response(element, status=200):
     contents = io.StringIO()
     root = create_xml_element(N.API_NAME)
     root.append(element)
@@ -212,7 +218,8 @@ def xml_flask_response(element):
     ElementTree.ElementTree(root).write(contents, encoding='unicode',
                                         xml_declaration=True)
 
-    return Response(contents.getvalue(), mimetype='application/xml')
+    return Response(contents.getvalue(), mimetype='application/xml',
+                    status=status)
 
 
 def value_to_xml(tag, val, list_item_names=None, max_depth=5):
@@ -265,12 +272,13 @@ def format_params_error_dict(error_dict):
     return results
 
 
-def create_param_error_response_single(errors):
+def create_param_error_response_single(errors, fmt):
     """Toma un diccionario de errores de parámetros y devuelve una respuesta
-    HTTP 400 con contenido JSON detallando los errores.
+    HTTP 400 detallando los errores.
 
     Args:
         errors (dict): Diccionario de errores.
+        fmt (str): Formato de datos a utilizar en la respuesta.
 
     Returns:
         flask.Response: Respuesta HTTP con errores.
@@ -278,6 +286,12 @@ def create_param_error_response_single(errors):
     """
     errors_fmt = format_params_error_dict(errors)
 
+    if fmt == 'xml':
+        root = value_to_xml('errores', errors_fmt, XML_ERROR_LIST_ITEM_NAMES)
+        return xml_flask_response(root, status=400)
+
+    # Para cualquier formato que no sea XML, utilizar JSON para devolver
+    # los errores.
     return make_response(jsonify({
         'errores': errors_fmt
     }), 400)

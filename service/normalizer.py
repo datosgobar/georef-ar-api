@@ -171,7 +171,7 @@ def process_entity_single(request, name, param_parser, key_translations):
     try:
         qs_params = param_parser.parse_get_params(request.args)
     except params.ParameterParsingException as e:
-        return formatter.create_param_error_response_single(e.errors)
+        return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     # Construir query a partir de parámetros
     query = translate_keys(qs_params, key_translations,
@@ -438,7 +438,7 @@ def process_street_single(request):
     try:
         qs_params = params.PARAMS_STREETS.parse_get_params(request.args)
     except params.ParameterParsingException as e:
-        return formatter.create_param_error_response_single(e.errors)
+        return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     query, fmt = build_street_query_format(qs_params)
 
@@ -660,7 +660,7 @@ def process_address_single(request):
     try:
         qs_params = params.PARAMS_ADDRESSES.parse_get_params(request.args)
     except params.ParameterParsingException as e:
-        return formatter.create_param_error_response_single(e.errors)
+        return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     query, fmt = build_address_query_format(qs_params)
 
@@ -911,7 +911,7 @@ def process_place_single(request):
     try:
         qs_params = params.PARAMS_PLACE.parse_get_params(request.args)
     except params.ParameterParsingException as e:
-        return formatter.create_param_error_response_single(e.errors)
+        return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     query, fmt = build_place_query_format(qs_params)
 
