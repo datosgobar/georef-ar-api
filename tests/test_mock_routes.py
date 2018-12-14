@@ -1,16 +1,7 @@
-import logging
-from unittest import TestCase
-from service import app
+from . import GeorefMockTest
 
 
-logging.getLogger('georef').setLevel(logging.CRITICAL)
-
-
-class RoutesTest(TestCase):
-    def setUp(self):
-        app.testing = True
-        self.app = app.test_client()
-
+class RoutesTest(GeorefMockTest):
     def test_v1_0_endpoints(self):
         """Los endpoints con prefijo /api/v1.0 deberían existir incluso si no
         se cuenta con más de una versión de la API."""
@@ -20,6 +11,7 @@ class RoutesTest(TestCase):
             '/api/v1.0/municipios',
             '/api/v1.0/localidades',
             '/api/v1.0/direcciones',
+            '/api/v1.0/calles',
             '/api/v1.0/ubicacion'
         ]
 
@@ -28,7 +20,7 @@ class RoutesTest(TestCase):
             for url in urls
         ]
 
-        self.assertTrue(all(validations), list(zip(urls, validations)))
+        self.assertTrue(all(validations))
 
     def test_complete_download_redirect(self):
         """La API debería permitir la descarga total de datos por recurso. Las

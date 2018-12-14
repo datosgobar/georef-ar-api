@@ -1,4 +1,3 @@
-import logging
 import random
 import elasticsearch
 from . import GeorefMockTest
@@ -11,8 +10,6 @@ ENDPOINTS = [
     '/municipios',
     '/localidades'
 ]
-
-logging.getLogger('georef').setLevel(logging.CRITICAL)
 
 
 class NormalizerTest(GeorefMockTest):

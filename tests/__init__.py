@@ -1,5 +1,6 @@
 import csv
 import copy
+import logging
 from xml.etree import ElementTree
 from unittest import mock, TestCase
 import json
@@ -7,6 +8,8 @@ import urllib
 from flask import current_app
 import geojson
 from service import app, formatter
+
+logging.getLogger('georef').setLevel(logging.CRITICAL)
 
 
 def asciifold(text):
@@ -23,6 +26,19 @@ def asciifold(text):
 
 
 class GeorefLiveTest(TestCase):
+    """Clase de utilidad para implementar tests para Georef API. Las clases que
+    hereden de GeorefLiveTest pueden utilizar el método 'get_response' para
+    realizar consultas a una API de prueba.
+
+    Nota: cada test ejecutado bajo GeorefLiveTest cuenta con una conexión real
+    a Elasticsearch y tiene acceso a todos los datos almacenados allí. Esto
+    permite realizar pruebas contra los datos utilizados por Georef API, además
+    del código mismo de la API. Por defecto, se utilizan los valores de la
+    configuración de ejemplo (config/georef.example.cfg) para establecer la
+    conexión (ver Makefile).
+
+    """
+
     def __init__(self, *args, **kwargs):
         self.endpoint = None
         self.entity = None
@@ -220,6 +236,16 @@ class GeorefLiveTest(TestCase):
 
 
 class GeorefMockTest(GeorefLiveTest):
+    """La clase GeorefMockTest debería ser considerada idéntica a
+    GeorefLiveTest, con la excepción de que cualquier clase que herede de ella
+    *no* cuenta con una conexión a Elasticsearch en sus tests: se utiliza el
+    módulo 'mock' de Python para crear una conexión simulada.
+
+    Los tests ejecutados bajo GeorefMockTest *no* requieren de una conexión
+    real a Elasticsearch, y nunca intentarán abrir una.
+
+    """
+
     def setUp(self):
         self.patcher = mock.patch('elasticsearch.Elasticsearch', autospec=True)
         self.es = self.patcher.start()

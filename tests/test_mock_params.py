@@ -1,7 +1,6 @@
 from random import choice
-from unittest import TestCase
-from service import app
 from service.params import ParamErrorType as T
+from . import GeorefMockTest
 
 ENDPOINTS = [
     '/provincias',
@@ -12,12 +11,10 @@ ENDPOINTS = [
 ]
 
 
-class ParamParsingTest(TestCase):
+class ParamParsingTest(GeorefMockTest):
     def setUp(self):
-        app.testing = True
-
-        self.app = app.test_client()
         self.url_base = '/api/v1.0'
+        super().setUp()
 
     def test_404_response(self):
         """Se debería devolver un error 404 con contenido JSON en caso de
