@@ -96,7 +96,7 @@ class FormattingTest(GeorefMockTest):
         """La estructura de las respuestas en formato XML deberían seguir una
         estructura predeterminada."""
         self.set_msearch_results([])
-        resp = self.get_response(params={'formato': 'xml'}, fmt='xml',
+        resp = self.get_response(params={'formato': 'xml'},
                                  endpoint='/api/provincias',
                                  entity='provincias')
 

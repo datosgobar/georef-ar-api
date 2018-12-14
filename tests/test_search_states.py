@@ -408,7 +408,7 @@ class SearchStatesTest(GeorefLiveTest):
     def test_csv_fields(self):
         """Una consulta CSV debería tener ciertos campos, ordenados de una
         forma específica."""
-        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        resp = self.get_response({'formato': 'csv'})
         headers = next(resp)
         self.assertListEqual(headers, ['provincia_id', 'provincia_nombre',
                                        'provincia_centroide_lat',

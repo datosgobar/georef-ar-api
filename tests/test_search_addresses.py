@@ -520,7 +520,7 @@ class SearchAddressesTest(GeorefLiveTest):
         resp = self.get_response({
             'formato': 'csv',
             'direccion': COMMON_ADDRESS
-        }, fmt='csv')
+        })
 
         headers = next(resp)
         self.assertListEqual(headers, ['calle_id',
@@ -542,7 +542,7 @@ class SearchAddressesTest(GeorefLiveTest):
             'direccion': 'NAON 1200',
             'departamento': 6427,  # 0 inicial agregado por API
             'max': 1
-        }, fmt='csv')
+        })
 
         header = next(resp)
         row = next(resp)

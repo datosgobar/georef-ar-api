@@ -449,7 +449,7 @@ class SearchLocalityTest(GeorefLiveTest):
     def test_csv_fields(self):
         """Una consulta CSV debería tener ciertos campos, ordenados de una
         forma específica."""
-        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        resp = self.get_response({'formato': 'csv'})
         headers = next(resp)
         self.assertListEqual(headers, ['localidad_id',
                                        'localidad_nombre',

@@ -422,7 +422,7 @@ class SearchDepartmentsTest(GeorefLiveTest):
     def test_csv_fields(self):
         """Una consulta CSV debería tener ciertos campos, ordenados de una
         forma específica."""
-        resp = self.get_response({'formato': 'csv'}, fmt='csv')
+        resp = self.get_response({'formato': 'csv'})
         headers = next(resp)
         self.assertListEqual(headers, ['departamento_id',
                                        'departamento_nombre',

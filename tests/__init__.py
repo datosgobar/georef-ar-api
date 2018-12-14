@@ -33,23 +33,60 @@ class GeorefLiveTest(TestCase):
         self.app = app.test_client()
 
     def get_response(self, params=None, method='GET', body=None,
-                     return_value='data', fmt='json', endpoint=None,
-                     entity=None):
-        """Método de uso general para obtener resultados de la API, utilizando
-        internamente los métodos .get() y .post() del app Flask."""
+                     return_value='data', endpoint=None, entity=None):
+        """Método de uso general para obtener respuestas de la API. El método
+        permite consultar la API especificando parámetros, formato de la
+        respuesta, valor de retorno deseado y más. Internamente, se utiliza una
+        app Flask de prueba para obtener las respuestas. El objetivo es simular
+        una consulta HTTP a la API desde un cliente externo.
 
+        Por defecto (con return_value == 'data'), se procesa la respuesta
+        dependiendo de su formato y se retorna un objeto Python apropiado. Por
+        ejemplo, una respuesta con formato=json retorna dict, una con
+        formato=xml returna un ElementTree y una con formato=csv retorna un
+        csv.Reader.
+
+        Args:
+            params (dict): Diccionario de parámetros a utilizar cuando
+                method == 'GET'. Se agregan los valores del diccionario a la
+                URL en forma de un query string.
+            method (str): Método HTTP a utilizar. Valores permitidos: 'GET' o
+                'POST'.
+            body (dict): Valor a utilizar como cuerpo de la petición HTTP en
+                caso de que method == 'POST'.
+            return_value (str): Valor de retorno deseado de la consulta HTTP.
+                Los valores posibles son: 'data' para obtener el cuerpo de la
+                respuesta procesado, 'full' para obtener la enteridad de la
+                respuesta en formato JSON sin procesar, 'raw' para obtener los
+                bytes de respuesta sin procesar y 'status' para obtener
+                sólamente el status_code HTTP de la respuesta como número
+                entero.
+            endpoint (str): Recurso de la API a consultar. Por defecto, se
+                utiliza el valor de 'self.endpoint'.
+            entity (str): Nombre (plural) de la entidad que se desea consultar.
+                Por defecto, se utiliza el valor de 'self.entity'.
+
+        Returns:
+            ElementTree, dict, csv.Reader, int, bytes: resultado dependiendo de
+                los parámetros especificados.
+
+        """
         if not params:
             params = {}
 
         endpoint = endpoint or self.endpoint
         entity = entity or self.entity
+        url = '{}?{}'.format(endpoint, urllib.parse.urlencode(params))
+        fmt = params.get('formato', 'json')
 
-        query = endpoint + '?' + urllib.parse.urlencode(params)
+        if method == 'POST' and fmt != 'json':
+            raise ValueError(
+                'Las consultas POST solo están disponibles en JSON.')
 
         if method == 'GET':
-            response = self.app.get(query)
+            response = self.app.get(url)
         elif method == 'POST':
-            response = self.app.post(query, json=body)
+            response = self.app.post(url, json=body)
         else:
             raise ValueError('Método desconocido.')
 
@@ -132,7 +169,7 @@ class GeorefLiveTest(TestCase):
             list_item_names=formatter.XML_LIST_ITEM_NAMES)
 
         params['formato'] = 'xml'
-        xml_resp = self.get_response(params=params, fmt='xml')
+        xml_resp = self.get_response(params=params)
         xml_entities = xml_resp.find('resultado').find(entity_plural)
 
         self.assertEqual(ElementTree.tostring(xml_entities,
