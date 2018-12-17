@@ -112,6 +112,7 @@ La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteri
 - Modificación de *mappeos* de tipos de Elasticsearch
 - Modificación de analizadores de texto de Elasticsearch
 - Modificación de listado de sinónimos
+- Modificación de listado de términos excluyentes
 
 
 Cualquiera de las dos opciones también permite indexar datos selectivamente: se debe especificar el nombre del índice a crear/re-indexar. Por ejemplo:
@@ -204,4 +205,4 @@ Comprobar que no existan errores comunes en el código, y que su estilo sea corr
 
 - El archivo de configuración `config/georef.cfg` debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en `georef.example.cfg`) utilizan el portal de descargas `infra.datos.gob.ar`, que siempre provee la última versión de los archivos JSON disponibles. La rama `master` de `georef-ar-api` siempre se mantiene compatible con la última versión de los datos disponibles en `infra.datos.gob.ar`.
 
-- El archivo de configuración `config/georef.cfg` también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto, en `georef.example.cfg`, puede ser utilizado.
+- El archivo de configuración `config/georef.cfg` también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto en `georef.example.cfg` puede ser utilizado, ya que utiliza la versión del archivo almacenado en `infra.datos.gob.ar`. El mismo criterio se aplica al archivo de términos excluyentes.

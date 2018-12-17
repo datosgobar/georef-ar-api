@@ -11,6 +11,7 @@ nav:
   - Usuarios:
     - Ejemplos de uso: quick-start.md
     - Consultas por lotes: bulk.md
+    - Operaciones con geometrías: geom-operations.md
     - Usar en planillas de cálculo: spreadsheet-integration.md
     - Usar en Python: python-usage.md
     - Autenticarse con JWT: jwt-token.md
@@ -19,9 +20,9 @@ nav:
   - Aplicaciones: applications.md
   - Desarrolladores:
     - Ambiente de desarrollo y deploy: georef-api-development.md
-    - Instalación de Python 3.6: python3.6.md
     - Proceso de ETL y Datos: georef-api-data.md
     - Historial de versiones: history.md
+    - Instalación de Python 3.6: python3.6.md
 
 docs_dir: docs/src
 site_dir: docs/site

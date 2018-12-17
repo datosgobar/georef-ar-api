@@ -872,7 +872,7 @@
 	    "param_campos": {
 		"type": "string",
 		"minLength": 1,
-		"example": "id,nombre"
+		"example": "estandar"
 	    },
 	    "param_aplanar": {
 		"enum": [true],
@@ -896,15 +896,15 @@
 	    },
 	    "param_formato_all": {
 		"type": "string",
-		"enum": ["json", "csv", "geojson"]
+		"enum": ["json", "csv", "geojson", "xml"]
 	    },
-	    "param_formato_json_csv": {
+	    "param_formato_sin_geojson": {
 		"type": "string",
-		"enum": ["json", "csv"]
+		"enum": ["json", "csv", "xml"]
 	    },
-	    "param_formato_json_geojson": {
+	    "param_formato_sin_csv": {
 		"type": "string",
-		"enum": ["json", "geojson"]
+		"enum": ["json", "geojson", "xml"]
 	    },
 	    "param_tipo_calle": {
 		"type": "string",
@@ -1099,20 +1099,20 @@
 		    "$ref": "#/components/schemas/param_formato_all"
 		}
 	    },
-	    "formato_json_csv": {
+	    "formato_sin_geojson": {
 		"name": "formato",
 		"description": "Formato de datos en el cual devolver los resultados.",
 		"in": "query",
 		"schema": {
-		    "$ref": "#/components/schemas/param_formato_json_csv"
+		    "$ref": "#/components/schemas/param_formato_sin_geojson"
 		}
 	    },
-	    "formato_json_geojson": {
+	    "formato_sin_csv": {
 		"name": "formato",
 		"description": "Formato de datos en el cual devolver los resultados.",
 		"in": "query",
 		"schema": {
-		    "$ref": "#/components/schemas/param_formato_json_geojson"
+		    "$ref": "#/components/schemas/param_formato_sin_csv"
 		}
 	    },
             "tipo_calle": {
@@ -1590,7 +1590,7 @@
 			"$ref": "#/components/parameters/exacto"
 		    },
 		    {
-			"$ref": "#/components/parameters/formato_json_csv"
+			"$ref": "#/components/parameters/formato_sin_geojson"
 		    }
 		],
 		"responses": {
@@ -1754,7 +1754,7 @@
 			"$ref": "#/components/parameters/campos"
 		    },
 		    {
-			"$ref": "#/components/parameters/formato_json_geojson"
+			"$ref": "#/components/parameters/formato_sin_csv"
 		    }
 		],
 		"responses": {
