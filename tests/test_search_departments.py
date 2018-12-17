@@ -1,6 +1,6 @@
 import random
 import unittest
-from service import formatter
+from service import formatter, constants
 from . import GeorefLiveTest, asciifold
 from .test_search_states import STATES
 
@@ -80,6 +80,21 @@ class SearchDepartmentsTest(GeorefLiveTest):
         se omiten ceros iniciales."""
         data = self.get_response({'id': '2007'})
         self.assertTrue(data[0]['id'] == '02007')
+
+    def test_id_list_search(self):
+        """La búsqueda por lista de IDs debe devolver los departamentos
+        correspondientes."""
+        data = self.get_response({
+            'id': '22036,22147,22098,22007',
+            'orden': 'nombre'
+        })
+
+        self.assertListEqual([p['nombre'] for p in data], [
+            '12 de Octubre',
+            'Almirante Brown',
+            'Mayor Luis J. Fontana',
+            'San Lorenzo',
+        ])
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
@@ -249,7 +264,7 @@ class SearchDepartmentsTest(GeorefLiveTest):
 
         self.assertTrue(all(results) and results)
 
-    def test_search_by_state(self):
+    def test_search_by_state_single(self):
         """Se debe poder buscar departamentos por provincia."""
         state = random.choice(STATES)
         state_id, state_name = state[0][0], state[1]
@@ -260,6 +275,19 @@ class SearchDepartmentsTest(GeorefLiveTest):
 
         results = [dept['id'].startswith(state_id) for dept in data]
         self.assertTrue(all(results) and results)
+
+    def test_search_by_state_id_list(self):
+        """Se debe poder buscar departamentos por lista de IDs de
+        provincias."""
+        states = STATES[:]
+        random.shuffle(states)
+        id_count = random.randint(3, 6)
+        ids = sorted(state[0][0] for state in states[:id_count])
+
+        resp = self.get_response({'provincia': ','.join(ids), 'max': 500})
+        id_prefixes = {dept['id'][:constants.STATE_ID_LEN] for dept in resp}
+
+        self.assertListEqual(ids, sorted(id_prefixes))
 
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores

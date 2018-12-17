@@ -94,6 +94,18 @@ class SearchStatesTest(GeorefLiveTest):
         data = self.get_response({'id': '06'})
         self.assertListEqual([p['nombre'] for p in data], ['Buenos Aires'])
 
+    def test_id_list_search(self):
+        """La búsqueda por lista de IDs debe devolver las provincias
+        correspondientes."""
+        data = self.get_response({'id': '66,14,26,38', 'orden': 'nombre'})
+
+        self.assertListEqual([p['nombre'] for p in data], [
+            'Chubut',
+            'Córdoba',
+            'Jujuy',
+            'Salta'
+        ])
+
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
         data = self.get_response({'max': 1})[0]

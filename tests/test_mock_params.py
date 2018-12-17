@@ -245,6 +245,27 @@ class ParamParsingTest(GeorefMockTest):
             (T.VALUE_ERROR.value, 'id')
         })
 
+    def test_id_param_repeated(self):
+        """Los parámtros de tipo ID no deberían aceptar listas con elementos
+        repetidos."""
+        self.assert_errors_match('/provincias?id=02,06,02', {
+            (T.VALUE_ERROR.value, 'id')
+        })
+
+    def test_id_param_list_digit(self):
+        """Los parámtros de tipo ID no deberían aceptar listas con elementos
+        no-numéricos."""
+        self.assert_errors_match('/provincias?id=54,14,foo,02', {
+            (T.VALUE_ERROR.value, 'id')
+        })
+
+    def test_id_param_list_empty(self):
+        """Los parámtros de tipo ID no deberían aceptar listas con elementos
+        vacíos."""
+        self.assert_errors_match('/provincias?id=54,14,,02', {
+            (T.VALUE_ERROR.value, 'id')
+        })
+
     def test_max_offset_sum(self):
         """La suma de los parámetros max e inicio debería estar limitada."""
         self.assert_errors_match(
@@ -473,6 +494,14 @@ class ParamParsingTest(GeorefMockTest):
         self.assert_errors_match('/departamentos?interseccion=municipio:::', {
             (T.VALUE_ERROR.value, 'interseccion')
         })
+
+    def test_invalid_intersection_id_repeated(self):
+        """El parámetro 'interseccion' no debería aceptar IDs repetidos."""
+        self.assert_errors_match(
+            '/municipios?interseccion=departamento:90084:90084', {
+                (T.VALUE_ERROR.value, 'interseccion')
+            }
+        )
 
     def test_invalid_intersection_empty_set(self):
         """El parámetro 'interseccion' no debería aceptar conjuntos
