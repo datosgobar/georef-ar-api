@@ -280,8 +280,10 @@ class StrParameter(Parameter):
         return val
 
 
-class IdParameter(Parameter):
-    """Representa un parámetro de tipo ID numérico.
+class IdsParameter(Parameter):
+    """Representa un parámetro de tipo lista de IDs numéricos. Se aceptan
+    listas de IDs separados por comas (esto incluye listas de longitud 1, es
+    decir, un solo ID sin comas). No se aceptan IDs repetidos.
 
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
     nuevamente el método '_parse_value' para implementar lógica de parseo y
@@ -289,23 +291,39 @@ class IdParameter(Parameter):
 
     """
 
-    def __init__(self, length, padding_char='0', padding_length=1):
-        self._length = length
+    def __init__(self, id_length, padding_char='0', padding_length=1, sep=','):
+        self._id_length = id_length
         self._padding_char = padding_char
-        self._min_length = length - padding_length
+        self._min_length = self._id_length - padding_length
+        self._sep = sep
         super().__init__()
 
     def _parse_value(self, val):
-        if not val.isdigit() or \
-           len(val) > self._length or \
-           len(val) < self._min_length:
-            raise ValueError(strings.ID_PARAM_INVALID.format(self._length))
+        items = val.split(self._sep)
+        if len(items) > MAX_RESULT_LEN:
+            raise ValueError(strings.ID_PARAM_LENGTH.format(MAX_RESULT_LEN))
 
-        return val.rjust(self._length, self._padding_char)
+        ids = set()
+        for item in items:
+            item = item.strip()
+
+            if not item.isdigit() or len(item) > self._id_length or \
+               len(item) < self._min_length:
+                raise ValueError(strings.ID_PARAM_INVALID.format(
+                    self._id_length))
+
+            item = item.rjust(self._id_length, self._padding_char)
+            if item in ids:
+                raise ValueError(strings.ID_PARAM_UNIQUE.format(item))
+            else:
+                ids.add(item)
+
+        return list(ids)
 
 
-class StrOrIdParameter(Parameter):
-    """Representa un parámetro de tipo string no vacío, o un ID numérico.
+class StrOrIdsParameter(Parameter):
+    """Representa un parámetro de tipo string no vacío, o lista de IDs
+    numéricos.
 
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
     nuevamente el método '_parse_value' para implementar lógica de parseo y
@@ -314,14 +332,15 @@ class StrOrIdParameter(Parameter):
     """
 
     def __init__(self, id_length, id_padding_char='0'):
-        self._id_param = IdParameter(id_length, id_padding_char)
+        self._id_param = IdsParameter(id_length, id_padding_char)
         self._str_param = StrParameter()
         super().__init__()
 
     def _parse_value(self, val):
-        if val.isdigit():
+        try:
             return self._id_param.get_value(val)
-        return self._str_param.get_value(val)
+        except ValueError:
+            return self._str_param.get_value(val)
 
 
 class BoolParameter(Parameter):
@@ -563,11 +582,14 @@ class IntersectionParameter(Parameter):
         self._id_params = {}
 
         if N.STATE in entities:
-            self._id_params[N.STATE] = IdParameter(constants.STATE_ID_LEN)
+            self._id_params[N.STATE] = IdsParameter(constants.STATE_ID_LEN,
+                                                    sep=':')
         if N.DEPT in entities:
-            self._id_params[N.DEPT] = IdParameter(constants.DEPT_ID_LEN)
+            self._id_params[N.DEPT] = IdsParameter(constants.DEPT_ID_LEN,
+                                                   sep=':')
         if N.MUN in entities:
-            self._id_params[N.MUN] = IdParameter(constants.MUNI_ID_LEN)
+            self._id_params[N.MUN] = IdsParameter(constants.MUNI_ID_LEN,
+                                                  sep=':')
 
         super().__init__(required)
 
@@ -579,9 +601,11 @@ class IntersectionParameter(Parameter):
 
             <tipo 1>:<ID 1>[:<ID 2>...][,<tipo 2>:<ID 1>[:<ID 2>...]...]
 
-        Por ejemplo:
+        Ejemplos:
 
             provincia:02,departamento:90098:02007
+            provincia:14,02,06,54
+            departamento:02007
 
         Args:
             val (str): Valor del parámetro recibido vía HTTP.
@@ -612,16 +636,15 @@ class IntersectionParameter(Parameter):
                     strings.FIELD_INTERSECTION_FORMAT,
                     strings.FIELD_INTERSECTION_FORMAT_HELP)
 
-            for entry in sections[1:]:
-                if entity == N.STATE:
-                    ids[N.STATES].add(
-                        self._id_params[entity].get_value(entry))
-                elif entity == N.DEPT:
-                    ids[N.DEPARTMENTS].add(
-                        self._id_params[entity].get_value(entry))
-                elif entity == N.MUN:
-                    ids[N.MUNICIPALITIES].add(
-                        self._id_params[entity].get_value(entry))
+            entity_ids_str = ':'.join(sections[1:])
+            entity_ids = self._id_params[entity].get_value(entity_ids_str)
+
+            if entity == N.STATE:
+                ids[N.STATES].update(entity_ids)
+            elif entity == N.DEPT:
+                ids[N.DEPARTMENTS].update(entity_ids)
+            elif entity == N.MUN:
+                ids[N.MUNICIPALITIES].update(entity_ids)
 
         return ids if any(list(ids.values())) else {}
 
@@ -982,7 +1005,7 @@ class EndpointParameters():
 
 
 PARAMS_STATES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=constants.STATE_ID_LEN),
+    N.ID: IdsParameter(id_length=constants.STATE_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.MUN]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
@@ -1005,10 +1028,10 @@ PARAMS_STATES = EndpointParameters(shared_params={
 )
 
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=constants.DEPT_ID_LEN),
+    N.ID: IdsParameter(id_length=constants.DEPT_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(entities=[N.STATE, N.MUN]),
-    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
+    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1030,10 +1053,10 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
 )
 
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=constants.MUNI_ID_LEN),
+    N.ID: IdsParameter(id_length=constants.MUNI_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE]),
-    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
+    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1055,11 +1078,11 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
 )
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=constants.LOCALITY_ID_LEN),
+    N.ID: IdsParameter(id_length=constants.LOCALITY_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
-    N.MUN: StrOrIdParameter(id_length=constants.MUNI_ID_LEN),
+    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
+    N.MUN: StrOrIdsParameter(id_length=constants.MUNI_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1085,8 +1108,8 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
+    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.DOOR_NUM],
@@ -1110,11 +1133,11 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 )
 
 PARAMS_STREETS = EndpointParameters(shared_params={
-    N.ID: IdParameter(length=constants.STREET_ID_LEN),
+    N.ID: IdsParameter(id_length=constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
     N.ROAD_TYPE: StrParameter(),
-    N.STATE: StrOrIdParameter(id_length=constants.STATE_ID_LEN),
-    N.DEPT: StrOrIdParameter(id_length=constants.DEPT_ID_LEN),
+    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],

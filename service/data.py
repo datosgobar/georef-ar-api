@@ -10,7 +10,7 @@ import shapely.geometry
 import shapely.wkb
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
-from elasticsearch_dsl.query import MatchNone, Term, Prefix
+from elasticsearch_dsl.query import MatchNone, Terms, Prefix, Bool
 from service import names as N
 from service import constants
 from service.management import es_config
@@ -125,6 +125,8 @@ class ElasticsearchSearch:
 
             for search, response in zip(searches, responses):
                 # Incluir offset (inicio) en los resultados
+                # TODO: Agregar variable 'offset' a ElasticsearchSearch para
+                # evitar tener que hacer to_dict().
                 offset = search.es_search.to_dict()['from']
                 search.set_result(ElasticsearchResult(response, offset))
 
@@ -191,7 +193,7 @@ def expand_intersection_parameters(es, params_list):
         for entity_type in sub_queries:
             ids[entity_type] = [
                 ElasticsearchSearch(build_entity_search(entity_type,
-                                                        entity_id=i,
+                                                        entity_ids=[i],
                                                         fields=[N.ID]))
                 for i in ids[entity_type]
             ]
@@ -268,7 +270,7 @@ def search_streets(es, params_list):
     return [search.result for search in searches]
 
 
-def build_entity_search(index, entity_id=None, name=None, state=None,
+def build_entity_search(index, entity_ids=None, name=None, state=None,
                         department=None, municipality=None, max=None,
                         order=None, fields=None, exact=False, offset=0,
                         intersection=None):
@@ -278,11 +280,14 @@ def build_entity_search(index, entity_id=None, name=None, state=None,
 
     Args:
         index (str): Índice sobre el cual se debería ejecutar la búsqueda.
-        entity_id (str): ID de la entidad (opcional).
+        entity_ids (list): IDs de entidades (opcional).
         name (str): Nombre del tipo de entidad (opcional).
-        state (str): ID o nombre de provincia para filtrar (opcional).
-        department (str): ID o nombre de departamento para filtrar (opcional).
-        municipality (str): ID o nombre de municipio para filtrar (opcional).
+        state (list, str): Lista de IDs o nombre de provincia para filtrar
+            (opcional).
+        department (list, str): Lista de IDs o nombre de departamento para
+            filtrar (opcional).
+        municipality (list, str): Lista de IDs o nombre de municipio para
+            filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         order (str): Campo por el cual ordenar los resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
@@ -301,8 +306,8 @@ def build_entity_search(index, entity_id=None, name=None, state=None,
 
     s = Search(index=index)
 
-    if entity_id:
-        s = s.filter(build_term_query(N.ID, entity_id))
+    if entity_ids:
+        s = s.filter(build_terms_query(N.ID, entity_ids))
 
     if name:
         s = s.query(build_name_query(N.NAME, name, exact))
@@ -311,22 +316,16 @@ def build_entity_search(index, entity_id=None, name=None, state=None,
         s = s.query(build_intersection_query(N.GEOM, intersection))
 
     if municipality:
-        if municipality.isdigit():
-            s = s.filter(build_term_query(N.MUN_ID, municipality))
-        else:
-            s = s.query(build_name_query(N.MUN_NAME, municipality, exact))
+        s = s.query(build_subentity_query(N.MUN_ID, N.MUN_NAME, municipality,
+                                          exact))
 
     if department:
-        if department.isdigit():
-            s = s.filter(build_term_query(N.DEPT_ID, department))
-        else:
-            s = s.query(build_name_query(N.DEPT_NAME, department, exact))
+        s = s.query(build_subentity_query(N.DEPT_ID, N.DEPT_NAME, department,
+                                          exact))
 
     if state:
-        if state.isdigit():
-            s = s.filter(build_term_query(N.STATE_ID, state))
-        else:
-            s = s.query(build_name_query(N.STATE_NAME, state, exact))
+        s = s.query(build_subentity_query(N.STATE_ID, N.STATE_NAME, state,
+                                          exact))
 
     if order:
         if order == N.NAME:
@@ -337,14 +336,14 @@ def build_entity_search(index, entity_id=None, name=None, state=None,
     return s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
 
 
-def build_streets_search(street_id=None, road_name=None, department=None,
+def build_streets_search(street_ids=None, road_name=None, department=None,
                          state=None, road_type=None, max=None, order=None,
                          fields=None, exact=False, number=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
     Args:
-        street_id (str): ID de la calle a buscar (opcional).
+        street_ids (list): IDs de calles a buscar (opcional).
         road_name (str): Nombre de la calle para filtrar (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
@@ -368,8 +367,8 @@ def build_streets_search(street_id=None, road_name=None, department=None,
 
     s = Search(index=N.STREETS)
 
-    if street_id:
-        s = s.filter(build_term_query(N.ID, street_id))
+    if street_ids:
+        s = s.filter(build_terms_query(N.ID, street_ids))
 
     if road_name:
         s = s.query(build_name_query(N.NAME, road_name, exact))
@@ -384,16 +383,12 @@ def build_streets_search(street_id=None, road_name=None, department=None,
                     build_range_query(N.END_R, '>=', number))
 
     if department:
-        if department.isdigit():
-            s = s.filter(build_term_query(N.DEPT_ID, department))
-        else:
-            s = s.query(build_name_query(N.DEPT_NAME, department, exact))
+        s = s.query(build_subentity_query(N.DEPT_ID, N.DEPT_NAME, department,
+                                          exact))
 
     if state:
-        if state.isdigit():
-            s = s.filter(build_term_query(N.STATE_ID, state))
-        else:
-            s = s.query(build_name_query(N.STATE_NAME, state, exact))
+        s = s.query(build_subentity_query(N.STATE_ID, N.STATE_NAME, state,
+                                          exact))
 
     if order:
         if order == N.NAME:
@@ -433,6 +428,30 @@ def build_place_search(index, lat, lon, fields=None):
     s = s.query(GeoShape(**{N.GEOM: options}))
     s = s.source(include=fields)
     return s[:1]
+
+
+def build_subentity_query(id_field, name_field, value, exact):
+    """Crea una condición de búsqueda por propiedades de una subentidad. Esta
+    condición se utiliza para filtrar resultados utilizando IDs o nombre de una
+    subentidad contenida por otra. Por ejemplo, se pueden buscar departamentos
+    filtrando por nombre de provincia, o localidades filtrando por IDS de
+    municipios.
+
+    Args:
+        id_field (str): Nombre del campo de ID de la subentidad.
+        name_field (str): Nombre del campo de nombre de la subentidad.
+        value (list, str): Lista de IDs o nombre a utilizar para filtrar.
+        exact (bool): Activa la búsqueda por nombres exactos (en caso de que
+            'value' sea de tipo str).
+
+    Returns:
+            Query: Condición para Elasticsearch.
+
+    """
+    if isinstance(value, list):
+        return Bool(filter=[build_terms_query(id_field, value)])
+
+    return build_name_query(name_field, value, exact)
 
 
 def build_intersection_query(field, ids):
@@ -504,18 +523,18 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
     return GeoShape(**{field: options}) & prefix_query
 
 
-def build_term_query(field, value):
-    """Crea una condición de búsqueda por término exacto para Elasticsearch.
+def build_terms_query(field, values):
+    """Crea una condición de búsqueda por términos exactos para Elasticsearch.
 
     Args:
         field (str): Campo de la condición.
-        value (str): Valor de comparación.
+        value (list): Lista de valores.
 
     Returns:
         Query: Condición para Elasticsearch.
 
     """
-    return Term(**{field: value})
+    return Terms(**{field: values})
 
 
 def build_name_query(field, value, exact=False):

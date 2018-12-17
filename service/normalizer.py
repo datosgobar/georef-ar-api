@@ -300,7 +300,7 @@ def process_state(request):
 
     """
     return process_entity(request, N.STATES, params.PARAMS_STATES, {
-        N.ID: 'entity_id',
+        N.ID: 'entity_ids',
         N.NAME: 'name',
         N.INTERSECTION: 'intersection',
         N.EXACT: 'exact',
@@ -323,7 +323,7 @@ def process_department(request):
     """
     return process_entity(request, N.DEPARTMENTS,
                           params.PARAMS_DEPARTMENTS, {
-                              N.ID: 'entity_id',
+                              N.ID: 'entity_ids',
                               N.NAME: 'name',
                               N.INTERSECTION: 'intersection',
                               N.STATE: 'state',
@@ -347,7 +347,7 @@ def process_municipality(request):
     """
     return process_entity(request, N.MUNICIPALITIES,
                           params.PARAMS_MUNICIPALITIES, {
-                              N.ID: 'entity_id',
+                              N.ID: 'entity_ids',
                               N.NAME: 'name',
                               N.INTERSECTION: 'intersection',
                               N.STATE: 'state',
@@ -370,7 +370,7 @@ def process_locality(request):
 
     """
     return process_entity(request, N.LOCALITIES, params.PARAMS_LOCALITIES, {
-        N.ID: 'entity_id',
+        N.ID: 'entity_ids',
         N.NAME: 'name',
         N.STATE: 'state',
         N.DEPT: 'department',
@@ -398,7 +398,7 @@ def build_street_query_format(parsed_params):
     """
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
-        N.ID: 'street_id',
+        N.ID: 'street_ids',
         N.NAME: 'road_name',
         N.STATE: 'state',
         N.DEPT: 'department',
