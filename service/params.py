@@ -171,8 +171,7 @@ class Parameter:
         self._required = required
         self._default = default
 
-        if choices and \
-           default is not None:
+        if choices and default is not None:
             try:
                 self._check_value_in_choices(default)
             except InvalidChoiceException:

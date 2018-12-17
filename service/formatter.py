@@ -204,6 +204,17 @@ def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
 
 
 def create_xml_element(tag, content=None):
+    """Crea un elemento XML con un contenido interno opcional.
+
+    Args:
+        tag (str): Tag del elemento XML.
+        content (object): Contenido opcional del elemento (se lo convierte a
+            str).
+
+    Returns:
+        ElementTree.Element: elemento XML.
+
+    """
     element = ElementTree.Element(tag)
     if content is not None:
         element.text = str(content)
@@ -211,6 +222,17 @@ def create_xml_element(tag, content=None):
 
 
 def xml_flask_response(element, status=200):
+    """Crea una respuesta HTTP con contenido XML.
+
+    Args:
+        element (ElementTree.Element): Elemento XML raíz a retornar en la
+            respuesta HTTP.
+        status (int): Código de respuesta HTTP a utilizar.
+
+    Returns:
+        flask.Response: Respuesta HTTP con el contenido especificado.
+
+    """
     contents = io.StringIO()
     root = create_xml_element(N.API_NAME)
     root.append(element)
@@ -223,6 +245,35 @@ def xml_flask_response(element, status=200):
 
 
 def value_to_xml(tag, val, list_item_names=None, max_depth=5):
+    """Dado un valor dict, list, str, None o numérico, lo convierte a su
+    equivalente en XML y retorna el nodo raíz resultante.
+
+    Args:
+        tag (str): Valor a utilizar como el tag del elemento XML raíz.
+        val (dict, list, int, float, NoneType, str): Valor a convertir a XML.
+            En caso de dict y list, se convierten también los valores
+            contenidos internamente, y se contruye un árbol XML con los
+            resultados.
+        list_item_names (dict): Valores a utilizar como tags en caso de tener
+            que convertir listas a XML. Por ejemplo, si tag == 'libros' y val
+            es de tipo list, entonces list_item_names podría contener el mapeo
+            'libros' -> 'libro'. De esta forma, se crearía un elemento XML con
+            tag 'libros', e internamente cada elemento de la lista estaría
+            dentro de un tag 'libro'. Notar que el parámetro se utiliza también
+            en las llamadas recursivas a 'value_to_xml', por lo que se pueden
+            especificar los tags de elementos de listas para cualquier nivel de
+            profundidad del valor a convertir.
+        max_depth (int): Profundidad máxima a alcanzar.
+
+    Raises:
+        RuntimeError: cuando se alcanza la profundidad máxima. Se agrega esta
+            medida de seguridad en caso de tener un diccionario demasiado
+            profundo, o un diccionario con referencias cíclicas.
+
+    Returns:
+        ElementTree.Element: valor convertido a su equivalente en XML.
+
+    """
     if max_depth <= 0:
         raise RuntimeError("Profundidad máxima alcanzada.")
 
@@ -237,7 +288,7 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
             elem = value_to_xml(list_item_names[tag], value, list_item_names,
                                 max_depth - 1)
             root.append(elem)
-    else:
+    elif val is not None:
         root.text = str(val)
 
     return root
@@ -325,9 +376,9 @@ def create_404_error_response():
     errors = [
         {
             'mensaje': strings.NOT_FOUND,
-            # El listado de recursos podría utilizar app.url_map, pero es mejor
-            # listar los elementos más importantes manualmente para que la
-            # respuesta sea de mayor utilidad para el usuario.
+            # La variable 'app.url_map' contiene una lista de todos los
+            # recursos de la app Flask, sin embargo es mejor listarlos
+            # manualmente para evitar incluir los que comienzan con /api/v1.0.
             'recursos_disponibles': [
                 '/api/provincias',
                 '/api/departamentos',
@@ -392,6 +443,17 @@ def create_internal_error_response():
 
 
 def format_result_xml(name, result):
+    """Toma el resultado de una consulta y la convierte a su equivalente en
+    XML.
+
+    Args:
+        name (str): Nombre de la entidad consultada.
+        result (QueryResult): Resultado de una consulta.
+
+    Returns:
+        ElementTree.Element: Resultados con estructura XML.
+
+    """
     root = create_xml_element(N.RESULT)
 
     if result.iterable:
@@ -407,6 +469,17 @@ def format_result_xml(name, result):
 
 
 def create_xml_response_single(name, result):
+    """Toma un resultado de una consulta, y devuelve una respuesta
+    HTTP 200 con el resultado en formato XML.
+
+    Args:
+        name (str): Nombre de la entidad consultada.
+        result (QueryResult): Resultado de una consulta.
+
+    Returns:
+        flask.Response: Respuesta HTTP 200 con contenido XML.
+
+    """
     root = format_result_xml(name, result)
     return xml_flask_response(root)
 
@@ -495,7 +568,7 @@ def format_result_json(name, result, fmt):
         fmt (dict): Parámetros de formato.
 
     Returns:
-        dict: Resultados con esctructura y formato apropiados.
+        dict: Resultados con estructura y formato apropiados.
 
     """
     if fmt.get(N.FLATTEN, False):
