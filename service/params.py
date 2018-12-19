@@ -836,15 +836,19 @@ class EndpointParameters():
             fmt = parsed.get(N.FORMAT, 'json')
             raise ParameterParsingException(errors, fmt)
 
-        self.cross_validate_params(parsed)
+        self.cross_validate_params(parsed, from_source)
         return parsed
 
-    def cross_validate_params(self, parsed):
-        """Ejecuta las validaciones de conjuntos de parámetros.
+    def cross_validate_params(self, parsed, from_source):
+        """Ejecuta las validaciones de conjuntos de parámetros distintos. Por
+        ejemplo, un validador puede comprobar que la suma de los parámetros
+        'max' e 'inicio' no superen un cierto valor.
 
         Args:
             parsed (dict): Diccionario parámetro-valor donde se almacenan los
                 resultados del parseo de argumentos para una consulta.
+            from_source (str): Ubicación dentro de la request HTTP donde fueron
+                recibidos los parámetros.
 
         Raises:
             ParameterParsingException: Se lanza la excepción si no se pasó una
@@ -860,7 +864,7 @@ class EndpointParameters():
             except ValueError as e:
                 for param in param_names:
                     errors[param] = ParamError(ParamErrorType.INVALID_SET,
-                                               str(e), param)
+                                               str(e), from_source)
 
                 # Si se encontraron errores al validar uno o más parámetros,
                 # utilizar el primer error encontrado.
@@ -870,8 +874,12 @@ class EndpointParameters():
             raise ParameterParsingException(errors)
 
     def validate_param_sets(self, results):
-        """Ejecuta las validaciones de conjuntos de valores sobre todos los
-        parámetros aceptados por el objeto EndpointParameters.
+        """Ejecuta las validaciones de conjuntos de valores para un parámetro.
+        Por ejemplo, un validador puede comprobar que la suma de todos los
+        parámetros 'max' en una request POST no supere un cierto valor. Notar
+        que esta validación solo se utiliza en requests POST ya que es el único
+        contexto donde se pueden recibir varios valores de un mismo parámetro
+        (ya que se repiten parámetros entre consultas recibidas).
 
         Args:
             results (list): Lista de diccionarios, cada diccionario contiene
