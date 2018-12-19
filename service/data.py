@@ -96,13 +96,13 @@ class ElasticsearchSearch:
     @property
     def result(self):
         if self._result is None:
-            raise RuntimeError('Search has not been executed yet.')
+            raise RuntimeError('Search has not been executed yet')
 
         return self._result
 
     def set_result(self, result):
         if self._result is not None:
-            raise RuntimeError('Search has already been executed.')
+            raise RuntimeError('Search has already been executed')
 
         self._result = result
 
@@ -510,7 +510,7 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
 
     """
     if index not in [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES]:
-        raise ValueError('Invalid entity type.')
+        raise ValueError('Invalid entity type')
 
     options = {
         'indexed_shape': {
@@ -613,7 +613,7 @@ def build_range_query(field, operator, value):
     elif operator == '>=':
         es_operator = 'gte'
     else:
-        raise ValueError('Invalid operator.')
+        raise ValueError('Invalid operator')
 
     options = {es_operator: value}
     return Range(**{field: options})

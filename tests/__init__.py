@@ -108,12 +108,11 @@ class GeorefLiveTest(TestCase):
         elif method == 'POST':
             response = self.app.post(url, json=body)
         else:
-            raise ValueError('Método desconocido.')
+            raise ValueError('Unknown method: {}'.format(method))
 
         if response.status_code not in expect_status:
-            raise Exception(
-                'La petición devolvió un código inesperado: {}'.format(
-                    response.status_code))
+            raise RuntimeError('Unexpected status code: {}'.format(
+                response.status_code))
 
         if return_value == 'status':
             return response.status_code
@@ -133,7 +132,7 @@ class GeorefLiveTest(TestCase):
                 if fmt == 'xml':
                     return ElementTree.fromstring(response.data.decode())
 
-                raise ValueError('Formato desconocido.')
+                raise ValueError('Unknown format')
 
             if return_value == 'full':
                 return json.loads(response.data)
@@ -141,7 +140,7 @@ class GeorefLiveTest(TestCase):
             if return_value == 'raw':
                 return response.data
 
-        raise ValueError('Tipo de retorno desconocido.')
+        raise ValueError('Unknown return type')
 
     def assert_unknown_param_returns_400(self):
         response = self.app.get(self.endpoint + '?foo=bar')

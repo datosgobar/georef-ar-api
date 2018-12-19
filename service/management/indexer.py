@@ -849,7 +849,7 @@ def main():
         elif args.mode == 'index_stats':
             run_info(es)
         else:
-            raise ValueError('Modo inválido.')
+            raise ValueError('Invalid operation')
 
 
 if __name__ == '__main__':

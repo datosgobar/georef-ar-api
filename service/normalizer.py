@@ -553,7 +553,7 @@ def street_extents(door_nums, number):
         if start <= number <= end:
             return start, end
 
-    raise ValueError('Street number out of range.')
+    raise ValueError('Street number out of range')
 
 
 def build_addresses_result(result, query, source):

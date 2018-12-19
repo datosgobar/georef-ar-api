@@ -189,7 +189,7 @@ def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
 
     """
     if max_depth <= 0:
-        raise RuntimeError("Profundidad máxima alcanzada.")
+        raise RuntimeError("Maximum depth reached")
 
     for key in list(d.keys()):
         v = d[key]
@@ -275,7 +275,7 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
 
     """
     if max_depth <= 0:
-        raise RuntimeError("Profundidad máxima alcanzada.")
+        raise RuntimeError("Maximum depth reached")
 
     root = create_xml_element(tag)
 
@@ -636,9 +636,10 @@ def filter_result_fields(result, fields_dict, max_depth=3):
     Args:
         result (dict): Resultado con valores a filtrar.
         fields_dict (dict): Diccionario especificando cuáles campos mantener.
+
     """
     if max_depth <= 0:
-        raise RuntimeError('Profundidad máxima alcanzada.')
+        raise RuntimeError('Maximum depth reached')
 
     for key in list(result.keys()):
         value = result[key]
@@ -648,9 +649,8 @@ def filter_result_fields(result, fields_dict, max_depth=3):
             del result[key]
         elif isinstance(field, dict):
             if not isinstance(value, dict):
-                raise RuntimeError(
-                    'No se puede especificar la presencia de sub-campos ' +
-                    'para valores no diccionarios.')
+                raise ValueError(
+                    'Can\'t specify sub-fields for non-dict values')
 
             filter_result_fields(value, fields_dict[key], max_depth - 1)
 
@@ -731,8 +731,8 @@ def create_ok_response(name, result, fmt):
 
     if fmt[N.FORMAT] == 'csv':
         if not result.iterable:
-            raise RuntimeError(
-                'Se requieren datos iterables para crear una respuesta CSV.')
+            raise ValueError(
+                'Can\'t create CSV response from non-iterable content')
 
         return create_csv_response_single(name, result, fmt)
 
@@ -742,7 +742,7 @@ def create_ok_response(name, result, fmt):
     if fmt[N.FORMAT] == 'geojson':
         return create_geojson_response_single(result, fmt)
 
-    raise RuntimeError('Formato desconocido.')
+    raise ValueError('Unknown format')
 
 
 def create_ok_response_bulk(name, results, formats):
