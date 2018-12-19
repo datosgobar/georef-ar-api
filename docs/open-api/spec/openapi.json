@@ -1005,7 +1005,7 @@
 	    },
             "provincia": {
                 "name": "provincia",
-                "description": "Filtrar por nombre o ID de provincia.",
+                "description": "Filtrar por nombre o ID de provincia. Se pueden especificar varios IDs separados por comas.",
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_provincia"
@@ -1013,7 +1013,7 @@
             },
             "departamento": {
                 "name": "departamento",
-                "description": "Filtrar por nombre o ID de departamento.",
+                "description": "Filtrar por nombre o ID de departamento. Se pueden especificar varios IDs separados por comas.",
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_departamento"
@@ -1021,7 +1021,7 @@
             },
             "municipio": {
                 "name": "municipio",
-                "description": "Filtrar por nombre o ID de municipio.",
+                "description": "Filtrar por nombre o ID de municipio. Se pueden especificar varios IDs separados por comas.",
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_municipio"
@@ -1061,7 +1061,7 @@
             },
             "id": {
                 "name": "id",
-                "description": "Filtrar por ID.",
+                "description": "Filtrar por ID. Se pueden especificar varios IDs separados por comas.",
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_id"
