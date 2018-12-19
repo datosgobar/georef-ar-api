@@ -64,19 +64,25 @@ class ElasticsearchSearch:
     Attributes:
         _es_search (elasticsearch_dsl.Search): Búsqueda Elasticsearch a
             ejecutar.
+        _offset (int): Cantidad de resultados a saltear, comenzando desde el
+            primero (0). El offset de la búsqueda es almacenado por separado
+            para evitar tener que buscar el valor dentro del diccionario de
+            _es_search.
         _result (ElasticsearchResult): Resultados de la búsqueda, luego de ser
             ejecutada.
 
     """
 
-    def __init__(self, es_search):
+    def __init__(self, es_search, offset=0):
         """Inicializa un objeto de tipo ElasticsearchSearch.
 
         Args:
             es_search (elasticsearch_dsl.Search): Ver atributo '_es_search'.
+            offset (int): Ver atributo '_offset'.
 
         """
         self._es_search = es_search
+        self._offset = offset
         self._result = None
 
     @property
@@ -84,15 +90,19 @@ class ElasticsearchSearch:
         return self._es_search
 
     @property
+    def offset(self):
+        return self._offset
+
+    @property
     def result(self):
         if self._result is None:
-            raise ValueError('Search has not been executed yet.')
+            raise RuntimeError('Search has not been executed yet.')
 
         return self._result
 
     def set_result(self, result):
         if self._result is not None:
-            raise ValueError('Search has already been executed.')
+            raise RuntimeError('Search has already been executed.')
 
         self._result = result
 
@@ -124,11 +134,10 @@ class ElasticsearchSearch:
             responses = ms.execute(raise_on_error=True)
 
             for search, response in zip(searches, responses):
-                # Incluir offset (inicio) en los resultados
-                # TODO: Agregar variable 'offset' a ElasticsearchSearch para
-                # evitar tener que hacer to_dict().
-                offset = search.es_search.to_dict()['from']
-                search.set_result(ElasticsearchResult(response, offset))
+                # Por cada objeto ElasticsearchSearch, establecer su objeto
+                # ElasticsearchResult conteniendo los documentos resultantes de
+                # la búsqueda ejecutada.
+                search.set_result(ElasticsearchResult(response, search.offset))
 
         except elasticsearch.ElasticsearchException:
             raise DataConnectionException()
@@ -192,9 +201,7 @@ def expand_intersection_parameters(es, params_list):
 
         for entity_type in sub_queries:
             ids[entity_type] = [
-                ElasticsearchSearch(build_entity_search(entity_type,
-                                                        entity_ids=[i],
-                                                        fields=[N.ID]))
+                build_entity_search(entity_type, entity_ids=[i], fields=[N.ID])
                 for i in ids[entity_type]
             ]
 
@@ -221,8 +228,7 @@ def search_entities(es, index, params_list):
     """
     expand_intersection_parameters(es, params_list)
 
-    searches = [ElasticsearchSearch(build_entity_search(index, **params))
-                for params in params_list]
+    searches = [build_entity_search(index, **params) for params in params_list]
 
     ElasticsearchSearch.run_searches(es, searches)
     return [search.result for search in searches]
@@ -243,8 +249,7 @@ def search_places(es, index, params_list):
         list: Resultados de búsqueda de entidades.
 
     """
-    searches = [ElasticsearchSearch(build_place_search(index, **params))
-                for params in params_list]
+    searches = [build_place_search(index, **params) for params in params_list]
 
     ElasticsearchSearch.run_searches(es, searches)
     return [search.result for search in searches]
@@ -263,8 +268,7 @@ def search_streets(es, params_list):
         list: Resultados de búsqueda de vías de circulación.
 
     """
-    searches = [ElasticsearchSearch(build_streets_search(**params))
-                for params in params_list]
+    searches = [build_streets_search(**params) for params in params_list]
 
     ElasticsearchSearch.run_searches(es, searches)
     return [search.result for search in searches]
@@ -298,7 +302,7 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
             primeros resultados obtenidos.
 
     Returns:
-        Search: Búsqueda de tipo Search.
+        Search: Búsqueda de tipo ElasticsearchSearch.
 
     """
     if not fields:
@@ -333,7 +337,9 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
         s = s.sort(order)
 
     s = s.source(include=fields)
-    return s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
+    s = s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
+
+    return ElasticsearchSearch(s, offset)
 
 
 def build_streets_search(street_ids=None, road_name=None, department=None,
@@ -359,7 +365,7 @@ def build_streets_search(street_ids=None, road_name=None, department=None,
             primeros resultados obtenidos.
 
     Returns:
-        Search: Búsqueda de tipo Search.
+        Search: Búsqueda de tipo ElasticsearchSearch.
 
     """
     if not fields:
@@ -396,7 +402,9 @@ def build_streets_search(street_ids=None, road_name=None, department=None,
         s = s.sort(order)
 
     s = s.source(include=fields)
-    return s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
+    s = s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
+
+    return ElasticsearchSearch(s, offset)
 
 
 def build_place_search(index, lat, lon, fields=None):
@@ -410,7 +418,7 @@ def build_place_search(index, lat, lon, fields=None):
         fields (list): Campos a devolver en los resultados (opcional).
 
     Returns:
-        Search: Búsqueda de tipo Search.
+        Search: Búsqueda de tipo ElasticsearchSearch.
 
     """
     if not fields:
@@ -427,7 +435,8 @@ def build_place_search(index, lat, lon, fields=None):
 
     s = s.query(GeoShape(**{N.GEOM: options}))
     s = s.source(include=fields)
-    return s[:1]
+
+    return ElasticsearchSearch(s[:1])
 
 
 def build_subentity_query(id_field, name_field, value, exact):
