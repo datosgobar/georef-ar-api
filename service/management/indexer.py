@@ -116,7 +116,7 @@ def send_email(host, user, password, subject, message, recipients,
         smtp.send_message(msg)
 
 
-def download(url, tries=1, retry_delay=1, try_timeout=None, proxies=None,
+def download(url, tries=1, retry_delay=1, try_timeout=10, proxies=None,
              verify=True):
     """
     Descarga un archivo a través del protocolo HTTP, en uno o más intentos.
@@ -278,11 +278,13 @@ class GeorefIndex:
             try:
                 content = download(filepath)
                 data = loadfn(content.decode())
-            except requests.exceptions.RequestException:
-                logger.warning('No se pudo descargar el archivo.')
+            except requests.exceptions.RequestException as e:
+                logger.warning('No se pudo descargar el archivo:')
+                logger.warning(e)
                 logger.warning('')
-            except ValueError:
-                logger.warning('No se pudo leer los contenidos del archivo.')
+            except ValueError as e:
+                logger.warning('No se pudo leer los contenidos del archivo:')
+                logger.warning(e)
                 logger.warning('')
         else:
             logger.info('Accediendo al archivo local:')
@@ -292,11 +294,13 @@ class GeorefIndex:
             try:
                 with open(filepath) as f:
                     data = loadfn(f.read())
-            except OSError:
-                logger.warning('No se pudo acceder al archivo local.')
+            except OSError as e:
+                logger.warning('No se pudo acceder al archivo local:')
+                logger.warning(e)
                 logger.warning('')
-            except ValueError:
-                logger.warning('No se pudo leer los contenidos del archivo.')
+            except ValueError as e:
+                logger.warning('No se pudo leer los contenidos del archivo:')
+                logger.warning(e)
                 logger.warning('')
 
         if data:
