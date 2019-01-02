@@ -255,6 +255,14 @@ class SearchPlaceTest(GeorefLiveTest):
 
         self.assertTrue(validations and all(validations))
 
+    def test_malvinas(self):
+        """Cualquier coordenada situada sobre las islas Malvinas debería
+        devolver el departamento ID 94021 y la provincia ID 94 como
+        resultado."""
+        resp = self.get_response({'lat': -51.694444, 'lon': -57.852778})
+        self.assertTrue(resp['provincia']['id'] == '94' and
+                        resp['departamento']['id'] == '94021')
+
     def test_geojson_coordinates(self):
         """Dada una respuesta en formato GeoJSON, se debería poder tomar las
         coordenadas de cualquier Feature y encontrar la misma entidad vía el
