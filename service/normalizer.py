@@ -629,7 +629,11 @@ def build_address_query_format(parsed_params):
         N.ORDER: 'order'
     }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])
 
-    query['fields'] = parsed_params[N.FIELDS] + [N.GEOM, N.START_R, N.END_L]
+    # Siempre traer la geometría y los cuatro límites de altura, para poder
+    # calcular más tarde las coordenadas de la altura especificada (utilizando
+    # la geometría)
+    query['fields'] = parsed_params[N.FIELDS] + [N.GEOM, N.START_R, N.START_L,
+                                                 N.END_R, N.END_L]
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
