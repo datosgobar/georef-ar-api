@@ -7,7 +7,6 @@ import logging
 import elasticsearch
 import shapely.ops
 import shapely.geometry
-import shapely.wkb
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
 from elasticsearch_dsl.query import MatchNone, Terms, Prefix, Bool
@@ -427,8 +426,9 @@ def build_place_search(index, lat, lon, fields=None):
     s = Search(index=index)
 
     options = {
+        # Shape en formato GeoJSON
         'shape': {
-            'type': 'point',
+            'type': 'Point',
             'coordinates': [lon, lat]
         }
     }
@@ -661,7 +661,10 @@ def street_number_location(geom, number, start, end):
         dict: Coordenadas del punto.
 
     """
-    shape = shapely.wkb.loads(bytes.fromhex(geom))
+    if geom['type'] != 'MultiLineString':
+        raise TypeError('GeoJSON type must be MultiLineString')
+
+    shape = shapely.geometry.MultiLineString(geom['coordinates'])
     line = shapely.ops.linemerge(shape)
     lat, lon = None, None
 

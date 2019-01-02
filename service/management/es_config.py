@@ -298,7 +298,7 @@ class Street(Entity):
         search_analyzer=name_analyzer
     )
     altura = StreetNumbersField
-    geometria = Text(index=False)
+    geometria = GeoShape()
     provincia = StateSimpleField
     departamento = DepartmentSimpleField
 
