@@ -433,8 +433,8 @@ class GeorefIndex:
 
         """
         if not data:
-            logger.warning('No existen datos a indexar.')
-            logger.warning('')
+            logger.error('No existen datos a indexar.')
+            logger.error('')
             return False
 
         timestamp = data['timestamp']
