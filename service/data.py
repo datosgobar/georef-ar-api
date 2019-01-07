@@ -180,7 +180,9 @@ def expand_intersection_parameters(es, params_list):
     'interseccion' y reemplaza los listados de IDs por búsquedas Elasticsearch
     de esos IDs. Esto se hace para poder utilizar más adelante los IDs ya
     validados en las consultas de tipo GeoShape con geometrías pre-indexadas,
-    que requieren IDs de documentos existentes.
+    que requieren IDs de documentos existentes. La función se asegura de que
+    incluso si hay varios parámetros de tipo 'intersección', se haga una sola
+    consulta a Elasticsearch.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
@@ -210,7 +212,68 @@ def expand_intersection_parameters(es, params_list):
         ElasticsearchSearch.run_searches(es, queries)
 
 
-def search_entities(es, index, params_list):
+def expand_geometry_searches(es, index, params_list, searches):
+    """Dada una lista de búsquedas *ya ejecutadas*, se asegura que las
+    búsquedas que incluyen 'geometria' en su lista de campos efectivamente
+    traigan las geometrías en sus resultados.
+
+    Esta función es necesaria ya que los índices de entidades no cuentan con
+    las versiones originales de las geometrías, por razones de performance (ver
+    comentario en archivo es_config.py). Entonces, es necesario buscar las
+    geometrías en índices separados, utilizando los IDs de los resultados
+    encontrados en la primera búsqueda. Todo esto debe hacerse de forma
+    amigable a las consultas bulk: se debe hacer una sola consulta a
+    Elasticsearch incluso si se hicieron varias consultas a la API. Por esta
+    razón se crean todas las ElasticsearchSearch necesarias y luego se las
+    ejecuta con 'ElasticsearchSearch.run_searches'.
+
+    Args:
+        es (Elasticsearch): Cliente de Elasticsearch.
+        index (str): Nombre del índice sobre el cual fueron ejecutadas las
+            consultas originales.
+        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
+            la documentación de la función 'build_entity_search' para más
+            detalles.
+        searches (list): Lista de ElasticsearchSearch ya ejecutadas, que
+            potencialmente incluyen 'geometria' en su lista de campos
+            requeridos.
+
+    """
+    geometry_searches = []
+    for params, search in zip(params_list, searches):
+        fields = params['fields']
+        if search.result and N.GEOM in fields and N.ID in fields:
+            # La búsqueda pidió la geometría de la entidad y se encontró una o
+            # más entidades. Crear una nueva ElasticsearchSearch para buscar la
+            # geometría utilizando el índice que corresponda (provincias ->
+            # provincias-geometria).
+            ids = [hit['id'] for hit in search.result.hits]
+            geometry_search = build_entity_search(N.GEOM_INDEX.format(index),
+                                                  entity_ids=ids,
+                                                  fields=[N.ID, N.GEOM],
+                                                  max=len(ids))
+
+            # Agregar la búsqueda de geometría y la búsqueda original a la
+            # lista geometry_searches
+            geometry_searches.append((geometry_search, search))
+
+    if geometry_searches:
+        # Ejecutar las búsquedas de geometrías
+        ElasticsearchSearch.run_searches(
+            es,
+            [searches[0] for searches in geometry_searches]
+        )
+
+        for geometry_search, search in geometry_searches:
+            # Transformar resultados originales a diccionario de ID-entidad
+            original_hits = {hit[N.ID]: hit for hit in search.result.hits}
+
+            for hit in geometry_search.result.hits:
+                # Agregar campo geometría a los resultados originales
+                original_hits[hit[N.ID]][N.GEOM] = hit[N.GEOM]
+
+
+def search_entities(es, index, params_list, expand_geometries=False):
     """Busca entidades políticas (localidades, departamentos, provincias o
     municipios) según parámetros de una o más consultas.
 
@@ -220,6 +283,10 @@ def search_entities(es, index, params_list):
         params_list (list): Lista de conjuntos de parámetros de consultas. Ver
             la documentación de la función 'build_entity_search' para más
             detalles.
+        expand_geometries (bool): Si es verdadero, se analizan las búsquedas
+            realizadas para ver si incluyen geometrías en sus listas de campos
+            requeridos. Como la mayoría de las búsquedas no las incluyen, se
+            desactiva la opción por defecto como una optimización.
 
     Returns:
         list: Resultados de búsqueda de entidades.
@@ -228,8 +295,11 @@ def search_entities(es, index, params_list):
     expand_intersection_parameters(es, params_list)
 
     searches = [build_entity_search(index, **params) for params in params_list]
-
     ElasticsearchSearch.run_searches(es, searches)
+
+    if expand_geometries:
+        expand_geometry_searches(es, index, params_list, searches)
+
     return [search.result for search in searches]
 
 
