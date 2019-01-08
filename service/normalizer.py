@@ -186,9 +186,9 @@ def process_entity_single(request, name, param_parser, key_translations):
     fmt[N.CSV_FIELDS] = formatter.ENDPOINT_CSV_FIELDS[name]
 
     expand_geometries = fmt[N.FORMAT] == 'shp'
-
     if expand_geometries:
-        query['fields'].append(N.GEOM)
+        query['fields'] += (N.GEOM,)
+        fmt[N.FIELDS] += (N.GEOM,)
 
     es = get_elasticsearch()
     result = data.search_entities(es, name, [query], expand_geometries)[0]
@@ -448,7 +448,8 @@ def process_street_single(request):
     query, fmt = build_street_query_format(qs_params)
 
     if fmt[N.FORMAT] == 'shp':
-        query['fields'].append(N.GEOM)
+        query['fields'] += (N.GEOM,)
+        fmt[N.FIELDS] += (N.GEOM,)
 
     es = get_elasticsearch()
     result = data.search_streets(es, [query])[0]
@@ -640,8 +641,8 @@ def build_address_query_format(parsed_params):
     # Siempre traer la geometría y los cuatro límites de altura, para poder
     # calcular más tarde las coordenadas de la altura especificada (utilizando
     # la geometría)
-    query['fields'] = parsed_params[N.FIELDS] + [N.GEOM, N.START_R, N.START_L,
-                                                 N.END_R, N.END_L]
+    query['fields'] = parsed_params[N.FIELDS] + (N.GEOM, N.START_R, N.START_L,
+                                                 N.END_R, N.END_L)
 
     # Construir reglas de formato a partir de parámetros
     fmt = {

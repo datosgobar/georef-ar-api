@@ -781,7 +781,7 @@ def fields_list_to_dict(fields):
     cada campo procesado.
 
     Args:
-        fields (dict): Lista de campos.
+        fields (tuple): Lista de campos.
 
     Returns:
         dict: Diccionario de campos.

@@ -6,7 +6,7 @@ class FormattingTest(GeorefMockTest):
     def test_fields_list_to_dict(self):
         """El resultado de fields_list_to_dict debería ser un diccionario
         equivalente a los valores de una lista, desaplanados."""
-        fields = [
+        fields = (
             'id',
             'nombre',
             'provincia.id',
@@ -15,7 +15,7 @@ class FormattingTest(GeorefMockTest):
             'ubicacion.lon',
             'prueba.foo.bar',
             'prueba.foo.baz'
-        ]
+        )
 
         fields_dict = formatter.fields_list_to_dict(fields)
         self.assertEqual(fields_dict, {
@@ -72,12 +72,12 @@ class FormattingTest(GeorefMockTest):
             }
         }
 
-        fields = [
+        fields = (
             'simple',
             'nested.field1',
             'nested.field2',
             'nested.nested2.field1'
-        ]
+        )
 
         formatter.filter_result_fields(result,
                                        formatter.fields_list_to_dict(fields))

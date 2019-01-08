@@ -157,17 +157,17 @@ class Parameter:
         """Inicializa un objeto Parameter.
 
         Args:
-            choices (list): Lista de valores permitidos (o None si se permite
-                cualquier valor).
             required (bool): Verdadero si el parámetro es requerido.
             default: Valor que debería tomar el parámetro en caso de no haber
                 sido recibido.
+            choices (list): Lista de valores permitidos (o None si se permite
+                cualquier valor).
 
         """
         if required and default is not None:
             raise ValueError(strings.OBLIGATORY_NO_DEFAULT)
 
-        self._choices = choices
+        self._choices = frozenset(choices) if choices else None
         self._required = required
         self._default = default
 
@@ -381,16 +381,16 @@ class FieldListParameter(Parameter):
     """
 
     def __init__(self, basic=None, standard=None, complete=None):
-        self._basic = set(basic or [])
-        self._standard = set(standard or []) | self._basic
-        self._complete = set(complete or []) | self._standard
+        self._basic = frozenset(basic or [])
+        self._standard = frozenset(standard or []) | self._basic
+        self._complete = frozenset(complete or []) | self._standard
 
-        super().__init__(False, list(self._standard), self._complete)
+        super().__init__(False, tuple(self._standard), self._complete)
 
     def _check_value_in_choices(self, val):
-        # La variable val es de tipo set o list, self._choices es de tipo set:
-        # Lanzar una excepción si existen elementos en val que no están en
-        # self._choices.
+        # La variable val es de tipo list o tuple, self._choices es de tipo
+        # frozenset: Lanzar una excepción si existen elementos en val que no
+        # están en self._choices.
         if set(val) - self._complete:
             raise InvalidChoiceException(strings.FIELD_LIST_INVALID_CHOICE)
 
@@ -433,11 +433,11 @@ class FieldListParameter(Parameter):
         # Manejar casos especiales: basico, estandar y completo
         if len(parts) == 1 and parts[0] in [N.BASIC, N.STANDARD, N.COMPLETE]:
             if parts[0] == N.BASIC:
-                return list(self._basic)
+                return tuple(self._basic)
             if parts[0] == N.STANDARD:
-                return list(self._standard)
+                return tuple(self._standard)
             if parts[0] == N.COMPLETE:
-                return list(self._complete)
+                return tuple(self._complete)
 
         received = set(parts)
         if len(parts) != len(received):
@@ -446,7 +446,7 @@ class FieldListParameter(Parameter):
         received = self._expand_prefixes(received)
 
         # Siempre se agregan los valores básicos
-        return list(self._basic | received)
+        return tuple(self._basic | received)
 
 
 class IntParameter(Parameter):
