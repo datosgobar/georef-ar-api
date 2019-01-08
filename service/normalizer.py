@@ -185,8 +185,13 @@ def process_entity_single(request, name, param_parser, key_translations):
     }
     fmt[N.CSV_FIELDS] = formatter.ENDPOINT_CSV_FIELDS[name]
 
+    expand_geometries = fmt[N.FORMAT] == 'shp'
+
+    if expand_geometries:
+        query['fields'].append(N.GEOM)
+
     es = get_elasticsearch()
-    result = data.search_entities(es, name, [query])[0]
+    result = data.search_entities(es, name, [query], expand_geometries)[0]
 
     source = INDEX_SOURCES[name]
     for match in result.hits:
@@ -441,6 +446,9 @@ def process_street_single(request):
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     query, fmt = build_street_query_format(qs_params)
+
+    if fmt[N.FORMAT] == 'shp':
+        query['fields'].append(N.GEOM)
 
     es = get_elasticsearch()
     result = data.search_streets(es, [query])[0]

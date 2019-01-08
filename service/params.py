@@ -1026,7 +1026,7 @@ PARAMS_STATES = EndpointParameters(shared_params={
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
-                           choices=['json', 'csv', 'geojson', 'xml'])
+                           choices=['json', 'csv', 'geojson', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
     IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
@@ -1051,7 +1051,7 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
-                           choices=['json', 'csv', 'geojson', 'xml'])
+                           choices=['json', 'csv', 'geojson', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
     IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
@@ -1076,7 +1076,7 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
-                           choices=['json', 'csv', 'geojson', 'xml'])
+                           choices=['json', 'csv', 'geojson', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
     IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
@@ -1158,7 +1158,8 @@ PARAMS_STREETS = EndpointParameters(shared_params={
     N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
-    N.FORMAT: StrParameter(default='json', choices=['json', 'csv', 'xml'])
+    N.FORMAT: StrParameter(default='json',
+                           choices=['json', 'csv', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
     IntSetSumValidator(upper_limit=MAX_RESULT_LEN)

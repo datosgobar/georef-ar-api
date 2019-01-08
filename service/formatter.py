@@ -6,9 +6,12 @@ las consultas a los índices o a la base de datos.
 
 import csv
 import io
+import zipfile
+import shutil
 from xml.etree import ElementTree
-from flask import make_response, jsonify, Response, request
+from flask import make_response, jsonify, Response, request, send_file
 import geojson
+import shapefile
 from service import strings
 from service import names as N
 
@@ -17,6 +20,8 @@ CSV_SEP = ','
 CSV_QUOTE = '"'
 CSV_NEWLINE = '\n'
 FLAT_SEP = '_'
+SHP_MAX_FIELD_CONTENT_LEN = 128
+SHP_MAX_FIELD_NAME_LEN = 11
 
 STATES_CSV_FIELDS = [
     (N.ID, [N.STATE, N.ID]),
@@ -119,6 +124,27 @@ XML_LIST_ITEM_NAMES = {
 XML_ERROR_LIST_ITEM_NAMES = {
     'errores': 'error',
     'ayuda': 'item'
+}
+
+
+SHP_SHORT_FIELD_NAMES = {
+    key.replace('.', FLAT_SEP): value
+    for key, value in
+    {
+        N.STATE_NAME: 'prov_nombre',
+        N.STATE_ID: 'prov_id',
+        N.STATE_INTERSECTION: 'prov_intscn',
+        N.DEPT_NAME: 'dept_nombre',
+        N.DEPT_ID: 'dept_id',
+        N.ID: 'dept_id',
+        N.C_LAT: 'centroi_lat',
+        N.C_LON: 'centroi_lon',
+        N.FULL_NAME: 'nomencla',
+        N.START_R: 'altura_in_d',
+        N.START_L: 'altura_in_i',
+        N.END_R: 'altura_fi_d',
+        N.END_L: 'altura_fi_i'
+    }.items()
 }
 
 
@@ -484,6 +510,70 @@ def create_xml_response_single(name, result):
     return xml_flask_response(root)
 
 
+def create_shp_response_single(name, result, fmt):
+    """Toma un resultado de una consulta, y devuelve una respuesta HTTP 200 con
+    el resultado en formato SHP (Shapefile), comprimido en formato ZIP.
+
+    Args:
+        name (str): Nombre de la entidad que fue consultada.
+        result (QueryResult): Resultado de una consulta.
+        fmt (dict): Parámetros de formato.
+
+    Returns:
+        flask.Response: Respuesta HTTP con contenido SHP.
+
+    """
+    contents = io.BytesIO()
+    zip_file = zipfile.ZipFile(contents, mode='w')
+
+    # El formato SHP exige la presencia de los siguientes 3 archivos:
+    shp = io.BytesIO()
+    shx = io.BytesIO()
+    dbf = io.BytesIO()
+
+    writer = shapefile.Writer(shp=shp, shx=shx, dbf=dbf)
+
+    keys = [
+        field.replace('.', FLAT_SEP)
+        for field in fmt[N.FIELDS]
+        if field != N.GEOM  # No incluir la geometría en los records
+    ]
+
+    for key in keys:
+        if len(key) > SHP_MAX_FIELD_NAME_LEN:
+            key = SHP_SHORT_FIELD_NAMES[key]
+        writer.field(key, 'C', SHP_MAX_FIELD_CONTENT_LEN)
+
+    if result.iterable:
+        for entity in result.entities:
+            writer.shape(entity[N.GEOM])
+
+            flatten_dict(entity, max_depth=3)
+            record = []
+            for key in keys:
+                value = str(entity[key])
+                if len(value) > SHP_MAX_FIELD_CONTENT_LEN:
+                    value = value[:SHP_MAX_FIELD_CONTENT_LEN]
+
+                record.append(value)
+
+            writer.record(*record)
+
+    writer.close()
+
+    for fp, extension in [(shp, 'shp'), (shx, 'shx'), (dbf, 'dbf')]:
+        with zip_file.open('{}.{}'.format(name, extension), mode='w') as f:
+            # Escribir cada archivo (shp, shx y dbf) al comprimido ZIP.
+            fp.seek(0)
+            shutil.copyfileobj(fp, f)
+
+    zip_file.close()
+
+    contents.seek(0)
+    return send_file(contents, attachment_filename='{}.zip'.format(name),
+                     as_attachment=True)
+
+
 def create_csv_response_single(name, result, fmt):
     """Toma un resultado (iterable) de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato CSV.
@@ -741,6 +831,9 @@ def create_ok_response(name, result, fmt):
 
     if fmt[N.FORMAT] == 'geojson':
         return create_geojson_response_single(result, fmt)
+
+    if fmt[N.FORMAT] == 'shp':
+        return create_shp_response_single(name, result, fmt)
 
     raise ValueError('Unknown format')
 
