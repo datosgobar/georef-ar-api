@@ -67,3 +67,5 @@ logging.ini
 /site/
 /profile/
 /config/georef_synonyms.txt
+.coverage
+htmlcov/

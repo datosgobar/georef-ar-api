@@ -60,6 +60,11 @@ code_checks:
 	flake8 tests/ service/
 	pylint tests/ service/
 
+coverage:
+	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
+	coverage run --source=service --omit=service/management/* -m unittest
+	coverage report
+
 docs:
 	mkdocs build
 	rsync -vau --remove-source-files docs/site/ docs/
