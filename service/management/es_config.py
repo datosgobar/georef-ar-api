@@ -9,8 +9,10 @@ datos generados por el ETL.
 El excluimiento del campo 'geometria' en _source se debe a que las geometrías
 tienden a aumentar significativamente el tamaño de los documentos, por lo que
 la performance de la búsqueda por id/nombre/etc se ve disminuida. Para poder
-contar con las geometrías originales (para queries GeoShape), se crean
-índices adicionales con las geometrías intactas.
+contar con las geometrías originales (para queries GeoShape y para poder
+utilizarlas como valores de respuesta), se crean índices adicionales con las
+geometrías intactas. Notar que este cambio solo se aplica a entidades que
+tienen geometrías de gran tamaño (provincias, municipios y departamentos).
 
 Para más información, ver:
 https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
@@ -21,9 +23,12 @@ from elasticsearch_dsl import Document, Index
 from elasticsearch_dsl import analyzer, normalizer, token_filter
 from elasticsearch_dsl import Object, Float, GeoShape, Keyword, Text, Integer
 from elasticsearch_dsl import MetaField
+from .. import names as N
 
 # Tipo de documento utilizado por default en elasticsearch_dsl
 DOC_TYPE = 'doc'
+
+GEOMETRYLESS_INDICES = {N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES}
 
 # -----------------------------------------------------------------------------
 # Analizadores, Filtros, Normalizadores
@@ -286,9 +291,6 @@ class Locality(Entity):
     departamento = DepartmentSimpleField
     municipio = MunicipalitySimpleField
 
-    class Meta:
-        source = MetaField(excludes=['geometria'])
-
 
 class Street(Entity):
     nombre = NameField
@@ -331,3 +333,22 @@ def create_index(es, name, doc_class, synonyms=None, excluding_terms=None):
 
     index.document(doc_class)
     index.create(using=es)
+
+
+def geom_index_for(index):
+    """Dado un nombre de índice, retorna su índice correspondiente que contenga
+    las geometrías de la entidad.
+
+    Args:
+        index (str): Nombre del índice conteniendo entidades de las cuales se
+            desea obtener las geometrías.
+
+    Returns:
+        str: Nombre de índice conteniendo las geometrías de las entidades
+            almacenadas en 'index'.
+
+    """
+    if index in GEOMETRYLESS_INDICES:
+        return N.GEOM_INDEX.format(index)
+
+    return index

@@ -248,8 +248,9 @@ def expand_geometry_searches(es, index, params_list, searches):
             # geometría utilizando el índice que corresponda (provincias ->
             # provincias-geometria).
             ids = [hit['id'] for hit in search.result.hits]
-            geometry_search = build_entity_search(N.GEOM_INDEX.format(index),
-                                                  entity_ids=ids,
+            geom_index = es_config.geom_index_for(index)
+
+            geometry_search = build_entity_search(geom_index, entity_ids=ids,
                                                   fields=[N.ID, N.GEOM],
                                                   max=len(ids))
 
@@ -584,7 +585,7 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
 
     options = {
         'indexed_shape': {
-            'index': N.GEOM_INDEX.format(index),
+            'index': es_config.geom_index_for(index),
             'type': es_config.DOC_TYPE,
             'id': entity_id,
             'path': entity_geom_path
