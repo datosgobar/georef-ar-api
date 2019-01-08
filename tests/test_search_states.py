@@ -465,6 +465,22 @@ class SearchStatesTest(GeorefLiveTest):
             'nombre': 'santa'
         })
 
+    def test_shp_format(self):
+        """Se debería poder obtener resultados en formato SHP (sin
+        parámetros)."""
+        self.assert_valid_shp_type(
+            shape_type=5,  # 5 == POLYGON
+            params={'max': 1}
+        )
+
+    def test_shp_format_query(self):
+        """Se debería poder obtener resultados en formato SHP (con
+        parámetros)."""
+        self.assert_valid_shp_query({
+            'max': 2,
+            'campos': 'completo'
+        })
+
 
 if __name__ == '__main__':
     unittest.main()

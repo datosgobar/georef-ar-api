@@ -350,6 +350,23 @@ class SearchStreetsTest(GeorefLiveTest):
             'tipo': 'avenida'
         })
 
+    def test_shp_format(self):
+        """Se debería poder obtener resultados en formato SHP (sin
+        parámetros)."""
+        self.assert_valid_shp_type(
+            shape_type=3,  # 3 == POLYLINE
+            params={'max': 1}
+        )
+
+    def test_shp_format_query(self):
+        """Se debería poder obtener resultados en formato SHP (con
+        parámetros)."""
+        self.assert_valid_shp_query({
+            'max': 500,
+            'campos': 'completo',
+            'tipo': 'avenida'
+        })
+
 
 if __name__ == '__main__':
     unittest.main()

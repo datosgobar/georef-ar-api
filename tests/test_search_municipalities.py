@@ -435,6 +435,23 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
             'nombre': 'mitre'
         })
 
+    def test_shp_format(self):
+        """Se debería poder obtener resultados en formato SHP (sin
+        parámetros)."""
+        self.assert_valid_shp_type(
+            shape_type=5,  # 5 == POLYGON
+            params={'max': 1}
+        )
+
+    def test_shp_format_query(self):
+        """Se debería poder obtener resultados en formato SHP (con
+        parámetros)."""
+        self.assert_valid_shp_query({
+            'max': 5,
+            'campos': 'completo',
+            'nombre': 'santa'
+        })
+
 
 if __name__ == '__main__':
     unittest.main()

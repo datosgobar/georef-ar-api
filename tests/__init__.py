@@ -1,3 +1,6 @@
+import io
+import os
+import shutil
 import csv
 import copy
 import logging
@@ -5,8 +8,10 @@ from xml.etree import ElementTree
 from unittest import mock, TestCase
 import json
 import urllib
+import zipfile
 from flask import current_app
 import geojson
+import shapefile
 from service import app, formatter
 
 logging.getLogger('georef').setLevel(logging.CRITICAL)
@@ -23,6 +28,34 @@ def asciifold(text):
     }
 
     return text.upper().translate(text.maketrans(conv))
+
+
+def shapefile_from_zip_bytes(data):
+    """Dada una secuencia de bytes representando un zipped Shapefile,
+    devuelve una instancia de shapefile.Reader con sus contenidos.
+
+    Args:
+        data (bytes): Secuencia de bytes (ZIP).
+
+    Return:
+        shapefile.Reader: Contenidos del Shapefile.
+
+    """
+    contents = io.BytesIO(data)
+    zip_file = zipfile.ZipFile(contents)
+
+    files = {}
+    for filename in zip_file.namelist():
+        extension = os.path.splitext(filename)[1][1:]
+        buf = io.BytesIO()
+
+        with zip_file.open(filename) as f:
+            shutil.copyfileobj(f, buf)
+
+        buf.seek(0)
+        files[extension] = buf
+
+    return shapefile.Reader(**files)
 
 
 class GeorefLiveTest(TestCase):
@@ -132,6 +165,9 @@ class GeorefLiveTest(TestCase):
                 if fmt == 'xml':
                     return ElementTree.fromstring(response.data.decode())
 
+                if fmt == 'shp':
+                    return shapefile_from_zip_bytes(response.data)
+
                 raise ValueError('Unknown format')
 
             if return_value == 'full':
@@ -196,6 +232,37 @@ class GeorefLiveTest(TestCase):
     def assert_xml_equal(self, element_a, element_b):
         self.assertEqual(ElementTree.tostring(element_a, encoding='unicode'),
                          ElementTree.tostring(element_b, encoding='unicode'))
+
+    def assert_valid_shp_type(self, shape_type, params=None):
+        if not params:
+            params = {}
+        params['formato'] = 'shp'
+
+        shape = self.get_response(params)
+        self.assertEqual(shape.shapeType, shape_type)
+
+    def assert_valid_shp_query(self, params=None):
+        if not params:
+            params = {}
+
+        json_resp = self.get_response(params)
+
+        params['formato'] = 'shp'
+        shape = self.get_response(params)
+
+        self.assertEqual(len(json_resp), len(shape.shapes()))
+
+        json_records = sorted([
+            (entity['id'], entity['nombre'])
+            for entity in json_resp
+        ])
+
+        shape_records = sorted([
+            (record['id'], record['nombre'])
+            for record in shape.records()
+        ])
+
+        self.assertListEqual(json_records, shape_records)
 
     def assert_flat_results(self):
         resp = self.get_response({'aplanar': 1, 'max': 1})
