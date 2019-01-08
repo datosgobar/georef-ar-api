@@ -36,6 +36,10 @@ start_gunicorn_dev_server: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
 	gunicorn service:app -w 4 --log-config=config/logging.ini -b 127.0.0.1:5000
 
+start_profile_server:
+	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
+	gunicorn service:app -c service/management/gunicorn_profile.py -b 127.0.0.1:5000
+
 test_live:
 	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
 	python -m unittest discover -p test_search_*

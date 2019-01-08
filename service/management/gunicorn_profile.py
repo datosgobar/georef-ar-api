@@ -1,15 +1,13 @@
 """gunicorn_profile.py - profiler para endpoints
 Requiere: git, imagemagick tools, graphviz
 
-Para utilizar, cargar el módulo al inicializar Gunicorn (desde el directorio
-raíz del proyecto):
+Para utilizar, ejecutar el siguiente comando en la carpeta raíz del proyecto:
 
-$ export GEOREF_CONFIG=config/georef.cfg
-$ gunicorn service:app -c service/management/gunicorn_profile.py -b :5000
+$ make start_profile_server
 
-Luego, agregar el header 'X-Gunicorn-Profile' a los requests HTTP realizados
-para activar el análisis de performance. Los resultados se depositan en el
-directorio 'profile'.
+Luego, realizar una request HTTP a localhost:5000 para llevar a cabo un
+análisis de performance. Los resultados se depositan en el directorio
+'profile'.
 """
 
 import cProfile
@@ -18,6 +16,7 @@ import io
 import subprocess
 import os
 import time
+import shutil
 
 MAX_ROWS = 20
 PROFILE_DIR = 'profile'
@@ -29,37 +28,37 @@ def run_cmd(cmd, input=None):
     return result.stdout
 
 
-def profile_enabled(req):
-    return 'X-Gunicorn-Profile'.upper() in [h[0] for h in req.headers]
+def assert_command_exists(cmd):
+    if not shutil.which(cmd):
+        raise RuntimeError('The following command is required: {}'.format(cmd))
 
 
 def when_ready(_):
+    assert_command_exists('git')
+    assert_command_exists('dot')
+    assert_command_exists('gprof2dot')
+    assert_command_exists('convert')
+
     if not os.path.exists(PROFILE_DIR):
         os.makedirs(PROFILE_DIR)
 
 
-def pre_request(worker, req):
-    if profile_enabled(req):
-        worker.profile = cProfile.Profile()
-        worker.profile.enable()
+def pre_request(worker, _):
+    worker.profile = cProfile.Profile()
+    worker.profile.enable()
 
 
 def post_request(worker, req, *_):
-    if not profile_enabled(req):
-        return
-
     worker.profile.disable()
     t = time.strftime('%Y.%m.%d-%H.%M.%S')
     s = io.StringIO()
     ps = pstats.Stats(worker.profile, stream=s)
     ps.sort_stats('time', 'cumulative')
 
-    git_commit = 'undefined'
     try:
         git_commit = run_cmd('git describe --always --tags --dirty')
     except subprocess.CalledProcessError:
-        # Ignorar excepción completamente
-        pass
+        git_commit = 'unknown commit'
 
     base_name = os.path.join(
         PROFILE_DIR,
