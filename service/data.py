@@ -298,7 +298,7 @@ def search_entities(es, index, params_list, expand_geometries=False):
     searches = [build_entity_search(index, **params) for params in params_list]
     ElasticsearchSearch.run_searches(es, searches)
 
-    if expand_geometries:
+    if expand_geometries and index != es_config.geom_index_for(index):
         expand_geometry_searches(es, index, params_list, searches)
 
     return [search.result for search in searches]

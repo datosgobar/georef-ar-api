@@ -136,6 +136,8 @@ SHP_SHORT_FIELD_NAMES = {
         N.STATE_INTERSECTION: 'prov_intscn',
         N.DEPT_NAME: 'dept_nombre',
         N.DEPT_ID: 'dept_id',
+        N.MUN_NAME: 'muni_nombre',
+        N.MUN_ID: 'muni_id',
         N.ID: 'dept_id',
         N.C_LAT: 'centroi_lat',
         N.C_LON: 'centroi_lon',
