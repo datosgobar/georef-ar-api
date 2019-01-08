@@ -2,9 +2,9 @@
 La API permite a los usuarios operar con las geometrías de distintas entidades geográficas. A continuación, se detallan los recursos y parámetros que permiten a los usuarios realizar estas operaciones.
 
 ## Parámetro `interseccion`
-Los recursos `/departamentos` y `/municipios` cuentan con el parámetro `interseccion`. El parámetro permite buscar entidades utilizando intersección de geometrías como filtro. El parámetro debe tomar valores con el siguiente formato:
+Los recursos `/provincias`, `/departamentos` y `/municipios` cuentan con el parámetro `interseccion`. El parámetro permite buscar entidades utilizando intersección de geometrías como filtro. El parámetro debe tomar valores con el siguiente formato:
 
-	interseccion=<nombre de entidad>:<id 1>[:<id 2>:...]
+	interseccion=<tipo de entidad>:<id 1>[:<id 2>:...]
 
 Al aplicar el filtro `interseccion`, se buscan entidades que compartan área con cualquiera de las entidades listadas en la lista de IDs. Entonces, utilizar (por ejemplo) `/municipios?interseccion=departamento:18105` buscaría todos los municipios que interseccionen con el departamento con ID 18105, mientras que utilizar `/departamentos?interseccion=municipio:620133:540378` buscaría todos los departamentos que interseccionen con el municipio con ID 620133 **o** el municipio con ID 540378.
 
@@ -36,6 +36,8 @@ Ejemplo completo de llamado a la API:
     "inicio": 0
 }
 ```
+
+Aunque el recurso `/provincias` acepta el parámetro `interseccion`, se recomienda utilizar filtros por IDs y no por geometrías al momento de buscar provincias, ya que el filtrado por ID es más performante. Por ejemplo, la consulta `/provincias?interseccion=departamento:18105` es equivalente a la consulta `/provincias?id=18`, ya que los primeros dos dígitos de los códigos de los departamentos siempre corresponden a su provincia.
 
 ## Recurso `/ubicacion`
 En la [sección de inicio](/), se dió un ejemplo de uso del recurso `/ubicacion` para enriquecer datos existentes. El recurso utiliza las geometrías de las entidades geográficas para determinar cuáles contienen al punto especificado por el usuario a través de los parámetros `lat` y `lon`. Las entidades devueltas son las siguientes:
