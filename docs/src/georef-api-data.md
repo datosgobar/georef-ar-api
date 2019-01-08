@@ -24,7 +24,7 @@ Los orígenes de los datos procesados en el ETL son:
 - Enlace: [Portal de geoservicios de INDEC](https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas)
 
 ## Archivos
-A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `6.0.0`.
+A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `7.0.0`.
 
 ### Provincias
 El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:
@@ -32,7 +32,7 @@ El archivo de datos de provincias debe tener formato JSON. Su esquema de datos d
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "6.0.0", // Versión de archivo
+	"version": "7.0.0", // Versión de archivo
 	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
@@ -43,7 +43,7 @@ El archivo de datos de provincias debe tener formato JSON. Su esquema de datos d
 				"lon": -65.36475 // Longitud de centroide
 			},
 			"geometria": { // Geometría en formato GeoJSON
-				"type": "mutlipolygon",
+				"type": "MultiPolygon",
 				"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
 			}
 		},
@@ -58,7 +58,7 @@ El archivo de datos de departamentos debe tener formato JSON. Su esquema de dato
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "6.0.0", // Versión de archivo
+	"version": "7.0.0", // Versión de archivo
 	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
@@ -69,7 +69,7 @@ El archivo de datos de departamentos debe tener formato JSON. Su esquema de dato
 				"lon": -58.625449  // Longitud de centroide
 			},
 			"geometria": { // Geometría en formato GeoJSON
-				"type": "mutlipolygon",
+				"type": "MultiPolygon",
 				"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
 			},
 			"provincia": { // Provincia que contiene al departamento
@@ -89,7 +89,7 @@ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos d
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "6.0.0", // Versión de archivo
+	"version": "7.0.0", // Versión de archivo
 	"fuente": "IGN", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
@@ -100,7 +100,7 @@ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos d
 				"lon": -61.149648  // Longitud de centroide
 			},
 			"geometria": { // Geometría en formato GeoJSON
-				"type": "mutlipolygon",
+				"type": "MultiPolygon",
 				"coordinates": [[[[-58.4453, -34.4324], [-58.6463, -34.6841], ...]]]
 			},
 			"provincia": {  // Provincia que contiene al municipio
@@ -120,7 +120,7 @@ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos 
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "6.0.0", // Versión de archivo
+	"version": "7.0.0", // Versión de archivo
 	"fuente": "BAHRA", // Fuente de los datos
 	"datos": [ // Lista de entidades
 		{
@@ -132,7 +132,7 @@ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos 
 				"lon": -61.537720  // Longitud de centroide
 			},
 			"geometria": { // Geometría en formato GeoJSON
-				"type": "multipoint",
+				"type": "MultiPoint",
 				"coordinates": [[-61.5377, -38.7415], ...]
 			},
 			"municipio": { // Municipio que contiene a la localidad
@@ -159,7 +159,7 @@ El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe 
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "6.0.0", // Versión de archivo
+	"version": "7.0.0", // Versión de archivo
 	"fuente": "INDEC", // Fuente de los datos
 	"datos": [ // Lista de vías de circulación
 		{
@@ -177,7 +177,10 @@ El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe 
 					"izquierda": 800, // Número final de altura (lado izquierdo)
 				}
 			},
-			"geometria": "0105000020E61000...", // Geometría MultiLineString en formato WKB, representación hexadecimal
+			"geometria": { // Geometría en formato GeoJSON
+				"type": "MultiLineString",
+				"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
+			},
 			"departamento": { // Departamento
 				"nombre": "Comuna 3",
 				"id": "02021"
