@@ -1,6 +1,7 @@
 elasticsearch==6.2.0
 elasticsearch-dsl==6.2.0
 Flask==1.0.2
+georef-ar-address==0.0.3
 geojson==2.3.0
 gunicorn==19.8.1
 requests==2.20.0

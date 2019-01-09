@@ -21,6 +21,7 @@ logger = logging.getLogger('georef')
 class DataConnectionException(Exception):
     """Representa un error sucedido al intentar realizar una operación
     utilizando Elasticsearch.
+
     """
 
     pass

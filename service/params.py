@@ -5,9 +5,11 @@ HTTP.
 """
 
 import re
+import threading
 from enum import Enum, unique
 from collections import defaultdict
 from flask import current_app
+from georef_ar_address import AddressParser
 import service.names as N
 from service import strings, constants
 
@@ -503,57 +505,42 @@ class AddressParameter(Parameter):
     nuevamente el método '_parse_value' para implementar lógica de parseo y
     validación propias de AddressParameter.
 
-    TODO: El análisis del campo 'direccion' es una tarea compleja y no debería
-    resolverse utilizando expresiones regulares. Se debería implementar algún
-    método más efectivo, que probablemente tenga una complejidad mucho mayor.
-    Como referencia, ver: https://github.com/openvenues/libpostal. La
-    implementación de la solución probablemente sea un proyecto en sí.
+    Attributes:
+        _parser (AddressParser): Parser de direcciones de la librería
+            georef-ar-address.
 
     """
 
     def __init__(self):
+        # Se crea el Lock 'self._parser_lock' para evitar problemas en
+        # contextos de ejecución donde se usen threads. Si se utilizan threads
+        # o no depende de la configuración que se esté usando para los workers
+        # de Gunicorn. Por defecto los workers son de tipo 'sync', por lo que
+        # se crea un proceso separado por worker (no se usan threads).
+        self._parser_lock = threading.Lock()
+        self._parser = AddressParser(cache={})
         super().__init__(required=True)
 
     def _parse_value(self, val):
         if not val:
             raise ValueError(strings.STRING_EMPTY)
 
-        # 1) Remover ítems entre paréntesis e indicadores de número (N°, n°)
-        val = re.sub(r'\(.*?\)|[nN][°º]', '', val.strip('\'" '))
+        with self._parser_lock:
+            data = self._parser.parse(val)
 
-        parts = [
-            # 3) Normalizar espacios
-            ' '.join(part.strip().split())
-            for part
-            # 2) Dividir el texto utilizando guiones, comas e indicadores
-            # de barrio (B°, b°)
-            in re.split(r'-|,|[bB][°º]', val)
-            if part
-        ]
+        if data['type'] == 'none':
+            return None, None
 
-        address = None
-        for part in parts:
-            # 4) Por cada parte de texto resultante, buscar un nombre de calle
-            # junto a una altura numérica. La altura debe estar al final del
-            # texto. Priorizar los primeros resultados válidos encontrados.
-            match = re.search(r'^(.+?)\s+([0-9]+)$', part)
+        num = None
+        door_num_value = data['door_number']['value']
+        if door_num_value:
+            match = re.search(r'\d+', door_num_value)
             if match:
-                name, num_str = match.groups()
-                num = int(num_str)
-                # Interpetar direcciones con altura 0 como sin altura
-                address = name, (num if num > 0 else None)
-                break
+                num_int = int(match.group(0))
+                if num_int != 0:
+                    num = num_int
 
-        # 5) Último intento: tomar la primera parte de la dirección (que ya se
-        # sabe que no tiene número) y utilizarla como nombre de calle.
-        if not address:
-            if parts and parts[0]:
-                address = parts[0], None  # Dirección sin altura
-            else:
-                raise ParameterValueError(strings.ADDRESS_FORMAT,
-                                          strings.ADDRESS_FORMAT_HELP)
-
-        return address
+        return data['street_names'][0], num
 
 
 class IntersectionParameter(Parameter):

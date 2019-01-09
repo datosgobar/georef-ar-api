@@ -65,6 +65,10 @@ coverage:
 	coverage run --source=service --omit=service/management/* -m unittest
 	coverage report
 
+console:
+	GEOREF_CONFIG=$(CFG_PATH) \
+	python -i -c 'import service'
+
 docs:
 	mkdocs build
 	rsync -vau --remove-source-files docs/site/ docs/
