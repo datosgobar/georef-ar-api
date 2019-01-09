@@ -11,7 +11,7 @@ from collections import defaultdict
 from flask import current_app
 from georef_ar_address import AddressParser
 import service.names as N
-from service import strings, constants
+from service import strings, constants, utils
 
 MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
 MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
@@ -518,7 +518,9 @@ class AddressParameter(Parameter):
         # de Gunicorn. Por defecto los workers son de tipo 'sync', por lo que
         # se crea un proceso separado por worker (no se usan threads).
         self._parser_lock = threading.Lock()
-        self._parser = AddressParser(cache={})
+
+        cache = utils.LRUDict(constants.ADDRESS_PARSER_CACHE_SIZE)
+        self._parser = AddressParser(cache=cache)
         super().__init__(required=True)
 
     def _parse_value(self, val):
