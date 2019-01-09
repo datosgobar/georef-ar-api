@@ -16,9 +16,8 @@ ADDRESS_FORMAT_HELP = [
 STRING_EMPTY = 'El campo no tiene contenido.'
 INT_VAL_ERROR = 'El parámetro no es un número entero.'
 FLOAT_VAL_ERROR = 'El parámetro no es un número real.'
-INVALID_CHOICE = 'El parámetro debe consistir en una lista de ítems separados \
-por comas. Los valores posibles de los ítems se listan bajo la \
-clave \'ayuda\'.'
+INVALID_CHOICE = 'El parámetro debe tomar el valor de uno de los listados \
+bajo la clave \'ayuda\'.'
 INVALID_BULK = 'Las operaciones deben estar contenidas en una lista no vacía \
 bajo la clave \'{}\'.'
 BULK_QS_INVALID = 'No se permiten parámetros vía query string en operaciones \
@@ -42,8 +41,10 @@ ID_PARAM_LENGTH = 'La cantidad de ID debe ser menor o igual que {}.'
 ID_PARAM_UNIQUE = 'La lista no debe contener ID repetidos (ID repetido: {}).'
 FIELD_LIST_EMPTY = 'La lista no contiene valores.'
 FIELD_LIST_REPEATED = 'La lista contiene valores repetidos.'
-FIELD_LIST_INVALID_CHOICE = INVALID_CHOICE + ' Alternativamente, se pueden \
-especificar los valores \'basico\', \'estandar\' o \'completo\'.'
+FIELD_LIST_INVALID_CHOICE = 'El parámetro debe consistir en una lista de \
+ítems separados por comas. Los valores posibles de los ítems se listan bajo \
+la clave \'ayuda\'. Alternativamente, se pueden especificar los valores \
+\'basico\', \'estandar\' o \'completo\'.'
 FIELD_INTERSECTION_FORMAT = 'El parámetro debe seguir el siguiente formato: \
 <tipo de entidad>:<id>, <tipo de entidad>:<id>, ... (ver ejemplos bajo la \
 clave ayuda).'
