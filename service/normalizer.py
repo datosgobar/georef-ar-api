@@ -188,7 +188,6 @@ def process_entity_single(request, name, param_parser, key_translations):
     expand_geometries = fmt[N.FORMAT] == 'shp'
     if expand_geometries:
         query['fields'] += (N.GEOM,)
-        fmt[N.FIELDS] += (N.GEOM,)
 
     es = get_elasticsearch()
     result = data.search_entities(es, name, [query], expand_geometries)[0]
@@ -449,7 +448,6 @@ def process_street_single(request):
 
     if fmt[N.FORMAT] == 'shp':
         query['fields'] += (N.GEOM,)
-        fmt[N.FIELDS] += (N.GEOM,)
 
     es = get_elasticsearch()
     result = data.search_streets(es, [query])[0]

@@ -470,20 +470,23 @@ def create_internal_error_response():
     }), 500)
 
 
-def format_result_xml(name, result):
+def format_result_xml(name, result, fmt):
     """Toma el resultado de una consulta y la convierte a su equivalente en
     XML.
 
     Args:
         name (str): Nombre de la entidad consultada.
         result (QueryResult): Resultado de una consulta.
+        fmt (dict): Parámetros de formato.
 
     Returns:
         ElementTree.Element: Resultados con estructura XML.
 
     """
-    root = create_xml_element(N.RESULT)
+    # Remover campos no especificados por el usuario.
+    format_result_fields(result, fmt)
 
+    root = create_xml_element(N.RESULT)
     if result.iterable:
         root.append(value_to_xml(name, result.entities,
                                  list_item_names=XML_LIST_ITEM_NAMES))
@@ -496,19 +499,20 @@ def format_result_xml(name, result):
     return root
 
 
-def create_xml_response_single(name, result):
+def create_xml_response_single(name, result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato XML.
 
     Args:
         name (str): Nombre de la entidad consultada.
         result (QueryResult): Resultado de una consulta.
+        fmt (dict): Parámetros de formato.
 
     Returns:
         flask.Response: Respuesta HTTP 200 con contenido XML.
 
     """
-    root = format_result_xml(name, result)
+    root = format_result_xml(name, result, fmt)
     return xml_flask_response(root)
 
 
@@ -534,12 +538,7 @@ def create_shp_response_single(name, result, fmt):
     dbf = io.BytesIO()
 
     writer = shapefile.Writer(shp=shp, shx=shx, dbf=dbf)
-
-    keys = [
-        field.replace('.', FLAT_SEP)
-        for field in fmt[N.FIELDS]
-        if field != N.GEOM  # No incluir la geometría en los records
-    ]
+    keys = [field.replace('.', FLAT_SEP) for field in fmt[N.FIELDS]]
 
     for key in keys:
         if len(key) > SHP_MAX_FIELD_NAME_LEN:
@@ -629,6 +628,9 @@ def create_geojson_response_single(result, fmt):
         flask.Response: Respuesta HTTP con contenido GeoJSON.
 
     """
+    # Remover campos no especificados por el usuario.
+    format_result_fields(result, fmt)
+
     features = []
     for item in result.entities:
         lat, lon = None, None
@@ -663,6 +665,9 @@ def format_result_json(name, result, fmt):
         dict: Resultados con estructura y formato apropiados.
 
     """
+    # Remover campos no especificados por el usuario.
+    format_result_fields(result, fmt)
+
     if fmt.get(N.FLATTEN, False):
         if result.iterable:
             for match in result.entities:
@@ -748,7 +753,8 @@ def filter_result_fields(result, fields_dict, max_depth=3):
 
 
 def format_result_fields(result, fmt):
-    """Aplica el parámetro de formato 'campos' a un resultado.
+    """Dada la lista de campos en fmt[N.FIELDS], remueve los campos no
+    especificados en cada entidad del resultado.
 
     Args:
         result (QueryResult): Resultado con valores a filtrar.
@@ -763,25 +769,28 @@ def format_result_fields(result, fmt):
         filter_result_fields(result.first_entity(), fields_dict)
 
 
-def format_results_fields(results, formats):
-    """Aplica el parámetro de formato 'campos' a varios resultados.
-
-    Args:
-        results (list): Resultados con valores a filtrar.
-        formats (list): Lista de parámetros de formato.
-
-    """
-    for result, fmt in zip(results, formats):
-        format_result_fields(result, fmt)
-
-
-def fields_list_to_dict(fields):
+def fields_list_to_dict(fields, sep='.'):
     """Convierte una lista de campos (potencialmente, campos anidados separados
     con puntos) en un diccionario de uno o más niveles conteniendo 'True' por
     cada campo procesado.
 
+    Por ejemplo, dada la siguiente lista de campos:
+
+    ['a', 'b.c', 'd']
+
+    Resultaría en el siguiente diccionario de campos:
+
+    {
+        'a': True,
+        'b': {
+            'c': True
+        },
+        'd': True
+    }
+
     Args:
         fields (tuple): Lista de campos.
+        sep (str): Separador de campos anidados.
 
     Returns:
         dict: Diccionario de campos.
@@ -789,7 +798,7 @@ def fields_list_to_dict(fields):
     """
     fields_dict = {}
     for field in fields:
-        parts = field.split('.')
+        parts = field.split(sep)
         current = fields_dict
         for part in parts[:-1]:
             current = current.setdefault(part, {})
@@ -816,8 +825,6 @@ def create_ok_response(name, result, fmt):
             especifica formato CSV para datos no iterables.
 
     """
-    format_result_fields(result, fmt)
-
     if fmt[N.FORMAT] == 'json':
         return create_json_response_single(name, result, fmt)
 
@@ -829,7 +836,7 @@ def create_ok_response(name, result, fmt):
         return create_csv_response_single(name, result, fmt)
 
     if fmt[N.FORMAT] == 'xml':
-        return create_xml_response_single(name, result)
+        return create_xml_response_single(name, result, fmt)
 
     if fmt[N.FORMAT] == 'geojson':
         return create_geojson_response_single(result, fmt)
@@ -853,7 +860,6 @@ def create_ok_response_bulk(name, results, formats):
         flask.Response: Respuesta HTTP 200.
 
     """
-    format_results_fields(results, formats)
     # El valor FMT de cada elemento de formats es 'json' (ya que en modo bulk
     # solo se permiten respuestas JSON).
     return create_json_response_bulk(name, results, formats)

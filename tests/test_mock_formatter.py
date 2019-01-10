@@ -93,8 +93,8 @@ class FormattingTest(GeorefMockTest):
         })
 
     def test_xml_structure(self):
-        """La estructura de las respuestas en formato XML deberían seguir una
-        estructura predeterminada."""
+        """El nodo raíz de todas las respuestas XML debería ser el tag
+        'georef-ar-api'."""
         self.set_msearch_results([])
         resp = self.get_response(params={'formato': 'xml'},
                                  endpoint='/api/provincias',
