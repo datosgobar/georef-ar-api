@@ -549,7 +549,7 @@ class AddressParameter(Parameter):
         with self._parser_lock:
             data = self._parser.parse(val)
 
-        if data['type'] == 'none':
+        if not data['type']:
             return None, None
 
         num = None
