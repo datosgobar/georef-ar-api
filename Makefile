@@ -20,7 +20,7 @@ index: check_config_file
 
 index_forced: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(INDEXER_PY) -m index -f -n $(INDEX_NAME)
+	python -m $(INDEXER_PY) -m index -n $(INDEX_NAME) -f
 
 print_index_stats: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
@@ -48,9 +48,10 @@ test_mock:
 	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
 	python -m unittest discover -p test_mock_*
 
+# TEST_FILES: Variable de entorno definida por el usuario
 test_custom:
 	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
-	python -m unittest discover -p $(TEST_FILES) # Variable de entorno definida por el usuario
+	python -m unittest discover -p $(TEST_FILES)
 
 test:
 	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
