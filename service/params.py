@@ -147,11 +147,11 @@ class Parameter:
     estado inicial estático.
 
     Attributes:
-        _choices (list): Lista de valores permitidos (o None si se permite
+        _choices (frozenset): Lista de valores permitidos (o None si se permite
             cualquier valor).
         _required (bool): Verdadero si el parámetro es requerido.
-        _default: Valor que debería tomar el parámetro en caso de no haber sido
-            recibido.
+        _default (object): Valor que debería tomar el parámetro en caso de no
+            haber sido recibido.
 
     """
 
@@ -291,6 +291,13 @@ class IdsParameter(Parameter):
     nuevamente el método '_parse_value' para implementar lógica de parseo y
     validación propias de IdParameter.
 
+    Attributes:
+        _id_length (int): Longitud de los IDs a aceptar/devolver.
+        _padding_char (str): Caracter a utilizar para completar los IDs
+            recibidos con longitud menor a _id_length.
+        _min_length (int): Longitud mínima de valores str a procesar.
+        _sep (str): Caracter a utilizar para separar listas de IDs.
+
     """
 
     def __init__(self, id_length, padding_char='0', padding_length=1, sep=','):
@@ -330,6 +337,10 @@ class StrOrIdsParameter(Parameter):
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
     nuevamente el método '_parse_value' para implementar lógica de parseo y
     validación propias de StrOrIdParameter.
+
+    Attributes:
+        _id_param (IdsParameter): Parámetro de lista de IDs.
+        _str_param (StrParameter): Parámetro de string.
 
     """
 
@@ -371,13 +382,13 @@ class FieldListParameter(Parameter):
     _check_value_in_choices para modificar su comportamiento original.
 
     Attributes:
-        self._basic (set): Conjunto de campos mínimos, siempre son incluídos
-            en cualquier lista de campos, incluso si el usuario no los
-            especificó.
-        self._standard (set): Conjunto de campos estándar. Se retorna este
-            conjunto de parámetros como default cuando no se especifica ningún
-            conjunto de parámetros.
-        self._complete (set): Conjunto de campos completos. Este conjunto
+        self._basic (frozenset): Conjunto de campos mínimos, siempre son
+            incluídos en cualquier lista de campos, incluso si el usuario no
+            los especificó.
+        self._standard (frozenset): Conjunto de campos estándar. Se retorna
+            este conjunto de parámetros como default cuando no se especifica
+            ningún conjunto de parámetros.
+        self._complete (frozenset): Conjunto de campos completos. Este conjunto
             contiene todos los campos posibles a especificar.
 
     """
@@ -459,6 +470,10 @@ class IntParameter(Parameter):
     validación propias de IntParameter, y 'valid_values' para validar uno
     o más parámetros 'max' recibidos en conjunto.
 
+    Attributes:
+        _lower_limit (int): Valor mínimo int a aceptar.
+        _upper_limit (int): Valor máximo int a aceptar.
+
     """
 
     def __init__(self, required=False, default=0, choices=None,
@@ -508,15 +523,19 @@ class AddressParameter(Parameter):
     Attributes:
         _parser (AddressParser): Parser de direcciones de la librería
             georef-ar-address.
+        _parser_lock (threading.Lock): Mutex utilizado para sincronizar el uso
+            de '_parser' (ver comentario en '__init__').
 
     """
 
     def __init__(self):
-        # Se crea el Lock 'self._parser_lock' para evitar problemas en
-        # contextos de ejecución donde se usen threads. Si se utilizan threads
-        # o no depende de la configuración que se esté usando para los workers
-        # de Gunicorn. Por defecto los workers son de tipo 'sync', por lo que
-        # se crea un proceso separado por worker (no se usan threads).
+        # Se crea el Lock 'self._parser_lock' para evitar problemas con
+        # 'self._parser' en contextos de ejecución donde se usen threads, ya
+        # que el parser cuenta con un estado interno mutable (su propiedad
+        # '_cache'). Si se utilizan threads o no depende de la configuración
+        # que se esté usando para los workers de Gunicorn. Por defecto los
+        # workers son de tipo 'sync', por lo que se crea un proceso separado
+        # por worker (no se usan threads).
         self._parser_lock = threading.Lock()
 
         cache = utils.LRUDict(constants.ADDRESS_PARSER_CACHE_SIZE)
@@ -552,6 +571,10 @@ class IntersectionParameter(Parameter):
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
     nuevamente el método '_parse_value' para implementar lógica de parseo y
     validación propias de IntersectionParameter.
+
+    Attributes:
+        _id_params (dict): Diccionario de tipo de entidad a objeto
+            IdsParameter.
 
     """
 
