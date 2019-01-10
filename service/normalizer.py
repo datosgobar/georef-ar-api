@@ -653,6 +653,41 @@ def build_address_query_format(parsed_params):
     return query, fmt
 
 
+def process_address_queries(params_list):
+    """Ejecuta una lista de consultas de direcciones, partiendo desde los
+    parámetros recibidos del usuario.
+
+    Args:
+        params_list (list): Lista de dict, cada dict conteniendo los parámetros
+            de una consulta al recurso de direcciones de la API.
+
+    Returns:
+        tuple: Tupla de (list, list), donde la primera lista contiene una
+            instancia de QueryResult por cada consulta, y la segunda lista
+            contiene una instancia de dict utilizada para darle formato al
+            resultado más tarde.
+
+    """
+    queries = []
+    formats = []
+    for parsed_params in params_list:
+        query, fmt = build_address_query_format(parsed_params)
+        queries.append(query)
+        formats.append(fmt)
+
+    es = get_elasticsearch()
+    results = data.search_streets(es, queries)
+
+    source = INDEX_SOURCES[N.STREETS]
+    for result, query in zip(results, queries):
+        build_addresses_result(result, query, source)
+
+    return [
+        QueryResult.from_entity_list(result.hits, result.total, result.offset)
+        for result in results
+    ], formats
+
+
 def process_address_single(request):
     """Procesa una request GET para normalizar una dirección.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
@@ -673,18 +708,10 @@ def process_address_single(request):
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
-    query, fmt = build_address_query_format(qs_params)
+    query_results, formats = process_address_queries([qs_params])
 
-    es = get_elasticsearch()
-    result = data.search_streets(es, [query])[0]
-
-    source = INDEX_SOURCES[N.STREETS]
-    build_addresses_result(result, query, source)
-
-    query_result = QueryResult.from_entity_list(result.hits, result.total,
-                                                result.offset)
-
-    return formatter.create_ok_response(N.ADDRESSES, query_result, fmt)
+    return formatter.create_ok_response(N.ADDRESSES, query_results[0],
+                                        formats[0])
 
 
 def process_address_bulk(request):
@@ -708,23 +735,7 @@ def process_address_bulk(request):
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
-    queries = []
-    formats = []
-    for parsed_params in body_params:
-        query, fmt = build_address_query_format(parsed_params)
-        queries.append(query)
-        formats.append(fmt)
-
-    es = get_elasticsearch()
-    results = data.search_streets(es, queries)
-
-    source = INDEX_SOURCES[N.STREETS]
-    for result, query in zip(results, queries):
-        build_addresses_result(result, query, source)
-
-    query_results = [QueryResult.from_entity_list(result.hits, result.total,
-                                                  result.offset)
-                     for result in results]
+    query_results, formats = process_address_queries(body_params)
 
     return formatter.create_ok_response_bulk(N.ADDRESSES, query_results,
                                              formats)
