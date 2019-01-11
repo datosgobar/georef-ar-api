@@ -7,8 +7,8 @@ from . import GeorefLiveTest, asciifold
 COMMON_ADDRESS = 'Corrientes 1000'
 
 
-class SearchAddressesTest(GeorefLiveTest):
-    """Pruebas de búsqueda por dirección."""
+class SearchAddressesSimpleTest(GeorefLiveTest):
+    """Pruebas de búsqueda por dirección de tipo 'simple'."""
 
     def setUp(self):
         self.endpoint = '/api/v1.0/direcciones'
@@ -31,7 +31,7 @@ class SearchAddressesTest(GeorefLiveTest):
     def test_id_length(self):
         """El ID de la entidad debe tener la longitud correcta."""
         data = self.get_response({'direccion': COMMON_ADDRESS, 'max': 1})[0]
-        self.assertTrue(len(data['id']) == 13)
+        self.assertTrue(len(data['calle']['id']) == 13)
 
     def test_pagination(self):
         """Los resultados deberían poder ser paginados."""
@@ -47,7 +47,7 @@ class SearchAddressesTest(GeorefLiveTest):
             })
 
             for result in resp:
-                results.add(result['id'])
+                results.add(result['calle']['id'])
 
         # Si el paginado funciona correctamente, no deberían haberse repetido
         # IDs de entidades entre resultados.
@@ -70,12 +70,13 @@ class SearchAddressesTest(GeorefLiveTest):
         data = self.get_response({'direccion': COMMON_ADDRESS, 'max': 1})[0]
         fields = sorted([
             'altura',
+            'piso',
+            'calle',
+            'calle_cruce_1',
+            'calle_cruce_2',
             'departamento',
-            'id',
-            'nombre',
             'nomenclatura',
             'provincia',
-            'tipo',
             'ubicacion'
         ])
         self.assertListEqual(fields, sorted(data.keys()))
@@ -83,17 +84,32 @@ class SearchAddressesTest(GeorefLiveTest):
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""
-        self.assert_fields_set_equals('basico', ['id', 'nombre', 'altura'],
+        self.assert_fields_set_equals('basico', ['calle.id', 'calle.nombre',
+                                                 'altura.valor',
+                                                 'calle_cruce_1.id',
+                                                 'calle_cruce_1.nombre',
+                                                 'calle_cruce_2.id',
+                                                 'calle_cruce_2.nombre',
+                                                 'piso'],
                                       {'direccion': COMMON_ADDRESS})
 
     def test_standard_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'estandar'."""
         self.assert_fields_set_equals('estandar',
-                                      ['id', 'nombre', 'altura',
+                                      ['altura.valor', 'altura.unidad',
+                                       'piso',
+                                       'calle.id', 'calle.nombre',
+                                       'calle.tipo',
+                                       'calle_cruce_1.id',
+                                       'calle_cruce_1.nombre',
+                                       'calle_cruce_1.tipo',
+                                       'calle_cruce_2.id',
+                                       'calle_cruce_2.nombre',
+                                       'calle_cruce_2.tipo',
                                        'departamento.id',
                                        'departamento.nombre',
-                                       'nomenclatura', 'tipo',
+                                       'nomenclatura',
                                        'provincia.id', 'provincia.nombre',
                                        'ubicacion.lat', 'ubicacion.lon'],
                                       {'direccion': COMMON_ADDRESS})
@@ -102,23 +118,39 @@ class SearchAddressesTest(GeorefLiveTest):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'completo'."""
         self.assert_fields_set_equals('completo',
-                                      ['id', 'fuente', 'nombre', 'tipo',
-                                       'altura', 'departamento.id',
-                                       'departamento.nombre', 'nomenclatura',
+                                      ['altura.valor', 'altura.unidad',
+                                       'piso',
+                                       'calle.id', 'calle.nombre',
+                                       'calle.tipo',
+                                       'calle_cruce_1.id',
+                                       'calle_cruce_1.nombre',
+                                       'calle_cruce_1.tipo',
+                                       'calle_cruce_2.id',
+                                       'calle_cruce_2.nombre',
+                                       'calle_cruce_2.tipo',
+                                       'departamento.id',
+                                       'departamento.nombre',
+                                       'nomenclatura',
                                        'provincia.id', 'provincia.nombre',
-                                       'ubicacion.lat', 'ubicacion.lon'],
+                                       'ubicacion.lat', 'ubicacion.lon',
+                                       'fuente'],
                                       {'direccion': COMMON_ADDRESS})
 
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""
         fields_lists = [
-            ['altura', 'fuente', 'id', 'nombre', 'ubicacion.lat',
-             'ubicacion.lon'],
-            ['altura', 'fuente', 'id', 'nombre', 'nomenclatura',
-             'ubicacion.lat', 'ubicacion.lon'],
-            ['altura', 'departamento.id', 'fuente', 'id', 'nombre',
-             'ubicacion.lat']
+            ['fuente', 'ubicacion.lat', 'ubicacion.lon'],
+            ['fuente', 'nomenclatura', 'ubicacion.lat'],
+            ['departamento.id', 'ubicacion.lat']
         ]
+        for field_list in fields_lists:
+            field_list.extend(['calle_cruce_1.nombre', 'calle_cruce_1.id',
+                               'calle_cruce_2.nombre', 'calle_cruce_2.id',
+                               'piso', 'calle.id', 'calle.nombre',
+                               'altura.valor'])
+
+        fields_lists = [sorted(l) for l in fields_lists]
+
         fields_results = []
 
         for fields in fields_lists:
@@ -136,7 +168,7 @@ class SearchAddressesTest(GeorefLiveTest):
         """Las direcciones con altura 0 deben ser tratadas como alturas sin
         número."""
         resp = self.get_response({'direccion': 'Corrientes 0'})
-        self.assertIsNone(resp[0]['altura'])
+        self.assertIsNone(resp[0]['altura']['valor'])
 
     def test_no_number_returns_null(self):
         """Si se especifica una dirección sin altura, se debería normalizar por
@@ -147,7 +179,10 @@ class SearchAddressesTest(GeorefLiveTest):
             'departamento': '82084'
         })
 
-        self.assertTrue(all(addr['altura'] is None for addr in response))
+        self.assertTrue(all(
+            addr['altura']['valor'] is None
+            for addr in response
+        ))
 
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
@@ -157,7 +192,7 @@ class SearchAddressesTest(GeorefLiveTest):
             'max': 1000
         })
 
-        ordered = [r['nombre'] for r in resp]
+        ordered = [r['calle']['nombre'] for r in resp]
         expected = sorted(ordered, key=asciifold)
         self.assertListEqual(ordered, expected)
 
@@ -169,7 +204,7 @@ class SearchAddressesTest(GeorefLiveTest):
             'max': 1000
         })
 
-        ordered = [r['id'] for r in resp]
+        ordered = [r['calle']['id'] for r in resp]
         expected = sorted(ordered)
         self.assertListEqual(ordered, expected)
 
@@ -216,7 +251,7 @@ class SearchAddressesTest(GeorefLiveTest):
             if exact:
                 params['exacto'] = 1
             res = self.get_response(params)
-            results.append(sorted([p['id'] for p in res]))
+            results.append(sorted([p['calle']['id'] for p in res]))
 
         self.assertListEqual([sorted(ids) for ids, _ in term_matches], results)
 
@@ -317,8 +352,12 @@ class SearchAddressesTest(GeorefLiveTest):
             'direccion': COMMON_ADDRESS
         })
 
-        roads_valid = roads and all(road['tipo'] == 'CALLE' for road in roads)
-        avenues_valid = avenues and all(av['tipo'] == 'AV' for av in avenues)
+        roads_valid = roads and all(
+            road['calle']['tipo'] == 'CALLE' for road in roads
+        )
+        avenues_valid = avenues and all(
+            av['calle']['tipo'] == 'AV' for av in avenues
+        )
 
         self.assertTrue(roads_valid and avenues_valid)
 
@@ -459,7 +498,7 @@ class SearchAddressesTest(GeorefLiveTest):
             },
             {
                 'direccion': COMMON_ADDRESS,
-                'campos': 'nombre,tipo'
+                'campos': 'calle.nombre,calle.tipo'
             },
             {
                 'direccion': COMMON_ADDRESS,
@@ -523,11 +562,19 @@ class SearchAddressesTest(GeorefLiveTest):
         })
 
         headers = next(resp)
-        self.assertListEqual(headers, ['calle_id',
+        self.assertListEqual(headers, ['altura_valor',
+                                       'altura_unidad',
+                                       'piso',
+                                       'direccion_nomenclatura',
                                        'calle_nombre',
-                                       'calle_altura',
-                                       'calle_nomenclatura',
+                                       'calle_id',
                                        'calle_tipo',
+                                       'calle_cruce_1_nombre',
+                                       'calle_cruce_1_id',
+                                       'calle_cruce_1_tipo',
+                                       'calle_cruce_2_nombre',
+                                       'calle_cruce_2_id',
+                                       'calle_cruce_2_tipo',
                                        'provincia_id',
                                        'provincia_nombre',
                                        'departamento_id',

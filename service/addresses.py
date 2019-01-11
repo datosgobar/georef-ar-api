@@ -56,6 +56,7 @@ class AddressQueryPlanner:
         self._street_names = address_data['street_names']
         self._door_number = None
         self._door_number_unit = address_data['door_number']['unit']
+        self._floor = address_data['floor']
 
         door_number_value = address_data['door_number']['value']
         if door_number_value:
@@ -89,6 +90,7 @@ class AddressQueryPlanner:
             N.VALUE: self._door_number,
             N.UNIT: self._door_number_unit
         }
+        address_hit[N.FLOOR] = self._floor
         address_hit[N.LOCATION] = {
             N.LAT: None,
             N.LON: None
