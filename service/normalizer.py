@@ -6,99 +6,11 @@ de los recursos que expone la API.
 
 import logging
 from flask import current_app
-from service import data, params, formatter
+from service import data, params, formatter, addresses, constants
 from service import names as N
+from service.query_result import QueryResult
 
 logger = logging.getLogger('georef')
-
-INDEX_SOURCES = {
-    N.STATES: N.SOURCE_IGN,
-    N.DEPARTMENTS: N.SOURCE_IGN,
-    N.MUNICIPALITIES: N.SOURCE_IGN,
-    N.LOCALITIES: N.SOURCE_BAHRA,
-    N.STREETS: N.SOURCE_INDEC
-}
-
-
-class QueryResult:
-    """Representa el resultado de una consulta a la API.
-
-    Se distinguen dos casos de resultados posibles:
-        1) Resultados en forma de lista de 0 o más elementos.
-        2) Resultado singular.
-    Internamente, ambos casos se almacenan como una lista.
-
-    Attributes:
-        _entities (list): Lista de entidades (provincias, municipios,
-            ubicaciones, calles, etc.).
-        _iterable (bool): Falso si el resultado representa una entidad
-            singular (como en el caso de una ubicación). Verdadero cuando se
-            representa una lista de entidades (como en el caso de, por ejemplo,
-            provincias).
-        _total (int): Total de entidades encontradas, no necesariamente
-            incluidas en la respuesta. En caso de iterable == False, se utiliza
-            1 como valor default, ya que el 'total' de entidades posibles a ser
-            devueltas es 0 o 1, pero al contar ya con un resultado, el número
-            deber ser 1.
-        _offset (int): Cantidad de resultados salteados. En caso de iterable ==
-            False, se establece como 0, ya que no se puede saltear el único
-            posible.
-
-    """
-
-    def __init__(self, entities, iterable=False, total=1, offset=0):
-        """Inicializar una QueryResult. Se recomienda utilizar
-        'from_single_entity' y 'from_entity_list' en vez de utilizar este
-        método.
-
-        """
-        self._entities = entities
-        self._iterable = iterable
-        self._total = total
-        self._offset = offset
-
-    @classmethod
-    def from_single_entity(cls, entity):
-        """Construir una QueryResult a partir de una entidad singular.
-
-        Args:
-            entity (dict): Entidad encontrada.
-
-        """
-        return cls([entity])
-
-    @classmethod
-    def from_entity_list(cls, entities, total, offset=0):
-        """Construir una QueryResult a partir de una lista de entidades de
-        cualquier longitud.
-
-        Args:
-            entities (list): Lista de entidades.
-            total (int): Total de entidades encontradas, no necesariamente
-                incluidas.
-            offset (int): Cantidad de resultados salteados.
-
-        """
-        return cls(entities, iterable=True, total=total, offset=offset)
-
-    @property
-    def entities(self):
-        return self._entities
-
-    def first_entity(self):
-        return self._entities[0]
-
-    @property
-    def total(self):
-        return self._total
-
-    @property
-    def offset(self):
-        return self._offset
-
-    @property
-    def iterable(self):
-        return self._iterable
 
 
 def get_elasticsearch():
@@ -192,7 +104,7 @@ def process_entity_single(request, name, param_parser, key_translations):
     es = get_elasticsearch()
     result = data.search_entities(es, name, [query], expand_geometries)[0]
 
-    source = INDEX_SOURCES[name]
+    source = constants.INDEX_SOURCES[name]
     for match in result.hits:
         match[N.SOURCE] = source
 
@@ -249,7 +161,7 @@ def process_entity_bulk(request, name, param_parser, key_translations):
     es = get_elasticsearch()
     results = data.search_entities(es, name, queries)
 
-    source = INDEX_SOURCES[name]
+    source = constants.INDEX_SOURCES[name]
     for result in results:
         for match in result.hits:
             match[N.SOURCE] = source
@@ -403,7 +315,7 @@ def build_street_query_format(parsed_params):
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
         N.ID: 'street_ids',
-        N.NAME: 'road_name',
+        N.NAME: 'name',
         N.STATE: 'state',
         N.DEPT: 'department',
         N.EXACT: 'exact',
@@ -452,7 +364,7 @@ def process_street_single(request):
     es = get_elasticsearch()
     result = data.search_streets(es, [query])[0]
 
-    source = INDEX_SOURCES[N.STREETS]
+    source = constants.INDEX_SOURCES[N.STREETS]
     for match in result.hits:
         match[N.SOURCE] = source
 
@@ -493,7 +405,7 @@ def process_street_bulk(request):
     es = get_elasticsearch()
     results = data.search_streets(es, queries)
 
-    source = INDEX_SOURCES[N.STREETS]
+    source = constants.INDEX_SOURCES[N.STREETS]
     for result in results:
         for match in result.hits:
             match[N.SOURCE] = source
@@ -528,86 +440,6 @@ def process_street(request):
         return formatter.create_internal_error_response()
 
 
-def street_extents(door_nums, number):
-    """Dados los datos de alturas de una calle, y una altura recibida en una
-    consulta, retorna los extremos de la calle que contienen la altura.
-    Idealmente, se utilizaría siempre start_r y end_l, pero al contar a veces
-    con datos incompletos, se flexibiliza la elección de extremos para poder
-    geolocalizar más direcciones.
-
-    Args:
-        door_nums (dict): Datos de alturas de la calle.
-        number (int): Altura recibida en una consulta.
-
-    Returns:
-        tuple (int, int): Altura inicial y final de la calle que contienen la
-            altura especificada.
-
-    Raises:
-        ValueError: Si la altura no está contenida dentro de ninguna
-            combinación de extremos.
-
-    """
-    start_r = door_nums[N.START][N.RIGHT]
-    start_l = door_nums[N.START][N.LEFT]
-    end_r = door_nums[N.END][N.RIGHT]
-    end_l = door_nums[N.END][N.LEFT]
-
-    combinations = [(start_r, end_l), (start_l, end_r), (start_r, end_r),
-                    (start_l, end_l)]
-
-    for start, end in combinations:
-        if start <= number <= end:
-            return start, end
-
-    raise ValueError('Street number out of range')
-
-
-def build_addresses_result(result, query, source):
-    """Construye resultados para una consulta al endpoint de direcciones.
-    Modifica los resultados contenidos en la lista 'result', agregando
-    ubicación, altura y nomenclatura con altura.
-
-    Args:
-        result (list): Resultados de una búsqueda al índice de calles.
-            (lista de calles).
-        query (dict): Query utilizada para obtener los resultados.
-        source (str): Nombre de la fuente de los datos.
-
-    """
-    fields = query['fields']
-    number = query['number']
-
-    for street in result.hits:
-        if number and N.FULL_NAME in fields:
-            parts = street[N.FULL_NAME].split(',')
-            parts[0] += ' {}'.format(number)
-            street[N.FULL_NAME] = ','.join(parts)
-
-        door_nums = street.pop(N.DOOR_NUM)
-        geom = street.pop(N.GEOM)
-
-        if N.DOOR_NUM in fields:
-            street[N.DOOR_NUM] = number
-
-        if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
-            if number:
-                # El llamado a street_extents() no puede lanzar una excepción
-                # porque los resultados de Elasticsearch aseguran que 'number'
-                # está dentro de alguna combinación de extremos de la calle.
-                start, end = street_extents(door_nums, number)
-                loc = data.street_number_location(geom, number, start, end)
-            else:
-                loc = {
-                    N.LAT: None,
-                    N.LON: None
-                }
-
-            street[N.LOCATION] = loc
-
-        street[N.SOURCE] = source
-
-
 def build_address_query_format(parsed_params):
     """Construye dos diccionarios a partir de parámetros de consulta
     recibidos, el primero representando la query a Elasticsearch a
@@ -622,12 +454,13 @@ def build_address_query_format(parsed_params):
         tuple: diccionario de query y diccionario de formato
 
     """
-    # Construir query a partir de parámetros
-    road_name, number = parsed_params.pop(N.ADDRESS)
-    parsed_params['road_name'] = road_name
-    parsed_params['number'] = number
+    # road_name, number = parsed_params.pop(N.ADDRESS)
+    # parsed_params['road_name'] = road_name
+    # parsed_params['number'] = number
 
+    # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
+        # N.ADDRESS: 'address_data',
         N.DEPT: 'department',
         N.STATE: 'state',
         N.EXACT: 'exact',
@@ -635,12 +468,6 @@ def build_address_query_format(parsed_params):
         N.OFFSET: 'offset',
         N.ORDER: 'order'
     }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])
-
-    # Siempre traer la geometría y los cuatro límites de altura, para poder
-    # calcular más tarde las coordenadas de la altura especificada (utilizando
-    # la geometría)
-    query['fields'] = parsed_params[N.FIELDS] + (N.GEOM, N.START_R, N.START_L,
-                                                 N.END_R, N.END_L)
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
@@ -676,16 +503,10 @@ def process_address_queries(params_list):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = data.search_streets(es, queries)
+    # results = data.search_streets(es, queries)
+    query_results = addresses.run_address_queries(es, queries, formats)
 
-    source = INDEX_SOURCES[N.STREETS]
-    for result, query in zip(results, queries):
-        build_addresses_result(result, query, source)
-
-    return [
-        QueryResult.from_entity_list(result.hits, result.total, result.offset)
-        for result in results
-    ], formats
+    return query_results, formats
 
 
 def process_address_single(request):
@@ -795,7 +616,7 @@ def build_place_result(query, state, dept, muni):
         dept = dept or empty_entity.copy()
         muni = muni or empty_entity.copy()
         # TODO: Cambiar a 'fuentes'?
-        source = INDEX_SOURCES[N.STATES]
+        source = constants.INDEX_SOURCES[N.STATES]
 
     place = {
         N.STATE: state,

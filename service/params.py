@@ -4,17 +4,12 @@ Contiene clases utilizadas para leer y validar parámetros recibidos en requests
 HTTP.
 """
 
-import re
 import threading
 from enum import Enum, unique
 from collections import defaultdict
-from flask import current_app
 from georef_ar_address import AddressParser
 import service.names as N
 from service import strings, constants, utils
-
-MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
-MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
 
 
 class ParameterParsingException(Exception):
@@ -309,8 +304,9 @@ class IdsParameter(Parameter):
 
     def _parse_value(self, val):
         items = val.split(self._sep)
-        if len(items) > MAX_RESULT_LEN:
-            raise ValueError(strings.ID_PARAM_LENGTH.format(MAX_RESULT_LEN))
+        if len(items) > constants.MAX_RESULT_LEN:
+            raise ValueError(strings.ID_PARAM_LENGTH.format(
+                constants.MAX_RESULT_LEN))
 
         ids = set()
         for item in items:
@@ -547,21 +543,7 @@ class AddressParameter(Parameter):
             raise ValueError(strings.STRING_EMPTY)
 
         with self._parser_lock:
-            data = self._parser.parse(val)
-
-        if not data['type']:
-            return None, None
-
-        num = None
-        door_num_value = data['door_number']['value']
-        if door_num_value:
-            match = re.search(r'\d+', door_num_value)
-            if match:
-                num_int = int(match.group(0))
-                if num_int != 0:
-                    num = num_int
-
-        return data['street_names'][0], num
+            return self._parser.parse(val)
 
 
 class IntersectionParameter(Parameter):
@@ -657,6 +639,8 @@ class IntersectionParameter(Parameter):
                 ids[N.DEPARTMENTS].update(entity_ids)
             elif entity == N.MUN:
                 ids[N.MUNICIPALITIES].update(entity_ids)
+            else:
+                raise TypeError('Invalid entity type')
 
         return ids if any(list(ids.values())) else {}
 
@@ -975,11 +959,12 @@ class EndpointParameters():
                                       'body')}
             ])
 
-        if len(body_params) > MAX_RESULT_LEN:
+        if len(body_params) > constants.MAX_RESULT_LEN:
             raise ParameterParsingException([
                 {body_key: ParamError(
                     ParamErrorType.INVALID_BULK_LEN,
-                    strings.BULK_LEN_ERROR.format(MAX_RESULT_LEN), 'body')}
+                    strings.BULK_LEN_ERROR.format(constants.MAX_RESULT_LEN),
+                    'body')}
             ])
 
         results, errors_list = [], []
@@ -1033,18 +1018,20 @@ PARAMS_STATES = EndpointParameters(shared_params={
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON],
                                  complete=[N.SOURCE]),
-    N.MAX: IntParameter(default=24, lower_limit=1, upper_limit=MAX_RESULT_LEN),
-    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
+    N.MAX: IntParameter(default=24, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
                            choices=['json', 'csv', 'geojson', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
-    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
 ).with_cross_validator(
     [N.MAX, N.OFFSET],
-    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
@@ -1058,18 +1045,20 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME],
                                  complete=[N.SOURCE, N.STATE_INTERSECTION]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
-    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
                            choices=['json', 'csv', 'geojson', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
-    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
 ).with_cross_validator(
     [N.MAX, N.OFFSET],
-    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
@@ -1083,18 +1072,20 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME],
                                  complete=[N.SOURCE, N.STATE_INTERSECTION]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
-    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
                            choices=['json', 'csv', 'geojson', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
-    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
 ).with_cross_validator(
     [N.MAX, N.OFFSET],
-    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
@@ -1111,19 +1102,40 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
                                            N.DEPT_NAME, N.MUN_ID, N.MUN_NAME,
                                            N.LOCALITY_TYPE],
                                  complete=[N.SOURCE]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
-    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
                            choices=['json', 'csv', 'geojson', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
-    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
 ).with_cross_validator(
     [N.MAX, N.OFFSET],
-    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
+
+_ADDRESSES_BASIC_FIELDS = [
+    N.DOOR_NUM_VAL,
+    N.STREET_ID, N.STREET_NAME,
+    N.STREET_X1_ID, N.STREET_X1_NAME,
+    N.STREET_X2_ID, N.STREET_X2_NAME,
+    N.FLOOR
+]
+
+_ADDRESSES_STANDARD_FIELDS = [
+    N.STATE_ID, N.STATE_NAME,
+    N.DEPT_ID, N.DEPT_NAME,
+    N.DOOR_NUM_UNIT,
+    N.STREET_TYPE,
+    N.STREET_X1_TYPE,
+    N.STREET_X2_TYPE,
+    N.FULL_NAME,
+    N.LOCATION_LAT, N.LOCATION_LON
+]
 
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
@@ -1132,24 +1144,23 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
-    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME, N.DOOR_NUM],
-                                 standard=[N.STATE_ID, N.STATE_NAME, N.DEPT_ID,
-                                           N.DEPT_NAME, N.ROAD_TYPE,
-                                           N.FULL_NAME, N.LOCATION_LAT,
-                                           N.LOCATION_LON],
+    N.FIELDS: FieldListParameter(basic=_ADDRESSES_BASIC_FIELDS,
+                                 standard=_ADDRESSES_STANDARD_FIELDS,
                                  complete=[N.SOURCE]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
-    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
                            choices=['json', 'csv', 'geojson', 'xml'])
 }).with_set_validator(
     N.MAX,
-    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
 ).with_cross_validator(
     [N.MAX, N.OFFSET],
-    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
 PARAMS_STREETS = EndpointParameters(shared_params={
@@ -1166,18 +1177,20 @@ PARAMS_STREETS = EndpointParameters(shared_params={
                                            N.DEPT_ID, N.DEPT_NAME, N.FULL_NAME,
                                            N.ROAD_TYPE],
                                  complete=[N.SOURCE]),
-    N.MAX: IntParameter(default=10, lower_limit=1, upper_limit=MAX_RESULT_LEN),
-    N.OFFSET: IntParameter(lower_limit=0, upper_limit=MAX_RESULT_WINDOW),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
                            choices=['json', 'csv', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
-    IntSetSumValidator(upper_limit=MAX_RESULT_LEN)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
 ).with_cross_validator(
     [N.MAX, N.OFFSET],
-    IntSetSumValidator(upper_limit=MAX_RESULT_WINDOW)
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
 

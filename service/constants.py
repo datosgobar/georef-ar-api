@@ -3,6 +3,20 @@
 Contiene variables con valores constantes.
 """
 
+from flask import current_app
+from service import names as N
+
+MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
+MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
+
+INDEX_SOURCES = {
+    N.STATES: N.SOURCE_IGN,
+    N.DEPARTMENTS: N.SOURCE_IGN,
+    N.MUNICIPALITIES: N.SOURCE_IGN,
+    N.LOCALITIES: N.SOURCE_BAHRA,
+    N.STREETS: N.SOURCE_INDEC
+}
+
 MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_SEARCH_SIZE = 10
 DEFAULT_FUZZINESS = 'AUTO:4,8'

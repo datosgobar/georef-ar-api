@@ -5,8 +5,6 @@ Contiene funciones que ejecutan consultas a índices de Elasticsearch.
 
 import logging
 import elasticsearch
-import shapely.ops
-import shapely.geometry
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
 from elasticsearch_dsl.query import MatchNone, Terms, Prefix, Bool
@@ -14,6 +12,9 @@ from service import names as N
 from service import constants
 from service.management import es_config
 
+INTERSECTION_PARAM_TYPES = (
+    N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES, N.STREETS
+)
 
 logger = logging.getLogger('georef')
 
@@ -130,6 +131,9 @@ class ElasticsearchSearch:
         for search in searches:
             ms = ms.add(search.es_search)
 
+        # import json
+        # print(json.dumps(ms.to_dict(), indent=4))
+
         try:
             responses = ms.execute(raise_on_error=True)
 
@@ -178,39 +182,51 @@ class ElasticsearchResult:
 
 def expand_intersection_parameters(es, params_list):
     """Dada una lista de conjuntos de parámetros, encuentra parámetros de tipo
-    'interseccion' y reemplaza los listados de IDs por búsquedas Elasticsearch
-    de esos IDs. Esto se hace para poder utilizar más adelante los IDs ya
-    validados en las consultas de tipo GeoShape con geometrías pre-indexadas,
-    que requieren IDs de documentos existentes. La función se asegura de que
-    incluso si hay varios parámetros de tipo 'intersección', se haga una sola
-    consulta a Elasticsearch.
+    'interseccion' y comprueba que los IDs listados internamente apunten a
+    entidades existentes. Esto se hace para poder utilizar más adelante los IDs
+    ya validados en las consultas de tipo GeoShape con geometrías
+    pre-indexadas, que requieren IDs de documentos existentes. La función se
+    asegura de que incluso si hay varios parámetros de tipo 'intersección',
+    se haga una sola consulta a Elasticsearch.
 
     Args:
         es (Elasticsearch): Cliente de Elasticsearch.
         params_list (list): Lista de conjuntos de parámetros de consultas.
 
     """
-    sub_queries = {
-        N.STATES: [],
-        N.DEPARTMENTS: [],
-        N.MUNICIPALITIES: []
-    }
+    searches = []
 
     for params in params_list:
         ids = params.get('intersection')
         if not ids:
             continue
 
-        for entity_type in sub_queries:
-            ids[entity_type] = [
-                build_entity_search(entity_type, entity_ids=[i], fields=[N.ID])
-                for i in ids[entity_type]
-            ]
+        for entity_type in INTERSECTION_PARAM_TYPES:
+            entity_ids = list(ids[entity_type]) if entity_type in ids else None
 
-            sub_queries[entity_type].extend(ids[entity_type])
+            if entity_ids:
+                ids[entity_type] = build_entity_search(entity_type,
+                                                       entity_ids=entity_ids,
+                                                       fields=[N.ID])
 
-    for queries in sub_queries.values():
-        ElasticsearchSearch.run_searches(es, queries)
+                searches.append(ids[entity_type])
+
+    if not searches:
+        return
+
+    ElasticsearchSearch.run_searches(es, searches)
+
+    for params in params_list:
+        ids = params.get('intersection')
+        if not ids:
+            continue
+
+        for entity_type in INTERSECTION_PARAM_TYPES:
+            if entity_type in ids:
+                ids[entity_type] = [
+                    hit['id']
+                    for hit in ids[entity_type].result.hits
+                ]
 
 
 def expand_geometry_searches(es, index, params_list, searches):
@@ -259,20 +275,22 @@ def expand_geometry_searches(es, index, params_list, searches):
             # lista geometry_searches
             geometry_searches.append((geometry_search, search))
 
-    if geometry_searches:
-        # Ejecutar las búsquedas de geometrías
-        ElasticsearchSearch.run_searches(
-            es,
-            [searches[0] for searches in geometry_searches]
-        )
+    if not geometry_searches:
+        return
 
-        for geometry_search, search in geometry_searches:
-            # Transformar resultados originales a diccionario de ID-entidad
-            original_hits = {hit[N.ID]: hit for hit in search.result.hits}
+    # Ejecutar las búsquedas de geometrías
+    ElasticsearchSearch.run_searches(
+        es,
+        [searches[0] for searches in geometry_searches]
+    )
 
-            for hit in geometry_search.result.hits:
-                # Agregar campo geometría a los resultados originales
-                original_hits[hit[N.ID]][N.GEOM] = hit[N.GEOM]
+    for geometry_search, search in geometry_searches:
+        # Transformar resultados originales a diccionario de ID-entidad
+        original_hits = {hit[N.ID]: hit for hit in search.result.hits}
+
+        for hit in geometry_search.result.hits:
+            # Agregar campo geometría a los resultados originales
+            original_hits[hit[N.ID]][N.GEOM] = hit[N.GEOM]
 
 
 def search_entities(es, index, params_list, expand_geometries=False):
@@ -347,8 +365,8 @@ def search_streets(es, params_list):
 
 def build_entity_search(index, entity_ids=None, name=None, state=None,
                         department=None, municipality=None, max=None,
-                        order=None, fields=None, exact=False, offset=0,
-                        intersection=None):
+                        order=None, fields=None, exact=False,
+                        intersection=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para entidades políticas
     (localidades, departamentos, o provincias) según parámetros de búsqueda
     de una consulta.
@@ -369,6 +387,9 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'department',
             'municipality' o 'state'.) (opcional).
+        intersection (dict): Diccionario de tipo de entidad - lista de IDs a
+            utilizar para filtrar por intersecciones con geometrías
+            pre-indexadas (opcional).
         offset (int): Retornar resultados comenenzando desde los 'offset'
             primeros resultados obtenidos.
 
@@ -388,7 +409,7 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
         s = s.query(build_name_query(N.NAME, name, exact))
 
     if intersection:
-        s = s.query(build_intersection_query(N.GEOM, intersection))
+        s = s.query(build_intersection_query(N.GEOM, ids=intersection))
 
     if municipality:
         s = s.query(build_subentity_query(N.MUN_ID, N.MUN_NAME, municipality,
@@ -413,15 +434,17 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
     return ElasticsearchSearch(s, offset)
 
 
-def build_streets_search(street_ids=None, road_name=None, department=None,
+def build_streets_search(street_ids=None, name=None, department=None,
                          state=None, road_type=None, max=None, order=None,
-                         fields=None, exact=False, number=None, offset=0):
+                         fields=None, exact=False, number=None,
+                         intersection_ids=None, intersection_geoms=None,
+                         offset=0):
     """Construye una búsqueda con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
     Args:
         street_ids (list): IDs de calles a buscar (opcional).
-        road_name (str): Nombre de la calle para filtrar (opcional).
+        name (str): Nombre de la calle para filtrar (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
         road_type (str): Nombre del tipo de camino para filtrar (opcional).
@@ -432,6 +455,11 @@ def build_streets_search(street_ids=None, road_name=None, department=None,
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
             'department'.) (opcional).
+        intersection_ids (dict): Diccionario de tipo de entidad - lista de IDs
+            a utilizar para filtrar por intersecciones con geometrías
+            pre-indexadas (opcional).
+        intersection_geoms (list): Lista de geometrías a utilizar para filtrar
+            por intersecciones.
         offset (int): Retornar resultados comenenzando desde los 'offset'
             primeros resultados obtenidos.
 
@@ -447,8 +475,14 @@ def build_streets_search(street_ids=None, road_name=None, department=None,
     if street_ids:
         s = s.filter(build_terms_query(N.ID, street_ids))
 
-    if road_name:
-        s = s.query(build_name_query(N.NAME, road_name, exact))
+    if intersection_ids:
+        s = s.query(build_intersection_query(N.GEOM, ids=intersection_ids))
+
+    if intersection_geoms:
+        s = s.query(build_intersection_query(N.GEOM, geoms=intersection_geoms))
+
+    if name:
+        s = s.query(build_name_query(N.NAME, name, exact))
 
     if road_type:
         s = s.query(build_match_query(N.ROAD_TYPE, road_type, fuzzy=True))
@@ -535,15 +569,14 @@ def build_subentity_query(id_field, name_field, value, exact):
     return build_name_query(name_field, value, exact)
 
 
-def build_intersection_query(field, ids):
+def build_intersection_query(field, ids=None, geoms=None):
     """Crea una condición de búsqueda por intersección de geometrías de una
     o más entidades, de tipos provincia/departamento/municipio.
 
     Args:
         field (str): Campo de la condición (debe ser de tipo 'geo_shape').
-        ids (dict): Diccionario de tipo de entidad / lista de
-            ElasticsearchSearch. Cada ElasticsearchSearch representa,
-            potencialmente, un ID de entidad a utilizar en una GeoShape query.
+        ids (dict): Diccionario de tipo de entidad - lista de IDs.
+        geoms (list): Lista de geometrías.
 
     Returns:
         Query: Condición para Elasticsearch.
@@ -551,18 +584,25 @@ def build_intersection_query(field, ids):
     """
     query = MatchNone()
 
-    for entity_type, entity_id_searches in ids.items():
-        for search in entity_id_searches:
-            hits = search.result.hits
-
-            if hits:
-                # La búsqueda por ID retornó resultados, la longitud de los
-                # los mismos debe ser 1.
-                entity_id = hits[0]['id']
+    if ids:
+        for entity_type, id_list in ids.items():
+            for entity_id in id_list:
                 query |= build_geo_indexed_shape_query(field, entity_type,
                                                        entity_id, N.GEOM)
 
+    if geoms:
+        for geometry in geoms:
+            query |= build_geo_shape_query(field, geometry)
+
     return query
+
+
+def build_geo_shape_query(field, geometry):
+    options = {
+        'shape': geometry
+    }
+
+    return GeoShape(**{field: options})
 
 
 def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
@@ -581,7 +621,7 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
         Query: Condición para Elasticsearch.
 
     """
-    if index not in [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES]:
+    if index not in INTERSECTION_PARAM_TYPES:
         raise ValueError('Invalid entity type')
 
     options = {
@@ -718,41 +758,3 @@ def build_match_query(field, value, fuzzy=False, operator='or', analyzer=None):
         options['analyzer'] = analyzer
 
     return Match(**{field: options})
-
-
-def street_number_location(geom, number, start, end):
-    """Obtiene las coordenadas de un punto dentro de un tramo de calle.
-
-    Args:
-        geom (str): Geometría de un tramo de calle.
-        number (int or None): Número de puerta o altura.
-        start (int): Numeración inicial del tramo de calle.
-        end (int): Numeración final del tramo de calle.
-
-    Returns:
-        dict: Coordenadas del punto.
-
-    """
-    if geom['type'] != 'MultiLineString':
-        raise TypeError('GeoJSON type must be MultiLineString')
-
-    shape = shapely.geometry.MultiLineString(geom['coordinates'])
-    line = shapely.ops.linemerge(shape)
-    lat, lon = None, None
-
-    if isinstance(line, shapely.geometry.LineString):
-        # Si la geometría de la calle pudo ser combinada para formar un único
-        # tramo, encontrar la ubicación interpolando la altura con el inicio y
-        # fin de altura de la calle.
-        ip = line.interpolate((number - start) / (end - start),
-                              normalized=True)
-        # TODO:
-        # line.interpolate retorna un shapely Point pero pylint solo mira
-        # los atributos de BaseGeometry.
-        lat = ip.y  # pylint: disable=no-member
-        lon = ip.x  # pylint: disable=no-member
-
-    return {
-        N.LAT: lat,
-        N.LON: lon
-    }
