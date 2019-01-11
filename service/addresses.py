@@ -252,8 +252,9 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
         for street_1, street_2, loc in intersections:
             intersection_hit = self._build_base_address_hit(street_1)
-            intersection_hit[N.STREET] = street_1
-            intersection_hit[N.STREET_X1] = street_2
+            intersection_hit[N.STREET] = self._build_street_entity(street_1)
+            intersection_hit[N.STREET_X1] = self._build_street_entity(street_2)
+            intersection_hit[N.STREET_X2] = self._build_street_entity()
             intersection_hit[N.LOCATION] = loc
 
             if N.FULL_NAME in fields:
