@@ -125,10 +125,6 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         super().__init__(query, fmt)
 
     def get_next_query(self, _iteration):
-        ###############
-        # Iteración 0 #
-        ###############
-
         query = self._query.copy()
         query['name'] = self._street_names[0]
 
@@ -138,10 +134,6 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         return query
 
     def set_elasticsearch_result(self, result, _iteration):
-        ###############
-        # Iteración 0 #
-        ###############
-
         # Para direcciones de tipo 'simple', el resultado final es simplemente
         # la primera consulta hecha a Elasticsearch.
         self._elasticsearch_result = result
@@ -193,20 +185,17 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
 
 class AddressIsctQueryPlanner(AddressQueryPlanner):
-    required_iterations = 2
+    required_iterations = 3
 
     def __init__(self, query, fmt):
         self._elasticsearch_result_1 = None
         self._elasticsearch_result_2 = None
-        self._intersection_hits = None
+        self._elasticsearch_result_3 = None
+        self._intersection_hits = []
         super().__init__(query, fmt)
 
     def get_next_query(self, iteration):
         if iteration == 0:
-            ###############
-            # Iteración 0 #
-            ###############
-
             # Buscar la calle principal
             query = self._query.copy()
             query['name'] = self._street_names[0]
@@ -217,33 +206,49 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
                 query['number'] = self._door_number
 
             return query
+        elif iteration == 1:
+            # Segunda calle
+            query = self._query.copy()
+            query['name'] = self._street_names[1]
+            query['max'] = constants.MAX_RESULT_LEN
+            query['offset'] = 0
 
-        ###############
-        # Iteración 1 #
-        ###############
+            return query
 
-        street_1_geoms = [
-            hit[N.GEOM]
-            for hit in self._elasticsearch_result_1.hits
-        ]
+        # iteration == 2
+
+        result_1_len = len(self._elasticsearch_result_1.hits)
+        result_2_len = len(self._elasticsearch_result_2.hits)
+
+        if result_1_len > result_2_len:
+            geoms = [hit[N.GEOM] for hit in self._elasticsearch_result_2.hits]
+            ids = [hit[N.ID] for hit in self._elasticsearch_result_1.hits]
+        else:
+            geoms = [hit[N.GEOM] for hit in self._elasticsearch_result_1.hits]
+            ids = [hit[N.ID] for hit in self._elasticsearch_result_2.hits]
+
         query = self._query.copy()
-        query['intersection_geoms'] = street_1_geoms
-        # Nombre de la segunda calle
-        query['name'] = self._street_names[1]
+        query['street_ids'] = ids
+        query['intersection_geoms'] = geoms
 
         return query
 
     def _find_intersections(self, streets_1, streets_2):
         intersections = []
+        streets_2_found = set()
 
-        for street_2 in streets_2:
-            for street_1 in streets_1:
+        for street_1 in streets_1:
+            for street_2 in streets_2:
+                if street_2[N.ID] in streets_2_found:
+                    continue
+
                 geom_1 = street_1[N.GEOM]
                 geom_2 = street_2[N.GEOM]
                 loc = geometry.streets_intersection_location(geom_1, geom_2)
 
                 if loc[N.LAT] and loc[N.LON]:
                     intersections.append((street_1, street_2, loc))
+                    streets_2_found.add(street_2[N.ID])
                     break
 
         return intersections
@@ -280,45 +285,66 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
     def set_elasticsearch_result(self, result, iteration):
         if iteration == 0:
-            ###############
-            # Iteración 0 #
-            ###############
-
             self._elasticsearch_result_1 = result
+
+            if len(self._elasticsearch_result_1) == 0:
+                self.required_iterations = 0
+
+            return
+        elif iteration == 1:
+            self._elasticsearch_result_2 = result
+
+            if len(self._elasticsearch_result_2) == 0:
+                self.required_iterations = 0
+
             return
 
-        ###############
-        # Iteración 1 #
-        ###############
+        # iteration == 2
 
-        self._elasticsearch_result_2 = result
-        department_groups = {}
+        self._elasticsearch_result_3 = result
+        result_1_len = len(self._elasticsearch_result_1.hits)
+        result_2_len = len(self._elasticsearch_result_2.hits)
 
-        for street_1 in self._elasticsearch_result_1.hits:
+        if result_1_len > result_2_len:
+            streets_1 = self._elasticsearch_result_3.hits
+            streets_2 = self._elasticsearch_result_2.hits
+        else:
+            streets_1 = self._elasticsearch_result_1.hits
+            streets_2 = self._elasticsearch_result_3.hits
+
+        # Separar las calles por departamentos para minimizar la cantidad de
+        # cruces que hay que comprobar (dos calles de distintos departamentos
+        # no pueden cruzarse entre sí)
+        department_groups = {
+            hit[N.DEPT][N.ID]: ([], [])
+            for hit in self._elasticsearch_result_3.hits
+        }
+
+        for street_1 in streets_1:
             dept_id = street_1['departamento']['id']
 
-            if dept_id not in department_groups:
-                department_groups[dept_id] = {
-                    'streets_1': [], 'streets_2': []
-                }
+            if dept_id in department_groups:
+                department_groups[dept_id][0].append(street_1)
 
-            department_groups[dept_id]['streets_1'].append(street_1)
-
-        for street_2 in self._elasticsearch_result_2.hits:
+        for street_2 in streets_2:
             dept_id = street_2['departamento']['id']
-            department_groups[dept_id]['streets_2'].append(street_2)
+
+            if dept_id in department_groups:
+                department_groups[dept_id][1].append(street_2)
 
         intersections = []
         for dept in department_groups.values():
-            intersections.extend(self._find_intersections(dept['streets_1'],
-                                                          dept['streets_2']))
+            intersections.extend(self._find_intersections(*dept))
 
         self._intersection_hits = self._build_intersection_hits(intersections)
 
     def get_query_result(self):
-        return QueryResult.from_entity_list(
-            self._intersection_hits, self._elasticsearch_result_2.total,
-            self._elasticsearch_result_2.offset)
+        if self._elasticsearch_result_3:
+            return QueryResult.from_entity_list(
+                self._intersection_hits, self._elasticsearch_result_3.total,
+                self._elasticsearch_result_3.offset)
+        else:
+            return QueryResult.empty()
 
 
 class AddressBtwnQueryPlanner(AddressQueryPlanner):
@@ -336,7 +362,9 @@ def step_query_planners(es, query_planners, iteration=0):
             planner_queries.append((planner, query))
 
     results = data.search_streets(es, [
-        planner_query[1] for planner_query in planner_queries
+        planner_query[1]
+        for planner_query in planner_queries
+        if planner_query[1]
     ])
 
     for result, planner_query in zip(results, planner_queries):
