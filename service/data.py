@@ -131,9 +131,6 @@ class ElasticsearchSearch:
         for search in searches:
             ms = ms.add(search.es_search)
 
-        # import json
-        # print(json.dumps(ms.to_dict(), indent=4))
-
         try:
             responses = ms.execute(raise_on_error=True)
 
