@@ -13,3 +13,14 @@ with app.app_context():
     import service.params
     # Crear rutas utilizando también configuración de Flask
     import service.routes  # noqa: F401 pylint: disable=wrong-import-position
+
+
+def georef_console():
+    """TODO: Docs
+    """
+    import code
+    with app.app_context():
+        console = code.InteractiveConsole(locals=locals())
+        console.push('import service')
+        console.push('es = service.normalizer.get_elasticsearch()')
+        console.interact()

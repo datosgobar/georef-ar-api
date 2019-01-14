@@ -68,7 +68,7 @@ coverage:
 
 console:
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -i -c 'import service'
+	python -c 'import service; service.georef_console()'
 
 docs:
 	mkdocs build
