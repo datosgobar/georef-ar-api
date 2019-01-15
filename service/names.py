@@ -2,103 +2,118 @@
 
 Declara los nombres que usa la API para campos,
 parámetros, y otras claves que se usan frecuentemente.
+
+Se utilizan variables globales (constantes) para permitir escribir código en
+inglés (e.g. FLOOR) con contenido real en español ('piso'). Esto es necesario
+ya que los datos producidos por georef-ar-etl están en español, así como la
+interfaz externa de georef-ar-api que consumen los usuarios. El uso de
+variables también permite que herramientas como jedi/pylint/flake8 detecten
+errores de uso de variables inexistentes estáticamente (en comparación a
+utilizar un diccionario de str-str).
 """
 
-# Endpoints
-ADDRESSES = 'direcciones'
-STREETS = 'calles'
-LOCALITIES = 'localidades'
-DEPARTMENTS = 'departamentos'
-MUNICIPALITIES = 'municipios'
-STATES = 'provincias'
-PLACES = 'ubicaciones'
+FIELDS_SEP = '.'
 
-# Fields
-ID = 'id'
-DOOR_NUM = 'altura'
-DOOR_NUM_VAL = 'altura.valor'
-DOOR_NUM_UNIT = 'altura.unidad'
-ROAD_TYPE = 'tipo'
-NAME = 'nombre'
-FULL_NAME = 'nomenclatura'
+
+def join(*words):
+    return FIELDS_SEP.join(words)
+
+
+##########################
+#    Valores simples     #
+##########################
+
+# Entidades y recursos
 STATE = 'provincia'
+STATES = 'provincias'
+DEPARTMENTS = 'departamentos'
 DEPT = 'departamento'
 MUN = 'municipio'
+MUNICIPALITIES = 'municipios'
+LOCALITIES = 'localidades'
 LOCALITY = 'localidad'
 STREET = 'calle'
 STREET_X1 = 'calle_cruce_1'
 STREET_X2 = 'calle_cruce_2'
-GEOM = 'geometria'
-LAT = 'lat'
-LON = 'lon'
-VALUE = 'valor'
-UNIT = 'unidad'
-C_LAT = 'centroide.lat'
-C_LON = 'centroide.lon'
-CENTROID = 'centroide'
-END_R = 'altura.fin.derecha'
-END_L = 'altura.fin.izquierda'
-START_R = 'altura.inicio.derecha'
-START_L = 'altura.inicio.izquierda'
-START = 'inicio'
-END = 'fin'
-RIGHT = 'derecha'
-LEFT = 'izquierda'
-SOURCE = 'fuente'
-LOCALITY_TYPE = 'tipo'
-LOCATION = 'ubicacion'
-FLOOR = 'piso'
-LOCATION_LAT = 'ubicacion.lat'
-LOCATION_LON = 'ubicacion.lon'
-STREET_ID = 'calle.id'
-STREET_NAME = 'calle.nombre'
-STREET_TYPE = 'calle.tipo'
-STREET_X1_ID = 'calle_cruce_1.id'
-STREET_X1_NAME = 'calle_cruce_1.nombre'
-STREET_X1_TYPE = 'calle_cruce_1.tipo'
-STREET_X2_ID = 'calle_cruce_2.id'
-STREET_X2_NAME = 'calle_cruce_2.nombre'
-STREET_X2_TYPE = 'calle_cruce_2.tipo'
-
-# Parameters
+STREETS = 'calles'
 ADDRESS = 'direccion'
-PLACE = 'ubicacion'
-ORDER = 'orden'
-FIELDS = 'campos'
-CSV_FIELDS = 'campos_csv'
-FLATTEN = 'aplanar'
-MAX = 'max'
-OFFSET = 'inicio'
-FORMAT = 'formato'
-EXACT = 'exacto'
-BASIC = 'basico'
-STANDARD = 'estandar'
-COMPLETE = 'completo'
-INTERSECTION = 'interseccion'
-
-# Results
-RESULTS = 'resultados'
+ADDRESSES = 'direcciones'
+LOCATION = 'ubicacion'
+LOCATIONS = 'ubicaciones'
 RESULT = 'resultado'
-TOTAL = 'total'
-QUANTITY = 'cantidad'
+RESULTS = 'resultados'
 
-# Elasticsearch
-STATE_ID = 'provincia.id'
-STATE_NAME = 'provincia.nombre'
-STATE_INTERSECTION = 'provincia.interseccion'
-DEPT_ID = 'departamento.id'
-DEPT_NAME = 'departamento.nombre'
-MUN_ID = 'municipio.id'
-MUN_NAME = 'municipio.nombre'
-EXACT_SUFFIX = '.exacto'
+# Campos, parámetros, etc.
+BASIC = 'basico'
+CENTROID = 'centroide'
+COMPLETE = 'completo'
+DOOR_NUM = 'altura'
+END = 'fin'
+EXACT = 'exacto'
+FIELDS = 'campos'
+FLATTEN = 'aplanar'
+FLOOR = 'piso'
+FORMAT = 'formato'
+FULL_NAME = 'nomenclatura'
+GEOM = 'geometria'
+ID = 'id'
+INTERSECTION = 'interseccion'
+LAT = 'lat'
+LEFT = 'izquierda'
+LOCALITY_TYPE = 'tipo'
+LON = 'lon'
+MAX = 'max'
+NAME = 'nombre'
+OFFSET = 'inicio'
+ORDER = 'orden'
+QUANTITY = 'cantidad'
+RIGHT = 'derecha'
+ROAD_TYPE = 'tipo'
+SOURCE = 'fuente'
+STANDARD = 'estandar'
+START = 'inicio'
+TOTAL = 'total'
+UNIT = 'unidad'
+VALUE = 'valor'
 
 # Fuentes
-SOURCE_INDEC = 'INDEC'
 SOURCE_BAHRA = 'BAHRA'
 SOURCE_IGN = 'IGN'
+SOURCE_INDEC = 'INDEC'
 
-# Índices
-GEOM_INDEX = '{}-geometria'
+##########################
+#    Valores compuestos  #
+##########################
 
-# API
-API_NAME = 'georef-ar-api'
+# Campos de entidades
+STATE_ID = join(STATE, ID)
+STATE_INTERSECTION = join(STATE, INTERSECTION)
+STATE_NAME = join(STATE, NAME)
+DEPT_ID = join(DEPT, ID)
+DEPT_NAME = join(DEPT, NAME)
+MUN_ID = join(MUN, ID)
+MUN_NAME = join(MUN, NAME)
+EXACT_SUFFIX = join('{}', EXACT)
+C_LAT = join(CENTROID, LAT)
+C_LON = join(CENTROID, LON)
+LOCATION_LAT = join(LOCATION, LAT)
+LOCATION_LON = join(LOCATION, LON)
+
+# Campos de altura
+START_L = join(DOOR_NUM, START, LEFT)
+START_R = join(DOOR_NUM, START, RIGHT)
+END_L = join(DOOR_NUM, END, LEFT)
+END_R = join(DOOR_NUM, END, RIGHT)
+DOOR_NUM_UNIT = join(DOOR_NUM, UNIT)
+DOOR_NUM_VAL = join(DOOR_NUM, VALUE)
+
+# Campos de calles
+STREET_ID = join(STREET, ID)
+STREET_NAME = join(STREET, NAME)
+STREET_TYPE = join(STREET, ROAD_TYPE)
+STREET_X1_ID = join(STREET_X1, ID)
+STREET_X1_NAME = join(STREET_X1, NAME)
+STREET_X1_TYPE = join(STREET_X1, ROAD_TYPE)
+STREET_X2_ID = join(STREET_X2, ID)
+STREET_X2_NAME = join(STREET_X2, NAME)
+STREET_X2_TYPE = join(STREET_X2, ROAD_TYPE)

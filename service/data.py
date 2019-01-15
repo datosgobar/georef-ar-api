@@ -422,7 +422,7 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
 
     if order:
         if order == N.NAME:
-            order += N.EXACT_SUFFIX
+            order = N.EXACT_SUFFIX.format(order)
         s = s.sort(order)
 
     s = s.source(include=fields)
@@ -494,7 +494,7 @@ def build_streets_search(street_ids=None, name=None, department=None,
 
     if order:
         if order == N.NAME:
-            order += N.EXACT_SUFFIX
+            order = N.EXACT_SUFFIX.format(order)
         s = s.sort(order)
 
     s = s.source(include=fields)
@@ -650,7 +650,7 @@ def build_name_query(field, value, exact=False):
 
     """
     if exact:
-        field += N.EXACT_SUFFIX
+        field = N.EXACT_SUFFIX.format(field)
         return build_match_query(field, value, False)
 
     query = build_match_query(field, value, True, operator='and')

@@ -6,6 +6,8 @@ Contiene variables con valores constantes.
 from flask import current_app
 from service import names as N
 
+API_NAME = 'georef-ar-api'
+
 MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
 MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
 

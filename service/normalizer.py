@@ -95,7 +95,6 @@ def process_entity_single(request, name, param_parser, key_translations):
         for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in qs_params
     }
-    fmt[N.CSV_FIELDS] = formatter.ENDPOINT_CSV_FIELDS[name]
 
     expand_geometries = fmt[N.FORMAT] == 'shp'
     if expand_geometries:
@@ -331,7 +330,6 @@ def build_street_query_format(parsed_params):
         for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in parsed_params
     }
-    fmt[N.CSV_FIELDS] = formatter.STREETS_CSV_FIELDS
 
     return query, fmt
 
@@ -475,7 +473,6 @@ def build_address_query_format(parsed_params):
         for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
         if key in parsed_params
     }
-    fmt[N.CSV_FIELDS] = formatter.ADDRESSES_CSV_FIELDS
 
     return query, fmt
 
@@ -763,7 +760,7 @@ def process_place_single(request):
 
     query_result = QueryResult.from_single_entity(place)
 
-    return formatter.create_ok_response(N.PLACE, query_result, fmt)
+    return formatter.create_ok_response(N.LOCATION, query_result, fmt)
 
 
 def process_place_bulk(request):
@@ -783,7 +780,7 @@ def process_place_bulk(request):
     """
     try:
         body_params = params.PARAMS_PLACE.parse_post_params(
-            request.args, request.json, N.PLACES)
+            request.args, request.json, N.LOCATIONS)
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
@@ -798,7 +795,8 @@ def process_place_bulk(request):
     places = process_place_queries(es, queries)
     query_results = [QueryResult.from_single_entity(place) for place in places]
 
-    return formatter.create_ok_response_bulk(N.PLACE, query_results, formats)
+    return formatter.create_ok_response_bulk(N.LOCATION, query_results,
+                                             formats)
 
 
 def process_place(request):

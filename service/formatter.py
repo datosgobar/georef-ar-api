@@ -12,7 +12,7 @@ from xml.etree import ElementTree
 from flask import make_response, jsonify, Response, request, send_file
 import geojson
 import shapefile
-from service import strings
+from service import strings, constants
 from service import names as N
 
 
@@ -136,7 +136,7 @@ XML_ERROR_LIST_ITEM_NAMES = {
 
 
 SHP_SHORT_FIELD_NAMES = {
-    key.replace('.', FLAT_SEP): value
+    key.replace(N.FIELDS_SEP, FLAT_SEP): value
     for key, value in
     {
         N.STATE_NAME: 'prov_nombre',
@@ -270,7 +270,7 @@ def xml_flask_response(element, status=200):
 
     """
     contents = io.StringIO()
-    root = create_xml_element(N.API_NAME)
+    root = create_xml_element(constants.API_NAME)
     root.append(element)
 
     ElementTree.ElementTree(root).write(contents, encoding='unicode',
@@ -546,7 +546,7 @@ def create_shp_response_single(name, result, fmt):
     dbf = io.BytesIO()
 
     writer = shapefile.Writer(shp=shp, shx=shx, dbf=dbf)
-    keys = [field.replace('.', FLAT_SEP) for field in fmt[N.FIELDS]]
+    keys = [field.replace(N.FIELDS_SEP, FLAT_SEP) for field in fmt[N.FIELDS]]
 
     for key in keys:
         if len(key) > SHP_MAX_FIELD_NAME_LEN:
@@ -604,9 +604,11 @@ def create_csv_response_single(name, result, fmt):
 
         keys = []
         field_names = []
-        for original_field, csv_field_name in fmt[N.CSV_FIELDS]:
+        csv_fields = ENDPOINT_CSV_FIELDS[name]
+
+        for original_field, csv_field_name in csv_fields:
             if original_field in fmt[N.FIELDS]:
-                keys.append(original_field.replace('.', FLAT_SEP))
+                keys.append(original_field.replace(N.FIELDS_SEP, FLAT_SEP))
                 field_names.append(FLAT_SEP.join(csv_field_name))
 
         yield csv_writer.row_to_str(field_names)
@@ -777,7 +779,7 @@ def format_result_fields(result, fmt):
         filter_result_fields(result.first_entity(), fields_dict)
 
 
-def fields_list_to_dict(fields, sep='.'):
+def fields_list_to_dict(fields, sep=N.FIELDS_SEP):
     """Convierte una lista de campos (potencialmente, campos anidados separados
     con puntos) en un diccionario de uno o más niveles conteniendo 'True' por
     cada campo procesado.

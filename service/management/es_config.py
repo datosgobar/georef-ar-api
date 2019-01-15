@@ -25,9 +25,8 @@ from elasticsearch_dsl import Object, Float, GeoShape, Keyword, Text, Integer
 from elasticsearch_dsl import MetaField
 from .. import names as N
 
-# Tipo de documento utilizado por default en elasticsearch_dsl
-DOC_TYPE = 'doc'
-
+DOC_TYPE = 'doc'  # Tipo de doc utilizado por defecto en elasticsearch_dsl
+GEOM_INDEX_SUFFIX = '{}-geometria'
 GEOMETRYLESS_INDICES = {N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES}
 
 # -----------------------------------------------------------------------------
@@ -349,6 +348,6 @@ def geom_index_for(index):
 
     """
     if index in GEOMETRYLESS_INDICES:
-        return N.GEOM_INDEX.format(index)
+        return GEOM_INDEX_SUFFIX.format(index)
 
     return index
