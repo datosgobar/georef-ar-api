@@ -367,6 +367,25 @@ class SearchStreetsTest(GeorefLiveTest):
             'tipo': 'avenida'
         })
 
+    def test_shp_record_fields(self):
+        """Los campos obtenidos en formato SHP deberían ser los esperados y
+        deberían corresponder a los campos obtenidos en otros formatos."""
+        self.assert_shp_fields('completo', [
+            'nombre',
+            'nomencla',
+            'id',
+            'prov_id',
+            'prov_nombre',
+            'dpto_nombre',
+            'dpto_id',
+            'tipo',
+            'alt_ini_der',
+            'alt_ini_izq',
+            'alt_fin_der',
+            'alt_fin_izq',
+            'fuente'
+        ])
+
 
 if __name__ == '__main__':
     unittest.main()

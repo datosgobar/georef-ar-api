@@ -452,6 +452,20 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
             'nombre': 'santa'
         })
 
+    def test_shp_record_fields(self):
+        """Los campos obtenidos en formato SHP deberían ser los esperados y
+        deberían corresponder a los campos obtenidos en otros formatos."""
+        self.assert_shp_fields('completo', [
+            'nombre',
+            'id',
+            'prov_id',
+            'prov_nombre',
+            'prov_intscn',
+            'centr_lat',
+            'centr_lon',
+            'fuente'
+        ])
+
 
 if __name__ == '__main__':
     unittest.main()

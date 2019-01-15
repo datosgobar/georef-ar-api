@@ -142,18 +142,17 @@ SHP_SHORT_FIELD_NAMES = {
         N.STATE_NAME: 'prov_nombre',
         N.STATE_ID: 'prov_id',
         N.STATE_INTERSECTION: 'prov_intscn',
-        N.DEPT_NAME: 'dept_nombre',
-        N.DEPT_ID: 'dept_id',
+        N.DEPT_NAME: 'dpto_nombre',
+        N.DEPT_ID: 'dpto_id',
         N.MUN_NAME: 'muni_nombre',
         N.MUN_ID: 'muni_id',
-        N.ID: 'dept_id',
-        N.C_LAT: 'centroi_lat',
-        N.C_LON: 'centroi_lon',
+        N.C_LAT: 'centr_lat',
+        N.C_LON: 'centr_lon',
         N.FULL_NAME: 'nomencla',
-        N.START_R: 'altura_in_d',
-        N.START_L: 'altura_in_i',
-        N.END_R: 'altura_fi_d',
-        N.END_L: 'altura_fi_i'
+        N.START_R: 'alt_ini_der',
+        N.START_L: 'alt_ini_izq',
+        N.END_R: 'alt_fin_der',
+        N.END_L: 'alt_fin_izq'
     }.items()
 }
 

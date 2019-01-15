@@ -264,6 +264,25 @@ class GeorefLiveTest(TestCase):
 
         self.assertListEqual(json_records, shape_records)
 
+    def assert_shp_fields(self, set_name, fields):
+        params = {
+            'campos': set_name,
+            'formato': 'shp',
+            'max': 1
+        }
+        fields.sort()
+
+        shape = self.get_response(params)
+        shp_fields = sorted([field[0] for field in shape.fields[1:]])
+
+        # TODO: Cambiar a self.assertListEqual(fields, shp_fields)
+        # Por alguna razón, pyshp está truncando los nombres de los campos
+        # a 10 cuando lee un .shp (pero el archivo se está escribiendo bien)
+        self.assertTrue(all(
+            field.startswith(shp_field)
+            for field, shp_field in zip(fields, shp_fields)
+        ) and len(shp_fields) == len(fields))
+
     def assert_flat_results(self):
         resp = self.get_response({'aplanar': 1, 'max': 1})
         self.assertTrue(all([
