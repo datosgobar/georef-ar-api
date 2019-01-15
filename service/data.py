@@ -434,8 +434,7 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
 def build_streets_search(street_ids=None, name=None, department=None,
                          state=None, road_type=None, max=None, order=None,
                          fields=None, exact=False, number=None,
-                         intersection_ids=None, intersection_geoms=None,
-                         offset=0):
+                         intersection_ids=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
@@ -455,8 +454,6 @@ def build_streets_search(street_ids=None, name=None, department=None,
         intersection_ids (dict): Diccionario de tipo de entidad - lista de IDs
             a utilizar para filtrar por intersecciones con geometrías
             pre-indexadas (opcional).
-        intersection_geoms (list): Lista de geometrías a utilizar para filtrar
-            por intersecciones.
         offset (int): Retornar resultados comenenzando desde los 'offset'
             primeros resultados obtenidos.
 
@@ -474,9 +471,6 @@ def build_streets_search(street_ids=None, name=None, department=None,
 
     if intersection_ids:
         s = s.query(build_intersection_query(N.GEOM, ids=intersection_ids))
-
-    if intersection_geoms:
-        s = s.query(build_intersection_query(N.GEOM, geoms=intersection_geoms))
 
     if name:
         s = s.query(build_name_query(N.NAME, name, exact))
@@ -566,14 +560,13 @@ def build_subentity_query(id_field, name_field, value, exact):
     return build_name_query(name_field, value, exact)
 
 
-def build_intersection_query(field, ids=None, geoms=None):
+def build_intersection_query(field, ids):
     """Crea una condición de búsqueda por intersección de geometrías de una
     o más entidades, de tipos provincia/departamento/municipio.
 
     Args:
         field (str): Campo de la condición (debe ser de tipo 'geo_shape').
         ids (dict): Diccionario de tipo de entidad - lista de IDs.
-        geoms (list): Lista de geometrías.
 
     Returns:
         Query: Condición para Elasticsearch.
@@ -581,25 +574,12 @@ def build_intersection_query(field, ids=None, geoms=None):
     """
     query = MatchNone()
 
-    if ids:
-        for entity_type, id_list in ids.items():
-            for entity_id in id_list:
-                query |= build_geo_indexed_shape_query(field, entity_type,
-                                                       entity_id, N.GEOM)
-
-    if geoms:
-        for geometry in geoms:
-            query |= build_geo_shape_query(field, geometry)
+    for entity_type, id_list in ids.items():
+        for entity_id in id_list:
+            query |= build_geo_indexed_shape_query(field, entity_type,
+                                                   entity_id, N.GEOM)
 
     return query
-
-
-def build_geo_shape_query(field, geometry):
-    options = {
-        'shape': geometry
-    }
-
-    return GeoShape(**{field: options})
 
 
 def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
