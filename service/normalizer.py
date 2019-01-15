@@ -582,7 +582,7 @@ def process_address(request):
         return formatter.create_internal_error_response()
 
 
-def build_place_result(query, state, dept, muni):
+def build_location_result(query, state, dept, muni):
     """Construye un resultado para una consulta al endpoint de ubicación.
 
     Args:
@@ -615,7 +615,7 @@ def build_place_result(query, state, dept, muni):
         # TODO: Cambiar a 'fuentes'?
         source = constants.INDEX_SOURCES[N.STATES]
 
-    place = {
+    location = {
         N.STATE: state,
         N.DEPT: dept,
         N.MUN: muni,
@@ -624,10 +624,10 @@ def build_place_result(query, state, dept, muni):
         N.SOURCE: source
     }
 
-    return place
+    return location
 
 
-def build_place_query_format(parsed_params):
+def build_location_query_format(parsed_params):
     """Construye dos diccionarios a partir de parámetros de consulta
     recibidos, el primero representando la query a Elasticsearch a
     realizar y el segundo representando las propiedades de formato
@@ -653,7 +653,7 @@ def build_place_query_format(parsed_params):
     return query, fmt
 
 
-def process_place_queries(es, queries):
+def process_location_queries(es, queries):
     """Dada una lista de queries de ubicación, construye las queries apropiadas
     a índices de departamentos y municipios, y las ejecuta utilizando
     Elasticsearch.
@@ -669,7 +669,7 @@ def process_place_queries(es, queries):
 
     # TODO:
     # Por problemas con los datos de origen, se optó por utilizar una
-    # implementación simple para la la funcion 'process_place_queries'.
+    # implementación simple para la la funcion 'process_location_queries'.
     # Cuando los datos de departamentos cubran todo el departamento nacional,
     # se podría modificar la función para que funcione de la siguiente forma:
     #
@@ -695,7 +695,7 @@ def process_place_queries(es, queries):
             'fields': [N.ID, N.NAME]
         })
 
-    state_results = data.search_places(es, N.STATES, state_queries)
+    state_results = data.search_locations(es, N.STATES, state_queries)
 
     dept_queries = []
     for query in queries:
@@ -705,7 +705,7 @@ def process_place_queries(es, queries):
             'fields': [N.ID, N.NAME, N.STATE]
         })
 
-    dept_results = data.search_places(es, N.DEPARTMENTS, dept_queries)
+    dept_results = data.search_locations(es, N.DEPARTMENTS, dept_queries)
 
     muni_queries = []
     for query in queries:
@@ -715,25 +715,25 @@ def process_place_queries(es, queries):
             'fields': [N.ID, N.NAME]
         })
 
-    muni_results = data.search_places(es, N.MUNICIPALITIES, muni_queries)
+    muni_results = data.search_locations(es, N.MUNICIPALITIES, muni_queries)
 
-    places = []
+    locations = []
     for query, state_result, dept_result, muni_result in zip(queries,
                                                              state_results,
                                                              dept_results,
                                                              muni_results):
-        # Ya que la query de tipo place retorna una o cero entidades,
+        # Ya que la query de tipo location retorna una o cero entidades,
         # extraer la primera entidad de los resultados, o tomar None si
         # no hay resultados.
         state = state_result.hits[0] if state_result else None
         dept = dept_result.hits[0] if dept_result else None
         muni = muni_result.hits[0] if muni_result else None
-        places.append(build_place_result(query, state, dept, muni))
+        locations.append(build_location_result(query, state, dept, muni))
 
-    return places
+    return locations
 
 
-def process_place_single(request):
+def process_location_single(request):
     """Procesa una request GET para obtener entidades en un punto.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -749,21 +749,21 @@ def process_place_single(request):
 
     """
     try:
-        qs_params = params.PARAMS_PLACE.parse_get_params(request.args)
+        qs_params = params.PARAMS_LOCATION.parse_get_params(request.args)
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
-    query, fmt = build_place_query_format(qs_params)
+    query, fmt = build_location_query_format(qs_params)
 
     es = get_elasticsearch()
-    place = process_place_queries(es, [query])[0]
+    location = process_location_queries(es, [query])[0]
 
-    query_result = QueryResult.from_single_entity(place)
+    query_result = QueryResult.from_single_entity(location)
 
     return formatter.create_ok_response(N.LOCATION, query_result, fmt)
 
 
-def process_place_bulk(request):
+def process_location_bulk(request):
     """Procesa una request POST para obtener entidades en varios puntos.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -779,7 +779,7 @@ def process_place_bulk(request):
 
     """
     try:
-        body_params = params.PARAMS_PLACE.parse_post_params(
+        body_params = params.PARAMS_LOCATION.parse_post_params(
             request.args, request.json, N.LOCATIONS)
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
@@ -787,19 +787,22 @@ def process_place_bulk(request):
     queries = []
     formats = []
     for parsed_params in body_params:
-        query, fmt = build_place_query_format(parsed_params)
+        query, fmt = build_location_query_format(parsed_params)
         queries.append(query)
         formats.append(fmt)
 
     es = get_elasticsearch()
-    places = process_place_queries(es, queries)
-    query_results = [QueryResult.from_single_entity(place) for place in places]
+    locations = process_location_queries(es, queries)
+    query_results = [
+        QueryResult.from_single_entity(location)
+        for location in locations
+    ]
 
     return formatter.create_ok_response_bulk(N.LOCATION, query_results,
                                              formats)
 
 
-def process_place(request):
+def process_location(request):
     """Procesa una request GET o POST para obtener entidades en una o varias
     ubicaciones.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
@@ -814,9 +817,9 @@ def process_place(request):
     """
     try:
         if request.method == 'GET':
-            return process_place_single(request)
+            return process_location_single(request)
 
-        return process_place_bulk(request)
+        return process_location_bulk(request)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: ubicacion')

@@ -1193,8 +1193,7 @@ PARAMS_STREETS = EndpointParameters(shared_params={
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
-
-PARAMS_PLACE = EndpointParameters(shared_params={
+PARAMS_LOCATION = EndpointParameters(shared_params={
     N.LAT: FloatParameter(required=True),
     N.LON: FloatParameter(required=True),
     N.FLATTEN: BoolParameter(),

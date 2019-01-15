@@ -108,8 +108,8 @@ def get_addresses():
 
 @bp_v1_0.route('/ubicacion', methods=['GET', 'POST'])
 @disable_cache
-def get_placement():
-    return normalizer.process_place(request)
+def get_location():
+    return normalizer.process_location(request)
 
 
 # Última versión de la API

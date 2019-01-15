@@ -39,7 +39,7 @@ class ParamParsingTest(GeorefMockTest):
             {(T.INVALID_BULK.value, endpoint[1:])}
         ], method='POST', body={})
 
-    def test_bulk_empty_json_places(self):
+    def test_bulk_empty_json_locations(self):
         """No se deberían aceptar operaciones bulk cuando el body HTTP
         contiene JSON vacío."""
         self.assert_errors_match('/ubicacion', [

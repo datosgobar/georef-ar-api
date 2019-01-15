@@ -4,7 +4,7 @@ from service import formatter
 from . import GeorefLiveTest
 
 
-PLACES = [
+LOCATIONS = [
     ('-27.27416', '-66.75292', {
         'provincia': '10',
         'departamento': '10035',
@@ -27,7 +27,7 @@ PLACES = [
     })
 ]
 
-PLACES_NO_MUNI = [
+LOCATIONS_NO_MUNI = [
     ('-31.480693', '-59.0928132', {
         'provincia': '30',
         'departamento': '30113'
@@ -35,7 +35,7 @@ PLACES_NO_MUNI = [
 ]
 
 
-class SearchPlaceTest(GeorefLiveTest):
+class SearchLocationTest(GeorefLiveTest):
     """Pruebas de búsqueda por ubicación."""
 
     def setUp(self):
@@ -45,8 +45,8 @@ class SearchPlaceTest(GeorefLiveTest):
 
     def test_default_results_fields(self):
         """La ubicación devuelta debe tener los campos default."""
-        place = PLACES[0]
-        data = self.get_response({'lat': place[0], 'lon': place[1]})
+        location = LOCATIONS[0]
+        data = self.get_response({'lat': location[0], 'lon': location[1]})
         fields = sorted([
             'provincia',
             'departamento',
@@ -59,30 +59,30 @@ class SearchPlaceTest(GeorefLiveTest):
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""
-        place = PLACES[0]
+        location = LOCATIONS[0]
         self.assert_fields_set_equals('basico', ['provincia.id',
                                                  'provincia.nombre',
                                                  'lat', 'lon'],
-                                      {'lat': place[0], 'lon': place[1]},
+                                      {'lat': location[0], 'lon': location[1]},
                                       iterable=False)
 
     def test_standard_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'estandar'."""
-        place = PLACES[0]
+        location = LOCATIONS[0]
 
         self.assert_fields_set_equals('estandar',
                                       ['provincia.id', 'provincia.nombre',
                                        'lat', 'lon', 'departamento.id',
                                        'departamento.nombre',
                                        'municipio.id', 'municipio.nombre'],
-                                      {'lat': place[0], 'lon': place[1]},
+                                      {'lat': location[0], 'lon': location[1]},
                                       iterable=False)
 
     def test_complete_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'completo'."""
-        place = PLACES[0]
+        location = LOCATIONS[0]
 
         self.assert_fields_set_equals('completo',
                                       ['provincia.id', 'provincia.nombre',
@@ -90,12 +90,12 @@ class SearchPlaceTest(GeorefLiveTest):
                                        'departamento.nombre',
                                        'municipio.id', 'municipio.nombre',
                                        'fuente'],
-                                      {'lat': place[0], 'lon': place[1]},
+                                      {'lat': location[0], 'lon': location[1]},
                                       iterable=False)
 
     def test_filter_results_fields(self):
         """Los campos de la ubicación devuelta deben ser filtrables."""
-        place = PLACES[0]
+        location = LOCATIONS[0]
         fields_lists = [
             ['provincia.id', 'provincia.nombre', 'lat', 'lon'],
             ['departamento.id', 'fuente', 'lat', 'lon', 'provincia.id',
@@ -110,8 +110,8 @@ class SearchPlaceTest(GeorefLiveTest):
         for fields in fields_lists:
             data = self.get_response({
                 'campos': ','.join(fields),
-                'lat': place[0],
-                'lon': place[1]
+                'lat': location[0],
+                'lon': location[1]
             })
             formatter.flatten_dict(data, sep='.')
             fields_results.append(sorted(data.keys()))
@@ -122,7 +122,7 @@ class SearchPlaceTest(GeorefLiveTest):
         """Se deberían encontrar resultados para coordenadas válidas."""
         validations = []
 
-        for lat, lon, data in PLACES:
+        for lat, lon, data in LOCATIONS:
             res = self.get_response({'lat': lat, 'lon': lon})
             validations.append(all([
                 res['municipio']['id'] == data['municipio'],
@@ -151,8 +151,8 @@ class SearchPlaceTest(GeorefLiveTest):
     def test_no_muni(self):
         """Cuando se especifican coordenadas que no contienen un municipio,
         el campo 'municipio' debe tener un valor nulo."""
-        place = PLACES_NO_MUNI[0]
-        data = self.get_response({'lat': place[0], 'lon': place[1]})
+        location = LOCATIONS_NO_MUNI[0]
+        data = self.get_response({'lat': location[0], 'lon': location[1]})
         muni = data['municipio']
         self.assertTrue(muni['id'] is None and muni['nombre'] is None)
 
@@ -168,10 +168,10 @@ class SearchPlaceTest(GeorefLiveTest):
 
     def test_flat_results(self):
         """El parametro aplanar deberia aplanar los resultados devueltos."""
-        place = PLACES[0]
+        location = LOCATIONS[0]
         resp = self.get_response({
-            'lat': place[0],
-            'lon': place[1],
+            'lat': location[0],
+            'lon': location[1],
             'aplanar': 1
         })
 
@@ -198,9 +198,9 @@ class SearchPlaceTest(GeorefLiveTest):
 
             lat = state['centroide']['lat']
             lon = state['centroide']['lon']
-            place = self.get_response({'lat': lat, 'lon': lon})
+            location = self.get_response({'lat': lat, 'lon': lon})
 
-            validations.append(place['provincia']['id'] == state['id'])
+            validations.append(location['provincia']['id'] == state['id'])
 
         self.assertTrue(validations and all(validations))
 
@@ -220,9 +220,9 @@ class SearchPlaceTest(GeorefLiveTest):
         for dept in depts:
             lat = dept['centroide']['lat']
             lon = dept['centroide']['lon']
-            place = self.get_response({'lat': lat, 'lon': lon})
+            location = self.get_response({'lat': lat, 'lon': lon})
 
-            validations.append(place['departamento']['id'] == dept['id'])
+            validations.append(location['departamento']['id'] == dept['id'])
 
         self.assertTrue(validations and all(validations))
 
@@ -249,9 +249,9 @@ class SearchPlaceTest(GeorefLiveTest):
             muni = result['municipios'][0]
             lat = muni['centroide']['lat']
             lon = muni['centroide']['lon']
-            place = self.get_response({'lat': lat, 'lon': lon})
+            location = self.get_response({'lat': lat, 'lon': lon})
 
-            validations.append(place['municipio']['id'] == muni['id'])
+            validations.append(location['municipio']['id'] == muni['id'])
 
         self.assertTrue(validations and all(validations))
 
@@ -283,8 +283,8 @@ class SearchPlaceTest(GeorefLiveTest):
         state_coordinates = resp['features'][0]['geometry']['coordinates']
         lon, lat = state_coordinates[0], state_coordinates[1]
 
-        place = self.get_response({'lat': lat, 'lon': lon})
-        self.assertEqual(place['provincia']['id'], state_id)
+        location = self.get_response({'lat': lat, 'lon': lon})
+        self.assertEqual(location['provincia']['id'], state_id)
 
     def test_bulk_empty_400(self):
         """La búsqueda bulk vacía debería retornar un error 400."""
@@ -296,11 +296,11 @@ class SearchPlaceTest(GeorefLiveTest):
         """La longitud de la respuesta bulk debería ser igual a la cantidad
         de queries envíadas."""
         req_len = random.randint(10, 20)
-        place = PLACES[0]
+        location = LOCATIONS[0]
 
         query = {
-            'lat': place[0],
-            'lon': place[1]
+            'lat': location[0],
+            'lon': location[1]
         }
 
         body = {
@@ -313,25 +313,25 @@ class SearchPlaceTest(GeorefLiveTest):
     def test_bulk_equivalent(self):
         """Los resultados de una query envíada vía bulk deberían ser idénticos a
         los resultados de una query individual (GET)."""
-        place = PLACES[0]
+        location = LOCATIONS[0]
 
         queries = [
             {
-                'lat': place[0],
-                'lon': place[1]
+                'lat': location[0],
+                'lon': location[1]
             },
             {
                 'lat': 0,
                 'lon': 0
             },
             {
-                'lat': place[0],
-                'lon': place[1],
+                'lat': location[0],
+                'lon': location[1],
                 'aplanar': True
             },
             {
-                'lat': place[0],
-                'lon': place[1],
+                'lat': location[0],
+                'lon': location[1],
                 'campos': 'lat,lon'
             }
         ]
@@ -351,37 +351,37 @@ class SearchPlaceTest(GeorefLiveTest):
     def test_json_format(self):
         """Por default, los resultados de una query deberían estar en
         formato JSON."""
-        place = PLACES[1]
+        location = LOCATIONS[1]
 
         default_response = self.get_response({
-            'lat': place[0],
-            'lon': place[1]
+            'lat': location[0],
+            'lon': location[1]
         })
         json_response = self.get_response({
             'formato': 'json',
-            'lat': place[0],
-            'lon': place[1]
+            'lat': location[0],
+            'lon': location[1]
         })
         self.assertEqual(default_response, json_response)
 
     def test_geojson_format_query(self):
         """Se debería poder obtener resultados en formato
         GEOJSON (con parámetros)."""
-        place = PLACES[1]
+        location = LOCATIONS[1]
 
         self.assert_valid_geojson({
-            'lat': place[0],
-            'lon': place[1]
+            'lat': location[0],
+            'lon': location[1]
         })
 
     def test_xml_format(self):
         """Se debería poder obtener resultados en formato XML (con
         parámetros)."""
-        place = PLACES[1]
+        location = LOCATIONS[1]
 
         self.assert_valid_xml({
-            'lat': place[0],
-            'lon': place[1]
+            'lat': location[0],
+            'lon': location[1]
         })
 
 

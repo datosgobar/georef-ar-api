@@ -320,7 +320,7 @@ def search_entities(es, index, params_list, expand_geometries=False):
     return [search.result for search in searches]
 
 
-def search_places(es, index, params_list):
+def search_locations(es, index, params_list):
     """Busca entidades políticas que contengan un punto dato, según
     parámetros de una o más consultas.
 
@@ -328,14 +328,17 @@ def search_places(es, index, params_list):
         es (Elasticsearch): Cliente de Elasticsearch.
         index (str): Nombre del índice sobre el cual realizar las búsquedas.
         params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_place_search' para más
+            la documentación de la función 'build_location_search' para más
             detalles.
 
     Returns:
         list: Resultados de búsqueda de entidades.
 
     """
-    searches = [build_place_search(index, **params) for params in params_list]
+    searches = [
+        build_location_search(index, **params)
+        for params in params_list
+    ]
 
     ElasticsearchSearch.run_searches(es, searches)
     return [search.result for search in searches]
@@ -503,7 +506,7 @@ def build_streets_search(street_ids=None, name=None, department=None,
     return ElasticsearchSearch(s, offset)
 
 
-def build_place_search(index, lat, lon, fields=None):
+def build_location_search(index, lat, lon, fields=None):
     """Construye una búsqueda con Elasticsearch DSL para entidades en una
     ubicación según parámetros de búsqueda de una consulta.
 
