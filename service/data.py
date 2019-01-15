@@ -194,7 +194,7 @@ def expand_intersection_parameters(es, params_list):
     searches = []
 
     for params in params_list:
-        ids = params.get('intersection')
+        ids = params.get('intersection_ids')
         if not ids:
             continue
 
@@ -214,7 +214,7 @@ def expand_intersection_parameters(es, params_list):
     ElasticsearchSearch.run_searches(es, searches)
 
     for params in params_list:
-        ids = params.get('intersection')
+        ids = params.get('intersection_ids')
         if not ids:
             continue
 
@@ -363,7 +363,7 @@ def search_streets(es, params_list):
 def build_entity_search(index, entity_ids=None, name=None, state=None,
                         department=None, municipality=None, max=None,
                         order=None, fields=None, exact=False,
-                        intersection=None, offset=0):
+                        intersection_ids=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para entidades políticas
     (localidades, departamentos, o provincias) según parámetros de búsqueda
     de una consulta.
@@ -384,8 +384,8 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'department',
             'municipality' o 'state'.) (opcional).
-        intersection (dict): Diccionario de tipo de entidad - lista de IDs a
-            utilizar para filtrar por intersecciones con geometrías
+        intersection_ids (dict): Diccionario de tipo de entidad - lista de IDs
+            a utilizar para filtrar por intersecciones con geometrías
             pre-indexadas (opcional).
         offset (int): Retornar resultados comenenzando desde los 'offset'
             primeros resultados obtenidos.
@@ -405,8 +405,8 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
     if name:
         s = s.query(build_name_query(N.NAME, name, exact))
 
-    if intersection:
-        s = s.query(build_intersection_query(N.GEOM, ids=intersection))
+    if intersection_ids:
+        s = s.query(build_intersection_query(N.GEOM, ids=intersection_ids))
 
     if municipality:
         s = s.query(build_subentity_query(N.MUN_ID, N.MUN_NAME, municipality,
