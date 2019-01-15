@@ -3,7 +3,6 @@
 Contiene funciones que ejecutan consultas a índices de Elasticsearch.
 """
 
-import logging
 import elasticsearch
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
@@ -15,8 +14,6 @@ from service.management import es_config
 INTERSECTION_PARAM_TYPES = (
     N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES, N.STREETS
 )
-
-logger = logging.getLogger('georef')
 
 
 class DataConnectionException(Exception):

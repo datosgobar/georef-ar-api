@@ -570,7 +570,7 @@ class IntersectionParameter(Parameter):
                 obligatorio.
 
         """
-        if any(e not in [N.STATE, N.DEPT, N.MUN] for e in entities):
+        if any(e not in [N.STATE, N.DEPT, N.MUN, N.STREET] for e in entities):
             raise ValueError('Unknown entity type')
 
         self._id_params = {}
@@ -584,6 +584,9 @@ class IntersectionParameter(Parameter):
         if N.MUN in entities:
             self._id_params[N.MUN] = IdsParameter(constants.MUNI_ID_LEN,
                                                   sep=':')
+        if N.STREET in entities:
+            self._id_params[N.STREET] = IdsParameter(constants.STREET_ID_LEN,
+                                                     sep=':')
 
         super().__init__(required)
 
@@ -639,6 +642,8 @@ class IntersectionParameter(Parameter):
                 ids[N.DEPARTMENTS].update(entity_ids)
             elif entity == N.MUN:
                 ids[N.MUNICIPALITIES].update(entity_ids)
+            elif entity == N.STREET:
+                ids[N.STREETS].update(entity_ids)
             else:
                 raise TypeError('Invalid entity type')
 
@@ -1064,7 +1069,8 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
 PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.MUNI_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE]),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE,
+                                                    N.STREET]),
     N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
@@ -1166,6 +1172,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 PARAMS_STREETS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
+    N.INTERSECTION: IntersectionParameter(entities=[N.MUN, N.DEPT, N.STATE]),
     N.ROAD_TYPE: StrParameter(),
     N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
     N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),

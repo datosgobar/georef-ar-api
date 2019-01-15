@@ -112,6 +112,24 @@ class IntersectionsTest(GeorefLiveTest):
             ['822315', '822287', '822378', '900042', '908371', '908567']
         )
 
+    def test_intersection_muni_street(self):
+        """Se debería poder buscar municipios utilizando geometrías de
+        calles por intersección."""
+        self.assert_intersection_contains_ids(
+            'municipios',
+            {'interseccion': 'calle:0638503000700'},
+            ['060385']
+        )
+
+    def test_intersection_street_muni(self):
+        """Se debería poder buscar calles utilizando geometrías de
+        municipios por intersección."""
+        self.assert_intersection_contains_ids(
+            'calles',
+            {'interseccion': 'municipio:220084', 'max': 1000},
+            ['2202801000850', '2202801000125', '2202801001110']
+        )
+
     def test_intersection_invalid_id(self):
         """Una búsqueda por intersección de ID/s inválido/s debería resultar
         vacía."""

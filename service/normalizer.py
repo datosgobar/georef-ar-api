@@ -315,6 +315,7 @@ def build_street_query_format(parsed_params):
     query = translate_keys(parsed_params, {
         N.ID: 'street_ids',
         N.NAME: 'name',
+        N.INTERSECTION: 'intersection_ids',
         N.STATE: 'state',
         N.DEPT: 'department',
         N.EXACT: 'exact',
@@ -615,7 +616,7 @@ def build_location_result(query, state, dept, muni):
         # TODO: Cambiar a 'fuentes'?
         source = constants.INDEX_SOURCES[N.STATES]
 
-    location = {
+    return {
         N.STATE: state,
         N.DEPT: dept,
         N.MUN: muni,
@@ -623,8 +624,6 @@ def build_location_result(query, state, dept, muni):
         N.LON: query['lon'],
         N.SOURCE: source
     }
-
-    return location
 
 
 def build_location_query_format(parsed_params):
