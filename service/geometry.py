@@ -45,30 +45,3 @@ def street_number_location(geom, number, start, end):
         N.LAT: lat,
         N.LON: lon
     }
-
-
-def streets_intersection_location(geom_a, geom_b):
-    if geom_a['type'] != 'MultiLineString' or \
-       geom_b['type'] != 'MultiLineString':
-        raise TypeError('GeoJSON type must be MultiLineString')
-
-    shape_a = shapely.geometry.MultiLineString(geom_a['coordinates'])
-    shape_b = shapely.geometry.MultiLineString(geom_b['coordinates'])
-    lat, lon = None, None
-
-    intersection = shape_a.intersection(shape_b)
-
-    if isinstance(intersection, shapely.geometry.Point):
-        lat = intersection.y  # pylint: disable=no-member
-        lon = intersection.x  # pylint: disable=no-member
-    elif isinstance(intersection, shapely.geometry.MultiPoint):
-        # Una o las dos calles tiene más de un tramo, y la intersección no
-        # ocurre en un solo punto si no que en varios
-        centroid = intersection.centroid
-        lat = centroid.y  # pylint: disable=no-member
-        lon = centroid.x  # pylint: disable=no-member
-
-    return {
-        N.LAT: lat,
-        N.LON: lon
-    }
