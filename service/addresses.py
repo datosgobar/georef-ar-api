@@ -225,11 +225,11 @@ def run_address_queries(es, queries, formats):
             query_planners.append(AddressNoneQueryPlanner(query, fmt))
         elif address_type == 'simple':
             query_planners.append(AddressSimpleQueryPlanner(query, fmt))
-        elif address_type == 'isct':
+        elif address_type == 'intersection':
             # TODO: Complentar AddressIsctQueryPlanner
             # query_planners.append(AddressIsctQueryPlanner(query, fmt))
             query_planners.append(AddressNoneQueryPlanner(query, fmt))
-        elif address_type == 'btwn':
+        elif address_type == 'between':
             # TODO: Complentar AddressBtwnQueryPlanner
             # query_planners.append(AddressBtwnQueryPlanner(query, fmt))
             query_planners.append(AddressNoneQueryPlanner(query, fmt))
