@@ -340,9 +340,9 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
 
         self.assert_address_search_id_matches(expected)
 
-    def test_search_road_type(self):
+    def test_search_street_type(self):
         """Se debe poder especificar el tipo de calle en la búsqueda."""
-        roads = self.get_response({
+        streets = self.get_response({
             'tipo': 'calle',
             'direccion': COMMON_ADDRESS
         })
@@ -352,14 +352,14 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
             'direccion': COMMON_ADDRESS
         })
 
-        roads_valid = roads and all(
-            road['calle']['tipo'] == 'CALLE' for road in roads
+        streets_valid = streets and all(
+            street['calle']['tipo'] == 'CALLE' for street in streets
         )
         avenues_valid = avenues and all(
             av['calle']['tipo'] == 'AV' for av in avenues
         )
 
-        self.assertTrue(roads_valid and avenues_valid)
+        self.assertTrue(streets_valid and avenues_valid)
 
     def test_filter_by_state_name(self):
         """Se debe poder filtrar los resultados por nombre de provincia."""
@@ -379,7 +379,7 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
             })
 
             validations.append(all(
-                road['provincia']['id'] == state_code for road in res
+                street['provincia']['id'] == state_code for street in res
             ))
 
         self.assertTrue(validations and all(validations))
@@ -401,7 +401,7 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
             })
 
             validations.append(all(
-                road['provincia']['nombre'] == state_name for road in res
+                street['provincia']['nombre'] == state_name for street in res
             ))
 
         self.assertTrue(validations and all(validations))
@@ -423,7 +423,7 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
             })
 
             validations.append(all(
-                road['departamento']['id'] == dept_code for road in res
+                street['departamento']['id'] == dept_code for street in res
             ))
 
         self.assertTrue(validations and all(validations))
@@ -444,7 +444,7 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
             })
 
             validations.append(all(
-                road['departamento']['nombre'] == dept_name for road in res
+                street['departamento']['nombre'] == dept_name for street in res
             ))
 
         self.assertTrue(validations and all(validations))

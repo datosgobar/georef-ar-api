@@ -175,10 +175,10 @@ class SearchStreetsTest(GeorefLiveTest):
         data = self.get_response({'nombre': 'FoobarFoobar', 'exacto': 1})
         self.assertTrue(len(data) == 0)
 
-    def test_search_road_type(self):
+    def test_search_street_type(self):
         """Se debe poder especificar el tipo de calle en la búsqueda."""
         validations = []
-        road_types = [
+        street_types = [
             ('AV', 'avenida'),
             ('RUTA', 'ruta'),
             ('AUT', 'autopista'),
@@ -186,15 +186,15 @@ class SearchStreetsTest(GeorefLiveTest):
             ('PJE', 'pasaje')
         ]
 
-        for road_type, road_type_long in road_types:
+        for street_type, street_type_long in street_types:
             res = self.get_response({
-                'tipo': road_type_long,
+                'tipo': street_type_long,
                 'max': 100
             })
 
             validations.append(len(res) > 0)
             validations.append(all(
-                road['tipo'] == road_type for road in res
+                street['tipo'] == street_type for street in res
             ))
 
         assert(validations and all(validations))

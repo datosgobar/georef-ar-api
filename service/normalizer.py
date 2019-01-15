@@ -320,7 +320,7 @@ def build_street_query_format(parsed_params):
         N.DEPT: 'department',
         N.EXACT: 'exact',
         N.FIELDS: 'fields',
-        N.ROAD_TYPE: 'road_type',
+        N.TYPE: 'street_type',
         N.OFFSET: 'offset',
         N.ORDER: 'order'
     }, ignore=[N.FLATTEN, N.FORMAT])
@@ -453,17 +453,12 @@ def build_address_query_format(parsed_params):
         tuple: diccionario de query y diccionario de formato
 
     """
-    # road_name, number = parsed_params.pop(N.ADDRESS)
-    # parsed_params['road_name'] = road_name
-    # parsed_params['number'] = number
-
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
-        # N.ADDRESS: 'address_data',
         N.DEPT: 'department',
         N.STATE: 'state',
         N.EXACT: 'exact',
-        N.ROAD_TYPE: 'road_type',
+        N.TYPE: 'street_type',
         N.OFFSET: 'offset',
         N.ORDER: 'order'
     }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])

@@ -102,7 +102,7 @@ class AddressQueryPlanner:
         if not elasticsearch_street_hit:
             elasticsearch_street_hit = {}
 
-        keys = [N.ID, N.NAME, N.ROAD_TYPE]
+        keys = [N.ID, N.NAME, N.TYPE]
 
         return {
             key: elasticsearch_street_hit.get(key)
@@ -236,7 +236,7 @@ def run_address_queries(es, queries, formats):
         else:
             raise TypeError('Unknown address type')
 
-    for i in range(3):
+    for i in range(1):
         # TODO: Reducir cantidad de iteraciones (fijarse qué tipos de
         # direcciones hay en la lista)
         step_query_planners(es, query_planners, iteration=i)

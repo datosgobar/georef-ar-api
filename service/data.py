@@ -432,7 +432,7 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
 
 
 def build_streets_search(street_ids=None, name=None, department=None,
-                         state=None, road_type=None, max=None, order=None,
+                         state=None, street_type=None, max=None, order=None,
                          fields=None, exact=False, number=None,
                          intersection_ids=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para vías de circulación
@@ -443,7 +443,7 @@ def build_streets_search(street_ids=None, name=None, department=None,
         name (str): Nombre de la calle para filtrar (opcional).
         department (str): ID o nombre de departamento para filtrar (opcional).
         state (str): ID o nombre de provincia para filtrar (opcional).
-        road_type (str): Nombre del tipo de camino para filtrar (opcional).
+        street_type (str): Nombre del tipo de camino para filtrar (opcional).
         max (int): Limita la cantidad de resultados (opcional).
         order (str): Campo por el cual ordenar los resultados (opcional).
         fields (list): Campos a devolver en los resultados (opcional).
@@ -475,8 +475,8 @@ def build_streets_search(street_ids=None, name=None, department=None,
     if name:
         s = s.query(build_name_query(N.NAME, name, exact))
 
-    if road_type:
-        s = s.query(build_match_query(N.ROAD_TYPE, road_type, fuzzy=True))
+    if street_type:
+        s = s.query(build_match_query(N.TYPE, street_type, fuzzy=True))
 
     if number:
         s = s.query(build_range_query(N.START_R, '<=', number) |
