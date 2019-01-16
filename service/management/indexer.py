@@ -39,6 +39,8 @@ logger = logging.getLogger(__name__)
 FILE_VERSION = '7.0.0'
 
 SEPARATOR_WIDTH = 60
+SMTP_TIMEOUT = 10
+LOGS_DIR = 'logs'
 ACTIONS = ['index', 'index_stats']
 INDEX_NAMES = [
     N.STATES,
@@ -82,8 +84,23 @@ def setup_logger(l, stream):
     l.addHandler(str_handler)
 
 
+def save_log(contents):
+    """Escribe los contenidos de un log a un archivo en el directorio de logs.
+
+    Args:
+        contents (str): Contenido del log.
+
+    """
+    os.makedirs(LOGS_DIR, exist_ok=True)
+    t = time.strftime('%Y.%m.%d-%H.%M.%S')
+    filename = 'georef-index-{}.log'.format(t)
+
+    with open(os.path.join(LOGS_DIR, filename), 'w') as f:
+        f.write(contents)
+
+
 def send_email(host, user, password, subject, message, recipients,
-               attachments=None):
+               attachments=None, timeout=SMTP_TIMEOUT):
     """Envía un mail a un listado de destinatarios.
 
     Args:
@@ -96,9 +113,11 @@ def send_email(host, user, password, subject, message, recipients,
         attachments (dict): Diccionario de contenidos <str, str> a adjuntar en
             el mail. Las claves representan los nombres de los contenidos y los
             valores representan los contenidos en sí.
+        timeout (int): Tiempo máximo a esperar en segundos para establecer la
+            conexión al servidor SMTP.
 
     """
-    with smtplib.SMTP_SSL(host) as smtp:
+    with smtplib.SMTP_SSL(host, timeout=timeout) as smtp:
         smtp.login(user, password)
 
         msg = MIMEMultipart()
@@ -724,6 +743,10 @@ def run_index(es, forced, name='all'):
     logger.info('Comenzando (re)indexación en Georef API [{}]'.format(env))
     logger.info('')
 
+    logger.info('Índice(s) seleccionado(s): {}'.format(name))
+    logger.info('Modo forzado: {}'.format(forced))
+    logger.info('')
+
     indices = [
         GeorefIndex(alias=N.STATES,
                     doc_class=es_config.State,
@@ -794,9 +817,19 @@ def run_index(es, forced, name='all'):
     mail_config = app.config.get_namespace('EMAIL_')
     if mail_config['enabled']:
         logger.info('Enviando mail...')
-        send_index_email(mail_config, forced, env,
-                         loggerStream.getvalue())
-        logger.info('Mail enviado.')
+
+        try:
+            send_index_email(mail_config, forced, env,
+                             loggerStream.getvalue())
+            logger.info('Mail enviado.')
+            logger.info('')
+        except Exception:  # pylint: disable=broad-except
+            logger.error('')
+            logger.exception('Ocurrió un error al enviar el mail:')
+            logger.error('')
+
+    logger.info('Script finalizado.')
+    save_log(loggerStream.getvalue())
 
 
 def run_info(es):

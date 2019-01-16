@@ -69,3 +69,4 @@ logging.ini
 /config/georef_synonyms.txt
 .coverage
 htmlcov/
+logs/
