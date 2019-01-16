@@ -51,6 +51,8 @@ DOOR_NUM = 'altura'
 END = 'fin'
 EXACT = 'exacto'
 FIELDS = 'campos'
+ERROR = 'error'
+ERRORS = 'errores'
 FLATTEN = 'aplanar'
 FLOOR = 'piso'
 FORMAT = 'formato'
@@ -116,3 +118,35 @@ STREET_X1_TYPE = join(STREET_X1, TYPE)
 STREET_X2_ID = join(STREET_X2, ID)
 STREET_X2_NAME = join(STREET_X2, NAME)
 STREET_X2_TYPE = join(STREET_X2, TYPE)
+
+##########################
+#        Plurales        #
+##########################
+
+_PLURALS = {
+    STATE: STATES,
+    DEPT: DEPARTMENTS,
+    MUN: MUNICIPALITIES,
+    LOCALITY: LOCALITIES,
+    STREET: STREETS,
+    ADDRESS: ADDRESSES,
+    LOCATION: LOCATIONS,
+    RESULT: RESULTS,
+    ERROR: ERRORS
+}
+
+_SINGULARS = {value: key for key, value in _PLURALS.items()}
+
+
+def plural(word):
+    if word not in _PLURALS:
+        raise RuntimeError('No plural defined for: {}'.format(word))
+
+    return _PLURALS[word]
+
+
+def singular(word):
+    if word not in _SINGULARS:
+        raise RuntimeError('No singular defined for: {}').format(word)
+
+    return _SINGULARS[word]

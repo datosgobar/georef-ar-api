@@ -570,23 +570,21 @@ class IntersectionParameter(Parameter):
                 obligatorio.
 
         """
-        if any(e not in [N.STATE, N.DEPT, N.MUN, N.STREET] for e in entities):
+        id_lengths = {
+            N.STATE: constants.STATE_ID_LEN,
+            N.DEPT: constants.DEPT_ID_LEN,
+            N.MUN: constants.MUNI_ID_LEN,
+            N.STREET: constants.STREET_ID_LEN
+        }
+
+        if any(e not in id_lengths for e in entities):
             raise ValueError('Unknown entity type')
 
         self._id_params = {}
 
-        if N.STATE in entities:
-            self._id_params[N.STATE] = IdsParameter(constants.STATE_ID_LEN,
-                                                    sep=':')
-        if N.DEPT in entities:
-            self._id_params[N.DEPT] = IdsParameter(constants.DEPT_ID_LEN,
-                                                   sep=':')
-        if N.MUN in entities:
-            self._id_params[N.MUN] = IdsParameter(constants.MUNI_ID_LEN,
-                                                  sep=':')
-        if N.STREET in entities:
-            self._id_params[N.STREET] = IdsParameter(constants.STREET_ID_LEN,
-                                                     sep=':')
+        for entity in entities:
+            self._id_params[entity] = IdsParameter(
+                id_length=id_lengths[entity], sep=':')
 
         super().__init__(required)
 
@@ -636,16 +634,8 @@ class IntersectionParameter(Parameter):
             entity_ids_str = ':'.join(sections[1:])
             entity_ids = self._id_params[entity].get_value(entity_ids_str)
 
-            if entity == N.STATE:
-                ids[N.STATES].update(entity_ids)
-            elif entity == N.DEPT:
-                ids[N.DEPARTMENTS].update(entity_ids)
-            elif entity == N.MUN:
-                ids[N.MUNICIPALITIES].update(entity_ids)
-            elif entity == N.STREET:
-                ids[N.STREETS].update(entity_ids)
-            else:
-                raise TypeError('Invalid entity type')
+            entity_plural = N.plural(entity)
+            ids[entity_plural].update(entity_ids)
 
         return ids if any(list(ids.values())) else {}
 

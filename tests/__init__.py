@@ -219,9 +219,8 @@ class GeorefLiveTest(TestCase):
         entity_plural = self.endpoint.split('/')[-1]
 
         json_resp = self.get_response(params=params, return_value='full')
-        json_as_xml = formatter.value_to_xml(
-            entity_plural, json_resp[entity_plural],
-            list_item_names=formatter.XML_LIST_ITEM_NAMES)
+        json_as_xml = formatter.value_to_xml(entity_plural,
+                                             json_resp[entity_plural])
 
         params['formato'] = 'xml'
         xml_resp = self.get_response(params=params)

@@ -118,19 +118,7 @@ ENDPOINT_CSV_FIELDS = {
 }
 
 
-XML_LIST_ITEM_NAMES = {
-    N.STATES: N.STATE,
-    N.DEPARTMENTS: N.DEPT,
-    N.MUNICIPALITIES: N.MUN,
-    N.LOCALITIES: N.LOCALITY,
-    N.STREETS: N.STREET,
-    N.ADDRESSES: N.ADDRESS,
-    N.RESULTS: N.RESULT
-}
-
-
 XML_ERROR_LIST_ITEM_NAMES = {
-    'errores': 'error',
     'ayuda': 'item'
 }
 
@@ -280,8 +268,8 @@ def xml_flask_response(element, status=200):
 
 
 def value_to_xml(tag, val, list_item_names=None, max_depth=5):
-    """Dado un valor dict, list, str, None o numérico, lo convierte a su
-    equivalente en XML y retorna el nodo raíz resultante.
+    """Dado un valor dict, list, str, None o numérico, lo convierte
+    recursivamentea su equivalente en XML y retorna el nodo raíz resultante.
 
     Args:
         tag (str): Valor a utilizar como el tag del elemento XML raíz.
@@ -297,7 +285,9 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
             dentro de un tag 'libro'. Notar que el parámetro se utiliza también
             en las llamadas recursivas a 'value_to_xml', por lo que se pueden
             especificar los tags de elementos de listas para cualquier nivel de
-            profundidad del valor a convertir.
+            profundidad del valor a convertir. En caso de no encontrar un valor
+            plural en el diccionario, se intenta utilizar la función
+            'names.singular()' para buscar el singular de la palabra.
         max_depth (int): Profundidad máxima a alcanzar.
 
     Raises:
@@ -320,7 +310,17 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
             root.append(elem)
     elif isinstance(val, list):
         for value in val:
-            elem = value_to_xml(list_item_names[tag], value, list_item_names,
+            list_item_name = None
+
+            if list_item_names:
+                # Intentar utilizar list_item_names primero
+                list_item_name = list_item_names.get(tag)
+
+            if not list_item_name:
+                # Utilizar names.singular() si el singular no fue especificado
+                list_item_name = N.singular(tag)
+
+            elem = value_to_xml(list_item_name, value, list_item_names,
                                 max_depth - 1)
             root.append(elem)
     elif val is not None:
@@ -495,8 +495,7 @@ def format_result_xml(name, result, fmt):
 
     root = create_xml_element(N.RESULT)
     if result.iterable:
-        root.append(value_to_xml(name, result.entities,
-                                 list_item_names=XML_LIST_ITEM_NAMES))
+        root.append(value_to_xml(name, result.entities))
         root.append(create_xml_element(N.QUANTITY, len(result.entities)))
         root.append(create_xml_element(N.TOTAL, result.total))
         root.append(create_xml_element(N.OFFSET, result.offset))
