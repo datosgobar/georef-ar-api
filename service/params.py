@@ -397,9 +397,20 @@ class FieldListParameter(Parameter):
         super().__init__(False, tuple(self._standard), self._complete)
 
     def _check_value_in_choices(self, val):
-        # La variable val es de tipo list o tuple, self._choices es de tipo
-        # frozenset: Lanzar una excepción si existen elementos en val que no
-        # están en self._choices.
+        """Comprueba que un valor representando un conjunto de campos sea
+        válido. Cada campo debe estar contenido en 'self._complete'.
+
+        Args:
+            val (tuple): Campos recibidos.
+
+        Raises:
+            InvalidChoiceException: si alguno de los valores de 'val' no está
+                contenido en 'self._complete'.
+
+        """
+        # La variable val es de tipo tuple, self._complete es de tipo
+        # frozenset: Convertir val a un set, y comprobar que todos sus campos
+        # están contenidos en self._complete.
         if set(val) - self._complete:
             raise InvalidChoiceException(strings.FIELD_LIST_INVALID_CHOICE)
 
@@ -785,6 +796,9 @@ class EndpointParameters():
 
         """
         parsed, errors = {}, {}
+        # Cuando ser reciben parámetros vía querystring, se pueden llegar a
+        # tener varios valores bajo una misma key (ver clase
+        # werkzeug.MultiDict).
         is_multi_dict = hasattr(received, 'getlist')
 
         for param_name, param in params.items():
