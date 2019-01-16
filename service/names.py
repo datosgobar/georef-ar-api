@@ -147,6 +147,6 @@ def plural(word):
 
 def singular(word):
     if word not in _SINGULARS:
-        raise RuntimeError('No singular defined for: {}').format(word)
+        raise RuntimeError('No singular defined for: {}'.format(word))
 
     return _SINGULARS[word]

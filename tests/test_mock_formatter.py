@@ -54,6 +54,31 @@ class FormattingTest(GeorefMockTest):
             'foo': 'bar'
         })
 
+    def test_flatten_dict_max_depth(self):
+        """El aplanado de diccionarios debería fallar con diccionarios
+        demasiado profundos."""
+        deep_dict = {
+            'a': {
+                'b': {
+                    'c': {
+                        'd': {}
+                    }
+                }
+            }
+        }
+
+        with self.assertRaises(RuntimeError):
+            formatter.flatten_dict(deep_dict)
+
+    def test_flatten_dict_max_depth_circular(self):
+        """La conversión a XML debería fallar con diccionarios o listas
+        con referencias circulares."""
+        c_dict = {}
+        c_dict['a'] = c_dict
+
+        with self.assertRaises(RuntimeError):
+            formatter.flatten_dict(c_dict)
+
     def test_filter_result_fields(self):
         """Se debería poder filtrar los campos de un diccionario, utilizando
         otro diccionario para especificar cuáles campos deberían ser
@@ -91,6 +116,31 @@ class FormattingTest(GeorefMockTest):
                 }
             }
         })
+
+    def test_xml_max_depth(self):
+        """La conversión a XML debería fallar con diccionarios demasiado
+        profundos."""
+        deep_dict = {
+            'a': {
+                'b': {
+                    'c': {
+                        'd': {}
+                    }
+                }
+            }
+        }
+
+        with self.assertRaises(RuntimeError):
+            formatter.value_to_xml('test', deep_dict, max_depth=3)
+
+    def test_xml_max_depth_circular(self):
+        """La conversión a XML debería fallar con diccionarios o listas
+        con referencias circulares."""
+        c_dict = {}
+        c_dict['a'] = c_dict
+
+        with self.assertRaises(RuntimeError):
+            formatter.value_to_xml('test', c_dict)
 
     def test_xml_structure(self):
         """El nodo raíz de todas las respuestas XML debería ser el tag
