@@ -54,7 +54,7 @@ INDEX_NAMES = [
     N.INTERSECTIONS,
     'all'
 ]
-TIMEOUT = 500
+ES_TIMEOUT = 500
 
 
 def setup_logger(l, stream):
@@ -559,7 +559,7 @@ class GeorefIndex:
 
         for ok, response in helpers.streaming_bulk(es, operations,
                                                    raise_on_error=False,
-                                                   request_timeout=TIMEOUT):
+                                                   request_timeout=ES_TIMEOUT):
             if ok and response['create']['result'] == 'created':
                 creations += 1
             else:

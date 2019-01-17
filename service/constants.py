@@ -10,6 +10,8 @@ API_NAME = 'georef-ar-api'
 
 MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
 MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
+ES_MULTISEARCH_MAX_LEN = current_app.config.get('ES_MULTISEARCH_MAX_LEN',
+                                                MAX_RESULT_LEN)
 
 INDEX_SOURCES = {
     N.STATES: N.SOURCE_IGN,

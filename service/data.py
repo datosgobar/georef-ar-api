@@ -123,22 +123,28 @@ class ElasticsearchSearch:
         if not searches:
             return
 
-        ms = MultiSearch(using=es)
+        step_size = constants.ES_MULTISEARCH_MAX_LEN
 
-        for search in searches:
-            ms = ms.add(search.es_search)
+        # Partir las búsquedas en varios baches si es necesario.
+        for i in range(0, len(searches), step_size):
+            part = searches[i:i + step_size]
+            ms = MultiSearch(using=es)
 
-        try:
-            responses = ms.execute(raise_on_error=True)
+            for search in part:
+                ms = ms.add(search.es_search)
 
-            for search, response in zip(searches, responses):
-                # Por cada objeto ElasticsearchSearch, establecer su objeto
-                # ElasticsearchResult conteniendo los documentos resultantes de
-                # la búsqueda ejecutada.
-                search.set_result(ElasticsearchResult(response, search.offset))
+            try:
+                responses = ms.execute(raise_on_error=True)
 
-        except elasticsearch.ElasticsearchException:
-            raise DataConnectionException()
+                for search, response in zip(part, responses):
+                    # Por cada objeto ElasticsearchSearch, establecer su objeto
+                    # ElasticsearchResult conteniendo los documentos
+                    # resultantes de la búsqueda ejecutada.
+                    search.set_result(ElasticsearchResult(response,
+                                                          search.offset))
+
+            except elasticsearch.ElasticsearchException:
+                raise DataConnectionException()
 
 
 class ElasticsearchResult:
