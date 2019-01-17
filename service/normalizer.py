@@ -496,7 +496,6 @@ def process_address_queries(params_list):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    # results = data.search_streets(es, queries)
     query_results = addresses.run_address_queries(es, queries, formats)
 
     return query_results, formats

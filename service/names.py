@@ -33,9 +33,13 @@ MUNICIPALITIES = 'municipios'
 LOCALITIES = 'localidades'
 LOCALITY = 'localidad'
 STREET = 'calle'
+STREET_A = 'calle_a'
+STREET_B = 'calle_b'
 STREET_X1 = 'calle_cruce_1'
 STREET_X2 = 'calle_cruce_2'
 STREETS = 'calles'
+INTERSECTION = 'interseccion'
+INTERSECTIONS = 'intersecciones'
 ADDRESS = 'direccion'
 ADDRESSES = 'direcciones'
 LOCATION = 'ubicacion'
@@ -58,8 +62,8 @@ FLOOR = 'piso'
 FORMAT = 'formato'
 FULL_NAME = 'nomenclatura'
 GEOM = 'geometria'
+CATEGORY = 'categoria'
 ID = 'id'
-INTERSECTION = 'interseccion'
 LAT = 'lat'
 LEFT = 'izquierda'
 TYPE = 'tipo'
@@ -132,7 +136,8 @@ _PLURALS = {
     ADDRESS: ADDRESSES,
     LOCATION: LOCATIONS,
     RESULT: RESULTS,
-    ERROR: ERRORS
+    ERROR: ERRORS,
+    INTERSECTION: INTERSECTIONS
 }
 
 _SINGULARS = {value: key for key, value in _PLURALS.items()}

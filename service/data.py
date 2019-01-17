@@ -360,6 +360,13 @@ def search_streets(es, params_list):
     return [search.result for search in searches]
 
 
+def search_intersections(es, params_list):
+    searches = [build_intersections_search(**params) for params in params_list]
+
+    ElasticsearchSearch.run_searches(es, searches)
+    return [search.result for search in searches]
+
+
 def build_entity_search(index, entity_ids=None, name=None, state=None,
                         department=None, municipality=None, max=None,
                         order=None, fields=None, exact=False,
@@ -534,6 +541,68 @@ def build_location_search(index, lat, lon, fields=None):
     s = s.source(include=fields)
 
     return ElasticsearchSearch(s[:1])
+
+
+def build_intersections_search(ids=None, names=None, department=None,
+                               state=None, max=None, fields=None, exact=False,
+                               offset=0):
+    if not fields:
+        fields = []
+
+    s = Search(index=N.INTERSECTIONS)
+
+    if ids:
+        query_1 = (
+            build_terms_query(N.join(N.STREET_A, N.ID), ids[0]) &
+            build_terms_query(N.join(N.STREET_B, N.ID), ids[1])
+        )
+
+        query_2 = (
+            build_terms_query(N.join(N.STREET_A, N.ID), ids[1]) &
+            build_terms_query(N.join(N.STREET_B, N.ID), ids[0])
+        )
+
+        s = s.query(query_1 | query_2)
+
+    if names:
+        query_1 = (
+            build_name_query(N.join(N.STREET_A, N.NAME), names[0], exact) &
+            build_name_query(N.join(N.STREET_B, N.NAME), names[1], exact)
+        )
+
+        query_2 = (
+            build_name_query(N.join(N.STREET_A, N.NAME), names[1], exact) &
+            build_name_query(N.join(N.STREET_B, N.NAME), names[0], exact)
+        )
+
+        s = s.query(query_1 | query_2)
+
+    if department:
+        for side in [N.STREET_A, N.STREET_B]:
+            s = s.query(build_subentity_query(
+                N.join(side, N.DEPT_ID),
+                N.join(side, N.DEPT_NAME),
+                department,
+                exact
+            ))
+
+    if state:
+        for side in [N.STREET_A, N.STREET_B]:
+            s = s.query(build_subentity_query(
+                N.join(side, N.STATE_ID),
+                N.join(side, N.STATE_NAME),
+                state,
+                exact
+            ))
+
+    if state:
+        s = s.query(build_subentity_query(N.STATE_ID, N.STATE_NAME, state,
+                                          exact))
+
+    s = s.source(include=fields)
+    s = s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
+
+    return ElasticsearchSearch(s, offset)
 
 
 def build_subentity_query(id_field, name_field, value, exact):

@@ -211,6 +211,22 @@ MunicipalitySimpleField = Object(
     dynamic='strict'
 )
 
+CategoryField = Text(
+    analyzer=name_analyzer_synonyms,
+    search_analyzer=name_analyzer
+)
+
+StreetSimpleField = Object(
+    properties={
+        'id': Keyword(),
+        'nombre': NameField,
+        'provincia': StateSimpleField,
+        'departamento': DepartmentSimpleField,
+        'categoria': CategoryField
+    },
+    dynamic='strict'
+)
+
 StreetLimitField = Object(
     properties={
         'derecha': Integer(),
@@ -294,14 +310,17 @@ class Locality(Entity):
 class Street(Entity):
     nombre = NameField
     nomenclatura = Text(index=False)
-    tipo = Text(
-        analyzer=name_analyzer_synonyms,
-        search_analyzer=name_analyzer
-    )
+    tipo = CategoryField
     altura = StreetNumbersField
     geometria = GeoShape()
     provincia = StateSimpleField
     departamento = DepartmentSimpleField
+
+
+class Intersection(Entity):
+    calle_a = StreetSimpleField
+    calle_b = StreetSimpleField
+    geometria = GeoShape()
 
 
 def create_index(es, name, doc_class, synonyms=None, excluding_terms=None):

@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizdo el código para tomar
 # nuevas versiones de los archivos.
-FILE_VERSION = '7.0.0'
+FILE_VERSION = '8.0.0'
 
 SEPARATOR_WIDTH = 60
 SMTP_TIMEOUT = 10
@@ -51,6 +51,7 @@ INDEX_NAMES = [
     es_config.geom_index_for(N.MUNICIPALITIES),
     N.LOCALITIES,
     N.STREETS,
+    N.INTERSECTIONS,
     'all'
 ]
 TIMEOUT = 500
@@ -798,7 +799,15 @@ def run_index(es, forced, name='all'):
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
-                    backup_filepath=os.path.join(backups_dir, 'calles.json'))
+                    backup_filepath=os.path.join(backups_dir, 'calles.json')),
+        GeorefIndex(alias=N.INTERSECTIONS,
+                    doc_class=es_config.Intersection,
+                    filepath=app.config['INTERSECTIONS_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'calles_intersecciones.json'))
     ]
 
     files_cache = {}

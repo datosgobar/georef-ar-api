@@ -131,6 +131,7 @@ Los nombres de los índices disponibles son:
 - `municipios-geometria`
 - `localidades`
 - `calles`
+- `intersecciones`
 
 ### 5. Correr API 
 #### Entornos de desarrollo

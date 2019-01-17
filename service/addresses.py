@@ -6,6 +6,7 @@ Contiene funciones y clases utilizadas para normalizar direcciones (recurso
 """
 
 import re
+from collections import defaultdict
 from service import names as N
 from service import data, constants, geometry
 from service.query_result import QueryResult
@@ -48,7 +49,7 @@ def street_extents(door_nums, number):
 
 class AddressQueryPlanner:
     def __init__(self, query, fmt):
-        self._query = query
+        self._query = query.copy()
         self._format = fmt
         self._interpret_address_data(self._query.pop(N.ADDRESS))
 
@@ -76,14 +77,13 @@ class AddressQueryPlanner:
     def get_query_result(self):
         raise NotImplementedError()
 
-    def _build_base_address_hit(self, elasticsearch_street_hit):
-        base_keys = [N.STATE, N.DEPT]
+    def _build_base_address_hit(self, state=None, dept=None):
+        address_hit = {}
+        if state:
+            address_hit[N.STATE] = state
 
-        address_hit = {
-            key: elasticsearch_street_hit[key]
-            for key in base_keys
-            if key in elasticsearch_street_hit
-        }
+        if dept:
+            address_hit[N.DEPT] = dept
 
         address_hit[N.SOURCE] = constants.INDEX_SOURCES[N.STREETS]
         address_hit[N.DOOR_NUM] = {
@@ -104,10 +104,16 @@ class AddressQueryPlanner:
 
         keys = [N.ID, N.NAME, N.TYPE]
 
-        return {
+        street_entity = {
             key: elasticsearch_street_hit.get(key)
             for key in keys
         }
+
+        # TODO: Borar y usar 'categoria' directamente
+        if not street_entity[N.TYPE]:
+            street_entity[N.TYPE] = elasticsearch_street_hit.get(N.CATEGORY)
+
+        return street_entity
 
 
 class AddressNoneQueryPlanner(AddressQueryPlanner):
@@ -131,7 +137,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         if self._door_number:
             query['number'] = self._door_number
 
-        return query
+        return data.search_streets, query
 
     def set_elasticsearch_result(self, result, _iteration):
         # Para direcciones de tipo 'simple', el resultado final es simplemente
@@ -143,7 +149,9 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         fields = self._format[N.FIELDS]
 
         for street in self._elasticsearch_result.hits:
-            address_hit = self._build_base_address_hit(street)
+            address_hit = self._build_base_address_hit(street.get(N.STATE),
+                                                       street.get(N.DEPT))
+
             address_hit[N.STREET] = self._build_street_entity(street)
             address_hit[N.STREET_X1] = self._build_street_entity()
             address_hit[N.STREET_X2] = self._build_street_entity()
@@ -185,10 +193,130 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
 
 class AddressIsctQueryPlanner(AddressQueryPlanner):
-    # TODO: Completar clase
+    required_iterations = 3
+
+    def __init__(self, query, fmt):
+        self._intersections_result = None
+        self._street_1_result = None
+        self._street_2_result = None
+        self._street_1_ids = None
+        self._street_2_ids = None
+        self._intersection_hits = None
+
+        super().__init__(query, fmt)
+
+        # TODO: Definir si estos parámetros de búsqueda van a seguir
+        # disponibles en /direcciones. Notar también los cambios en
+        # data.py - build_address_query_format().
+        self._query.pop('order', None)
+        self._query.pop('street_type', None)
+
+    def _build_intersections_query(self, street_1_ids, street_2_ids):
+        query = self._query.copy()
+        query['ids'] = (list(street_1_ids), list(street_2_ids))
+
+        return data.search_intersections, query
+
+    def _build_street_query(self, street, add_number):
+        query = self._query.copy()
+
+        query['name'] = street
+        if add_number and self._door_number:
+            query['number'] = self._door_number
+        query['max'] = constants.MAX_RESULT_LEN
+        query['offset'] = 0
+
+        return data.search_streets, query
+
+    def get_next_query(self, iteration):
+        if iteration == 1:
+            return self._build_street_query(self._street_names[0], True)
+        if iteration == 2:
+            return self._build_street_query(self._street_names[1], False)
+
+        # iteration == 3
+        return self._build_intersections_query(self._street_1_ids,
+                                               self._street_2_ids)
+
+    def _build_intersection_hits(self, intersections):
+        intersection_hits = []
+        fields = self._format[N.FIELDS]
+
+        for street_1, street_2, geom in intersections:
+            address_hit = self._build_base_address_hit(street_1.get(N.STATE),
+                                                       street_1.get(N.DEPT))
+
+            # TODO: Usar prov/dept de cual calle?
+            address_hit[N.STREET] = self._build_street_entity(street_1)
+            address_hit[N.STREET_X1] = self._build_street_entity(street_2)
+            address_hit[N.STREET_X2] = self._build_street_entity()
+
+            if N.FULL_NAME in fields:
+                door_number = ''
+                if self._door_number:
+                    door_number = ' {}'.format(self._door_number)
+
+                full_name = '{}{} y {}, {}, {}'.format(
+                    street_1[N.NAME],
+                    door_number,
+                    street_2[N.NAME],
+                    address_hit[N.DEPT][N.NAME],
+                    address_hit[N.STATE][N.NAME]
+                )
+
+                address_hit[N.FULL_NAME] = full_name
+
+            address_hit[N.LOCATION] = {
+                N.LON: geom['coordinates'][0],
+                N.LAT: geom['coordinates'][1]
+            }
+
+            intersection_hits.append(address_hit)
+
+        return intersection_hits
+
+    def set_elasticsearch_result(self, result, iteration):
+        if iteration == 1:
+            self._street_1_result = result
+            self._street_1_ids = {
+                hit[N.ID]
+                for hit in self._street_1_result.hits
+            }
+            return
+        if iteration == 2:
+            self._street_2_result = result
+            self._street_2_ids = {
+                hit[N.ID]
+                for hit in self._street_2_result.hits
+            }
+            return
+
+        # iteration == 3
+        self._intersections_result = result
+
+        intersections = []
+        for intersection in self._intersections_result.hits:
+            id_1, id_2 = intersection[N.ID].split('-')
+
+            if id_1 in self._street_1_ids and id_2 in self._street_2_ids:
+                intersections.append((intersection[N.STREET_A],
+                                      intersection[N.STREET_B],
+                                      intersection[N.GEOM]))
+            elif id_1 in self._street_2_ids and id_2 in self._street_1_ids:
+                intersections.append((intersection[N.STREET_B],
+                                      intersection[N.STREET_A],
+                                      intersection[N.GEOM]))
+            else:
+                raise RuntimeError(
+                    'Unknown street IDs for intersection {} - {}'.format(id_1,
+                                                                         id_2))
+
+        self._intersection_hits = self._build_intersection_hits(intersections)
 
     def get_query_result(self):
-        raise NotImplementedError()
+        return QueryResult.from_entity_list(self._intersection_hits,
+                                            self._intersections_result.total,
+                                            self._intersections_result.offset)
 
 
 class AddressBtwnQueryPlanner(AddressQueryPlanner):
@@ -198,48 +326,50 @@ class AddressBtwnQueryPlanner(AddressQueryPlanner):
         raise NotImplementedError()
 
 
-def step_query_planners(es, query_planners, iteration=0):
-    planner_queries = []
+def step_query_planners(es, query_planners, iteration):
+    search_fn_queries = defaultdict(list)
+
     for planner in query_planners:
-        if planner.required_iterations > iteration:
-            query = planner.get_next_query(iteration)
-            planner_queries.append((planner, query))
+        if planner.required_iterations >= iteration:
+            search_fn, query = planner.get_next_query(iteration)
+            search_fn_queries[search_fn].append((query, planner))
 
-    results = data.search_streets(es, [
-        planner_query[1]
-        for planner_query in planner_queries
-        if planner_query[1]
-    ])
+    for search_fn, planner_queries in search_fn_queries.items():
+        results = search_fn(es, [
+            planner_query[0]
+            for planner_query in planner_queries
+        ])
 
-    for result, planner_query in zip(results, planner_queries):
-        planner = planner_query[0]
-        planner.set_elasticsearch_result(result, iteration)
+        for result, planner_query in zip(results, planner_queries):
+            planner = planner_query[1]
+            planner.set_elasticsearch_result(result, iteration)
 
 
 def run_address_queries(es, queries, formats):
     query_planners = []
+    min_iterations = 0
+
     for query, fmt in zip(queries, formats):
         address_type = query[N.ADDRESS]['type']
 
         if not address_type:
-            query_planners.append(AddressNoneQueryPlanner(query, fmt))
+            query_planner = AddressNoneQueryPlanner(query, fmt)
         elif address_type == 'simple':
-            query_planners.append(AddressSimpleQueryPlanner(query, fmt))
+            query_planner = AddressSimpleQueryPlanner(query, fmt)
         elif address_type == 'intersection':
-            # TODO: Complentar AddressIsctQueryPlanner
-            # query_planners.append(AddressIsctQueryPlanner(query, fmt))
-            query_planners.append(AddressNoneQueryPlanner(query, fmt))
+            query_planner = AddressIsctQueryPlanner(query, fmt)
         elif address_type == 'between':
             # TODO: Complentar AddressBtwnQueryPlanner
             # query_planners.append(AddressBtwnQueryPlanner(query, fmt))
-            query_planners.append(AddressNoneQueryPlanner(query, fmt))
+            query_planner = AddressNoneQueryPlanner(query, fmt)
         else:
             raise TypeError('Unknown address type')
 
-    for i in range(1):
-        # TODO: Reducir cantidad de iteraciones (fijarse qué tipos de
-        # direcciones hay en la lista)
-        step_query_planners(es, query_planners, iteration=i)
+        min_iterations = max(query_planner.required_iterations, min_iterations)
+        query_planners.append(query_planner)
+
+    for i in range(min_iterations):
+        step_query_planners(es, query_planners, iteration=i + 1)
 
     return [
         query_planner.get_query_result()
