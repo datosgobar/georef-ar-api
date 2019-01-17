@@ -278,6 +278,10 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
     def set_elasticsearch_result(self, result, iteration):
         if iteration == 1:
             self._street_1_result = result
+            if not self._street_1_result:
+                self.required_iterations = 0
+                return
+
             self._street_1_ids = {
                 hit[N.ID]
                 for hit in self._street_1_result.hits
@@ -285,6 +289,10 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             return
         if iteration == 2:
             self._street_2_result = result
+            if not self._street_2_result:
+                self.required_iterations = 0
+                return
+
             self._street_2_ids = {
                 hit[N.ID]
                 for hit in self._street_2_result.hits
@@ -314,9 +322,12 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         self._intersection_hits = self._build_intersection_hits(intersections)
 
     def get_query_result(self):
-        return QueryResult.from_entity_list(self._intersection_hits,
-                                            self._intersections_result.total,
-                                            self._intersections_result.offset)
+        if self._intersection_hits:
+            return QueryResult.from_entity_list(
+                self._intersection_hits, self._intersections_result.total,
+                self._intersections_result.offset)
+        else:
+            return QueryResult.empty()
 
 
 class AddressBtwnQueryPlanner(AddressQueryPlanner):
