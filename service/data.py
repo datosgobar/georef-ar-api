@@ -595,10 +595,6 @@ def build_intersections_search(ids=None, names=None, department=None,
                 exact
             ))
 
-    if state:
-        s = s.query(build_subentity_query(N.STATE_ID, N.STATE_NAME, state,
-                                          exact))
-
     s = s.source(include=fields)
     s = s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
 
