@@ -322,12 +322,12 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         self._intersection_hits = self._build_intersection_hits(intersections)
 
     def get_query_result(self):
-        if self._intersection_hits:
-            return QueryResult.from_entity_list(
-                self._intersection_hits, self._intersections_result.total,
-                self._intersections_result.offset)
-        else:
+        if not self._intersection_hits:
             return QueryResult.empty()
+
+        return QueryResult.from_entity_list(self._intersection_hits,
+                                            self._intersections_result.total,
+                                            self._intersections_result.offset)
 
 
 class AddressBtwnQueryPlanner(AddressQueryPlanner):
