@@ -549,9 +549,9 @@ def build_location_search(index, lat, lon, fields=None):
     return ElasticsearchSearch(s[:1])
 
 
-def build_intersections_search(ids=None, names=None, department=None,
-                               state=None, max=None, fields=None, exact=False,
-                               geo_shape_geoms=None, offset=0):
+def build_intersections_search(ids=None, department=None, state=None, max=None,
+                               fields=None, exact=False, geo_shape_geoms=None,
+                               offset=0):
     if not fields:
         fields = []
 
@@ -566,19 +566,6 @@ def build_intersections_search(ids=None, names=None, department=None,
         query_2 = (
             build_terms_query(N.join(N.STREET_A, N.ID), ids[1]) &
             build_terms_query(N.join(N.STREET_B, N.ID), ids[0])
-        )
-
-        s = s.query(query_1 | query_2)
-
-    if names:
-        query_1 = (
-            build_name_query(N.join(N.STREET_A, N.NAME), names[0], exact) &
-            build_name_query(N.join(N.STREET_B, N.NAME), names[1], exact)
-        )
-
-        query_2 = (
-            build_name_query(N.join(N.STREET_A, N.NAME), names[1], exact) &
-            build_name_query(N.join(N.STREET_B, N.NAME), names[0], exact)
         )
 
         s = s.query(query_1 | query_2)

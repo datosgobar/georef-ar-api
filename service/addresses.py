@@ -147,14 +147,14 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         self._query.pop('order', None)
         self._query.pop('street_type', None)
 
-    def _build_intersections_query(self, street_1_ids, street_1_locations,
-                                   street_2_ids):
+    def _build_intersections_query(self, street_1_ids, street_2_ids,
+                                   locations):
         query = self._query.copy()
         query['ids'] = (list(street_1_ids), list(street_2_ids))
-        if street_1_locations:
+        if locations:
             geoms = []
 
-            for loc in street_1_locations.values():
+            for loc in locations:
                 geoms.append(geometry.build_circle_geometry(
                     loc,
                     ISCT_DOOR_NUM_TOLERANCE_M
@@ -164,7 +164,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
         return data.search_intersections, query
 
-    def _build_street_query(self, street, add_number):
+    def _build_street_query(self, street, add_number=False):
         query = self._query.copy()
 
         query['name'] = street
@@ -175,44 +175,50 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
         return data.search_streets, query
 
+    def _read_street_1_results(self, result):
+        # Recolectar resultados de la primera calle
+        street_1_ids = set()
+        street_1_locations = {}
+
+        # Si tenemos altura, comprobar que podemos calcular la ubicación
+        # geográfica de cada altura por cada resultado de la calle 1.
+        # Ignorar los resultados donde la ubicación no se puede calcular.
+        if self._numerical_door_number:
+            for street in result.hits:
+                loc = geometry.street_number_location(
+                    street, self._numerical_door_number)
+
+                if loc[N.LAT] and loc[N.LON]:
+                    street_1_ids.add(street[N.ID])
+                    street_1_locations[street[N.ID]] = loc
+        else:
+            # No tenemos altura: la dirección es "Calle 1 y Calle 2".
+            # No necesitamos calcular ninguna posición sobre la calle 1,
+            # porque se usa la posición de la intersección de las dos
+            # calles, que ya está pre-calculada.
+            street_1_ids = {hit[N.ID] for hit in result.hits}
+
+        return street_1_ids, street_1_locations
+
     def planner_steps(self):
         # Buscar la primera calle, incluyendo la altura si está presente
         result = yield self._build_street_query(
             self._address_data.street_names[0], True)
 
         if result:
-            # Recolectar resultados de la primera calle
-            street_1_locations = {}
+            street_1_ids, street_1_locations = self._read_street_1_results(
+                result)
 
-            # Si tenemos altura, comprobar que podemos calcular la ubicación
-            # geográfica de cada altura por cada resultado de la calle 1.
-            # Ignorar los resultados donde la ubicación no se puede calcular.
-            if self._numerical_door_number:
-                street_1_ids = set()
-
-                for street in result.hits:
-                    loc = geometry.street_number_location(
-                        street, self._numerical_door_number)
-
-                    if loc[N.LAT] and loc[N.LON]:
-                        street_1_ids.add(street[N.ID])
-                        street_1_locations[street[N.ID]] = loc
-
-                if not street_1_ids:
-                    # Ninguno de los resultados pudo ser utilizado para
-                    # calcular la ubicación. Devolver 0 resultados.
-                    return
-            else:
-                # No tenemos altura: la dirección es "Calle 1 y Calle 2".
-                # No necesitamos calcular ninguna posición sobre la calle 1,
-                # porque se usa la posición de la intersección de las dos
-                # calles, que ya está pre-calculada.
-                street_1_ids = {hit[N.ID] for hit in result.hits}
+            if not street_1_ids:
+                # Ninguno de los resultados pudo ser utilizado para
+                # calcular la ubicación, o no se encontraron resultados.
+                # Devolver 0 resultados de intersección.
+                return
         else:
             return
 
         result = yield self._build_street_query(
-            self._address_data.street_names[1], False)
+            self._address_data.street_names[1])
 
         if result:
             # Resultados de la segunda calle
@@ -224,9 +230,8 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         # orden ("Calle 1 y Calle 2" o "Calle 2 y Calle 1"). Si tenemos altura,
         # comprobar que las intersecciones no estén a mas de X metros de cada
         # ubicación sobre la calle 1 que calculamos anteriormente.
-        result = yield self._build_intersections_query(street_1_ids,
-                                                       street_1_locations,
-                                                       street_2_ids)
+        result = yield self._build_intersections_query(
+            street_1_ids, street_2_ids, street_1_locations.values())
 
         self._intersections_result = result
 
@@ -236,18 +241,18 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         # el mismo orden en el que fueron recibidos.
         intersections = []
         for intersection in self._intersections_result.hits:
-            id_1, id_2 = intersection[N.ID].split('-')
+            id_a, id_b = intersection[N.ID].split('-')
 
-            if id_1 in street_1_ids and id_2 in street_2_ids:
+            if id_a in street_1_ids and id_b in street_2_ids:
                 street_1 = intersection[N.STREET_A]
                 street_2 = intersection[N.STREET_B]
-            elif id_1 in street_2_ids and id_2 in street_1_ids:
+            elif id_a in street_2_ids and id_b in street_1_ids:
                 street_1 = intersection[N.STREET_B]
                 street_2 = intersection[N.STREET_A]
             else:
                 raise RuntimeError(
-                    'Unknown street IDs for intersection {} - {}'.format(id_1,
-                                                                         id_2))
+                    'Unknown street IDs for intersection {} - {}'.format(id_a,
+                                                                         id_b))
 
             if street_1[N.ID] in street_1_locations:
                 # Como tenemos altura, usamos la posición sobre la calle 1 en
@@ -302,11 +307,112 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
                                             self._intersections_result.offset)
 
 
-class AddressBtwnQueryPlanner(AddressQueryPlanner):
-    # TODO: Completar clase
+class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
+    required_iterations = 4
+
+    def __init__(self, query, fmt):
+        self._between_hits = None
+        super().__init__(query, fmt)
+
+    def _build_between_hits(self, betweens):
+        between_hits = []
+
+        for street_1, street_2, street_3 in betweens:
+            address_hit = self._build_base_address_hit(street_1.get(N.STATE),
+                                                       street_1.get(N.DEPT))
+
+            # TODO: Usar prov/dept de cual calle?
+            address_hit[N.STREET] = self._build_street_entity(street_1)
+            address_hit[N.STREET_X1] = self._build_street_entity(street_2)
+            address_hit[N.STREET_X2] = self._build_street_entity(street_3)
+            # address_hit[N.LOCATION] = loc
+
+            between_hits.append(address_hit)
+
+        return between_hits
+
+    def planner_steps(self):
+        # Buscar la primera calle, incluyendo la altura si está presente
+        result = yield self._build_street_query(
+            self._address_data.street_names[0], True)
+
+        if result:
+            street_1_ids, street_1_locations = self._read_street_1_results(
+                result)
+
+            if not street_1_ids:
+                # Ninguno de los resultados pudo ser utilizado para
+                # calcular la ubicación, o no se encontraron resultados.
+                # Devolver 0 resultados de intersección.
+                return
+        else:
+            return
+
+        result = yield self._build_street_query(
+            self._address_data.street_names[1])
+
+        if result:
+            # Resultados de la segunda calle
+            street_2_ids = {hit[N.ID] for hit in result.hits}
+        else:
+            return
+
+        result = yield self._build_street_query(
+            self._address_data.street_names[2])
+
+        if result:
+            # Resultados de la tercera calle
+            street_3_ids = {hit[N.ID] for hit in result.hits}
+        else:
+            return
+
+        street_2_3_ids = street_2_ids | street_3_ids
+
+        result = yield self._build_intersections_query(
+            street_1_ids,
+            street_2_3_ids,
+            street_1_locations.values()
+        )
+
+        betweens = {}
+        for intersection in result.hits:
+            id_a, id_b = intersection[N.ID].split('-')
+
+            if id_a in street_1_ids and id_b in street_2_3_ids:
+                street_1 = intersection[N.STREET_A]
+                street_other = intersection[N.STREET_B]
+            elif id_a in street_2_3_ids and id_b in street_1_ids:
+                street_1 = intersection[N.STREET_B]
+                street_other = intersection[N.STREET_A]
+            else:
+                raise RuntimeError(
+                    'Unknown street IDs for intersection {} - {}'.format(id_a,
+                                                                         id_b))
+
+            if street_1[N.ID] not in betweens:
+                betweens[street_1[N.ID]] = [street_1, None, None]
+
+            if street_other[N.ID] in street_2_ids:
+                betweens[street_1[N.ID]][1] = street_other
+            elif street_other[N.ID] in street_3_ids:
+                betweens[street_1[N.ID]][2] = street_other
+            else:
+                raise RuntimeError('Unknown street ID: {}'.format(
+                    street_other[N.ID]))
+
+        # Las tres calles deben estar presentes
+        self._between_hits = self._build_between_hits([
+            streets for streets in betweens.values() if all(streets)
+        ])
 
     def get_query_result(self):
-        raise NotImplementedError()
+        if not self._between_hits:
+            return QueryResult.empty()
+
+        # TODO: Revisar total y offset
+        return QueryResult.from_entity_list(self._between_hits,
+                                            len(self._between_hits),
+                                            0)
 
 
 def step_plan_iterator(iterator, previous_result):
@@ -379,9 +485,7 @@ def run_address_queries(es, queries, formats):
         elif address_type == 'intersection':
             query_planner = AddressIsctQueryPlanner(query, fmt)
         elif address_type == 'between':
-            # TODO: Complentar AddressBtwnQueryPlanner
-            # query_planners.append(AddressBtwnQueryPlanner(query, fmt))
-            query_planner = AddressNoneQueryPlanner(query, fmt)
+            query_planner = AddressBtwnQueryPlanner(query, fmt)
         else:
             raise TypeError('Unknown address type')
 
