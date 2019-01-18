@@ -202,6 +202,15 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
         expected = sorted(ordered)
         self.assertListEqual(ordered, expected)
 
+    def test_invalid_address_search(self):
+        """Si se busca una dirección que no peude ser interpretada por la
+        librería georef-ar-address, se deberían traer 0 resultados."""
+        resp = self.get_response({
+            'direccion': 'Tucumán y Corrientes y López'
+        })
+
+        self.assertEqual(len(resp), 0)
+
     def test_address_exact_match(self):
         """La búsqueda exacta debe devolver las direcciones
         correspondientes."""
