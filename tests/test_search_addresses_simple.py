@@ -164,12 +164,6 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
 
         self.assertListEqual(fields_lists, fields_results)
 
-    def test_number_0(self):
-        """Las direcciones con altura 0 deben ser tratadas como alturas sin
-        número."""
-        resp = self.get_response({'direccion': 'Corrientes 0'})
-        self.assertIsNone(resp[0]['altura']['valor'])
-
     def test_no_number_returns_null(self):
         """Si se especifica una dirección sin altura, se debería normalizar por
         lo menos el nombre de la calle, y el resultado debería tener null como

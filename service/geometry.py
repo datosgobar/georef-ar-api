@@ -45,3 +45,13 @@ def street_number_location(geom, number, start, end):
         N.LAT: lat,
         N.LON: lon
     }
+
+
+def geojson_point_to_location(geom):
+    if geom['type'] != 'Point':
+        raise TypeError('GeoJSON type must be Point')
+
+    return {
+        N.LON: geom['coordinates'][0],
+        N.LAT: geom['coordinates'][1]
+    }

@@ -419,7 +419,7 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
         s = s.query(build_name_query(N.NAME, name, exact))
 
     if intersection_ids:
-        s = s.query(build_intersection_query(N.GEOM, ids=intersection_ids))
+        s = s.query(build_geo_query(N.GEOM, ids=intersection_ids))
 
     if municipality:
         s = s.query(build_subentity_query(N.MUN_ID, N.MUN_NAME, municipality,
@@ -483,7 +483,7 @@ def build_streets_search(street_ids=None, name=None, department=None,
         s = s.filter(build_terms_query(N.ID, street_ids))
 
     if intersection_ids:
-        s = s.query(build_intersection_query(N.GEOM, ids=intersection_ids))
+        s = s.query(build_geo_query(N.GEOM, ids=intersection_ids))
 
     if name:
         s = s.query(build_name_query(N.NAME, name, exact))
@@ -551,7 +551,7 @@ def build_location_search(index, lat, lon, fields=None):
 
 def build_intersections_search(ids=None, names=None, department=None,
                                state=None, max=None, fields=None, exact=False,
-                               offset=0):
+                               geo_shape_geoms=None, offset=0):
     if not fields:
         fields = []
 
@@ -582,6 +582,9 @@ def build_intersections_search(ids=None, names=None, department=None,
         )
 
         s = s.query(query_1 | query_2)
+
+    if geo_shape_geoms:
+        s = s.query(build_geo_query(N.GEOM, geoms=geo_shape_geoms))
 
     if department:
         for side in [N.STREET_A, N.STREET_B]:
@@ -631,13 +634,20 @@ def build_subentity_query(id_field, name_field, value, exact):
     return build_name_query(name_field, value, exact)
 
 
-def build_intersection_query(field, ids):
-    """Crea una condición de búsqueda por intersección de geometrías de una
-    o más entidades, de tipos provincia/departamento/municipio.
+def build_geo_query(field, ids=None, geoms=None, relation='intersects'):
+    """Crea una condición de búsqueda por propiedades de geometrías. La función
+    permite especificar una o más geometrías (vía el ID de un documento, o su
+    valor GeoJSON directo) y una relación (INTERSECTS, WITHIN, etc.), y luego
+    construye las queries GeoShape apropiadas, una por geometría. Las queries
+    son unidas con el operador lógico OR.
 
     Args:
         field (str): Campo de la condición (debe ser de tipo 'geo_shape').
-        ids (dict): Diccionario de tipo de entidad - lista de IDs.
+        ids (dict): Diccionario de tipo de entidad - lista de IDs. Los
+            documentos referidos deben contar con un campo 'geometria'.
+        geoms (list): Lista de geometrías con formato GeoJSON.
+        relation (str): Tipo de búsqueda por geometrías a realizar. Ver la
+            documentación de Elasticsearch GeoShape Query para más detalles.
 
     Returns:
         Query: Condición para Elasticsearch.
@@ -645,15 +655,31 @@ def build_intersection_query(field, ids):
     """
     query = MatchNone()
 
-    for entity_type, id_list in ids.items():
-        for entity_id in id_list:
-            query |= build_geo_indexed_shape_query(field, entity_type,
-                                                   entity_id, N.GEOM)
+    if ids:
+        for entity_type, id_list in ids.items():
+            for entity_id in id_list:
+                query |= build_geo_indexed_shape_query(field, entity_type,
+                                                       entity_id, N.GEOM,
+                                                       relation)
+
+    if geoms:
+        for geom in geoms:
+            query |= build_geo_shape_query(field, geom, relation)
 
     return query
 
 
-def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
+def build_geo_shape_query(field, geom, relation):
+    options = {
+        'shape': geom,
+        'relation': relation
+    }
+
+    return GeoShape(**{field: options})
+
+
+def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path,
+                                  relation):
     """Crea una condición de búsqueda por intersección con una geometría
     pre-indexada. La geometría debe pertenecer a una entidad de tipo provincia,
     departamento o municipio.
@@ -664,6 +690,8 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
         entity_id (str): ID del documento con la geometría a utilizar.
         entity_geom_path (str): Campo del documento donde se encuentra la
             geometría.
+        relation (str): Tipo de búsqueda por geometrías a realizar. Ver la
+            documentación de Elasticsearch GeoShape Query para más detalles.
 
     Returns:
         Query: Condición para Elasticsearch.
@@ -678,7 +706,8 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path):
             'type': es_config.DOC_TYPE,
             'id': entity_id,
             'path': entity_geom_path
-        }
+        },
+        'relation': relation
     }
 
     # Debido a la forma en la que Elasticsearch indexa geometrías, es posible

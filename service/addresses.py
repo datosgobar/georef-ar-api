@@ -5,7 +5,6 @@ Contiene funciones y clases utilizadas para normalizar direcciones (recurso
 'normalizer', con funciones específicas para el procesamiento de direcciones.
 """
 
-import re
 from collections import defaultdict
 from service import names as N
 from service import data, constants, geometry
@@ -51,28 +50,12 @@ class AddressQueryPlanner:
     def __init__(self, query, fmt):
         self._query = query.copy()
         self._format = fmt
-        self._interpret_address_data(self._query.pop(N.ADDRESS))
+        self._address_data = self._query.pop(N.ADDRESS)
+        self._numerical_door_number = \
+            self._address_data.normalized_door_number_value()
 
-    def _interpret_address_data(self, address_data):
-        self._street_names = address_data['street_names']
-        self._door_number = None
-        self._door_number_unit = address_data['door_number']['unit']
-        self._floor = address_data['floor']
-
-        door_number_value = address_data['door_number']['value']
-        if door_number_value:
-            match = re.search(r'\d+', door_number_value)
-
-            if match:
-                num_int = int(match.group(0))
-                if num_int != 0:
-                    self._door_number = num_int
-
-    def get_next_query(self, _iteration):
-        return None
-
-    def set_elasticsearch_result(self, result, _iteration):
-        pass
+    def planner_steps(self):
+        raise NotImplementedError()
 
     def get_query_result(self):
         raise NotImplementedError()
@@ -87,10 +70,10 @@ class AddressQueryPlanner:
 
         address_hit[N.SOURCE] = constants.INDEX_SOURCES[N.STREETS]
         address_hit[N.DOOR_NUM] = {
-            N.VALUE: self._door_number,
-            N.UNIT: self._door_number_unit
+            N.VALUE: self._address_data.door_number_value,
+            N.UNIT: self._address_data.door_number_unit
         }
-        address_hit[N.FLOOR] = self._floor
+        address_hit[N.FLOOR] = self._address_data.floor
         address_hit[N.LOCATION] = {
             N.LAT: None,
             N.LON: None
@@ -119,6 +102,9 @@ class AddressQueryPlanner:
 class AddressNoneQueryPlanner(AddressQueryPlanner):
     required_iterations = 0
 
+    def planner_steps(self):
+        return iter(())
+
     def get_query_result(self):
         return QueryResult.empty()
 
@@ -130,19 +116,14 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         self._elasticsearch_result = None
         super().__init__(query, fmt)
 
-    def get_next_query(self, _iteration):
+    def planner_steps(self):
         query = self._query.copy()
-        query['name'] = self._street_names[0]
+        query['name'] = self._address_data.street_names[0]
 
-        if self._door_number:
-            query['number'] = self._door_number
+        if self._numerical_door_number:
+            query['number'] = self._numerical_door_number
 
-        return data.search_streets, query
-
-    def set_elasticsearch_result(self, result, _iteration):
-        # Para direcciones de tipo 'simple', el resultado final es simplemente
-        # la primera consulta hecha a Elasticsearch.
-        self._elasticsearch_result = result
+        self._elasticsearch_result = yield (data.search_streets, query)
 
     def _build_address_hits(self):
         address_hits = []
@@ -157,9 +138,9 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             address_hit[N.STREET_X2] = self._build_street_entity()
 
             if N.FULL_NAME in fields:
-                if self._door_number:
+                if self._numerical_door_number:
                     parts = street[N.FULL_NAME].split(',')
-                    parts[0] += ' {}'.format(self._door_number)
+                    parts[0] += ' {}'.format(self._numerical_door_number)
                     address_hit[N.FULL_NAME] = ','.join(parts)
                 else:
                     address_hit[N.FULL_NAME] = street[N.FULL_NAME]
@@ -168,15 +149,16 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             geom = street.pop(N.GEOM)
 
             if (N.LOCATION_LAT in fields or N.LOCATION_LON in fields) and \
-               self._door_number:
+               self._numerical_door_number:
                 # El llamado a street_extents() no puede lanzar una
                 # excepción porque los resultados de Elasticsearch aseguran
                 # que 'number' está dentro de alguna combinación de
                 # extremos de la calle.
-                start, end = street_extents(door_nums, self._door_number)
-                loc = geometry.street_number_location(geom,
-                                                      self._door_number,
-                                                      start, end)
+                start, end = street_extents(door_nums,
+                                            self._numerical_door_number)
+
+                loc = geometry.street_number_location(
+                    geom, self._numerical_door_number, start, end)
 
                 address_hit[N.LOCATION] = loc
 
@@ -186,7 +168,6 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
     def get_query_result(self):
         address_hits = self._build_address_hits()
-
         return QueryResult.from_entity_list(address_hits,
                                             self._elasticsearch_result.total,
                                             self._elasticsearch_result.offset)
@@ -197,10 +178,6 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
     def __init__(self, query, fmt):
         self._intersections_result = None
-        self._street_1_result = None
-        self._street_2_result = None
-        self._street_1_ids = None
-        self._street_2_ids = None
         self._intersection_hits = None
 
         super().__init__(query, fmt)
@@ -221,22 +198,53 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         query = self._query.copy()
 
         query['name'] = street
-        if add_number and self._door_number:
-            query['number'] = self._door_number
+        if add_number and self._numerical_door_number:
+            query['number'] = self._numerical_door_number
         query['max'] = constants.MAX_RESULT_LEN
         query['offset'] = 0
 
         return data.search_streets, query
 
-    def get_next_query(self, iteration):
-        if iteration == 1:
-            return self._build_street_query(self._street_names[0], True)
-        if iteration == 2:
-            return self._build_street_query(self._street_names[1], False)
+    def planner_steps(self):
+        result = yield self._build_street_query(
+            self._address_data.street_names[0], True)
 
-        # iteration == 3
-        return self._build_intersections_query(self._street_1_ids,
-                                               self._street_2_ids)
+        if result:
+            street_1_ids = {hit[N.ID] for hit in result.hits}
+        else:
+            return
+
+        result = yield self._build_street_query(
+            self._address_data.street_names[1], False)
+
+        if result:
+            street_2_ids = {hit[N.ID] for hit in result.hits}
+        else:
+            return
+
+        result = yield self._build_intersections_query(street_1_ids,
+                                                       street_2_ids)
+
+        self._intersections_result = result
+
+        intersections = []
+        for intersection in self._intersections_result.hits:
+            id_1, id_2 = intersection[N.ID].split('-')
+
+            if id_1 in street_1_ids and id_2 in street_2_ids:
+                intersections.append((intersection[N.STREET_A],
+                                      intersection[N.STREET_B],
+                                      intersection[N.GEOM]))
+            elif id_1 in street_2_ids and id_2 in street_1_ids:
+                intersections.append((intersection[N.STREET_B],
+                                      intersection[N.STREET_A],
+                                      intersection[N.GEOM]))
+            else:
+                raise RuntimeError(
+                    'Unknown street IDs for intersection {} - {}'.format(id_1,
+                                                                         id_2))
+
+        self._intersection_hits = self._build_intersection_hits(intersections)
 
     def _build_intersection_hits(self, intersections):
         intersection_hits = []
@@ -253,8 +261,8 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
             if N.FULL_NAME in fields:
                 door_number = ''
-                if self._door_number:
-                    door_number = ' {}'.format(self._door_number)
+                if self._numerical_door_number:
+                    door_number = ' {}'.format(self._numerical_door_number)
 
                 full_name = '{}{} y {}, {}, {}'.format(
                     street_1[N.NAME],
@@ -266,60 +274,10 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
                 address_hit[N.FULL_NAME] = full_name
 
-            address_hit[N.LOCATION] = {
-                N.LON: geom['coordinates'][0],
-                N.LAT: geom['coordinates'][1]
-            }
-
+            address_hit[N.LOCATION] = geometry.geojson_point_to_location(geom)
             intersection_hits.append(address_hit)
 
         return intersection_hits
-
-    def set_elasticsearch_result(self, result, iteration):
-        if iteration == 1:
-            self._street_1_result = result
-            if not self._street_1_result:
-                self.required_iterations = 0
-                return
-
-            self._street_1_ids = {
-                hit[N.ID]
-                for hit in self._street_1_result.hits
-            }
-            return
-        if iteration == 2:
-            self._street_2_result = result
-            if not self._street_2_result:
-                self.required_iterations = 0
-                return
-
-            self._street_2_ids = {
-                hit[N.ID]
-                for hit in self._street_2_result.hits
-            }
-            return
-
-        # iteration == 3
-        self._intersections_result = result
-
-        intersections = []
-        for intersection in self._intersections_result.hits:
-            id_1, id_2 = intersection[N.ID].split('-')
-
-            if id_1 in self._street_1_ids and id_2 in self._street_2_ids:
-                intersections.append((intersection[N.STREET_A],
-                                      intersection[N.STREET_B],
-                                      intersection[N.GEOM]))
-            elif id_1 in self._street_2_ids and id_2 in self._street_1_ids:
-                intersections.append((intersection[N.STREET_B],
-                                      intersection[N.STREET_A],
-                                      intersection[N.GEOM]))
-            else:
-                raise RuntimeError(
-                    'Unknown street IDs for intersection {} - {}'.format(id_1,
-                                                                         id_2))
-
-        self._intersection_hits = self._build_intersection_hits(intersections)
 
     def get_query_result(self):
         if not self._intersection_hits:
@@ -337,13 +295,24 @@ class AddressBtwnQueryPlanner(AddressQueryPlanner):
         raise NotImplementedError()
 
 
-def step_query_planners(es, query_planners, iteration):
-    search_fn_queries = defaultdict(list)
+def step_plan_iterator(iterator, previous_result):
+    try:
+        if previous_result is None:
+            return next(iterator)
 
-    for planner in query_planners:
-        if planner.required_iterations >= iteration:
-            search_fn, query = planner.get_next_query(iteration)
-            search_fn_queries[search_fn].append((query, planner))
+        return iterator.send(previous_result)
+    except StopIteration:
+        return None, None
+
+
+def step_plans(es, previous_iteration):
+    search_fn_queries = defaultdict(list)
+    next_iteration = []
+
+    # Cada QueryPlanner puede generar queries a ser ejecutadas con distintas
+    # funciones de data.py. Agruparlas y ejecutarlas.
+    for iterator, search_fn, query in previous_iteration:
+        search_fn_queries[search_fn].append((query, iterator))
 
     for search_fn, planner_queries in search_fn_queries.items():
         results = search_fn(es, [
@@ -352,8 +321,34 @@ def step_query_planners(es, query_planners, iteration):
         ])
 
         for result, planner_query in zip(results, planner_queries):
-            planner = planner_query[1]
-            planner.set_elasticsearch_result(result, iteration)
+            iterator = planner_query[1]
+
+            # Cada query genera un resultado. Entregar el resultado al
+            # QueryPlanner correspondiente, y si genera una nueva query,
+            # insertarla en generated_queries y continuar iterando.
+            search_fn, query = step_plan_iterator(iterator,
+                                                  previous_result=result)
+            if search_fn and query:
+                next_iteration.append((iterator, search_fn, query))
+
+    return next_iteration
+
+
+def run_query_planners(es, query_planners, min_iterations):
+    iterators = [planner.planner_steps() for planner in query_planners]
+    iteration_data = []
+
+    for iterator in iterators:
+        # Generar datos de primera iteración
+        search_fn, query = step_plan_iterator(iterator, previous_result=None)
+        if search_fn and query:
+            iteration_data.append((iterator, search_fn, query))
+
+    for _ in range(min_iterations):
+        # Tomar las queries anteriores, ejecutarlas, tomar los resultados y
+        # entregárselos a los QueryPlanners para que generen nuevas queries.
+        # Repetir cuantas veces sea necesario.
+        iteration_data = step_plans(es, iteration_data)
 
 
 def run_address_queries(es, queries, formats):
@@ -361,7 +356,7 @@ def run_address_queries(es, queries, formats):
     min_iterations = 0
 
     for query, fmt in zip(queries, formats):
-        address_type = query[N.ADDRESS]['type']
+        address_type = query[N.ADDRESS].type
 
         if not address_type:
             query_planner = AddressNoneQueryPlanner(query, fmt)
@@ -379,8 +374,7 @@ def run_address_queries(es, queries, formats):
         min_iterations = max(query_planner.required_iterations, min_iterations)
         query_planners.append(query_planner)
 
-    for i in range(min_iterations):
-        step_query_planners(es, query_planners, iteration=i + 1)
+    run_query_planners(es, query_planners, min_iterations)
 
     return [
         query_planner.get_query_result()
