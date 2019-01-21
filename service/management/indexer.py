@@ -25,7 +25,7 @@ from .. import names as N
 from . import es_config
 
 
-loggerStream = StringIO()
+logger_stream = StringIO()
 """StringIO: Buffer donde se almacenan los logs generados como strings.
 """
 
@@ -59,8 +59,8 @@ ES_TIMEOUT = 500
 
 def setup_logger(l, stream):
     """Configura un objeto Logger para imprimir eventos de nivel INFO o
-    superiores. Los eventos se envían a sys.stdout y a un buffer de tipo
-    StringIO.
+    superiores. Los eventos se envían a sys.stdout, a un archivo en el
+    directorio de logs, y a un buffer de tipo 'StringIO'.
 
     Args:
         l (Logger): Objeto logger a configurar.
@@ -76,28 +76,20 @@ def setup_logger(l, stream):
     str_handler = logging.StreamHandler(stream)
     str_handler.setLevel(logging.INFO)
 
+    os.makedirs(LOGS_DIR, exist_ok=True)
+    filename = time.strftime('georef-index-%Y.%m.%d-%H.%M.%S.log')
+    file_handler = logging.FileHandler(os.path.join(LOGS_DIR, filename))
+    file_handler.setLevel(logging.INFO)
+
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s',
                                   '%Y-%m-%d %H:%M:%S')
     stdout_handler.setFormatter(formatter)
     str_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
 
     l.addHandler(stdout_handler)
     l.addHandler(str_handler)
-
-
-def save_log(contents):
-    """Escribe los contenidos de un log a un archivo en el directorio de logs.
-
-    Args:
-        contents (str): Contenido del log.
-
-    """
-    os.makedirs(LOGS_DIR, exist_ok=True)
-    t = time.strftime('%Y.%m.%d-%H.%M.%S')
-    filename = 'georef-index-{}.log'.format(t)
-
-    with open(os.path.join(LOGS_DIR, filename), 'w') as f:
-        f.write(contents)
+    l.addHandler(file_handler)
 
 
 def send_email(host, user, password, subject, message, recipients,
@@ -827,18 +819,11 @@ def run_index(es, forced, name='all'):
     if mail_config['enabled']:
         logger.info('Enviando mail...')
 
-        try:
-            send_index_email(mail_config, forced, env,
-                             loggerStream.getvalue())
-            logger.info('Mail enviado.')
-            logger.info('')
-        except Exception:  # pylint: disable=broad-except
-            logger.error('')
-            logger.exception('Ocurrió un error al enviar el mail:')
-            logger.error('')
+        send_index_email(mail_config, forced, env, logger_stream.getvalue())
+        logger.info('Mail enviado.')
+        logger.info('')
 
     logger.info('Script finalizado.')
-    save_log(loggerStream.getvalue())
 
 
 def run_info(es):
@@ -885,17 +870,23 @@ def main():
                         help='Mostrar información de índices y salir.')
     args = parser.parse_args()
 
-    setup_logger(logger, loggerStream)
+    setup_logger(logger, logger_stream)
 
-    with app.app_context():
-        es = normalizer.get_elasticsearch()
+    try:
+        with app.app_context():
+            es = normalizer.get_elasticsearch()
 
-        if args.mode == 'index':
-            run_index(es, args.forced, args.name)
-        elif args.mode == 'index_stats':
-            run_info(es)
-        else:
-            raise ValueError('Invalid operation')
+            if args.mode == 'index':
+                run_index(es, args.forced, args.name)
+            elif args.mode == 'index_stats':
+                run_info(es)
+            else:
+                raise ValueError('Invalid operation')
+    except Exception:  # pylint: disable=broad-except
+        logger.exception(
+            'Ocurrió un error al realizar la operación: {}'.format(args.mode))
+
+    logging.shutdown()
 
 
 if __name__ == '__main__':
