@@ -3,10 +3,6 @@
 Contiene mensajes de error en forma de texto para usuarios.
 """
 
-OBLIGATORY_NO_DEFAULT = 'Los parámetros obligatorios no pueden tener valor \
-default.'
-DEFAULT_INVALID_CHOICE = 'El valor default no se encuentra dentro de las \
-opciones de valores.'
 ADDRESS_FORMAT = 'La dirección debe seguir alguno de los formatos listados \
 bajo la clave \'ayuda\'.'
 ADDRESS_FORMAT_HELP = [

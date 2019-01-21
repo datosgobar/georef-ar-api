@@ -162,7 +162,8 @@ class Parameter:
 
         """
         if required and default is not None:
-            raise ValueError(strings.OBLIGATORY_NO_DEFAULT)
+            raise ValueError(
+                'Default values are not allowed on required parameters')
 
         self._choices = frozenset(choices) if choices else None
         self._required = required
@@ -172,7 +173,7 @@ class Parameter:
             try:
                 self._check_value_in_choices(default)
             except InvalidChoiceException:
-                raise ValueError(strings.DEFAULT_INVALID_CHOICE)
+                raise ValueError('Default value not contained in choices')
 
     def get_value(self, val):
         """Toma un valor 'val' recibido desde una request HTTP, y devuelve el
