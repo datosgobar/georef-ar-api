@@ -10,9 +10,6 @@ from service import names as N
 from service import data, constants, geometry
 from service.query_result import QueryResult
 
-ISCT_DOOR_NUM_TOLERANCE_M = 50
-BTWN_DOOR_NUM_TOLERANCE_M = 150
-
 
 class AddressQueryPlanner:
     def __init__(self, query, fmt):
@@ -29,6 +26,34 @@ class AddressQueryPlanner:
 
     def get_query_result(self):
         raise NotImplementedError()
+
+    def _address_full_name(self, *streets):
+        door_number = ''
+        if self._numerical_door_number:
+            door_number = ' {}'.format(self._numerical_door_number)
+
+        # TODO: Usar siempre datos de la primera calle?
+        # Los casos donde las calles son de distintos deptos son pocos
+        fmt = {
+            'state': streets[0][N.STATE][N.NAME],
+            'dept': streets[0][N.DEPT][N.NAME],
+            'door_number': door_number
+        }
+
+        for i, street in enumerate(streets):
+            fmt['street_{}'.format(i + 1)] = street[N.NAME]
+
+        if self._address_data.type == 'simple':
+            template = '{street_1}{door_number}'
+        elif self._address_data.type == 'intersection':
+            template = '{street_1}{door_number} y {street_2}'
+        elif self._address_data.type == 'between':
+            template = '{street_1}{door_number} entre {street_2} y {street_3}'
+        else:
+            raise ValueError('Unknown address type')
+
+        template += ', {dept}, {state}'
+        return template.format(**fmt)
 
     def _build_base_address_hit(self, state=None, dept=None):
         address_hit = {}
@@ -108,12 +133,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             address_hit[N.STREET_X2] = self._build_street_entity()
 
             if N.FULL_NAME in fields:
-                if self._numerical_door_number:
-                    parts = street[N.FULL_NAME].split(',')
-                    parts[0] += ' {}'.format(self._numerical_door_number)
-                    address_hit[N.FULL_NAME] = ','.join(parts)
-                else:
-                    address_hit[N.FULL_NAME] = street[N.FULL_NAME]
+                address_hit[N.FULL_NAME] = self._address_full_name(street)
 
             if (N.LOCATION_LAT in fields or N.LOCATION_LON in fields) and \
                self._numerical_door_number:
@@ -237,7 +257,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             street_1_ids,
             street_2_ids,
             street_1_locations.values(),
-            ISCT_DOOR_NUM_TOLERANCE_M
+            constants.ISCT_DOOR_NUM_TOLERANCE_M
         )
 
         self._intersections_result = result
@@ -288,19 +308,8 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             address_hit[N.LOCATION] = loc
 
             if N.FULL_NAME in fields:
-                door_number = ''
-                if self._numerical_door_number:
-                    door_number = ' {}'.format(self._numerical_door_number)
-
-                full_name = '{}{} y {}, {}, {}'.format(
-                    street_1[N.NAME],
-                    door_number,
-                    street_2[N.NAME],
-                    address_hit[N.DEPT][N.NAME],
-                    address_hit[N.STATE][N.NAME]
-                )
-
-                address_hit[N.FULL_NAME] = full_name
+                address_hit[N.FULL_NAME] = self._address_full_name(street_1,
+                                                                   street_2)
 
             intersection_hits.append(address_hit)
 
@@ -373,7 +382,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             street_1_ids,
             street_2_3_ids,
             street_1_locations.values(),
-            BTWN_DOOR_NUM_TOLERANCE_M,
+            constants.BTWN_DOOR_NUM_TOLERANCE_M,
             ignore_max=True
         )
 
@@ -432,20 +441,11 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                 address_hit[N.LOCATION] = entry.loc
 
             if N.FULL_NAME in fields:
-                door_number = ''
-                if self._numerical_door_number:
-                    door_number = ' {}'.format(self._numerical_door_number)
-
-                full_name = '{}{} entre {} y {}, {}, {}'.format(
-                    entry.street_1[N.NAME],
-                    door_number,
-                    entry.street_2[N.NAME],
-                    entry.street_3[N.NAME],
-                    address_hit[N.DEPT][N.NAME],
-                    address_hit[N.STATE][N.NAME]
+                address_hit[N.FULL_NAME] = self._address_full_name(
+                    entry.street_1,
+                    entry.street_2,
+                    entry.street_3
                 )
-
-                address_hit[N.FULL_NAME] = full_name
 
             between_hits.append(address_hit)
 
