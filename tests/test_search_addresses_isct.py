@@ -1,32 +1,35 @@
-import math
-from service import names as N
-from . import GeorefLiveTest
+from service import geometry
+from .test_search_addresses_simple import SearchAddressesBaseTest
 
-MEAN_EARTH_RADIUS_KM = 6371
 COMMON_ISCT = 'salta y santa fe'
 
 
-def approximate_distance_meters(loc_a, loc_b):
-    # https://en.wikipedia.org/wiki/Haversine_formula
-    lat_a = math.radians(loc_a[N.LAT])
-    lat_b = math.radians(loc_b[N.LAT])
-    diff_lat = math.radians(loc_b[N.LAT] - loc_a[N.LAT])
-    diff_lon = math.radians(loc_b[N.LON] - loc_a[N.LON])
-
-    a = math.sin(diff_lat / 2) ** 2
-    b = math.cos(lat_a) * math.cos(lat_b) * (math.sin(diff_lon / 2) ** 2)
-
-    kms = 2 * MEAN_EARTH_RADIUS_KM * math.asin(math.sqrt(a + b))
-    return kms * 1000
-
-
-class SearchAddressesIsctTest(GeorefLiveTest):
+class SearchAddressesIsctTest(SearchAddressesBaseTest):
     """Pruebas de búsqueda por dirección de tipo 'intersection'."""
 
     def setUp(self):
         self.endpoint = '/api/direcciones'
         self.entity = 'direcciones'
         super().setUp()
+
+    def test_default_results_fields(self):
+        """Las entidades devueltas deben tener los campos default."""
+        self.assert_default_results_fields(COMMON_ISCT)
+
+    def test_basic_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'basico'."""
+        self.assert_basic_fields_set(COMMON_ISCT)
+
+    def test_standard_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'estandar'."""
+        self.assert_standard_fields_set(COMMON_ISCT)
+
+    def test_complete_fields_set(self):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'completo'."""
+        self.assert_complete_fields_set(COMMON_ISCT)
 
     def test_basic_intersection_search(self):
         """La búsqueda de direcciones de tipo intersección debería devolver
@@ -75,10 +78,22 @@ class SearchAddressesIsctTest(GeorefLiveTest):
         self.assertAlmostEqual(loc_simple['lat'], loc_isct['lat'])
         self.assertAlmostEqual(loc_simple['lon'], loc_isct['lon'])
 
+    def test_intersection_location_no_door_num(self):
+        """Si no se especifica una altura en una intersección, se debería
+        utilizar la posición de la intersección como campo 'ubicacion'."""
+        resp = self.get_response({
+            'direccion': 'Maipú esquina Mendoza',
+            'departamento': 'Rosario'
+        })
+        loc = resp[0]['ubicacion']
+
+        self.assertAlmostEqual(loc['lat'], -32.9519930139424)
+        self.assertAlmostEqual(loc['lon'], -60.636562374115)
+
     def test_intersection_nonexistent_door_num(self):
         """Si se especifica una intersección con altura, la posición de la
         altura sobre la primera calle debería estar a menos de
-        ISCT_DOOR_NUM_TOLERANCE_M metros de la posición del a intersección.
+        ISCT_DOOR_NUM_TOLERANCE_M metros de la posición de la intersección.
         Solo se retornan casos donde se cumpla esa condidición."""
         resp_simple = self.get_response({
             'direccion': 'Cabrera 1000',
@@ -109,7 +124,7 @@ class SearchAddressesIsctTest(GeorefLiveTest):
         loc_isct = resp_isct[0]['ubicacion']
 
         self.assertLess(
-            approximate_distance_meters(loc_simple, loc_isct),
+            geometry.approximate_distance_meters(loc_simple, loc_isct),
             30  # metros
         )
 

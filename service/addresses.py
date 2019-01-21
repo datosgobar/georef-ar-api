@@ -11,6 +11,7 @@ from service import data, constants, geometry
 from service.query_result import QueryResult
 
 ISCT_DOOR_NUM_TOLERANCE_M = 50
+BTWN_DOOR_NUM_TOLERANCE_M = 150
 
 
 class AddressQueryPlanner:
@@ -148,17 +149,19 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         self._query.pop('street_type', None)
 
     def _build_intersections_query(self, street_1_ids, street_2_ids,
-                                   locations):
+                                   locations, tolerance_m, ignore_max=False):
         query = self._query.copy()
         query['ids'] = (list(street_1_ids), list(street_2_ids))
+
+        if ignore_max:
+            query['max'] = constants.MAX_RESULT_LEN
+            query['offset'] = 0
+
         if locations:
             geoms = []
 
             for loc in locations:
-                geoms.append(geometry.build_circle_geometry(
-                    loc,
-                    ISCT_DOOR_NUM_TOLERANCE_M
-                ))
+                geoms.append(geometry.build_circle_geometry(loc, tolerance_m))
 
             query['geo_shape_geoms'] = geoms
 
@@ -231,7 +234,11 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         # comprobar que las intersecciones no estén a mas de X metros de cada
         # ubicación sobre la calle 1 que calculamos anteriormente.
         result = yield self._build_intersections_query(
-            street_1_ids, street_2_ids, street_1_locations.values())
+            street_1_ids,
+            street_2_ids,
+            street_1_locations.values(),
+            ISCT_DOOR_NUM_TOLERANCE_M
+        )
 
         self._intersections_result = result
 
@@ -241,7 +248,8 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         # el mismo orden en el que fueron recibidos.
         intersections = []
         for intersection in self._intersections_result.hits:
-            id_a, id_b = intersection[N.ID].split('-')
+            id_a = intersection[N.STREET_A][N.ID]
+            id_b = intersection[N.STREET_B][N.ID]
 
             if id_a in street_1_ids and id_b in street_2_ids:
                 street_1 = intersection[N.STREET_A]
@@ -310,26 +318,19 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
     required_iterations = 4
 
+    class BetweenEntry:
+        def __init__(self, street_1):
+            self.street_1 = street_1
+            self.street_2 = None
+            self.street_3 = None
+            self.loc = None
+
+        def complete(self):
+            return all((self.street_1, self.street_2, self.street_3))
+
     def __init__(self, query, fmt):
         self._between_hits = None
         super().__init__(query, fmt)
-
-    def _build_between_hits(self, betweens):
-        between_hits = []
-
-        for street_1, street_2, street_3 in betweens:
-            address_hit = self._build_base_address_hit(street_1.get(N.STATE),
-                                                       street_1.get(N.DEPT))
-
-            # TODO: Usar prov/dept de cual calle?
-            address_hit[N.STREET] = self._build_street_entity(street_1)
-            address_hit[N.STREET_X1] = self._build_street_entity(street_2)
-            address_hit[N.STREET_X2] = self._build_street_entity(street_3)
-            # address_hit[N.LOCATION] = loc
-
-            between_hits.append(address_hit)
-
-        return between_hits
 
     def planner_steps(self):
         # Buscar la primera calle, incluyendo la altura si está presente
@@ -371,12 +372,15 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         result = yield self._build_intersections_query(
             street_1_ids,
             street_2_3_ids,
-            street_1_locations.values()
+            street_1_locations.values(),
+            BTWN_DOOR_NUM_TOLERANCE_M,
+            ignore_max=True
         )
 
-        betweens = {}
+        entries = {}
         for intersection in result.hits:
-            id_a, id_b = intersection[N.ID].split('-')
+            id_a = intersection[N.STREET_A][N.ID]
+            id_b = intersection[N.STREET_B][N.ID]
 
             if id_a in street_1_ids and id_b in street_2_3_ids:
                 street_1 = intersection[N.STREET_A]
@@ -389,21 +393,63 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                     'Unknown street IDs for intersection {} - {}'.format(id_a,
                                                                          id_b))
 
-            if street_1[N.ID] not in betweens:
-                betweens[street_1[N.ID]] = [street_1, None, None]
+            if street_1[N.ID] not in entries:
+                entry = AddressBtwnQueryPlanner.BetweenEntry(street_1)
+                if self._numerical_door_number:
+                    entry.loc = street_1_locations[street_1[N.ID]]
+
+                entries[street_1[N.ID]] = entry
 
             if street_other[N.ID] in street_2_ids:
-                betweens[street_1[N.ID]][1] = street_other
+                entries[street_1[N.ID]].street_2 = street_other
             elif street_other[N.ID] in street_3_ids:
-                betweens[street_1[N.ID]][2] = street_other
+                entries[street_1[N.ID]].street_3 = street_other
             else:
                 raise RuntimeError('Unknown street ID: {}'.format(
                     street_other[N.ID]))
 
         # Las tres calles deben estar presentes
-        self._between_hits = self._build_between_hits([
-            streets for streets in betweens.values() if all(streets)
-        ])
+        self._between_hits = self._build_between_hits(
+            entry for entry in entries.values() if entry.complete()
+        )
+
+    def _build_between_hits(self, entries):
+        between_hits = []
+        fields = self._format[N.FIELDS]
+
+        for entry in entries:
+            address_hit = self._build_base_address_hit(
+                entry.street_1.get(N.STATE), entry.street_1.get(N.DEPT))
+
+            # TODO: Usar prov/dept de cual calle?
+            address_hit[N.STREET] = self._build_street_entity(entry.street_1)
+            address_hit[N.STREET_X1] = self._build_street_entity(
+                entry.street_2)
+            address_hit[N.STREET_X2] = self._build_street_entity(
+                entry.street_3)
+
+            if entry.loc:
+                address_hit[N.LOCATION] = entry.loc
+
+            if N.FULL_NAME in fields:
+                door_number = ''
+                if self._numerical_door_number:
+                    door_number = ' {}'.format(self._numerical_door_number)
+
+                full_name = '{}{} entre {} y {}, {}, {}'.format(
+                    entry.street_1[N.NAME],
+                    door_number,
+                    entry.street_2[N.NAME],
+                    entry.street_3[N.NAME],
+                    address_hit[N.DEPT][N.NAME],
+                    address_hit[N.STATE][N.NAME]
+                )
+
+                address_hit[N.FULL_NAME] = full_name
+
+            between_hits.append(address_hit)
+
+        return between_hits
 
     def get_query_result(self):
         if not self._between_hits:

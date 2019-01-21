@@ -3,11 +3,83 @@ import random
 from service import formatter
 from . import GeorefLiveTest, asciifold
 
-
 COMMON_ADDRESS = 'Corrientes 1000'
 
 
-class SearchAddressesSimpleTest(GeorefLiveTest):
+class SearchAddressesBaseTest(GeorefLiveTest):
+    def assert_default_results_fields(self, address):
+        """Las entidades devueltas deben tener los campos default."""
+        data = self.get_response({'direccion': address, 'max': 1})[0]
+        fields = sorted([
+            'altura',
+            'piso',
+            'calle',
+            'calle_cruce_1',
+            'calle_cruce_2',
+            'departamento',
+            'nomenclatura',
+            'provincia',
+            'ubicacion'
+        ])
+        self.assertListEqual(fields, sorted(data.keys()))
+
+    def assert_basic_fields_set(self, address):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'basico'."""
+        self.assert_fields_set_equals('basico', ['calle.id', 'calle.nombre',
+                                                 'altura.valor',
+                                                 'calle_cruce_1.id',
+                                                 'calle_cruce_1.nombre',
+                                                 'calle_cruce_2.id',
+                                                 'calle_cruce_2.nombre',
+                                                 'piso'],
+                                      {'direccion': address})
+
+    def assert_standard_fields_set(self, address):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'estandar'."""
+        self.assert_fields_set_equals('estandar',
+                                      ['altura.valor', 'altura.unidad',
+                                       'piso',
+                                       'calle.id', 'calle.nombre',
+                                       'calle.tipo',
+                                       'calle_cruce_1.id',
+                                       'calle_cruce_1.nombre',
+                                       'calle_cruce_1.tipo',
+                                       'calle_cruce_2.id',
+                                       'calle_cruce_2.nombre',
+                                       'calle_cruce_2.tipo',
+                                       'departamento.id',
+                                       'departamento.nombre',
+                                       'nomenclatura',
+                                       'provincia.id', 'provincia.nombre',
+                                       'ubicacion.lat', 'ubicacion.lon'],
+                                      {'direccion': address})
+
+    def assert_complete_fields_set(self, address):
+        """Se debería poder especificar un conjunto de parámetros
+        preseleccionados llamado 'completo'."""
+        self.assert_fields_set_equals('completo',
+                                      ['altura.valor', 'altura.unidad',
+                                       'piso',
+                                       'calle.id', 'calle.nombre',
+                                       'calle.tipo',
+                                       'calle_cruce_1.id',
+                                       'calle_cruce_1.nombre',
+                                       'calle_cruce_1.tipo',
+                                       'calle_cruce_2.id',
+                                       'calle_cruce_2.nombre',
+                                       'calle_cruce_2.tipo',
+                                       'departamento.id',
+                                       'departamento.nombre',
+                                       'nomenclatura',
+                                       'provincia.id', 'provincia.nombre',
+                                       'ubicacion.lat', 'ubicacion.lon',
+                                       'fuente'],
+                                      {'direccion': address})
+
+
+class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     """Pruebas de búsqueda por dirección de tipo 'simple'."""
 
     def setUp(self):
@@ -67,74 +139,22 @@ class SearchAddressesSimpleTest(GeorefLiveTest):
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
-        data = self.get_response({'direccion': COMMON_ADDRESS, 'max': 1})[0]
-        fields = sorted([
-            'altura',
-            'piso',
-            'calle',
-            'calle_cruce_1',
-            'calle_cruce_2',
-            'departamento',
-            'nomenclatura',
-            'provincia',
-            'ubicacion'
-        ])
-        self.assertListEqual(fields, sorted(data.keys()))
+        self.assert_default_results_fields(COMMON_ADDRESS)
 
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""
-        self.assert_fields_set_equals('basico', ['calle.id', 'calle.nombre',
-                                                 'altura.valor',
-                                                 'calle_cruce_1.id',
-                                                 'calle_cruce_1.nombre',
-                                                 'calle_cruce_2.id',
-                                                 'calle_cruce_2.nombre',
-                                                 'piso'],
-                                      {'direccion': COMMON_ADDRESS})
+        self.assert_basic_fields_set(COMMON_ADDRESS)
 
     def test_standard_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'estandar'."""
-        self.assert_fields_set_equals('estandar',
-                                      ['altura.valor', 'altura.unidad',
-                                       'piso',
-                                       'calle.id', 'calle.nombre',
-                                       'calle.tipo',
-                                       'calle_cruce_1.id',
-                                       'calle_cruce_1.nombre',
-                                       'calle_cruce_1.tipo',
-                                       'calle_cruce_2.id',
-                                       'calle_cruce_2.nombre',
-                                       'calle_cruce_2.tipo',
-                                       'departamento.id',
-                                       'departamento.nombre',
-                                       'nomenclatura',
-                                       'provincia.id', 'provincia.nombre',
-                                       'ubicacion.lat', 'ubicacion.lon'],
-                                      {'direccion': COMMON_ADDRESS})
+        self.assert_standard_fields_set(COMMON_ADDRESS)
 
     def test_complete_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'completo'."""
-        self.assert_fields_set_equals('completo',
-                                      ['altura.valor', 'altura.unidad',
-                                       'piso',
-                                       'calle.id', 'calle.nombre',
-                                       'calle.tipo',
-                                       'calle_cruce_1.id',
-                                       'calle_cruce_1.nombre',
-                                       'calle_cruce_1.tipo',
-                                       'calle_cruce_2.id',
-                                       'calle_cruce_2.nombre',
-                                       'calle_cruce_2.tipo',
-                                       'departamento.id',
-                                       'departamento.nombre',
-                                       'nomenclatura',
-                                       'provincia.id', 'provincia.nombre',
-                                       'ubicacion.lat', 'ubicacion.lon',
-                                       'fuente'],
-                                      {'direccion': COMMON_ADDRESS})
+        self.assert_complete_fields_set(COMMON_ADDRESS)
 
     def test_filter_results_fields(self):
         """Los campos de las direcciones devueltas deben ser filtrables."""

@@ -4,9 +4,12 @@ Contiene funciones utilizadas para operar con geometrías, utilizando la
 librería Shapely.
 """
 
+import math
 import shapely.ops
 import shapely.geometry
 from service import names as N
+
+MEAN_EARTH_RADIUS_KM = 6371
 
 
 def street_extents(door_nums, number):
@@ -98,3 +101,17 @@ def build_circle_geometry(location, radius_meters):
         'radius': '{}m'.format(radius_meters),
         'coordinates': [location[N.LON], location[N.LAT]]
     }
+
+
+def approximate_distance_meters(loc_a, loc_b):
+    # https://en.wikipedia.org/wiki/Haversine_formula
+    lat_a = math.radians(loc_a[N.LAT])
+    lat_b = math.radians(loc_b[N.LAT])
+    diff_lat = math.radians(loc_b[N.LAT] - loc_a[N.LAT])
+    diff_lon = math.radians(loc_b[N.LON] - loc_a[N.LON])
+
+    a = math.sin(diff_lat / 2) ** 2
+    b = math.cos(lat_a) * math.cos(lat_b) * (math.sin(diff_lon / 2) ** 2)
+
+    kms = 2 * MEAN_EARTH_RADIUS_KM * math.asin(math.sqrt(a + b))
+    return kms * 1000
