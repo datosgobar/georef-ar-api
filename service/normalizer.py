@@ -6,7 +6,7 @@ de los recursos que expone la API.
 
 import logging
 from flask import current_app
-from service import data, params, formatter, addresses, constants
+from service import data, params, formatter, addresses, constants, geometry
 from service import names as N
 from service.query_result import QueryResult
 
@@ -217,7 +217,7 @@ def process_state(request):
     return process_entity(request, N.STATES, params.PARAMS_STATES, {
         N.ID: 'entity_ids',
         N.NAME: 'name',
-        N.INTERSECTION: 'intersection_ids',
+        N.INTERSECTION: 'geo_shape_ids',
         N.EXACT: 'exact',
         N.ORDER: 'order',
         N.FIELDS: 'fields',
@@ -240,7 +240,7 @@ def process_department(request):
                           params.PARAMS_DEPARTMENTS, {
                               N.ID: 'entity_ids',
                               N.NAME: 'name',
-                              N.INTERSECTION: 'intersection_ids',
+                              N.INTERSECTION: 'geo_shape_ids',
                               N.STATE: 'state',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
@@ -264,7 +264,7 @@ def process_municipality(request):
                           params.PARAMS_MUNICIPALITIES, {
                               N.ID: 'entity_ids',
                               N.NAME: 'name',
-                              N.INTERSECTION: 'intersection_ids',
+                              N.INTERSECTION: 'geo_shape_ids',
                               N.STATE: 'state',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
@@ -315,7 +315,7 @@ def build_street_query_format(parsed_params):
     query = translate_keys(parsed_params, {
         N.ID: 'street_ids',
         N.NAME: 'name',
-        N.INTERSECTION: 'intersection_ids',
+        N.INTERSECTION: 'geo_shape_ids',
         N.STATE: 'state',
         N.DEPT: 'department',
         N.EXACT: 'exact',
@@ -682,32 +682,32 @@ def process_location_queries(es, queries):
     state_queries = []
     for query in queries:
         state_queries.append({
-            'lat': query['lat'],
-            'lon': query['lon'],
-            'fields': [N.ID, N.NAME]
+            'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
+            'fields': [N.ID, N.NAME],
+            'max': 1
         })
 
-    state_results = data.search_locations(es, N.STATES, state_queries)
+    state_results = data.search_entities(es, N.STATES, state_queries)
 
     dept_queries = []
     for query in queries:
         dept_queries.append({
-            'lat': query['lat'],
-            'lon': query['lon'],
-            'fields': [N.ID, N.NAME, N.STATE]
+            'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
+            'fields': [N.ID, N.NAME, N.STATE],
+            'max': 1
         })
 
-    dept_results = data.search_locations(es, N.DEPARTMENTS, dept_queries)
+    dept_results = data.search_entities(es, N.DEPARTMENTS, dept_queries)
 
     muni_queries = []
     for query in queries:
         muni_queries.append({
-            'lat': query['lat'],
-            'lon': query['lon'],
-            'fields': [N.ID, N.NAME]
+            'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
+            'fields': [N.ID, N.NAME],
+            'max': 1
         })
 
-    muni_results = data.search_locations(es, N.MUNICIPALITIES, muni_queries)
+    muni_results = data.search_entities(es, N.MUNICIPALITIES, muni_queries)
 
     locations = []
     for query, state_result, dept_result, muni_result in zip(queries,

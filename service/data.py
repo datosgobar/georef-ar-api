@@ -198,7 +198,7 @@ def expand_intersection_parameters(es, params_list):
     searches = []
 
     for params in params_list:
-        ids = params.get('intersection_ids')
+        ids = params.get('geo_shape_ids')
         if not ids:
             continue
 
@@ -218,7 +218,7 @@ def expand_intersection_parameters(es, params_list):
     ElasticsearchSearch.run_searches(es, searches)
 
     for params in params_list:
-        ids = params.get('intersection_ids')
+        ids = params.get('geo_shape_ids')
         if not ids:
             continue
 
@@ -324,30 +324,6 @@ def search_entities(es, index, params_list, expand_geometries=False):
     return [search.result for search in searches]
 
 
-def search_locations(es, index, params_list):
-    """Busca entidades políticas que contengan un punto dato, según
-    parámetros de una o más consultas.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        index (str): Nombre del índice sobre el cual realizar las búsquedas.
-        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_location_search' para más
-            detalles.
-
-    Returns:
-        list: Resultados de búsqueda de entidades.
-
-    """
-    searches = [
-        build_location_search(index, **params)
-        for params in params_list
-    ]
-
-    ElasticsearchSearch.run_searches(es, searches)
-    return [search.result for search in searches]
-
-
 def search_streets(es, params_list):
     """Busca vías de circulación según parámetros de una o más consultas.
 
@@ -377,7 +353,7 @@ def search_intersections(es, params_list):
 def build_entity_search(index, entity_ids=None, name=None, state=None,
                         department=None, municipality=None, max=None,
                         order=None, fields=None, exact=False,
-                        intersection_ids=None, offset=0):
+                        geo_shape_ids=None, geo_shape_geoms=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para entidades políticas
     (localidades, departamentos, o provincias) según parámetros de búsqueda
     de una consulta.
@@ -398,9 +374,11 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'department',
             'municipality' o 'state'.) (opcional).
-        intersection_ids (dict): Diccionario de tipo de entidad - lista de IDs
+        geo_shape_ids (dict): Diccionario de tipo de entidad - lista de IDs
             a utilizar para filtrar por intersecciones con geometrías
             pre-indexadas (opcional).
+        geo_shape_geoms (list): Lista de geometrías GeoJSON a utilizar para
+            filtrar por intersecciones con geometrías.
         offset (int): Retornar resultados comenenzando desde los 'offset'
             primeros resultados obtenidos.
 
@@ -419,8 +397,9 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
     if name:
         s = s.query(build_name_query(N.NAME, name, exact))
 
-    if intersection_ids:
-        s = s.query(build_geo_query(N.GEOM, ids=intersection_ids))
+    if geo_shape_ids or geo_shape_geoms:
+        s = s.query(build_geo_query(N.GEOM, ids=geo_shape_ids,
+                                    geoms=geo_shape_geoms))
 
     if municipality:
         s = s.query(build_subentity_query(N.MUN_ID, N.MUN_NAME, municipality,
@@ -448,7 +427,7 @@ def build_entity_search(index, entity_ids=None, name=None, state=None,
 def build_streets_search(street_ids=None, name=None, department=None,
                          state=None, street_type=None, max=None, order=None,
                          fields=None, exact=False, number=None,
-                         intersection_ids=None, offset=0):
+                         geo_shape_ids=None, offset=0):
     """Construye una búsqueda con Elasticsearch DSL para vías de circulación
     según parámetros de búsqueda de una consulta.
 
@@ -465,7 +444,7 @@ def build_streets_search(street_ids=None, name=None, department=None,
         exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
             se especificaron los parámetros 'name', 'locality', 'state' o
             'department'.) (opcional).
-        intersection_ids (dict): Diccionario de tipo de entidad - lista de IDs
+        geo_shape_ids (dict): Diccionario de tipo de entidad - lista de IDs
             a utilizar para filtrar por intersecciones con geometrías
             pre-indexadas (opcional).
         offset (int): Retornar resultados comenenzando desde los 'offset'
@@ -483,8 +462,8 @@ def build_streets_search(street_ids=None, name=None, department=None,
     if street_ids:
         s = s.filter(build_terms_query(N.ID, street_ids))
 
-    if intersection_ids:
-        s = s.query(build_geo_query(N.GEOM, ids=intersection_ids))
+    if geo_shape_ids:
+        s = s.query(build_geo_query(N.GEOM, ids=geo_shape_ids))
 
     if name:
         s = s.query(build_name_query(N.NAME, name, exact))
@@ -515,39 +494,6 @@ def build_streets_search(street_ids=None, name=None, department=None,
     s = s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
 
     return ElasticsearchSearch(s, offset)
-
-
-def build_location_search(index, lat, lon, fields=None):
-    """Construye una búsqueda con Elasticsearch DSL para entidades en una
-    ubicación según parámetros de búsqueda de una consulta.
-
-    Args:
-        index (str): Índice sobre el cual se debería ejecutar la búsqueda.
-        lat (float): Latitud del punto.
-        lon (float): Longitud del punto.
-        fields (list): Campos a devolver en los resultados (opcional).
-
-    Returns:
-        Search: Búsqueda de tipo ElasticsearchSearch.
-
-    """
-    if not fields:
-        fields = []
-
-    s = Search(index=index)
-
-    options = {
-        # Shape en formato GeoJSON
-        'shape': {
-            'type': 'Point',
-            'coordinates': [lon, lat]
-        }
-    }
-
-    s = s.query(GeoShape(**{N.GEOM: options}))
-    s = s.source(include=fields)
-
-    return ElasticsearchSearch(s[:1])
 
 
 def build_intersections_search(ids=None, department=None, state=None, max=None,

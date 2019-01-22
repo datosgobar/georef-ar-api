@@ -95,7 +95,14 @@ def geojson_point_to_location(geom):
     }
 
 
-def build_circle_geometry(location, radius_meters):
+def location_to_geojson_point(location):
+    return {
+        'type': 'Point',
+        'coordinates': [location[N.LON], location[N.LAT]]
+    }
+
+
+def location_to_geojson_circle(location, radius_meters):
     return {
         'type': 'circle',
         'radius': '{}m'.format(radius_meters),

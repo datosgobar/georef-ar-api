@@ -181,7 +181,8 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             geoms = []
 
             for loc in locations:
-                geoms.append(geometry.build_circle_geometry(loc, tolerance_m))
+                geoms.append(geometry.location_to_geojson_circle(loc,
+                                                                 tolerance_m))
 
             query['geo_shape_geoms'] = geoms
 
