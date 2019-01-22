@@ -32,7 +32,7 @@ class SearchAddressesBaseTest(GeorefLiveTest):
                                                  'calle_cruce_1.nombre',
                                                  'calle_cruce_2.id',
                                                  'calle_cruce_2.nombre',
-                                                 'piso'],
+                                                 'nomenclatura'],
                                       {'direccion': address})
 
     def assert_standard_fields_set(self, address):
@@ -160,14 +160,14 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """Los campos de las direcciones devueltas deben ser filtrables."""
         fields_lists = [
             ['fuente', 'ubicacion.lat', 'ubicacion.lon'],
-            ['fuente', 'nomenclatura', 'ubicacion.lat'],
+            ['fuente', 'piso', 'ubicacion.lat'],
             ['departamento.id', 'ubicacion.lat']
         ]
         for field_list in fields_lists:
             field_list.extend(['calle_cruce_1.nombre', 'calle_cruce_1.id',
                                'calle_cruce_2.nombre', 'calle_cruce_2.id',
-                               'piso', 'calle.id', 'calle.nombre',
-                               'altura.valor'])
+                               'calle.id', 'calle.nombre', 'altura.valor',
+                               'nomenclatura'])
 
         fields_lists = [sorted(l) for l in fields_lists]
 
@@ -585,19 +585,19 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         })
 
         headers = next(resp)
-        self.assertListEqual(headers, ['altura_valor',
-                                       'altura_unidad',
-                                       'piso',
-                                       'direccion_nomenclatura',
+        self.assertListEqual(headers, ['direccion_nomenclatura',
                                        'calle_nombre',
                                        'calle_id',
                                        'calle_tipo',
+                                       'altura_valor',
+                                       'altura_unidad',
                                        'calle_cruce_1_nombre',
                                        'calle_cruce_1_id',
                                        'calle_cruce_1_tipo',
                                        'calle_cruce_2_nombre',
                                        'calle_cruce_2_id',
                                        'calle_cruce_2_tipo',
+                                       'piso',
                                        'provincia_id',
                                        'provincia_nombre',
                                        'departamento_id',
