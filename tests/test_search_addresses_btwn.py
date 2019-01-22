@@ -127,7 +127,7 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
             'departamento': 'Juan Martín de Pueyrredón'
         })
 
-        self.assertTrue(len(resp_btwn_1) == 1 and len(resp_btwn_2) == 0)
+        self.assertTrue(resp_btwn_1 and not resp_btwn_2)
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""

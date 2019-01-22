@@ -163,14 +163,13 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
         super().__init__(query, fmt)
 
-        # TODO: Definir si estos parámetros de búsqueda van a seguir
-        # disponibles en /direcciones. Notar también los cambios en
-        # data.py - build_address_query_format().
-        self._query.pop('order', None)
-
     def _build_intersections_query(self, street_1_ids, street_2_ids,
                                    locations, tolerance_m, ignore_max=False):
         query = self._query.copy()
+
+        # El orden por id/nombre se hace localmente (para direcciones de tipo
+        # intersection y between)
+        query.pop('order', None)
         query['ids'] = (list(street_1_ids), list(street_2_ids))
 
         if ignore_max:
@@ -293,6 +292,19 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
         self._intersection_hits = self._build_intersection_hits(intersections)
 
+    def _apply_sort(self, hits):
+        order = self._query.get('order')
+        if not order:
+            return
+
+        # Ordenar resultados utilizando la primera calle
+        if order == N.ID:
+            hits.sort(key=lambda hit: hit[N.STREET][N.ID])
+        elif order == N.NAME:
+            hits.sort(key=lambda hit: hit[N.STREET][N.NAME])
+        else:
+            raise ValueError('Invalid sort field')
+
     def _build_intersection_hits(self, intersections):
         intersection_hits = []
         fields = self._format[N.FIELDS]
@@ -301,7 +313,6 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             address_hit = self._build_base_address_hit(street_1.get(N.STATE),
                                                        street_1.get(N.DEPT))
 
-            # TODO: Usar prov/dept de cual calle?
             address_hit[N.STREET] = self._build_street_entity(street_1)
             address_hit[N.STREET_X1] = self._build_street_entity(street_2)
             address_hit[N.STREET_X2] = self._build_street_entity()
@@ -313,6 +324,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
             intersection_hits.append(address_hit)
 
+        self._apply_sort(intersection_hits)
         return intersection_hits
 
     def get_query_result(self):
@@ -468,7 +480,6 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             address_hit = self._build_base_address_hit(
                 entry.street_1.get(N.STATE), entry.street_1.get(N.DEPT))
 
-            # TODO: Usar prov/dept de cual calle?
             address_hit[N.STREET] = self._build_street_entity(entry.street_1)
             address_hit[N.STREET_X1] = self._build_street_entity(
                 entry.street_2)
@@ -487,6 +498,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
 
             between_hits.append(address_hit)
 
+        self._apply_sort(between_hits)
         return between_hits
 
     def get_query_result(self):

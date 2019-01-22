@@ -1,4 +1,5 @@
 from service import geometry
+from . import asciifold
 from .test_search_addresses_simple import SearchAddressesBaseTest
 
 COMMON_ISCT = 'salta y santa fe'
@@ -145,6 +146,30 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         traer 0 resultados."""
         self.assert_intersection_search_ids_matches('QuuzQuux y FoobarFoobar',
                                                     [])
+
+    def test_name_ordering(self):
+        """Los resultados deben poder ser ordenados por nombre."""
+        resp = self.get_response({
+            'direccion': 'santa fe y salta',
+            'orden': 'nombre',
+            'max': 1000
+        })
+
+        ordered = [r['calle']['nombre'] for r in resp]
+        expected = sorted(ordered, key=asciifold)
+        self.assertListEqual(ordered, expected)
+
+    def test_id_ordering(self):
+        """Los resultados deben poder ser ordenados por ID."""
+        resp = self.get_response({
+            'direccion': 'santa fe y salta',
+            'orden': 'id',
+            'max': 1000
+        })
+
+        ordered = [r['calle']['id'] for r in resp]
+        expected = sorted(ordered)
+        self.assertListEqual(ordered, expected)
 
     def assert_intersection_search_ids_matches(self, address, ids,
                                                params=None):
