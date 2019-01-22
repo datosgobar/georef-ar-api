@@ -5,8 +5,8 @@ librería Shapely.
 """
 
 import math
-import shapely.ops
 import shapely.geometry
+import shapely.ops
 from service import names as N
 
 MEAN_EARTH_RADIUS_KM = 6371
@@ -100,6 +100,17 @@ def build_circle_geometry(location, radius_meters):
         'type': 'circle',
         'radius': '{}m'.format(radius_meters),
         'coordinates': [location[N.LON], location[N.LAT]]
+    }
+
+
+def geojson_points_centroid(point_a, point_b):
+    point_a = shapely.geometry.Point(point_a['coordinates'])
+    point_b = shapely.geometry.Point(point_b['coordinates'])
+
+    centroid = shapely.geometry.MultiPoint([point_a, point_b]).centroid
+    return {
+        N.LON: centroid.x,  # pylint: disable=no-member
+        N.LAT: centroid.y   # pylint: disable=no-member
     }
 
 

@@ -32,8 +32,9 @@ class AddressQueryPlanner:
         if self._numerical_door_number:
             door_number = ' {}'.format(self._numerical_door_number)
 
-        # TODO: Usar siempre datos de la primera calle?
-        # Los casos donde las calles son de distintos deptos son pocos
+        # Usar siempre datos de provincia/departamento de la primera calle
+        # En la mayoría de los casos, las tres calles van a ser del mismo
+        # lugar.
         fmt = {
             'state': streets[0][N.STATE][N.NAME],
             'dept': streets[0][N.DEPT][N.NAME],
@@ -330,15 +331,79 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         def __init__(self, street_1):
             self.street_1 = street_1
             self.street_2 = None
+            self.intersection_2 = None
             self.street_3 = None
+            self.intersection_3 = None
             self.loc = None
 
-        def complete(self):
-            return all((self.street_1, self.street_2, self.street_3))
+        def valid(self):
+            if not all((self.street_1, self.street_2, self.street_3)):
+                return False
+
+            location_a = geometry.geojson_point_to_location(
+                self.intersection_2[N.GEOM])
+
+            location_b = geometry.geojson_point_to_location(
+                self.intersection_3[N.GEOM])
+
+            distance = geometry.approximate_distance_meters(location_a,
+                                                            location_b)
+
+            return distance < constants.BTWN_DISTANCE_TOLERANCE_M
+
+        def location(self):
+            if self.loc:
+                return self.loc
+
+            return geometry.geojson_points_centroid(
+                self.intersection_2[N.GEOM],
+                self.intersection_3[N.GEOM]
+            )
 
     def __init__(self, query, fmt):
         self._between_hits = None
         super().__init__(query, fmt)
+
+    def _process_intersections(self, intersections, street_1_ids, street_2_ids,
+                               street_3_ids, street_1_locations):
+        between_entries = {}
+        street_2_3_ids = street_2_ids | street_3_ids
+
+        for intersection in intersections:
+            id_a = intersection[N.STREET_A][N.ID]
+            id_b = intersection[N.STREET_B][N.ID]
+
+            if id_a in street_1_ids and id_b in street_2_3_ids:
+                street_1 = intersection[N.STREET_A]
+                street_other = intersection[N.STREET_B]
+            elif id_a in street_2_3_ids and id_b in street_1_ids:
+                street_1 = intersection[N.STREET_B]
+                street_other = intersection[N.STREET_A]
+            else:
+                raise RuntimeError(
+                    'Unknown street IDs for intersection {} - {}'.format(id_a,
+                                                                         id_b))
+
+            if street_1[N.ID] in between_entries:
+                entry = between_entries[street_1[N.ID]]
+            else:
+                entry = AddressBtwnQueryPlanner.BetweenEntry(street_1)
+                if self._numerical_door_number:
+                    entry.loc = street_1_locations[street_1[N.ID]]
+
+                between_entries[street_1[N.ID]] = entry
+
+            if street_other[N.ID] in street_2_ids:
+                entry.street_2 = street_other
+                entry.intersection_2 = intersection
+            elif street_other[N.ID] in street_3_ids:
+                entry.street_3 = street_other
+                entry.intersection_3 = intersection
+            else:
+                raise RuntimeError('Unknown street ID: {}'.format(
+                    street_other[N.ID]))
+
+        return between_entries
 
     def planner_steps(self):
         # Buscar la primera calle, incluyendo la altura si está presente
@@ -385,40 +450,14 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             ignore_max=True
         )
 
-        entries = {}
-        for intersection in result.hits:
-            id_a = intersection[N.STREET_A][N.ID]
-            id_b = intersection[N.STREET_B][N.ID]
+        entries = self._process_intersections(result.hits, street_1_ids,
+                                              street_2_ids, street_3_ids,
+                                              street_1_locations)
 
-            if id_a in street_1_ids and id_b in street_2_3_ids:
-                street_1 = intersection[N.STREET_A]
-                street_other = intersection[N.STREET_B]
-            elif id_a in street_2_3_ids and id_b in street_1_ids:
-                street_1 = intersection[N.STREET_B]
-                street_other = intersection[N.STREET_A]
-            else:
-                raise RuntimeError(
-                    'Unknown street IDs for intersection {} - {}'.format(id_a,
-                                                                         id_b))
-
-            if street_1[N.ID] not in entries:
-                entry = AddressBtwnQueryPlanner.BetweenEntry(street_1)
-                if self._numerical_door_number:
-                    entry.loc = street_1_locations[street_1[N.ID]]
-
-                entries[street_1[N.ID]] = entry
-
-            if street_other[N.ID] in street_2_ids:
-                entries[street_1[N.ID]].street_2 = street_other
-            elif street_other[N.ID] in street_3_ids:
-                entries[street_1[N.ID]].street_3 = street_other
-            else:
-                raise RuntimeError('Unknown street ID: {}'.format(
-                    street_other[N.ID]))
-
-        # Las tres calles deben estar presentes
+        # Las tres calles deben estar presentes, y las dos intersecciones
+        # deben estar a menos de cierta distancia entre sí
         self._between_hits = self._build_between_hits(
-            entry for entry in entries.values() if entry.complete()
+            entry for entry in entries.values() if entry.valid()
         )
 
     def _build_between_hits(self, entries):
@@ -436,8 +475,8 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             address_hit[N.STREET_X2] = self._build_street_entity(
                 entry.street_3)
 
-            if entry.loc:
-                address_hit[N.LOCATION] = entry.loc
+            if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
+                address_hit[N.LOCATION] = entry.location()
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(

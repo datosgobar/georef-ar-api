@@ -1,4 +1,6 @@
+import shapely.geometry
 from service import names as N
+from service import geometry
 from .test_search_addresses_simple import SearchAddressesBaseTest
 
 COMMON_BTWN = 'parana entre santa fe y alvear'
@@ -56,13 +58,37 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
 
     def test_between_location_no_door_num(self):
         """Si no se especifica una altura en una una dirección de tipo
-        'between', el resultado final no debería tener una posición."""
-        resp = self.get_response({
+        'between', el resultado final debería tener una posición calculada
+        a partir del promedio de la posición de las dos intersecciones."""
+        resp_btwn = self.get_response({
             'direccion': 'Mar del Plata entre Diaz y 12 de Octubre',
             'departamento': 'Río Hondo'
         })
-        loc = resp[0]['ubicacion']
-        self.assertTrue(loc[N.LAT] is None and loc[N.LON] is None)
+        loc_btwn = resp_btwn[0]['ubicacion']
+
+        resp_isct_1 = self.get_response({
+            'direccion': 'Mar del Plata esquina Diaz',
+            'departamento': 'Río Hondo'
+        })
+        loc_isct_1 = resp_isct_1[0]['ubicacion']
+
+        resp_isct_2 = self.get_response({
+            'direccion': 'Mar del Plata esq. 12 de Octubre',
+            'departamento': 'Río Hondo'
+        })
+        loc_isct_2 = resp_isct_2[0]['ubicacion']
+
+        point_1 = shapely.geometry.Point(loc_isct_1[N.LON], loc_isct_1[N.LAT])
+        point_2 = shapely.geometry.Point(loc_isct_2[N.LON], loc_isct_2[N.LAT])
+        centroid = shapely.geometry.MultiPoint([point_1, point_2]).centroid
+        centroid_location = {
+            N.LON: centroid.x,  # pylint: disable=no-member
+            N.LAT: centroid.y   # pylint: disable=no-member
+        }
+
+        distance = geometry.approximate_distance_meters(loc_btwn,
+                                                        centroid_location)
+        self.assertAlmostEqual(distance, 0)
 
     def test_between_nonexistent_door_num(self):
         """Si se especifica una dirección de tipo 'between' con altura,
@@ -83,6 +109,25 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
         })
 
         self.assertTrue(resp_simple and not resp_btwn)
+
+    def test_streets_distance(self):
+        """Si se especifica una dirección de tipo 'between' con las calles
+        2 y 3 a más de cierta distancia, no debe ser considerada una dirección
+        válida."""
+
+        # Belgrano y Pringles están a una cuadra de distancia
+        resp_btwn_1 = self.get_response({
+            'direccion': 'Falucho entre Belgrano y Pringles',
+            'departamento': 'Juan Martín de Pueyrredón'
+        })
+
+        # Ayacucho y Pringles están a dos cuadras de distancia
+        resp_btwn_2 = self.get_response({
+            'direccion': 'Falucho entre Ayacucho y Pringles',
+            'departamento': 'Juan Martín de Pueyrredón'
+        })
+
+        self.assertTrue(len(resp_btwn_1) == 1 and len(resp_btwn_2) == 0)
 
     def test_default_results_fields(self):
         """Las entidades devueltas deben tener los campos default."""
