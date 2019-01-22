@@ -458,7 +458,6 @@ def build_address_query_format(parsed_params):
         N.DEPT: 'department',
         N.STATE: 'state',
         N.EXACT: 'exact',
-        N.TYPE: 'street_type',
         N.OFFSET: 'offset',
         N.ORDER: 'order'
     }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])

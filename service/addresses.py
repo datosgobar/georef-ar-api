@@ -166,7 +166,6 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         # disponibles en /direcciones. Notar también los cambios en
         # data.py - build_address_query_format().
         self._query.pop('order', None)
-        self._query.pop('street_type', None)
 
     def _build_intersections_query(self, street_1_ids, street_2_ids,
                                    locations, tolerance_m, ignore_max=False):

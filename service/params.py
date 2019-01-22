@@ -1150,7 +1150,6 @@ _ADDRESSES_STANDARD_FIELDS = [
 
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
-    N.TYPE: StrParameter(),
     N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
     N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),

@@ -363,27 +363,6 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
 
         self.assert_address_search_id_matches(expected)
 
-    def test_search_street_type(self):
-        """Se debe poder especificar el tipo de calle en la búsqueda."""
-        streets = self.get_response({
-            'tipo': 'calle',
-            'direccion': COMMON_ADDRESS
-        })
-
-        avenues = self.get_response({
-            'tipo': 'avenida',
-            'direccion': COMMON_ADDRESS
-        })
-
-        streets_valid = streets and all(
-            street['calle']['tipo'] == 'CALLE' for street in streets
-        )
-        avenues_valid = avenues and all(
-            av['calle']['tipo'] == 'AV' for av in avenues
-        )
-
-        self.assertTrue(streets_valid and avenues_valid)
-
     def test_filter_by_state_name(self):
         """Se debe poder filtrar los resultados por nombre de provincia."""
         validations = []
@@ -510,10 +489,6 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         queries = [
             {
                 'direccion': COMMON_ADDRESS
-            },
-            {
-                'direccion': COMMON_ADDRESS,
-                'tipo': 'avenida'
             },
             {
                 'direccion': COMMON_ADDRESS,
