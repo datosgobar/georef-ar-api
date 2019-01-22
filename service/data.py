@@ -127,19 +127,20 @@ class ElasticsearchSearch:
 
         # Partir las búsquedas en varios baches si es necesario.
         for i in range(0, len(searches), step_size):
-            part = searches[i:i + step_size]
+            end = min(i + step_size, len(searches))
             ms = MultiSearch(using=es)
 
-            for search in part:
-                ms = ms.add(search.es_search)
+            for j in range(i, end):
+                ms = ms.add(searches[j].es_search)
 
             try:
                 responses = ms.execute(raise_on_error=True)
 
-                for search, response in zip(part, responses):
+                for j, response in zip(range(i, end), responses):
                     # Por cada objeto ElasticsearchSearch, establecer su objeto
                     # ElasticsearchResult conteniendo los documentos
                     # resultantes de la búsqueda ejecutada.
+                    search = searches[j]
                     search.set_result(ElasticsearchResult(response,
                                                           search.offset))
 
