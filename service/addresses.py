@@ -47,9 +47,10 @@ class AddressQueryPlanner:
         if self._address_data.type == 'simple':
             template = '{street_1}{door_number}'
         elif self._address_data.type == 'intersection':
-            template = '{street_1}{door_number} y {street_2}'
+            template = '{street_1}{door_number} (ESQUINA {street_2})'
         elif self._address_data.type == 'between':
-            template = '{street_1}{door_number} entre {street_2} y {street_3}'
+            template = \
+                '{street_1}{door_number} (ENTRE {street_2} Y {street_3})'
         else:
             raise ValueError('Unknown address type')
 
