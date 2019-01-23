@@ -8,12 +8,15 @@ from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
 from elasticsearch_dsl.query import MatchNone, Terms, Prefix, Bool
 from service import names as N
-from service import constants
+from service import constants, utils
 from service.management import es_config
 
-INTERSECTION_PARAM_TYPES = (
-    N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES, N.STREETS
-)
+INTERSECTION_PARAM_TYPES = {
+    N.STATES,
+    N.DEPARTMENTS,
+    N.MUNICIPALITIES,
+    N.STREETS
+}
 
 
 class DataConnectionException(Exception):
@@ -55,41 +58,87 @@ def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
         raise DataConnectionException()
 
 
+def run_multisearch(es, searches):
+    step_size = constants.ES_MULTISEARCH_MAX_LEN
+    responses = []
+
+    # Partir las búsquedas en varios baches si es necesario.
+    for i in range(0, len(searches), step_size):
+        end = min(i + step_size, len(searches))
+        ms = MultiSearch(using=es)
+
+        for j in range(i, end):
+            ms = ms.add(searches[j])
+
+        try:
+            responses.extend(ms.execute(raise_on_error=True))
+        except elasticsearch.ElasticsearchException:
+            raise DataConnectionException()
+
+    return responses
+
+
 class ElasticsearchSearch:
-    """Representa una búsqueda Elasticsearch y potencialmente sus
-    resultados.
-
-    Attributes:
-        _es_search (elasticsearch_dsl.Search): Búsqueda Elasticsearch a
-            ejecutar.
-        _offset (int): Cantidad de resultados a saltear, comenzando desde el
-            primero (0). El offset de la búsqueda es almacenado por separado
-            para evitar tener que buscar el valor dentro del diccionario de
-            _es_search.
-        _result (ElasticsearchResult): Resultados de la búsqueda, luego de ser
-            ejecutada.
-
-    """
-
-    def __init__(self, es_search, offset=0):
-        """Inicializa un objeto de tipo ElasticsearchSearch.
-
-        Args:
-            es_search (elasticsearch_dsl.Search): Ver atributo '_es_search'.
-            offset (int): Ver atributo '_offset'.
-
-        """
-        self._es_search = es_search
-        self._offset = offset
+    def __init__(self, index, query):
+        self._search = Search(index=index)
+        self._index = index
+        self._offset = query.get('offset', 0)
         self._result = None
 
-    @property
-    def es_search(self):
-        return self._es_search
+        self._read_query(**query)
 
-    @property
-    def offset(self):
-        return self._offset
+    def search_steps(self):
+        raise NotImplementedError()
+
+    def _read_query(self, fields=None, size=constants.DEFAULT_SEARCH_SIZE,
+                    offset=0):
+        if fields:
+            self._search = self._search.source(include=fields)
+
+        self._search = self._search[offset:offset + size]
+
+    def _expand_intersection_query(self, geo_shape_ids):
+        checked_ids = {}
+
+        for entity_type in INTERSECTION_PARAM_TYPES:
+            if entity_type not in geo_shape_ids:
+                continue
+
+            entity_ids = list(geo_shape_ids[entity_type])
+            search_class = entity_search_class(entity_type)
+            search = search_class({
+                'ids': entity_ids,
+                'size': len(entity_ids),
+                'fields': [N.ID]
+            })
+
+            yield from search.search_steps()
+
+            checked_ids[entity_type] = [
+                hit[N.ID] for hit in search.result.hits
+            ]
+
+        self._search = self._search.query(build_geo_query(
+            N.GEOM,
+            ids=checked_ids
+        ))
+
+    def _expand_geometry_query(self, search_class):
+        ids = [hit['id'] for hit in self._result.hits]
+
+        geom_search = search_class({
+            'ids': ids,
+            'fields': [N.ID, N.GEOM],
+            'size': len(ids)
+        })
+
+        yield from geom_search.search_steps()
+
+        original_hits = {hit[N.ID]: hit for hit in self._result.hits}
+
+        for hit in geom_search.result.hits:
+            # Agregar campo geometría a los resultados originales
+            original_hits[hit[N.ID]][N.GEOM] = hit[N.GEOM]
 
     @property
     def result(self):
@@ -106,46 +155,278 @@ class ElasticsearchSearch:
 
     @staticmethod
     def run_searches(es, searches):
-        """Ejecuta una lista de búsquedas ElasticsearchSearch. Internamente, se
-        utiliza la función MultiSearch para ejecutarlas. Los resultados de cada
-        búsqueda se almacenan en el objeto representando la búsqueda en sí
-        (campo 'result').
+        iterators = [search.search_steps() for search in searches]
+        iteration_data = []
+        for iterator in iterators:
+            search = utils.step_iterator(iterator)
 
-        Args:
-            es (Elasticsearch): Conexión a Elasticsearch.
-            searches (list): Lista de búsquedas, de tipo ElasticsearchSearch.
+            if search:
+                iteration_data.append((iterator, search))
 
-        Raises:
-            DataConnectionException: si ocurrió un error al ejecutar las
-                búsquedas.
+        while iteration_data:
+            responses = run_multisearch(es, [
+                search for _, search in iteration_data
+            ])
 
-        """
-        if not searches:
-            return
+            iterators = (iterator for iterator, _ in iteration_data)
+            iteration_data = []
 
-        step_size = constants.ES_MULTISEARCH_MAX_LEN
+            for iterator, response in zip(iterators, responses):
+                search = utils.step_iterator(iterator, response)
+                if search:
+                    iteration_data.append((iterator, search))
 
-        # Partir las búsquedas en varios baches si es necesario.
-        for i in range(0, len(searches), step_size):
-            end = min(i + step_size, len(searches))
-            ms = MultiSearch(using=es)
 
-            for j in range(i, end):
-                ms = ms.add(searches[j].es_search)
+class TerritoriesSearch(ElasticsearchSearch):
+    def __init__(self, index, query, geom_search_class=None):
+        self._geo_shape_ids = query.pop('geo_shape_ids', None)
+        self._geom_search_class = geom_search_class
 
-            try:
-                responses = ms.execute(raise_on_error=True)
+        fields = query.get('fields', [])
 
-                for j, response in zip(range(i, end), responses):
-                    # Por cada objeto ElasticsearchSearch, establecer su objeto
-                    # ElasticsearchResult conteniendo los documentos
-                    # resultantes de la búsqueda ejecutada.
-                    search = searches[j]
-                    search.set_result(ElasticsearchResult(response,
-                                                          search.offset))
+        if self._geom_search_class:
+            # Se pidieron geometrías, pero este índice no las contiene,
+            # es necesario buscarlas en el índice de geometrías
+            # correspondiente.
+            self._fetch_geoms = N.GEOM in fields and N.ID in fields
+        else:
+            # Las geometrías están contenidas en este índice. Si se pidieron en
+            # 'fields', serán devueltas por la consulta a Elasticsearch.
+            self._fetch_geoms = False
 
-            except elasticsearch.ElasticsearchException:
-                raise DataConnectionException()
+        super().__init__(index, query)
+
+    def _read_query(self, ids=None, name=None, municipality=None,
+                    department=None, state=None, exact=False,
+                    geo_shape_geoms=None, order=None, **kwargs):
+        super()._read_query(**kwargs)
+
+        if ids:
+            self._search = self._search.filter(build_terms_query(N.ID, ids))
+
+        if name:
+            self._search = self._search.query(build_name_query(N.NAME, name,
+                                                               exact))
+
+        if geo_shape_geoms:
+            self._search = self._search.query(build_geo_query(
+                N.GEOM,
+                geoms=geo_shape_geoms
+            ))
+
+        if municipality:
+            self._search = self._search.query(build_subentity_query(
+                N.MUN_ID,
+                N.MUN_NAME,
+                municipality,
+                exact
+            ))
+
+        if department:
+            self._search = self._search.query(build_subentity_query(
+                N.DEPT_ID,
+                N.DEPT_NAME,
+                department,
+                exact
+            ))
+
+        if state:
+            self._search = self._search.query(build_subentity_query(
+                N.STATE_ID,
+                N.STATE_NAME,
+                state,
+                exact
+            ))
+
+        if order:
+            if order == N.NAME:
+                order = N.EXACT_SUFFIX.format(order)
+            self._search = self._search.sort(order)
+
+    def search_steps(self):
+        if self._geo_shape_ids:
+            yield from self._expand_intersection_query(self._geo_shape_ids)
+
+        response = yield self._search
+        self._result = ElasticsearchResult(response, self._offset)
+
+        if self._fetch_geoms:
+            yield from self._expand_geometry_query(self._geom_search_class)
+
+
+class StreetsSearch(ElasticsearchSearch):
+    def __init__(self, query):
+        self._geo_shape_ids = query.pop('geo_shape_ids', None)
+        super().__init__(N.STREETS, query)
+
+    def _read_query(self, ids=None, name=None, department=None, state=None,
+                    street_type=None, order=None, exact=False, number=None,
+                    **kwargs):
+
+        super()._read_query(**kwargs)
+
+        if ids:
+            self._search = self._search.filter(build_terms_query(
+                N.ID,
+                ids
+            ))
+
+        if name:
+            self._search = self._search.query(build_name_query(
+                N.NAME,
+                name,
+                exact
+            ))
+
+        if street_type:
+            self._search = self._search.query(build_match_query(
+                N.TYPE,
+                street_type,
+                fuzzy=True
+            ))
+
+        if number:
+            self._search = self._search.query(
+                build_range_query(N.START_R, '<=', number) |
+                build_range_query(N.START_L, '<=', number)
+            )
+
+            self._search = self._search.query(
+                build_range_query(N.END_L, '>=', number) |
+                build_range_query(N.END_R, '>=', number)
+            )
+
+        if department:
+            self._search = self._search.query(build_subentity_query(
+                N.DEPT_ID,
+                N.DEPT_NAME,
+                department,
+                exact
+            ))
+
+        if state:
+            self._search = self._search.query(build_subentity_query(
+                N.STATE_ID,
+                N.STATE_NAME,
+                state,
+                exact
+            ))
+
+        if order:
+            if order == N.NAME:
+                order = N.EXACT_SUFFIX.format(order)
+            self._search = self._search.sort(order)
+
+    def search_steps(self):
+        if self._geo_shape_ids:
+            yield from self._expand_intersection_query(self._geo_shape_ids)
+
+        response = yield self._search
+        self._result = ElasticsearchResult(response, self._offset)
+
+
+class IntersectionsSearch(ElasticsearchSearch):
+    def __init__(self, query):
+        super().__init__(N.INTERSECTIONS, query)
+
+    def _read_query(self, ids=None, geo_shape_geoms=None, department=None,
+                    state=None, exact=False, **kwargs):
+        super()._read_query(**kwargs)
+
+        if ids:
+            query_1 = (
+                build_terms_query(N.join(N.STREET_A, N.ID), ids[0]) &
+                build_terms_query(N.join(N.STREET_B, N.ID), ids[1])
+            )
+
+            query_2 = (
+                build_terms_query(N.join(N.STREET_A, N.ID), ids[1]) &
+                build_terms_query(N.join(N.STREET_B, N.ID), ids[0])
+            )
+
+            self._search = self._search.query(query_1 | query_2)
+
+        if geo_shape_geoms:
+            self._search = self._search.query(build_geo_query(
+                N.GEOM,
+                geoms=geo_shape_geoms
+            ))
+
+        if department:
+            for side in [N.STREET_A, N.STREET_B]:
+                self._search = self._search.query(build_subentity_query(
+                    N.join(side, N.DEPT_ID),
+                    N.join(side, N.DEPT_NAME),
+                    department,
+                    exact
+                ))
+
+        if state:
+            for side in [N.STREET_A, N.STREET_B]:
+                self._search = self._search.query(build_subentity_query(
+                    N.join(side, N.STATE_ID),
+                    N.join(side, N.STATE_NAME),
+                    state,
+                    exact
+                ))
+
+    def search_steps(self):
+        response = yield self._search
+        self._result = ElasticsearchResult(response, self._offset)
+
+
+class StatesGeometrySearch(TerritoriesSearch):
+    def __init__(self, query):
+        super().__init__(es_config.geom_index_for(N.STATES), query)
+
+
+class StatesSearch(TerritoriesSearch):
+    def __init__(self, query):
+        super().__init__(N.STATES, query,
+                         geom_search_class=StatesGeometrySearch)
+
+
+class DepartmentsGeometrySearch(TerritoriesSearch):
+    def __init__(self, query):
+        super().__init__(es_config.geom_index_for(N.DEPARTMENTS), query)
+
+
+class DepartmentsSearch(TerritoriesSearch):
+    def __init__(self, query):
+        super().__init__(N.DEPARTMENTS, query,
+                         geom_search_class=DepartmentsGeometrySearch)
+
+
+class MunicipalitiesGeometrySearch(TerritoriesSearch):
+    def __init__(self, query):
+        super().__init__(es_config.geom_index_for(N.MUNICIPALITIES), query)
+
+
+class MunicipalitiesSearch(TerritoriesSearch):
+    def __init__(self, query):
+        super().__init__(N.MUNICIPALITIES, query,
+                         geom_search_class=MunicipalitiesGeometrySearch)
+
+
+class LocalitiesSearch(TerritoriesSearch):
+    def __init__(self, query):
+        super().__init__(N.LOCALITIES, query)
+
+
+ENTITY_SEARCH_CLASSES = {
+    N.STATES: StatesSearch,
+    N.DEPARTMENTS: DepartmentsSearch,
+    N.MUNICIPALITIES: MunicipalitiesSearch,
+    N.LOCALITIES: LocalitiesSearch,
+    N.STREETS: StreetsSearch
+}
+
+
+def entity_search_class(entity):
+    if entity not in ENTITY_SEARCH_CLASSES:
+        raise ValueError('Unknown entity type: {}'.format(entity))
+
+    return ENTITY_SEARCH_CLASSES[entity]
 
 
 class ElasticsearchResult:
@@ -179,369 +460,6 @@ class ElasticsearchResult:
 
     def __len__(self):
         return len(self._hits)
-
-
-def expand_intersection_parameters(es, params_list):
-    """Dada una lista de conjuntos de parámetros, encuentra parámetros de tipo
-    'interseccion' y comprueba que los IDs listados internamente apunten a
-    entidades existentes. Esto se hace para poder utilizar más adelante los IDs
-    ya validados en las consultas de tipo GeoShape con geometrías
-    pre-indexadas, que requieren IDs de documentos existentes. La función se
-    asegura de que incluso si hay varios parámetros de tipo 'intersección',
-    se haga una sola consulta a Elasticsearch.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        params_list (list): Lista de conjuntos de parámetros de consultas.
-
-    """
-    searches = []
-
-    for params in params_list:
-        ids = params.get('geo_shape_ids')
-        if not ids:
-            continue
-
-        for entity_type in INTERSECTION_PARAM_TYPES:
-            entity_ids = list(ids[entity_type]) if entity_type in ids else None
-
-            if entity_ids:
-                ids[entity_type] = build_entity_search(entity_type,
-                                                       entity_ids=entity_ids,
-                                                       fields=[N.ID])
-
-                searches.append(ids[entity_type])
-
-    if not searches:
-        return
-
-    ElasticsearchSearch.run_searches(es, searches)
-
-    for params in params_list:
-        ids = params.get('geo_shape_ids')
-        if not ids:
-            continue
-
-        for entity_type in INTERSECTION_PARAM_TYPES:
-            if entity_type in ids:
-                ids[entity_type] = [
-                    hit['id']
-                    for hit in ids[entity_type].result.hits
-                ]
-
-
-def expand_geometry_searches(es, index, params_list, searches):
-    """Dada una lista de búsquedas *ya ejecutadas*, se asegura que las
-    búsquedas que incluyen 'geometria' en su lista de campos efectivamente
-    traigan las geometrías en sus resultados.
-
-    Esta función es necesaria ya que los índices de entidades no cuentan con
-    las versiones originales de las geometrías, por razones de performance (ver
-    comentario en archivo es_config.py). Entonces, es necesario buscar las
-    geometrías en índices separados, utilizando los IDs de los resultados
-    encontrados en la primera búsqueda. Todo esto debe hacerse de forma
-    amigable a las consultas bulk: se debe hacer una sola consulta a
-    Elasticsearch incluso si se hicieron varias consultas a la API. Por esta
-    razón se crean todas las ElasticsearchSearch necesarias y luego se las
-    ejecuta con 'ElasticsearchSearch.run_searches'.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        index (str): Nombre del índice sobre el cual fueron ejecutadas las
-            consultas originales.
-        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_entity_search' para más
-            detalles.
-        searches (list): Lista de ElasticsearchSearch ya ejecutadas, que
-            potencialmente incluyen 'geometria' en su lista de campos
-            requeridos.
-
-    """
-    geometry_searches = []
-    for params, search in zip(params_list, searches):
-        fields = params['fields']
-        if search.result and N.GEOM in fields and N.ID in fields:
-            # La búsqueda pidió la geometría de la entidad y se encontró una o
-            # más entidades. Crear una nueva ElasticsearchSearch para buscar la
-            # geometría utilizando el índice que corresponda (provincias ->
-            # provincias-geometria).
-            ids = [hit['id'] for hit in search.result.hits]
-            geom_index = es_config.geom_index_for(index)
-
-            geometry_search = build_entity_search(geom_index, entity_ids=ids,
-                                                  fields=[N.ID, N.GEOM],
-                                                  max=len(ids))
-
-            # Agregar la búsqueda de geometría y la búsqueda original a la
-            # lista geometry_searches
-            geometry_searches.append((geometry_search, search))
-
-    if not geometry_searches:
-        return
-
-    # Ejecutar las búsquedas de geometrías
-    ElasticsearchSearch.run_searches(
-        es,
-        [searches[0] for searches in geometry_searches]
-    )
-
-    for geometry_search, search in geometry_searches:
-        # Transformar resultados originales a diccionario de ID-entidad
-        original_hits = {hit[N.ID]: hit for hit in search.result.hits}
-
-        for hit in geometry_search.result.hits:
-            # Agregar campo geometría a los resultados originales
-            original_hits[hit[N.ID]][N.GEOM] = hit[N.GEOM]
-
-
-def search_entities(es, index, params_list, expand_geometries=False):
-    """Busca entidades políticas (localidades, departamentos, provincias o
-    municipios) según parámetros de una o más consultas.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        index (str): Nombre del índice sobre el cual realizar las búsquedas.
-        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_entity_search' para más
-            detalles.
-        expand_geometries (bool): Si es verdadero, se analizan las búsquedas
-            realizadas para ver si incluyen geometrías en sus listas de campos
-            requeridos. Como la mayoría de las búsquedas no las incluyen, se
-            desactiva la opción por defecto como una optimización.
-
-    Returns:
-        list: Resultados de búsqueda de entidades.
-
-    """
-    expand_intersection_parameters(es, params_list)
-
-    searches = [build_entity_search(index, **params) for params in params_list]
-    ElasticsearchSearch.run_searches(es, searches)
-
-    if expand_geometries and index != es_config.geom_index_for(index):
-        expand_geometry_searches(es, index, params_list, searches)
-
-    return [search.result for search in searches]
-
-
-def search_streets(es, params_list):
-    """Busca vías de circulación según parámetros de una o más consultas.
-
-    Args:
-        es (Elasticsearch): Cliente de Elasticsearch.
-        params_list (list): Lista de conjuntos de parámetros de consultas. Ver
-            la documentación de la función 'build_streets_search' para más
-            detalles.
-
-    Returns:
-        list: Resultados de búsqueda de vías de circulación.
-
-    """
-    searches = [build_streets_search(**params) for params in params_list]
-
-    ElasticsearchSearch.run_searches(es, searches)
-    return [search.result for search in searches]
-
-
-def search_intersections(es, params_list):
-    searches = [build_intersections_search(**params) for params in params_list]
-
-    ElasticsearchSearch.run_searches(es, searches)
-    return [search.result for search in searches]
-
-
-def build_entity_search(index, entity_ids=None, name=None, state=None,
-                        department=None, municipality=None, max=None,
-                        order=None, fields=None, exact=False,
-                        geo_shape_ids=None, geo_shape_geoms=None, offset=0):
-    """Construye una búsqueda con Elasticsearch DSL para entidades políticas
-    (localidades, departamentos, o provincias) según parámetros de búsqueda
-    de una consulta.
-
-    Args:
-        index (str): Índice sobre el cual se debería ejecutar la búsqueda.
-        entity_ids (list): IDs de entidades (opcional).
-        name (str): Nombre del tipo de entidad (opcional).
-        state (list, str): Lista de IDs o nombre de provincia para filtrar
-            (opcional).
-        department (list, str): Lista de IDs o nombre de departamento para
-            filtrar (opcional).
-        municipality (list, str): Lista de IDs o nombre de municipio para
-            filtrar (opcional).
-        max (int): Limita la cantidad de resultados (opcional).
-        order (str): Campo por el cual ordenar los resultados (opcional).
-        fields (list): Campos a devolver en los resultados (opcional).
-        exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
-            se especificaron los parámetros 'name', 'department',
-            'municipality' o 'state'.) (opcional).
-        geo_shape_ids (dict): Diccionario de tipo de entidad - lista de IDs
-            a utilizar para filtrar por intersecciones con geometrías
-            pre-indexadas (opcional).
-        geo_shape_geoms (list): Lista de geometrías GeoJSON a utilizar para
-            filtrar por intersecciones con geometrías.
-        offset (int): Retornar resultados comenenzando desde los 'offset'
-            primeros resultados obtenidos.
-
-    Returns:
-        Search: Búsqueda de tipo ElasticsearchSearch.
-
-    """
-    if not fields:
-        fields = []
-
-    s = Search(index=index)
-
-    if entity_ids:
-        s = s.filter(build_terms_query(N.ID, entity_ids))
-
-    if name:
-        s = s.query(build_name_query(N.NAME, name, exact))
-
-    if geo_shape_ids or geo_shape_geoms:
-        s = s.query(build_geo_query(N.GEOM, ids=geo_shape_ids,
-                                    geoms=geo_shape_geoms))
-
-    if municipality:
-        s = s.query(build_subentity_query(N.MUN_ID, N.MUN_NAME, municipality,
-                                          exact))
-
-    if department:
-        s = s.query(build_subentity_query(N.DEPT_ID, N.DEPT_NAME, department,
-                                          exact))
-
-    if state:
-        s = s.query(build_subentity_query(N.STATE_ID, N.STATE_NAME, state,
-                                          exact))
-
-    if order:
-        if order == N.NAME:
-            order = N.EXACT_SUFFIX.format(order)
-        s = s.sort(order)
-
-    s = s.source(include=fields)
-    s = s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
-
-    return ElasticsearchSearch(s, offset)
-
-
-def build_streets_search(street_ids=None, name=None, department=None,
-                         state=None, street_type=None, max=None, order=None,
-                         fields=None, exact=False, number=None,
-                         geo_shape_ids=None, offset=0):
-    """Construye una búsqueda con Elasticsearch DSL para vías de circulación
-    según parámetros de búsqueda de una consulta.
-
-    Args:
-        street_ids (list): IDs de calles a buscar (opcional).
-        name (str): Nombre de la calle para filtrar (opcional).
-        department (str): ID o nombre de departamento para filtrar (opcional).
-        state (str): ID o nombre de provincia para filtrar (opcional).
-        street_type (str): Nombre del tipo de camino para filtrar (opcional).
-        max (int): Limita la cantidad de resultados (opcional).
-        order (str): Campo por el cual ordenar los resultados (opcional).
-        fields (list): Campos a devolver en los resultados (opcional).
-        number (int): Altura de la dirección (opcional).
-        exact (bool): Activa búsqueda por nombres exactos. (toma efecto sólo si
-            se especificaron los parámetros 'name', 'locality', 'state' o
-            'department'.) (opcional).
-        geo_shape_ids (dict): Diccionario de tipo de entidad - lista de IDs
-            a utilizar para filtrar por intersecciones con geometrías
-            pre-indexadas (opcional).
-        offset (int): Retornar resultados comenenzando desde los 'offset'
-            primeros resultados obtenidos.
-
-    Returns:
-        Search: Búsqueda de tipo ElasticsearchSearch.
-
-    """
-    if not fields:
-        fields = []
-
-    s = Search(index=N.STREETS)
-
-    if street_ids:
-        s = s.filter(build_terms_query(N.ID, street_ids))
-
-    if geo_shape_ids:
-        s = s.query(build_geo_query(N.GEOM, ids=geo_shape_ids))
-
-    if name:
-        s = s.query(build_name_query(N.NAME, name, exact))
-
-    if street_type:
-        s = s.query(build_match_query(N.TYPE, street_type, fuzzy=True))
-
-    if number:
-        s = s.query(build_range_query(N.START_R, '<=', number) |
-                    build_range_query(N.START_L, '<=', number))
-        s = s.query(build_range_query(N.END_L, '>=', number) |
-                    build_range_query(N.END_R, '>=', number))
-
-    if department:
-        s = s.query(build_subentity_query(N.DEPT_ID, N.DEPT_NAME, department,
-                                          exact))
-
-    if state:
-        s = s.query(build_subentity_query(N.STATE_ID, N.STATE_NAME, state,
-                                          exact))
-
-    if order:
-        if order == N.NAME:
-            order = N.EXACT_SUFFIX.format(order)
-        s = s.sort(order)
-
-    s = s.source(include=fields)
-    s = s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
-
-    return ElasticsearchSearch(s, offset)
-
-
-def build_intersections_search(ids=None, department=None, state=None, max=None,
-                               fields=None, exact=False, geo_shape_geoms=None,
-                               offset=0):
-    if not fields:
-        fields = []
-
-    s = Search(index=N.INTERSECTIONS)
-
-    if ids:
-        query_1 = (
-            build_terms_query(N.join(N.STREET_A, N.ID), ids[0]) &
-            build_terms_query(N.join(N.STREET_B, N.ID), ids[1])
-        )
-
-        query_2 = (
-            build_terms_query(N.join(N.STREET_A, N.ID), ids[1]) &
-            build_terms_query(N.join(N.STREET_B, N.ID), ids[0])
-        )
-
-        s = s.query(query_1 | query_2)
-
-    if geo_shape_geoms:
-        s = s.query(build_geo_query(N.GEOM, geoms=geo_shape_geoms))
-
-    if department:
-        for side in [N.STREET_A, N.STREET_B]:
-            s = s.query(build_subentity_query(
-                N.join(side, N.DEPT_ID),
-                N.join(side, N.DEPT_NAME),
-                department,
-                exact
-            ))
-
-    if state:
-        for side in [N.STREET_A, N.STREET_B]:
-            s = s.query(build_subentity_query(
-                N.join(side, N.STATE_ID),
-                N.join(side, N.STATE_NAME),
-                state,
-                exact
-            ))
-
-    s = s.source(include=fields)
-    s = s[offset: offset + (max or constants.DEFAULT_SEARCH_SIZE)]
-
-    return ElasticsearchSearch(s, offset)
 
 
 def build_subentity_query(id_field, name_field, value, exact):

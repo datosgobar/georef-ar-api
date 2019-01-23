@@ -96,19 +96,23 @@ def process_entity_single(request, name, param_parser, key_translations):
         if key in qs_params
     }
 
-    expand_geometries = fmt[N.FORMAT] == 'shp'
-    if expand_geometries:
+    if fmt[N.FORMAT] == 'shp':
         query['fields'] += (N.GEOM,)
 
     es = get_elasticsearch()
-    result = data.search_entities(es, name, [query], expand_geometries)[0]
+    search_class = data.entity_search_class(name)
+    search = search_class(query)
+    # result = data.search_entities(es, name, [query], expand_geometries)[0]
+
+    data.ElasticsearchSearch.run_searches(es, [search])
 
     source = constants.INDEX_SOURCES[name]
-    for match in result.hits:
+    for match in search.result.hits:
         match[N.SOURCE] = source
 
-    query_result = QueryResult.from_entity_list(result.hits, result.total,
-                                                result.offset)
+    query_result = QueryResult.from_entity_list(search.result.hits,
+                                                search.result.total,
+                                                search.result.offset)
 
     return formatter.create_ok_response(name, query_result, fmt)
 
@@ -158,16 +162,22 @@ def process_entity_bulk(request, name, param_parser, key_translations):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = data.search_entities(es, name, queries)
+    search_class = data.entity_search_class(name)
+    searches = [search_class(query) for query in queries]
+
+    data.ElasticsearchSearch.run_searches(es, searches)
 
     source = constants.INDEX_SOURCES[name]
-    for result in results:
-        for match in result.hits:
+    for search in searches:
+        for match in search.result.hits:
             match[N.SOURCE] = source
 
-    query_results = [QueryResult.from_entity_list(result.hits, result.total,
-                                                  result.offset)
-                     for result in results]
+    query_results = [
+        QueryResult.from_entity_list(search.result.hits,
+                                     search.result.total,
+                                     search.result.offset)
+        for search in searches
+    ]
 
     return formatter.create_ok_response_bulk(name, query_results, formats)
 
@@ -215,13 +225,14 @@ def process_state(request):
 
     """
     return process_entity(request, N.STATES, params.PARAMS_STATES, {
-        N.ID: 'entity_ids',
+        N.ID: 'ids',
         N.NAME: 'name',
         N.INTERSECTION: 'geo_shape_ids',
         N.EXACT: 'exact',
         N.ORDER: 'order',
         N.FIELDS: 'fields',
-        N.OFFSET: 'offset'
+        N.OFFSET: 'offset',
+        N.MAX: 'size'
     })
 
 
@@ -238,14 +249,15 @@ def process_department(request):
     """
     return process_entity(request, N.DEPARTMENTS,
                           params.PARAMS_DEPARTMENTS, {
-                              N.ID: 'entity_ids',
+                              N.ID: 'ids',
                               N.NAME: 'name',
                               N.INTERSECTION: 'geo_shape_ids',
                               N.STATE: 'state',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
                               N.FIELDS: 'fields',
-                              N.OFFSET: 'offset'
+                              N.OFFSET: 'offset',
+                              N.MAX: 'size'
                           })
 
 
@@ -262,14 +274,15 @@ def process_municipality(request):
     """
     return process_entity(request, N.MUNICIPALITIES,
                           params.PARAMS_MUNICIPALITIES, {
-                              N.ID: 'entity_ids',
+                              N.ID: 'ids',
                               N.NAME: 'name',
                               N.INTERSECTION: 'geo_shape_ids',
                               N.STATE: 'state',
                               N.EXACT: 'exact',
                               N.ORDER: 'order',
                               N.FIELDS: 'fields',
-                              N.OFFSET: 'offset'
+                              N.OFFSET: 'offset',
+                              N.MAX: 'size'
                           })
 
 
@@ -285,7 +298,7 @@ def process_locality(request):
 
     """
     return process_entity(request, N.LOCALITIES, params.PARAMS_LOCALITIES, {
-        N.ID: 'entity_ids',
+        N.ID: 'ids',
         N.NAME: 'name',
         N.STATE: 'state',
         N.DEPT: 'department',
@@ -293,7 +306,8 @@ def process_locality(request):
         N.EXACT: 'exact',
         N.ORDER: 'order',
         N.FIELDS: 'fields',
-        N.OFFSET: 'offset'
+        N.OFFSET: 'offset',
+        N.MAX: 'size'
     })
 
 
@@ -313,7 +327,7 @@ def build_street_query_format(parsed_params):
     """
     # Construir query a partir de parámetros
     query = translate_keys(parsed_params, {
-        N.ID: 'street_ids',
+        N.ID: 'ids',
         N.NAME: 'name',
         N.INTERSECTION: 'geo_shape_ids',
         N.STATE: 'state',
@@ -322,7 +336,8 @@ def build_street_query_format(parsed_params):
         N.FIELDS: 'fields',
         N.TYPE: 'street_type',
         N.OFFSET: 'offset',
-        N.ORDER: 'order'
+        N.ORDER: 'order',
+        N.MAX: 'size'
     }, ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
@@ -361,14 +376,16 @@ def process_street_single(request):
         query['fields'] += (N.GEOM,)
 
     es = get_elasticsearch()
-    result = data.search_streets(es, [query])[0]
+    search = data.StreetsSearch(query)
+    data.ElasticsearchSearch.run_searches(es, [search])
 
     source = constants.INDEX_SOURCES[N.STREETS]
-    for match in result.hits:
+    for match in search.result.hits:
         match[N.SOURCE] = source
 
-    query_result = QueryResult.from_entity_list(result.hits, result.total,
-                                                result.offset)
+    query_result = QueryResult.from_entity_list(search.result.hits,
+                                                search.result.total,
+                                                search.result.offset)
 
     return formatter.create_ok_response(N.STREETS, query_result, fmt)
 
@@ -402,16 +419,21 @@ def process_street_bulk(request):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = data.search_streets(es, queries)
+    searches = [data.StreetsSearch(query) for query in queries]
+
+    data.ElasticsearchSearch.run_searches(es, searches)
 
     source = constants.INDEX_SOURCES[N.STREETS]
-    for result in results:
-        for match in result.hits:
+    for search in searches:
+        for match in search.result.hits:
             match[N.SOURCE] = source
 
-    query_results = [QueryResult.from_entity_list(result.hits, result.total,
-                                                  result.offset)
-                     for result in results]
+    query_results = [
+        QueryResult.from_entity_list(search.result.hits,
+                                     search.result.total,
+                                     search.result.offset)
+        for search in searches
+    ]
 
     return formatter.create_ok_response_bulk(N.STREETS, query_results, formats)
 
@@ -459,7 +481,8 @@ def build_address_query_format(parsed_params):
         N.STATE: 'state',
         N.EXACT: 'exact',
         N.OFFSET: 'offset',
-        N.ORDER: 'order'
+        N.ORDER: 'order',
+        N.MAX: 'size'
     }, ignore=[N.FLATTEN, N.FORMAT, N.FIELDS])
 
     # Construir reglas de formato a partir de parámetros
@@ -679,47 +702,54 @@ def process_location_queries(es, queries):
     #    también tiene provincia. Si la consulta tiene municipio, entonces
     #    tiene provincia, departamento y municipio.
 
-    state_queries = []
+    all_searches = []
+
+    state_searches = []
     for query in queries:
-        state_queries.append({
+        search = data.StatesSearch({
             'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
             'fields': [N.ID, N.NAME],
-            'max': 1
+            'size': 1
         })
 
-    state_results = data.search_entities(es, N.STATES, state_queries)
+        all_searches.append(search)
+        state_searches.append(search)
 
-    dept_queries = []
+    dept_searches = []
     for query in queries:
-        dept_queries.append({
-            'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
-            'fields': [N.ID, N.NAME, N.STATE],
-            'max': 1
-        })
-
-    dept_results = data.search_entities(es, N.DEPARTMENTS, dept_queries)
-
-    muni_queries = []
-    for query in queries:
-        muni_queries.append({
+        search = data.DepartmentsSearch({
             'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
             'fields': [N.ID, N.NAME],
-            'max': 1
+            'size': 1
         })
 
-    muni_results = data.search_entities(es, N.MUNICIPALITIES, muni_queries)
+        all_searches.append(search)
+        dept_searches.append(search)
+
+    muni_searches = []
+    for query in queries:
+        search = data.MunicipalitiesSearch({
+            'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
+            'fields': [N.ID, N.NAME],
+            'size': 1
+        })
+
+        all_searches.append(search)
+        muni_searches.append(search)
+
+    data.ElasticsearchSearch.run_searches(es, all_searches)
 
     locations = []
-    for query, state_result, dept_result, muni_result in zip(queries,
-                                                             state_results,
-                                                             dept_results,
-                                                             muni_results):
+    for query, state_search, dept_search, muni_search in zip(queries,
+                                                             state_searches,
+                                                             dept_searches,
+                                                             muni_searches):
         # Ya que la query de tipo location retorna una o cero entidades,
         # extraer la primera entidad de los resultados, o tomar None si
         # no hay resultados.
-        state = state_result.hits[0] if state_result else None
-        dept = dept_result.hits[0] if dept_result else None
-        muni = muni_result.hits[0] if muni_result else None
+        state = state_search.result.hits[0] if state_search.result else None
+        dept = dept_search.result.hits[0] if dept_search.result else None
+        muni = muni_search.result.hits[0] if muni_search.result else None
         locations.append(build_location_result(query, state, dept, muni))
 
     return locations

@@ -68,7 +68,6 @@ disable=print-statement,
         long-suffix,
         old-ne-operator,
         old-octal-literal,
-        import-star-module-level,
         non-ascii-bytes-literal,
         raw-checker-failed,
         bad-inline-option,
@@ -150,10 +149,10 @@ disable=print-statement,
 	missing-docstring,
 	too-many-locals,
 	logging-format-interpolation,
-	redefined-builtin,
 	too-many-lines,
 	fixme,
-	too-many-return-statements
+	too-many-return-statements,
+	arguments-differ
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

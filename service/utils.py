@@ -146,3 +146,13 @@ class LRUDict:
 
         """
         return 'LRUDict({})'.format(self._dict)
+
+
+def step_iterator(iterator, input_data=None):
+    try:
+        if input_data is None:
+            return next(iterator)
+
+        return iterator.send(input_data)
+    except StopIteration:
+        return None

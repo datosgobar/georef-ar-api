@@ -41,9 +41,9 @@ class ParameterValueError(Exception):
 
     """
 
-    def __init__(self, message, help):
+    def __init__(self, message, help_data):
         self._message = message
-        self._help = help
+        self._help = help_data
         super().__init__()
 
     @property
@@ -100,11 +100,11 @@ class ParamError:
 
     """
 
-    def __init__(self, error_type, message, source, help=None):
+    def __init__(self, error_type, message, source, help_data=None):
         self._error_type = error_type
         self._message = message
         self._source = source
-        self._help = help
+        self._help = help_data
 
     @property
     def error_type(self):

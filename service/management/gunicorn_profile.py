@@ -22,9 +22,9 @@ MAX_ROWS = 20
 PROFILE_DIR = 'profile'
 
 
-def run_cmd(cmd, input=None):
+def run_cmd(cmd, input_data=None):
     result = subprocess.run(cmd.split(), stdout=subprocess.PIPE,
-                            encoding='utf-8', check=True, input=input)
+                            encoding='utf-8', check=True, input=input_data)
     return result.stdout
 
 
@@ -80,7 +80,7 @@ def post_request(worker, req, *_):
     try:
         graph = run_cmd('gprof2dot -f pstats {}'.format(dump_path))
         img_path = base_name + '_graph.png'
-        run_cmd('dot -Tpng -o {}'.format(img_path), input=graph)
+        run_cmd('dot -Tpng -o {}'.format(img_path), input_data=graph)
 
         # Agregar texto a la imagen creada
         cmd_template = 'convert ' + img_path + ' \

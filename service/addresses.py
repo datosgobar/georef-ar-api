@@ -5,9 +5,8 @@ Contiene funciones y clases utilizadas para normalizar direcciones (recurso
 'normalizer', con funciones específicas para el procesamiento de direcciones.
 """
 
-from collections import defaultdict
 from service import names as N
-from service import data, constants, geometry
+from service import data, constants, geometry, utils
 from service.query_result import QueryResult
 
 
@@ -120,7 +119,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         if self._numerical_door_number:
             query['number'] = self._numerical_door_number
 
-        self._elasticsearch_result = yield (data.search_streets, query)
+        self._elasticsearch_result = yield data.StreetsSearch(query)
 
     def _build_address_hits(self):
         address_hits = []
@@ -164,8 +163,8 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
         super().__init__(query, fmt)
 
-    def _build_intersections_query(self, street_1_ids, street_2_ids,
-                                   locations, tolerance_m, ignore_max=False):
+    def _build_intersections_search(self, street_1_ids, street_2_ids,
+                                    locations, tolerance_m, ignore_max=False):
         query = self._query.copy()
 
         # El orden por id/nombre se hace localmente (para direcciones de tipo
@@ -174,7 +173,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         query['ids'] = (list(street_1_ids), list(street_2_ids))
 
         if ignore_max:
-            query['max'] = constants.MAX_RESULT_LEN
+            query['size'] = constants.MAX_RESULT_LEN
             query['offset'] = 0
 
         if locations:
@@ -186,18 +185,18 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
             query['geo_shape_geoms'] = geoms
 
-        return data.search_intersections, query
+        return data.IntersectionsSearch(query)
 
-    def _build_street_query(self, street, add_number=False):
+    def _build_street_search(self, street, add_number=False):
         query = self._query.copy()
 
         query['name'] = street
         if add_number and self._numerical_door_number:
             query['number'] = self._numerical_door_number
-        query['max'] = constants.MAX_RESULT_LEN
+        query['size'] = constants.MAX_RESULT_LEN
         query['offset'] = 0
 
-        return data.search_streets, query
+        return data.StreetsSearch(query)
 
     def _read_street_1_results(self, result):
         # Recolectar resultados de la primera calle
@@ -226,7 +225,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
     def planner_steps(self):
         # Buscar la primera calle, incluyendo la altura si está presente
-        result = yield self._build_street_query(
+        result = yield self._build_street_search(
             self._address_data.street_names[0], True)
 
         if result:
@@ -241,7 +240,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         else:
             return
 
-        result = yield self._build_street_query(
+        result = yield self._build_street_search(
             self._address_data.street_names[1])
 
         if result:
@@ -254,7 +253,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         # orden ("Calle 1 y Calle 2" o "Calle 2 y Calle 1"). Si tenemos altura,
         # comprobar que las intersecciones no estén a mas de X metros de cada
         # ubicación sobre la calle 1 que calculamos anteriormente.
-        result = yield self._build_intersections_query(
+        result = yield self._build_intersections_search(
             street_1_ids,
             street_2_ids,
             street_1_locations.values(),
@@ -421,7 +420,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
 
     def planner_steps(self):
         # Buscar la primera calle, incluyendo la altura si está presente
-        result = yield self._build_street_query(
+        result = yield self._build_street_search(
             self._address_data.street_names[0], True)
 
         if result:
@@ -436,7 +435,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         else:
             return
 
-        result = yield self._build_street_query(
+        result = yield self._build_street_search(
             self._address_data.street_names[1])
 
         if result:
@@ -445,7 +444,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         else:
             return
 
-        result = yield self._build_street_query(
+        result = yield self._build_street_search(
             self._address_data.street_names[2])
 
         if result:
@@ -456,7 +455,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
 
         street_2_3_ids = street_2_ids | street_3_ids
 
-        result = yield self._build_intersections_query(
+        result = yield self._build_intersections_search(
             street_1_ids,
             street_2_3_ids,
             street_1_locations.values(),
@@ -513,65 +512,35 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                                             0)
 
 
-def step_plan_iterator(iterator, previous_result):
-    try:
-        if previous_result is None:
-            return next(iterator)
-
-        return iterator.send(previous_result)
-    except StopIteration:
-        return None, None
-
-
-def step_plans(es, previous_iteration):
-    search_fn_queries = defaultdict(list)
-    next_iteration = []
-
-    # Cada QueryPlanner puede generar queries a ser ejecutadas con distintas
-    # funciones de data.py. Agruparlas y ejecutarlas.
-    for iterator, search_fn, query in previous_iteration:
-        search_fn_queries[search_fn].append((query, iterator))
-
-    for search_fn, planner_queries in search_fn_queries.items():
-        results = search_fn(es, [
-            planner_query[0]
-            for planner_query in planner_queries
-        ])
-
-        for result, planner_query in zip(results, planner_queries):
-            iterator = planner_query[1]
-
-            # Cada query genera un resultado. Entregar el resultado al
-            # QueryPlanner correspondiente, y si genera una nueva query,
-            # insertarla en generated_queries y continuar iterando.
-            search_fn, query = step_plan_iterator(iterator,
-                                                  previous_result=result)
-            if search_fn and query:
-                next_iteration.append((iterator, search_fn, query))
-
-    return next_iteration
-
-
-def run_query_planners(es, query_planners, min_iterations):
+def run_query_planners(es, query_planners):
     iterators = [planner.planner_steps() for planner in query_planners]
     iteration_data = []
 
     for iterator in iterators:
         # Generar datos de primera iteración
-        search_fn, query = step_plan_iterator(iterator, previous_result=None)
-        if search_fn and query:
-            iteration_data.append((iterator, search_fn, query))
+        search = utils.step_iterator(iterator)
+        if search:
+            iteration_data.append((iterator, search))
 
-    for _ in range(min_iterations):
-        # Tomar las queries anteriores, ejecutarlas, tomar los resultados y
-        # entregárselos a los QueryPlanners para que generen nuevas queries.
-        # Repetir cuantas veces sea necesario.
-        iteration_data = step_plans(es, iteration_data)
+    while iteration_data:
+        # Tomar las búsquedas anteriores, ejecutarlas, tomar los resultados y
+        # entregárselos a los QueryPlanners para que generen nuevas búsquedas
+        # (si las necesitan). Repetir cuantas veces sea necesario.
+
+        searches = [search for _, search in iteration_data]
+        data.ElasticsearchSearch.run_searches(es, searches)
+
+        iterators = (iterator for iterator, _ in iteration_data)
+        iteration_data = []
+
+        for iterator, prev_search in zip(iterators, searches):
+            search = utils.step_iterator(iterator, prev_search.result)
+            if search:
+                iteration_data.append((iterator, search))
 
 
 def run_address_queries(es, queries, formats):
     query_planners = []
-    min_iterations = 0
 
     for query, fmt in zip(queries, formats):
         address_type = query[N.ADDRESS].type if query[N.ADDRESS] else None
@@ -587,10 +556,9 @@ def run_address_queries(es, queries, formats):
         else:
             raise TypeError('Unknown address type')
 
-        min_iterations = max(query_planner.required_iterations, min_iterations)
         query_planners.append(query_planner)
 
-    run_query_planners(es, query_planners, min_iterations)
+    run_query_planners(es, query_planners)
 
     return [
         query_planner.get_query_result()
