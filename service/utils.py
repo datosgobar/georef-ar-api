@@ -149,6 +149,17 @@ class LRUDict:
 
 
 def step_iterator(iterator, input_data=None):
+    """Avanza un iterador un paso, enviándole un valor si es necesario.
+    El iterador *no* debe producir valores 'None' en ninguno de sus pasos.
+
+    Args:
+        iterator (iterator): Iterador a avanzar.
+        input_data (object): Valor a envíar al iterador.
+
+    Returns:
+        object: Valor producido por el iterador, o 'None' si finalizó.
+
+    """
     try:
         if input_data is None:
             return next(iterator)

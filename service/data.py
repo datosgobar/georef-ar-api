@@ -59,6 +59,21 @@ def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
 
 
 def run_multisearch(es, searches):
+    """Ejecuta una lista de búsquedas Elasticsearch utilizando la función
+    MultiSearch. La cantidad de búsquedas que se envían a la vez es
+    configurable vía la variable ES_MULTISEARCH_MAX_LEN.
+
+    Args:
+        es (Elasticsearch): Conexión a Elasticsearch.
+        searches (list): Lista de elasticsearch_dsl.Search.
+
+    Raises:
+        DataConnectionException: Si ocurrió un error al ejecutar las búsquedas.
+
+    Returns:
+        list: Lista de respuestas a cada búsqueda.
+
+    """
     step_size = constants.ES_MULTISEARCH_MAX_LEN
     responses = []
 
@@ -79,7 +94,29 @@ def run_multisearch(es, searches):
 
 
 class ElasticsearchSearch:
+    """Representa una búsqueda a realizar utilizando Elasticsearch. Dependiendo
+    de los parámetros de búsqueda, se puede llegar a necesitar más de una
+    consulta a Elasticsearch para completar la misma.
+
+    Attributes:
+        _search (elasticsearch_dsl.Search): Búsqueda principal a envíar a
+            Elasticsearch.
+        _index (str): Índice sobre el cual realizar la búsqueda principal.
+        _offset (int): Cantidad de resultados a saltear ('from').
+        _result (ElasticsearchResult): Resultado de la búsqueda.
+
+    """
+
     def __init__(self, index, query):
+        """Inicializa un objeto de tipo ElasticsearchSearch.
+
+        Args:
+            index (str): Ver atributo '_index'.
+            query (dict): Parámetros de la búsqueda. Ver el método
+                '_read_query' para tomar nota de los valores permitidos
+                dentro del diccionario.
+
+        """
         self._search = Search(index=index)
         self._index = index
         self._offset = query.get('offset', 0)
@@ -88,16 +125,63 @@ class ElasticsearchSearch:
         self._read_query(**query)
 
     def search_steps(self):
+        """Devuelve un iterador de búsquedas elasticsearch_dsl.Search, cada una
+        representando un paso requerido para completar la búsqueda
+        ElasticsearchSearch.
+
+        Cuando el iterador finaliza, el valor de 'self._result' contiene el
+        resultado final de la búsqueda.
+
+        Yields:
+            elasticsearch_dsl.Search: Búsqueda DSL que se desea ejecutar. Sus
+                resultados deberían ser devueltos por el invocador de
+                'next()/send()'.
+
+        """
         raise NotImplementedError()
 
     def _read_query(self, fields=None, size=constants.DEFAULT_SEARCH_SIZE,
                     offset=0):
+        """Lee los parámetros de búsqueda recibidos y los agrega al atributo
+        'self._search'.
+
+        Args:
+            fields (list): Lista de campos a incluir en los resultados de la
+                búsqueda.
+            size (int): Tamaño máximo de resultados a devolver.
+            offset (int): Cantidad de resultados a saltear.
+
+        """
         if fields:
             self._search = self._search.source(include=fields)
 
         self._search = self._search[offset:offset + size]
 
     def _expand_intersection_query(self, geo_shape_ids):
+        """Expande (comprueba) que los IDs contenidos en geo_shape_ids sean
+        válidos y referencien a entidades existentes. Los IDs inválidos son
+        removidos.
+
+        Este paso es necesario ya que la búsqueda por geometrías pre-indexadas
+        de Elasticsearch no acepta IDs de documentos no existentes. Si se
+        intenta utilizar un ID inválido, retorna HTTP 400.
+
+        Para realizar la búsqueda, se retorna un iterador de
+        elasticsearch_dsl.Search. De esta forma, se puede utilizar este método
+        desde 'search_steps', agregando instancias de elasticsearch_dsl.Search
+        que deben ser ejecutadas para completar los resultados de la instancia
+        de ElasticsearchSearch.
+
+        Yields:
+            elasticsearch_dsl.Search: Búsqueda DSL necesaria para completar el
+                chequeo de IDs.
+
+        Args:
+            geo_shape_ids (dict): Diccionario de str - list, las keys siendo
+                tipos de entidades, y los valores siendo listas de IDs para el
+                tipo de entidad.
+
+        """
         checked_ids = {}
 
         for entity_type in INTERSECTION_PARAM_TYPES:
@@ -124,6 +208,32 @@ class ElasticsearchSearch:
         ))
 
     def _expand_geometry_query(self, search_class):
+        """Expande (completa) una búsqueda que incluye 'geometria' en sus
+        campos. Para lograr esto, crea búsquedas elasticsearch_dsl.Search
+        a los índices correspondientes que incluyen geometrías.
+
+        Este método es necesario ya que los índices de entidades no cuentan
+        con las versiones originales de las geometrías, por razones de
+        performance (ver comentario en archivo es_config.py). Entonces, es
+        necesario buscar las geometrías en índices separados, utilizando los
+        IDs de los resultados encontrados en la búsqueda principal
+        ('self._search').
+
+        Para realizar la búsqueda de geometrías, se retorna un iterador de
+        elasticsearch_dsl.Search. De esta forma, se puede utilizar este método
+        desde 'search_steps', agregando instancias de elasticsearch_dsl.Search
+        que deben ser ejecutadas para completar los resultados de la instancia
+        de ElasticsearchSearch.
+
+        Args:
+            search_class (type): Clase a utilizar para crear el iterador de
+                búsquedas.
+
+        Yields:
+            elasticsearch_dsl.Search: Búsqueda DSL necesaria para obtener las
+                geometrías.
+
+        """
         ids = [hit['id'] for hit in self._result.hits]
 
         geom_search = search_class({
@@ -142,19 +252,47 @@ class ElasticsearchSearch:
 
     @property
     def result(self):
+        """Devuelve el resultado de la búsqueda, si esta fue ejecutada.
+
+        Raises:
+            RuntimeError: Si la búsqueda no fue ejecutada.
+
+        Returns:
+            ElasticsearchResult: Resultado de la búsqueda.
+
+        """
         if self._result is None:
             raise RuntimeError('Search has not been executed yet')
 
         return self._result
 
-    def set_result(self, result):
-        if self._result is not None:
-            raise RuntimeError('Search has already been executed')
-
-        self._result = result
-
     @staticmethod
     def run_searches(es, searches):
+        """Ejecuta una lista de búsquedas ElasticsearchSearch.
+
+        Para ejecutar las búsquedas, se obtiene un iterador de búsquedas
+        elasticsearch_dsl.Search por cada elemento de 'searches'. Utilizando
+        los iteradores, se construyen listas de elasticsearch_dsl.Search, que
+        son luego ejecutadas utilizando 'run_multisearch'. Después, los
+        resultados son devueltos a cada iterador, que pueden o no generar una
+        nueva búsqueda elasticsearch_dsl.Search. El proceso se repite hasta que
+        todos los iteradores hayan finalizado. Con todo este proceso se logra:
+
+            1) Ejecutar cualquier tipo de búsquedas bajo una mismas interfaz.
+            2) Ejecutar búsquedas que requieren distintas cantides de pasos
+               bajo una misma interfaz.
+            3) Utilizar la funcionalidad de MultiSearch para hacer la menor
+               cantidad de consultas a Elasticsearch.
+
+        Los resultados de cada búsqueda pueden ser accedidos vía el campo
+        '.result' de cada una.
+
+        Args:
+            es (Elasticsearch): Conexión a Elasticsearch.
+            searches (list): Lista de búsquedas ElasticsearchSearch o
+                derivados.
+
+        """
         iterators = [search.search_steps() for search in searches]
         iteration_data = []
         for iterator in iterators:
@@ -178,13 +316,41 @@ class ElasticsearchSearch:
 
 
 class TerritoriesSearch(ElasticsearchSearch):
+    """Representa una búsqueda de entidades territoriales (provincias,
+    departamentos, etc.).
+
+    Attributes:
+        _geo_shape_ids (dict): Diccionario de str - list, las keys siendo
+            tipos de entidades, y los valores siendo listas de IDs para el
+            tipo de entidad. Se separa este atributo de los parámetros de
+            búsqueda ya que requiere un manejo especial (requiere realizar
+            consultas adicionales a otros índices).
+        _geom_search_class (type): Clase que debería utilizarse para buscar
+            geometrías para entidades de este TerritoriesSearch. Si es 'None',
+            las geometrías simplemente pueden ser obtenidas agregando
+            'geometria' a la lista de campos.
+        _fetch_geoms (bool): Verdadero si es necesario realizar consultas
+            adicionales para obtener geometrías.
+
+    """
+
     def __init__(self, index, query, geom_search_class=None):
+        """Inicializa un objeto de tipo TerritoriesSearch.
+
+        Args:
+            index (str): Ver atributo '_index'.
+            query (dict): Parámetros de la búsqueda. Ver el método
+                '_read_query' para tomar nota de los valores permitidos
+                dentro del diccionario.
+            geom_search_class (type): Ver atributo '_geom_search_class'.
+
+        """
         self._geo_shape_ids = query.pop('geo_shape_ids', None)
         self._geom_search_class = geom_search_class
 
-        fields = query.get('fields', [])
+        fields = query.get('fields')
 
-        if self._geom_search_class:
+        if fields and self._geom_search_class:
             # Se pidieron geometrías, pero este índice no las contiene,
             # es necesario buscarlas en el índice de geometrías
             # correspondiente.
@@ -199,6 +365,25 @@ class TerritoriesSearch(ElasticsearchSearch):
     def _read_query(self, ids=None, name=None, municipality=None,
                     department=None, state=None, exact=False,
                     geo_shape_geoms=None, order=None, **kwargs):
+        """Lee los parámetros de búsqueda recibidos y los agrega al atributo
+        'self._search'. Luego, invoca al método '_read_query' de la superclase
+        con los parámetros que no fueron procesados.
+
+        Args:
+            ids (list): Filtrar por IDs de entidades.
+            name (str): Filtrar por nombre de entidades.
+            municipality (list, str): Filtrar por nombre o IDs de municipios.
+            department (list, str): Filtrar por nombre o IDs de departamentos.
+            state (list, str): Filtrar por nombre o IDs de provincias.
+            exact (bool): Si es verdadero, desactivar la búsqueda fuzzy para
+                todos los parámetros de texto siendo utilizados (nombre,
+                provincia, etc.).
+            geo_shape_geoms (list): Lista de geometrías GeoJSON a utilizar para
+                filtrar por intersección con geometrías.
+            order (str): Campo a utilizar para ordenar los resultados.
+            kwargs (dict): Parámetros a delegar a la superclase.
+
+        """
         super()._read_query(**kwargs)
 
         if ids:
@@ -244,6 +429,14 @@ class TerritoriesSearch(ElasticsearchSearch):
             self._search = self._search.sort(order)
 
     def search_steps(self):
+        """Ver documentación de 'ElasticsearchSearch.search_steps'.
+
+        Pasos requeridos:
+            1) Expandir parámetros 'geo_shape_ids'. (opcional)
+            2) Buscar la entidad principal.
+            3) Obtener geometrías. (opcional)
+
+        """
         if self._geo_shape_ids:
             yield from self._expand_intersection_query(self._geo_shape_ids)
 
@@ -255,14 +448,49 @@ class TerritoriesSearch(ElasticsearchSearch):
 
 
 class StreetsSearch(ElasticsearchSearch):
+    """Representa una búsqueda de calles.
+
+    Attributes:
+        _geo_shape_ids (dict): Diccionario de str - list, las keys siendo
+            tipos de entidades, y los valores siendo listas de IDs para el
+            tipo de entidad. Se separa este atributo de los parámetros de
+            búsqueda ya que requiere un manejo especial (requiere realizar
+            consultas adicionales a otros índices).
+
+    """
     def __init__(self, query):
+        """Inicializa un objeto de tipo StreetsSearch.
+
+        Args:
+            query (dict): Parámetros de la búsqueda. Ver el método
+                '_read_query' para tomar nota de los valores permitidos
+                dentro del diccionario.
+
+        """
         self._geo_shape_ids = query.pop('geo_shape_ids', None)
         super().__init__(N.STREETS, query)
 
     def _read_query(self, ids=None, name=None, department=None, state=None,
                     street_type=None, order=None, exact=False, number=None,
                     **kwargs):
+        """Lee los parámetros de búsqueda recibidos y los agrega al atributo
+        'self._search'. Luego, invoca al método '_read_query' de la superclase
+        con los parámetros que no fueron procesados.
 
+        Args:
+            ids (list): Filtrar por IDs de calles.
+            name (str): Filtrar por nombre de calles.
+            department (list, str): Filtrar por nombre o IDs de departamentos.
+            state (list, str): Filtrar por nombre o IDs de provincias.
+            exact (bool): Si es verdadero, desactivar la búsqueda fuzzy para
+                todos los parámetros de texto siendo utilizados (nombre,
+                provincia, etc.).
+            number (int): Filtrar por altura de calle. El valor debe estar
+                contenido en los extremos inicio-fin de alturas de la calle.
+            order (str): Campo a utilizar para ordenar los resultados.
+            kwargs (dict): Parámetros a delegar a la superclase.
+
+        """
         super()._read_query(**kwargs)
 
         if ids:
@@ -318,6 +546,13 @@ class StreetsSearch(ElasticsearchSearch):
             self._search = self._search.sort(order)
 
     def search_steps(self):
+        """Ver documentación de 'ElasticsearchSearch.search_steps'.
+
+        Pasos requeridos:
+            1) Expandir parámetros 'geo_shape_ids'. (opcional)
+            2) Buscar calles.
+
+        """
         if self._geo_shape_ids:
             yield from self._expand_intersection_query(self._geo_shape_ids)
 
@@ -326,11 +561,39 @@ class StreetsSearch(ElasticsearchSearch):
 
 
 class IntersectionsSearch(ElasticsearchSearch):
+    """Representa una búsqueda de intersecciones de calles. Utiliza el índice
+    'intersecciones' para buscar datos.
+
+    """
     def __init__(self, query):
+        """Inicializa un objeto de tipo IntersectionsSearch.
+
+        Args:
+            query (dict): Parámetros de la búsqueda. Ver el método
+                '_read_query' para tomar nota de los valores permitidos
+                dentro del diccionario.
+
+        """
         super().__init__(N.INTERSECTIONS, query)
 
     def _read_query(self, ids=None, geo_shape_geoms=None, department=None,
                     state=None, exact=False, **kwargs):
+        """Lee los parámetros de búsqueda recibidos y los agrega al atributo
+        'self._search'. Luego, invoca al método '_read_query' de la superclase
+        con los parámetros que no fueron procesados.
+
+        Args:
+            ids (list): Filtrar por IDs de intersecciones.
+            geo_shape_geoms (list): Lista de geometrías GeoJSON a utilizar para
+                filtrar por intersección con geometrías.
+            department (list, str): Filtrar por nombre o IDs de departamentos.
+            state (list, str): Filtrar por nombre o IDs de provincias.
+            exact (bool): Si es verdadero, desactivar la búsqueda fuzzy para
+                todos los parámetros de texto siendo utilizados (nombre,
+                provincia, etc.).
+            kwargs (dict): Parámetros a delegar a la superclase.
+
+        """
         super()._read_query(**kwargs)
 
         if ids:
@@ -371,49 +634,99 @@ class IntersectionsSearch(ElasticsearchSearch):
                 ))
 
     def search_steps(self):
+        """Ver documentación de 'ElasticsearchSearch.search_steps'.
+
+        Pasos requeridos:
+            1) Buscar intersecciones de calles.
+
+        """
         response = yield self._search
         self._result = ElasticsearchResult(response, self._offset)
 
 
-class StatesGeometrySearch(TerritoriesSearch):
+class _StatesGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de provincias.
+
+    Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
+    utilizando 'StatesSearch', que internamente utilizará esta clase.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
     def __init__(self, query):
         super().__init__(es_config.geom_index_for(N.STATES), query)
 
 
 class StatesSearch(TerritoriesSearch):
+    """Representa una búsqueda de provincias.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
     def __init__(self, query):
         super().__init__(N.STATES, query,
-                         geom_search_class=StatesGeometrySearch)
+                         geom_search_class=_StatesGeometrySearch)
 
 
-class DepartmentsGeometrySearch(TerritoriesSearch):
+class _DepartmentsGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de departamentos.
+
+    Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
+    utilizando 'DepartmentsSearch', que internamente utilizará esta clase.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
     def __init__(self, query):
         super().__init__(es_config.geom_index_for(N.DEPARTMENTS), query)
 
 
 class DepartmentsSearch(TerritoriesSearch):
+    """Representa una búsqueda de departamentos.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
     def __init__(self, query):
         super().__init__(N.DEPARTMENTS, query,
-                         geom_search_class=DepartmentsGeometrySearch)
+                         geom_search_class=_DepartmentsGeometrySearch)
 
 
-class MunicipalitiesGeometrySearch(TerritoriesSearch):
+class _MunicipalitiesGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de municipios.
+
+    Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
+    utilizando 'MunicipalitiesSearch', que internamente utilizará esta clase.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
     def __init__(self, query):
         super().__init__(es_config.geom_index_for(N.MUNICIPALITIES), query)
 
 
 class MunicipalitiesSearch(TerritoriesSearch):
+    """Representa una búsqueda de municipios.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
     def __init__(self, query):
         super().__init__(N.MUNICIPALITIES, query,
-                         geom_search_class=MunicipalitiesGeometrySearch)
+                         geom_search_class=_MunicipalitiesGeometrySearch)
 
 
 class LocalitiesSearch(TerritoriesSearch):
+    """Representa una búsqueda de localidades.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
     def __init__(self, query):
         super().__init__(N.LOCALITIES, query)
 
 
-ENTITY_SEARCH_CLASSES = {
+_ENTITY_SEARCH_CLASSES = {
     N.STATES: StatesSearch,
     N.DEPARTMENTS: DepartmentsSearch,
     N.MUNICIPALITIES: MunicipalitiesSearch,
@@ -423,10 +736,24 @@ ENTITY_SEARCH_CLASSES = {
 
 
 def entity_search_class(entity):
-    if entity not in ENTITY_SEARCH_CLASSES:
+    """Dado un nombre de entidad, retorna la clase correspondiente que debe
+    ser utilizada para realizar búsquedas de la misma.
+
+    Args:
+        entity (str): Nombre de entidad (plural).
+
+    Raises:
+        ValueError: Si el nombre de la entidad no es válido.
+
+    Returns:
+        type: Clase derivada de ElasticsearchSearch a utilizar para realizar
+            búsquedas de la entidad.
+
+    """
+    if entity not in _ENTITY_SEARCH_CLASSES:
         raise ValueError('Unknown entity type: {}'.format(entity))
 
-    return ENTITY_SEARCH_CLASSES[entity]
+    return _ENTITY_SEARCH_CLASSES[entity]
 
 
 class ElasticsearchResult:

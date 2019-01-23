@@ -96,8 +96,6 @@ class AddressQueryPlanner:
 
 
 class AddressNoneQueryPlanner(AddressQueryPlanner):
-    required_iterations = 0
-
     def planner_steps(self):
         return iter(())
 
@@ -106,8 +104,6 @@ class AddressNoneQueryPlanner(AddressQueryPlanner):
 
 
 class AddressSimpleQueryPlanner(AddressQueryPlanner):
-    required_iterations = 1
-
     def __init__(self, query, fmt):
         self._elasticsearch_result = None
         super().__init__(query, fmt)
@@ -155,8 +151,6 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
 
 class AddressIsctQueryPlanner(AddressQueryPlanner):
-    required_iterations = 3
-
     def __init__(self, query, fmt):
         self._intersections_result = None
         self._intersection_hits = None
@@ -338,7 +332,6 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
 
 class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
-    required_iterations = 4
 
     class BetweenEntry:
         def __init__(self, street_1):
