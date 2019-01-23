@@ -1,4 +1,4 @@
-from service import geometry
+from service.geometry import Point
 from . import asciifold
 from .test_search_addresses_simple import SearchAddressesBaseTest
 
@@ -121,11 +121,11 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
             'departamento': '66028'
         })
 
-        loc_simple = resp_simple[0]['ubicacion']
-        loc_isct = resp_isct[0]['ubicacion']
+        point_simple = Point.from_json_location(resp_simple[0]['ubicacion'])
+        point_isct = Point.from_json_location(resp_isct[0]['ubicacion'])
 
         self.assertLess(
-            geometry.approximate_distance_meters(loc_simple, loc_isct),
+            point_simple.approximate_distance_meters(point_isct),
             30  # metros
         )
 

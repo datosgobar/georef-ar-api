@@ -849,6 +849,19 @@ def build_geo_query(field, ids=None, geoms=None, relation='intersects'):
 
 
 def build_geo_shape_query(field, geom, relation):
+    """Crea una condición de búsqueda por relación con una geometría en formato
+    GeoJSON.
+
+    Args:
+        field (str): Campo de la condición.
+        geom (dict): Geometría GeoJSON.
+        relation (str): Tipo de búsqueda por geometrías a realizar. Ver la
+            documentación de Elasticsearch GeoShape Query para más detalles.
+
+    Returns:
+        Query: Condición para Elasticsearch.
+
+    """
     options = {
         'shape': geom,
         'relation': relation
@@ -859,7 +872,7 @@ def build_geo_shape_query(field, geom, relation):
 
 def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path,
                                   relation):
-    """Crea una condición de búsqueda por intersección con una geometría
+    """Crea una condición de búsqueda por relación geométrica con una geometría
     pre-indexada. La geometría debe pertenecer a una entidad de tipo provincia,
     departamento o municipio.
 

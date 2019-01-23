@@ -6,9 +6,10 @@ de los recursos que expone la API.
 
 import logging
 from flask import current_app
-from service import data, params, formatter, addresses, constants, geometry
+from service import data, params, formatter, addresses, constants
 from service import names as N
 from service.query_result import QueryResult
+from service.geometry import Point
 
 logger = logging.getLogger('georef')
 
@@ -705,9 +706,12 @@ def process_location_queries(es, queries):
     all_searches = []
 
     state_searches = []
+    muni_searches = []
+    dept_searches = []
+
     for query in queries:
         search = data.StatesSearch({
-            'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
+            'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
             'fields': [N.ID, N.NAME],
             'size': 1
         })
@@ -715,10 +719,8 @@ def process_location_queries(es, queries):
         all_searches.append(search)
         state_searches.append(search)
 
-    dept_searches = []
-    for query in queries:
         search = data.DepartmentsSearch({
-            'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
+            'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
             'fields': [N.ID, N.NAME],
             'size': 1
         })
@@ -726,10 +728,8 @@ def process_location_queries(es, queries):
         all_searches.append(search)
         dept_searches.append(search)
 
-    muni_searches = []
-    for query in queries:
         search = data.MunicipalitiesSearch({
-            'geo_shape_geoms': [geometry.location_to_geojson_point(query)],
+            'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
             'fields': [N.ID, N.NAME],
             'size': 1
         })

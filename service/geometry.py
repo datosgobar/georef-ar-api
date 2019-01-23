@@ -1,7 +1,7 @@
 """Módulo 'geometry' de georef-ar-api.
 
-Contiene funciones utilizadas para operar con geometrías, utilizando la
-librería Shapely.
+Contiene funciones utilizadas para operar con geometrías en formato GeoJSON
+utilizando la librería Shapely.
 """
 
 import math
@@ -9,7 +9,7 @@ import shapely.geometry
 import shapely.ops
 from service import names as N
 
-MEAN_EARTH_RADIUS_KM = 6371
+_MEAN_EARTH_RADIUS_KM = 6371
 
 
 def street_extents(door_nums, number):
@@ -23,13 +23,13 @@ def street_extents(door_nums, number):
         door_nums (dict): Datos de alturas de la calle.
         number (int): Altura recibida en una consulta.
 
-    Returns:
-        tuple (int, int): Altura inicial y final de la calle que contienen la
-            altura especificada.
-
     Raises:
         ValueError: Si la altura no está contenida dentro de ninguna
             combinación de extremos.
+
+    Returns:
+        tuple (int, int): Altura inicial y final de la calle que contienen la
+            altura especificada.
 
     """
     start_r = door_nums[N.START][N.RIGHT]
@@ -47,25 +47,28 @@ def street_extents(door_nums, number):
     raise ValueError('Street number out of range')
 
 
-def street_number_location(street, number):
+def street_number_location(geom, door_numbers, number):
     """Obtiene las coordenadas de una altura dentro de una calle.
 
     Args:
-        street (dict): Datos de la calle (doc de Elasticsearch).
+        geom (dict): Geometría de la calle en formato GeoJSON.
+        door_numbers (dict): Límites de altura de la calle.
         number (int or None): Número de puerta o altura.
 
+    Raises:
+        TypeError: Cuando la geometría no es de tipo Point.
+
     Returns:
-        dict: Coordenadas del punto.
+        Point: Punto representando la posición de la altura, o 'None'
+            si no pudo ser calculada.
 
     """
-    geom = street[N.GEOM]
     if geom['type'] != 'MultiLineString':
         raise TypeError('GeoJSON type must be MultiLineString')
 
-    start, end = street_extents(street[N.DOOR_NUM], number)
+    start, end = street_extents(door_numbers, number)
     shape = shapely.geometry.MultiLineString(geom['coordinates'])
     line = shapely.ops.linemerge(shape)
-    lat, lon = None, None
 
     if isinstance(line, shapely.geometry.LineString):
         # Si la geometría de la calle pudo ser combinada para formar un único
@@ -73,63 +76,184 @@ def street_number_location(street, number):
         # fin de altura de la calle.
         ip = line.interpolate((number - start) / (end - start),
                               normalized=True)
-        # TODO:
-        # line.interpolate retorna un shapely Point pero pylint solo mira
-        # los atributos de BaseGeometry.
-        lat = ip.y  # pylint: disable=no-member
-        lon = ip.x  # pylint: disable=no-member
 
-    return {
-        N.LAT: lat,
-        N.LON: lon
-    }
+        return Point.from_shapely_point(ip)
+
+    return None
 
 
-def geojson_point_to_location(geom):
-    if geom['type'] != 'Point':
-        raise TypeError('GeoJSON type must be Point')
+class Point:
+    """Representa un punto en el plano cartesiano (x, y - lon, lat). Sirve como
+    intermediario entre distintas formas de representar puntos: shapely.Point,
+    GeoJSON 'Point' y {'lon': X, 'lat': Y}.
 
-    return {
-        N.LON: geom['coordinates'][0],
-        N.LAT: geom['coordinates'][1]
-    }
+    Attributes:
+        _lon (float): Longitud.
+        _lat (float): Latitud.
 
+    """
 
-def location_to_geojson_point(location):
-    return {
-        'type': 'Point',
-        'coordinates': [location[N.LON], location[N.LAT]]
-    }
+    __slots__ = ['_lon', '_lat']
 
+    def __init__(self, lon, lat):
+        """Inicializa un objeto de tipo 'Point'.
 
-def location_to_geojson_circle(location, radius_meters):
-    return {
-        'type': 'circle',
-        'radius': '{}m'.format(radius_meters),
-        'coordinates': [location[N.LON], location[N.LAT]]
-    }
+        Args:
+            lon (float): Longitud (x).
+            lat (float): Latitud (y).
 
+        """
+        self._lon = lon
+        self._lat = lat
 
-def geojson_points_centroid(point_a, point_b):
-    point_a = shapely.geometry.Point(point_a['coordinates'])
-    point_b = shapely.geometry.Point(point_b['coordinates'])
+    @classmethod
+    def from_shapely_point(cls, point):
+        """Construye un objeto 'Point' desde un punto de Shapely.
 
-    centroid = shapely.geometry.MultiPoint([point_a, point_b]).centroid
-    return {
-        N.LON: centroid.x,  # pylint: disable=no-member
-        N.LAT: centroid.y   # pylint: disable=no-member
-    }
+        Args:
+            point (shapely.geometry.Point): Punto a copiar.
 
+        Returns:
+            Point: Punto creado.
 
-def approximate_distance_meters(loc_a, loc_b):
-    # https://en.wikipedia.org/wiki/Haversine_formula
-    lat_a = math.radians(loc_a[N.LAT])
-    lat_b = math.radians(loc_b[N.LAT])
-    diff_lat = math.radians(loc_b[N.LAT] - loc_a[N.LAT])
-    diff_lon = math.radians(loc_b[N.LON] - loc_a[N.LON])
+        """
+        return cls(point.x, point.y)
 
-    a = math.sin(diff_lat / 2) ** 2
-    b = math.cos(lat_a) * math.cos(lat_b) * (math.sin(diff_lon / 2) ** 2)
+    @classmethod
+    def from_geojson_point(cls, geom):
+        """Construye un objeto 'Point' desde un punto GeoJSON.
 
-    kms = 2 * MEAN_EARTH_RADIUS_KM * math.asin(math.sqrt(a + b))
-    return kms * 1000
+        Raises:
+            TypeError: Cuando el argumento no tiene tipo Point.
+
+        Args:
+            geom (dict): Punto GeoJSON a copiar.
+
+        Returns:
+            Point: Punto creado.
+
+        """
+        if geom['type'] != 'Point':
+            raise TypeError('Geometry type must be Point')
+
+        return cls(*geom['coordinates'])
+
+    @classmethod
+    def from_json_location(cls, loc):
+        """Construye un objeto 'Point' desde una ubicación.
+
+        Args:
+            loc (dict): Ubicación a copiar.
+
+        Returns:
+            Point: Punto creado.
+
+        """
+        return cls(loc[N.LON], loc[N.LAT])
+
+    @property
+    def lon(self):
+        return self._lon
+
+    @property
+    def lat(self):
+        return self._lat
+
+    def to_geojson(self):
+        """Retorna una representación GeoJSON de la instancia de Point.
+
+        Returns:
+            dict: Valor GeoJSON de la instancia de Point.
+
+        """
+        return {
+            'type': 'Point',
+            'coordinates': [self._lon, self._lat]
+        }
+
+    def to_geojson_circle(self, radius_meters):
+        """Retorna una representación GeoJSON de un círculo centrado en la
+        instancia de Point.
+
+        Nota: Los círculos 'GeoJSON' son usados exclusivamente en
+        Elasticsearch (no forman parte del estándar GeoJSON).
+
+        Args:
+            radius_meters (int): Radio del círculo en metros.
+
+        Returns:
+            dict: Valor GeoJSON del círculo.
+
+        """
+        return {
+            'type': 'circle',
+            'radius': '{}m'.format(radius_meters),
+            'coordinates': [self._lon, self._lat]
+        }
+
+    def to_json_location(self):
+        """Retorna una representación como ubicación de la instancia de Point.
+        La ubicación es un diccionario con valores 'lat' y 'lon'.
+
+        Returns:
+            dict: Ubicación creada a partir de la instancia de Point.
+
+        """
+        return {
+            N.LON: self._lon,
+            N.LAT: self._lat
+        }
+
+    def to_shapely_point(self):
+        """Retorna una representación shapely.Point de la instancia de Point.
+
+        Returns:
+            shapely.geometry.Point: Valor shapely.Point de la instancia de
+                Point.
+
+        """
+        return shapely.geometry.Point([self._lon, self._lat])
+
+    def midpoint(self, other):
+        """Calcula el punto intermedio entre esta instancia de Point y otra.
+
+        Args:
+            other (Point): Punto hacia el cual calcular el punto medio.
+
+        Returns:
+            Point: Punto medio entre este Point y 'other'.
+
+        """
+        points = [self.to_shapely_point(), other.to_shapely_point()]
+
+        centroid = shapely.geometry.MultiPoint(points).centroid
+        return Point.from_shapely_point(centroid)
+
+    def approximate_distance_meters(self, other):
+        """Retorna la distancia aproximada, en metros, entre esta instancia de
+        Point y otro punto.
+
+        La distancia se calcula utilizando la fórmula de Haversine
+        (https://es.wikipedia.org/wiki/F%C3%B3rmula_del_haversine) y no debería
+        ser aplicada en casos donde se necesiten altos grados de precisión.
+
+        Args:
+            other (Point): Punto hacia el cual calcular la distancia.
+
+        Returns:
+            float: Distancia aproximada en metros desde esta instancia de Point
+                y 'other'.
+
+        """
+        lon_a = math.radians(self._lon)
+        lat_a = math.radians(self._lat)
+        lon_b = math.radians(other.lon)
+        lat_b = math.radians(other.lat)
+        diff_lat = lat_b - lat_a
+        diff_lon = lon_b - lon_a
+
+        a = math.sin(diff_lat / 2) ** 2
+        b = math.cos(lat_a) * math.cos(lat_b) * (math.sin(diff_lon / 2) ** 2)
+
+        kms = 2 * _MEAN_EARTH_RADIUS_KM * math.asin(math.sqrt(a + b))
+        return kms * 1000

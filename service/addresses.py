@@ -6,7 +6,8 @@ Contiene funciones y clases utilizadas para normalizar direcciones (recurso
 """
 
 from service import names as N
-from service import data, constants, geometry, utils
+from service import data, constants, utils
+from service.geometry import Point, street_number_location
 from service.query_result import QueryResult
 
 
@@ -134,10 +135,14 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
             if (N.LOCATION_LAT in fields or N.LOCATION_LON in fields) and \
                self._numerical_door_number:
-                loc = geometry.street_number_location(
-                    street, self._numerical_door_number)
+                point = street_number_location(
+                    street[N.GEOM],
+                    street[N.DOOR_NUM],
+                    self._numerical_door_number
+                )
 
-                address_hit[N.LOCATION] = loc
+                if point:
+                    address_hit[N.LOCATION] = point.to_json_location()
 
             address_hits.append(address_hit)
 
@@ -158,7 +163,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         super().__init__(query, fmt)
 
     def _build_intersections_search(self, street_1_ids, street_2_ids,
-                                    locations, tolerance_m, ignore_max=False):
+                                    points, tolerance_m, ignore_max=False):
         query = self._query.copy()
 
         # El orden por id/nombre se hace localmente (para direcciones de tipo
@@ -170,14 +175,11 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             query['size'] = constants.MAX_RESULT_LEN
             query['offset'] = 0
 
-        if locations:
-            geoms = []
-
-            for loc in locations:
-                geoms.append(geometry.location_to_geojson_circle(loc,
-                                                                 tolerance_m))
-
-            query['geo_shape_geoms'] = geoms
+        if points:
+            query['geo_shape_geoms'] = [
+                point.to_geojson_circle(tolerance_m)
+                for point in points
+            ]
 
         return data.IntersectionsSearch(query)
 
@@ -195,19 +197,22 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
     def _read_street_1_results(self, result):
         # Recolectar resultados de la primera calle
         street_1_ids = set()
-        street_1_locations = {}
+        street_1_points = {}
 
         # Si tenemos altura, comprobar que podemos calcular la ubicación
         # geográfica de cada altura por cada resultado de la calle 1.
         # Ignorar los resultados donde la ubicación no se puede calcular.
         if self._numerical_door_number:
             for street in result.hits:
-                loc = geometry.street_number_location(
-                    street, self._numerical_door_number)
+                point = street_number_location(
+                    street[N.GEOM],
+                    street[N.DOOR_NUM],
+                    self._numerical_door_number
+                )
 
-                if loc[N.LAT] and loc[N.LON]:
+                if point:
                     street_1_ids.add(street[N.ID])
-                    street_1_locations[street[N.ID]] = loc
+                    street_1_points[street[N.ID]] = point
         else:
             # No tenemos altura: la dirección es "Calle 1 y Calle 2".
             # No necesitamos calcular ninguna posición sobre la calle 1,
@@ -215,7 +220,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             # calles, que ya está pre-calculada.
             street_1_ids = {hit[N.ID] for hit in result.hits}
 
-        return street_1_ids, street_1_locations
+        return street_1_ids, street_1_points
 
     def planner_steps(self):
         # Buscar la primera calle, incluyendo la altura si está presente
@@ -223,7 +228,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             self._address_data.street_names[0], True)
 
         if result:
-            street_1_ids, street_1_locations = self._read_street_1_results(
+            street_1_ids, street_1_points = self._read_street_1_results(
                 result)
 
             if not street_1_ids:
@@ -250,7 +255,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         result = yield self._build_intersections_search(
             street_1_ids,
             street_2_ids,
-            street_1_locations.values(),
+            street_1_points.values(),
             constants.ISCT_DOOR_NUM_TOLERANCE_M
         )
 
@@ -276,14 +281,14 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
                     'Unknown street IDs for intersection {} - {}'.format(id_a,
                                                                          id_b))
 
-            if street_1[N.ID] in street_1_locations:
+            if street_1[N.ID] in street_1_points:
                 # Como tenemos altura, usamos la posición sobre la calle 1 en
                 # lugar de la posición de la intersección.
-                geom = street_1_locations[street_1[N.ID]]
+                point = street_1_points[street_1[N.ID]]
             else:
-                geom = geometry.geojson_point_to_location(intersection[N.GEOM])
+                point = Point.from_geojson_point(intersection[N.GEOM])
 
-            intersections.append((street_1, street_2, geom))
+            intersections.append((street_1, street_2, point))
 
         self._intersection_hits = self._build_intersection_hits(intersections)
 
@@ -304,14 +309,14 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         intersection_hits = []
         fields = self._format[N.FIELDS]
 
-        for street_1, street_2, loc in intersections:
+        for street_1, street_2, point in intersections:
             address_hit = self._build_base_address_hit(street_1.get(N.STATE),
                                                        street_1.get(N.DEPT))
 
             address_hit[N.STREET] = self._build_street_entity(street_1)
             address_hit[N.STREET_X1] = self._build_street_entity(street_2)
             address_hit[N.STREET_X2] = self._build_street_entity()
-            address_hit[N.LOCATION] = loc
+            address_hit[N.LOCATION] = point.to_json_location()
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(street_1,
@@ -336,42 +341,35 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
     class BetweenEntry:
         def __init__(self, street_1):
             self.street_1 = street_1
+            self.street_1_point = None
+
             self.street_2 = None
-            self.intersection_2 = None
+            self.street_2_point = None
+
             self.street_3 = None
-            self.intersection_3 = None
-            self.loc = None
+            self.street_3_point = None
 
         def valid(self):
             if not all((self.street_1, self.street_2, self.street_3)):
                 return False
 
-            location_a = geometry.geojson_point_to_location(
-                self.intersection_2[N.GEOM])
-
-            location_b = geometry.geojson_point_to_location(
-                self.intersection_3[N.GEOM])
-
-            distance = geometry.approximate_distance_meters(location_a,
-                                                            location_b)
+            distance = self.street_2_point.approximate_distance_meters(
+                self.street_3_point)
 
             return distance < constants.BTWN_DISTANCE_TOLERANCE_M
 
-        def location(self):
-            if self.loc:
-                return self.loc
+        def point(self):
+            if self.street_1_point:
+                return self.street_1_point
 
-            return geometry.geojson_points_centroid(
-                self.intersection_2[N.GEOM],
-                self.intersection_3[N.GEOM]
-            )
+            return self.street_2_point.midpoint(self.street_3_point)
 
     def __init__(self, query, fmt):
         self._between_hits = None
         super().__init__(query, fmt)
 
     def _process_intersections(self, intersections, street_1_ids, street_2_ids,
-                               street_3_ids, street_1_locations):
+                               street_3_ids, street_1_points):
         between_entries = {}
         street_2_3_ids = street_2_ids | street_3_ids
 
@@ -395,16 +393,18 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             else:
                 entry = AddressBtwnQueryPlanner.BetweenEntry(street_1)
                 if self._numerical_door_number:
-                    entry.loc = street_1_locations[street_1[N.ID]]
+                    entry.street_1_point = street_1_points[street_1[N.ID]]
 
                 between_entries[street_1[N.ID]] = entry
 
+            point = Point.from_geojson_point(intersection[N.GEOM])
+
             if street_other[N.ID] in street_2_ids:
                 entry.street_2 = street_other
-                entry.intersection_2 = intersection
+                entry.street_2_point = point
             elif street_other[N.ID] in street_3_ids:
                 entry.street_3 = street_other
-                entry.intersection_3 = intersection
+                entry.street_3_point = point
             else:
                 raise RuntimeError('Unknown street ID: {}'.format(
                     street_other[N.ID]))
@@ -417,7 +417,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             self._address_data.street_names[0], True)
 
         if result:
-            street_1_ids, street_1_locations = self._read_street_1_results(
+            street_1_ids, street_1_points = self._read_street_1_results(
                 result)
 
             if not street_1_ids:
@@ -451,14 +451,14 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         result = yield self._build_intersections_search(
             street_1_ids,
             street_2_3_ids,
-            street_1_locations.values(),
+            street_1_points.values(),
             constants.BTWN_DOOR_NUM_TOLERANCE_M,
             ignore_max=True
         )
 
         entries = self._process_intersections(result.hits, street_1_ids,
                                               street_2_ids, street_3_ids,
-                                              street_1_locations)
+                                              street_1_points)
 
         # Las tres calles deben estar presentes, y las dos intersecciones
         # deben estar a menos de cierta distancia entre sí
@@ -481,7 +481,8 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                 entry.street_3)
 
             if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
-                address_hit[N.LOCATION] = entry.location()
+                point = entry.point()
+                address_hit[N.LOCATION] = point.to_json_location()
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(

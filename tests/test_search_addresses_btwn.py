@@ -1,6 +1,4 @@
-import shapely.geometry
-from service import names as N
-from service import geometry
+from service.geometry import Point
 from .test_search_addresses_simple import SearchAddressesBaseTest
 
 COMMON_BTWN = 'parana entre santa fe y alvear'
@@ -64,30 +62,23 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
             'direccion': 'Mar del Plata entre Diaz y 12 de Octubre',
             'departamento': 'Río Hondo'
         })
-        loc_btwn = resp_btwn[0]['ubicacion']
+        point_btwn = Point.from_json_location(resp_btwn[0]['ubicacion'])
 
         resp_isct_1 = self.get_response({
             'direccion': 'Mar del Plata esquina Diaz',
             'departamento': 'Río Hondo'
         })
-        loc_isct_1 = resp_isct_1[0]['ubicacion']
+        point_isct_1 = Point.from_json_location(resp_isct_1[0]['ubicacion'])
 
         resp_isct_2 = self.get_response({
             'direccion': 'Mar del Plata esq. 12 de Octubre',
             'departamento': 'Río Hondo'
         })
-        loc_isct_2 = resp_isct_2[0]['ubicacion']
+        point_isct_2 = Point.from_json_location(resp_isct_2[0]['ubicacion'])
 
-        point_1 = shapely.geometry.Point(loc_isct_1[N.LON], loc_isct_1[N.LAT])
-        point_2 = shapely.geometry.Point(loc_isct_2[N.LON], loc_isct_2[N.LAT])
-        centroid = shapely.geometry.MultiPoint([point_1, point_2]).centroid
-        centroid_location = {
-            N.LON: centroid.x,  # pylint: disable=no-member
-            N.LAT: centroid.y   # pylint: disable=no-member
-        }
+        midpoint = point_isct_1.midpoint(point_isct_2)
 
-        distance = geometry.approximate_distance_meters(loc_btwn,
-                                                        centroid_location)
+        distance = point_btwn.approximate_distance_meters(midpoint)
         self.assertAlmostEqual(distance, 0)
 
     def test_between_nonexistent_door_num(self):
