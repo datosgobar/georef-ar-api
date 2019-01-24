@@ -12,7 +12,35 @@ from service.query_result import QueryResult
 
 
 class AddressQueryPlanner:
+    """Representa una búsqueda de una dirección de calle. Buscar una dirección
+    involucra potencialmente más de una consulta a la capa de datos (data.py),
+    utilizando distintos índices, dependiendo del tipo de dirección. Para poder
+    ejecutar varias búsquedas de direcciones de distintos tipos a la vez, se
+    utiliza la clase 'AddressQueryPlanner' y sus derivados para organizar el
+    proceso de creación de búsquedas ElasticsearchSearch y la ejecución de las
+    mismas.
+
+    Attributes:
+        _query (dict): Parámetros de la consulta.
+        _format (dict): Formato de salida deseado de la consulta, incluyendo
+            los campos que el usuario especificó. Se incluye este dato
+            exclusivamente como una optimización: algunos campos son costosos
+            de calcular y es conveniente saber si deben ser calculados o no. No
+            se aplica nada relacionado a la presentación de los resultados de
+            la búsqueda (ya que es responsabilidad del módulo formatter.py).
+        _address_data (georef_ar_address.AddressData): Datos de la dirección
+            recibida (componentes).
+
+    """
+
     def __init__(self, query, fmt):
+        """Inicializa un objeto de tipo 'AddressQueryPlanner'.
+
+        Args:
+            query (dict): Ver atributo '_query'.
+            fmt (dict): Ver atributo '_format'.
+
+        """
         self._query = query.copy()
         self._format = fmt
         self._address_data = self._query.pop(N.ADDRESS)
@@ -22,12 +50,43 @@ class AddressQueryPlanner:
                 self._address_data.normalized_door_number_value()
 
     def planner_steps(self):
+        """Crea un iterador de ElasticsearchSearch, representando los pasos
+        requeridos para completar la búsqueda de los datos la dirección.
+        Distintas direcciones requieren distintas cantidades de pasos.
+
+        Yields:
+            ElasticsearchSearch: Búsqueda que debe ser ejecutada por el
+                invocador de 'next()'.
+
+        """
         raise NotImplementedError()
 
     def get_query_result(self):
+        """Retorna los resultados de la búsqueda de direcciones. Este método
+        debe ser invocado luego de haber recorrido todo el iterador obtenido
+        con 'planner_steps'.
+
+        Returns:
+            QueryResult: Resultados de la búsqueda de direcciones.
+
+        """
         raise NotImplementedError()
 
     def _address_full_name(self, *streets):
+        """Obtiene una representación canónica de una dirección, utilizando los
+        nombres ya normalizados de las calles que la componen (y su altura).
+
+        Por ejemplo, 'Srmiento al 1443' se convierte a 'SARMIENTO 1443'.
+        'Santa fe esq. Pampa' se convierte a 'SANTA FE (ESQUINA LA PAMPA)'.
+
+        Args:
+            streets (list): Lista de calles (documentos) representando cada
+                calle de la dirección.
+
+        Returns:
+            str: Nombre completo canónico de la dirección.
+
+        """
         door_number = ''
         if self._numerical_door_number:
             door_number = ' {}'.format(self._numerical_door_number)
@@ -58,6 +117,17 @@ class AddressQueryPlanner:
         return template.format(**fmt)
 
     def _build_base_address_hit(self, state=None, dept=None):
+        """Construye la base de un resultado de búsqueda de direcciones.
+
+        Args:
+            state (dict): Valor a utilizar como provincia (documento).
+            dept (dict): Valor a utilizar como departamento (documento).
+
+        Returns:
+            dict: Resultado a ser completado con datos de calles, ubicación,
+                etc.
+
+        """
         address_hit = {}
         if state:
             address_hit[N.STATE] = state
@@ -79,6 +149,19 @@ class AddressQueryPlanner:
         return address_hit
 
     def _build_street_entity(self, elasticsearch_street_hit=None):
+        """Construye una sub-entidad calle para un resultado de dirección, a
+        partir de un resultado de búsqueda de calles. Los resultados de
+        direcciones poseen tres sub-entidades calles: 'calle', 'calle_cruce_1'
+        y 'calle_cruce_2'.
+
+        Args:
+            elasticsearch_street_hit (dict): Resultado de una búsqueda de
+                calles (documento).
+
+        Returns:
+            dict: Sub-entidad calle para resultados de direcciones.
+
+        """
         if not elasticsearch_street_hit:
             elasticsearch_street_hit = {}
 
@@ -89,7 +172,7 @@ class AddressQueryPlanner:
             for key in keys
         }
 
-        # TODO: Borar y usar 'categoria' directamente
+        # TODO: Borrar y usar 'categoria' directamente
         if not street_entity[N.TYPE]:
             street_entity[N.TYPE] = elasticsearch_street_hit.get(N.CATEGORY)
 
@@ -97,19 +180,66 @@ class AddressQueryPlanner:
 
 
 class AddressNoneQueryPlanner(AddressQueryPlanner):
+    """AddressQueryPlanner simbólico para direcciones inválidas. Se implementa
+    esta clase para facilitar la implementación de la función
+    'run_address_queries', con el objetivo de no tener que crear casos
+    especiales para direcciones que no pudieron ser interpretadas.
+
+    Ver documentación de la clase AddressQueryPlanner para más información.
+
+    """
+
     def planner_steps(self):
+        """Pasos requeridos (búsquedas) para direcciones inválidas. En el caso
+        de 'AddressNoneQueryPlanner', la cantidad de pasos requeridos es cero.
+
+        Yields:
+            ElasticsearchSearch: Búsqueda a realizar.
+
+        """
         return iter(())
 
     def get_query_result(self):
+        """Retorna los resultados de la búsqueda de direcciones. En el caso de
+        'AddressNoneQueryPlanner', siempre se retornan resultados vacíos.
+
+        Returns:
+            QueryResult: Resultados de la búsqueda de direcciones.
+
+        """
         return QueryResult.empty()
 
 
 class AddressSimpleQueryPlanner(AddressQueryPlanner):
+    """AddressQueryPlanner para direcciones de tipo 'simple'. Una dirección
+    'simple' es del tipo '<calle 1> <altura>'.
+
+    Ver documentación de la clase AddressQueryPlanner para más información.
+
+    """
     def __init__(self, query, fmt):
+        """Inicializa un objeto de tipo 'AddressSimpleQueryPlanner'.
+
+        Args:
+            query (dict): Ver atributo '_query'.
+            fmt (dict): Ver atributo '_format'.
+
+        """
         self._elasticsearch_result = None
         super().__init__(query, fmt)
 
     def planner_steps(self):
+        """Crea un iterador de ElasticsearchSearch, representando los pasos
+        requeridos para completar la búsqueda de los datos la dirección.
+
+        Pasos requeridos:
+            1) Búsqueda de la calle principal.
+
+        Yields:
+            ElasticsearchSearch: Búsqueda que debe ser ejecutada por el
+                invocador de 'next()'.
+
+        """
         query = self._query.copy()
         query['name'] = self._address_data.street_names[0]
 
@@ -119,6 +249,13 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         self._elasticsearch_result = yield data.StreetsSearch(query)
 
     def _build_address_hits(self):
+        """Construye los resultados de la búsqueda de direcciones a partir
+        del atributo '_elasticsearch_result'.
+
+        Returns:
+            list: Lista de resultados.
+
+        """
         address_hits = []
         fields = self._format[N.FIELDS]
 
@@ -149,6 +286,14 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         return address_hits
 
     def get_query_result(self):
+        """Retorna los resultados de la búsqueda de direcciones. Este método
+        debe ser invocado luego de haber recorrido todo el iterador obtenido
+        con 'planner_steps'.
+
+        Returns:
+            QueryResult: Resultados de la búsqueda de direcciones.
+
+        """
         address_hits = self._build_address_hits()
         return QueryResult.from_entity_list(address_hits,
                                             self._elasticsearch_result.total,
@@ -156,7 +301,21 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
 
 class AddressIsctQueryPlanner(AddressQueryPlanner):
+    """AddressQueryPlanner para direcciones de tipo 'intersection'. Una
+    dirección 'intersection' es del tipo '<calle 1> y <calle 2>'.
+
+    Ver documentación de la clase AddressQueryPlanner para más información.
+
+    """
+
     def __init__(self, query, fmt):
+        """Inicializa un objeto de tipo 'AddressIsctQueryPlanner'.
+
+        Args:
+            query (dict): Ver atributo '_query'.
+            fmt (dict): Ver atributo '_format'.
+
+        """
         self._intersections_result = None
         self._intersection_hits = None
 
@@ -164,6 +323,24 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
     def _build_intersections_search(self, street_1_ids, street_2_ids,
                                     points, tolerance_m, ignore_max=False):
+        """Método de utilidad para construir objetos IntersectionsSearch, para
+        buscar intersecciones de calles.
+
+        Args:
+            street_1_ids (list): Lista de IDs a utilizar como un lado de la
+                intersección.
+            street_2_ids (list): Lista de IDs a utilizar como el otro lado de
+                la intersección.
+            points (list): Lista de 'Point' a utilizar para filtrar por radios
+                circulares. Solo se retornan intersecciones que caigan dentro
+                de cualquier círculo de la lista.
+            tolerance_m (float): Distancia en metros a utilizar como radio de
+                los círculos.
+            ignore_max (bool): Si es verdadero, se ignoran los parámetros
+                'size' y 'offset' de la consulta original, y se buscan todas
+                las intersecciones posibles.
+
+        """
         query = self._query.copy()
 
         # El orden por id/nombre se hace localmente (para direcciones de tipo
@@ -184,6 +361,15 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         return data.IntersectionsSearch(query)
 
     def _build_street_search(self, street, add_number=False):
+        """Método de utilidad para crear búsquedas de tipo StreetsSearch.
+
+        Args:
+            street (str): Nombre de la calle a buscar.
+            add_number (bool): Si es verdadero, agrega a la búsqueda un
+                filtrado por altura, utilizando el atributo
+                '_numerical_door_number'.
+
+        """
         query = self._query.copy()
 
         query['name'] = street
@@ -195,6 +381,22 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         return data.StreetsSearch(query)
 
     def _read_street_1_results(self, result):
+        """Lee los resultados de la búsqueda de la primera calle. Los
+        resultados de la primera calle se manejan separadamente ya que
+        potencialmente se necesite calcular la posición de la altura
+        especificada sobre la misma.
+
+        Args:
+            result (ElasticsearchResult): Resultados de la búsqueda realizada
+                para la calle 1.
+
+        Returns:
+            tuple: Tupla de (set, dict). El conjunto contiene los IDs de las
+                calles encontradas, y el diccionario las posiciones de la
+                altura '_numerical_door_number' sobre las mismas (si la
+                consulta incluye una altura).
+
+        """
         # Recolectar resultados de la primera calle
         street_1_ids = set()
         street_1_points = {}
@@ -214,15 +416,36 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
                     street_1_ids.add(street[N.ID])
                     street_1_points[street[N.ID]] = point
         else:
-            # No tenemos altura: la dirección es "Calle 1 y Calle 2".
-            # No necesitamos calcular ninguna posición sobre la calle 1,
-            # porque se usa la posición de la intersección de las dos
-            # calles, que ya está pre-calculada.
+            # No tenemos altura: la dirección es "Calle 1 y Calle 2" o
+            # "Calle 1 entre Calle 2 y Calle 3". No necesitamos calcular
+            # ninguna posición sobre la calle 1, porque se usa la posición de
+            # la/s intersección/es de las calles, que ya está/n
+            # pre-calculada/s.
             street_1_ids = {hit[N.ID] for hit in result.hits}
 
         return street_1_ids, street_1_points
 
     def planner_steps(self):
+        """Crea un iterador de ElasticsearchSearch, representando los pasos
+        requeridos para completar la búsqueda de los datos la dirección.
+
+        Pasos requeridos:
+            1) Búsqueda de la calle principal (calle 1).
+            2) Búsqueda de la calle 2.
+            3) Búsqueda de intersecciones entre las calles 1 y 2.
+
+        Explicación: Primero, se buscan las calles 1 y 2, obteniendo todos los
+        IDs de las mismas. Luego, se buscan intersecciones de calles que
+        hagan referencia a los IDs obtenidos. Aunque es posible buscar
+        intersecciones directamente por nombre, no se hace esto ya que sería
+        difícil luego interpretar si la calle A de la intersección corresponde
+        a la calle 1 y la B a la 2, o vice versa.
+
+        Yields:
+            ElasticsearchSearch: Búsqueda que debe ser ejecutada por el
+                invocador de 'next()'.
+
+        """
         # Buscar la primera calle, incluyendo la altura si está presente
         result = yield self._build_street_search(
             self._address_data.street_names[0], True)
@@ -264,7 +487,8 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         # Iterar sobre los resultados, fijándose si cada intersección tiene la
         # calle 1 del lado A o B. Si la calle 1 está del lado B, invertir la
         # intersección. Se requiere que los datos devueltos al usuario tengan
-        # el mismo orden en el que fueron recibidos.
+        # el mismo orden en el que fueron recibidos ("calle X y calle Y" no es
+        # lo mismo que "calle Y y calle X").
         intersections = []
         for intersection in self._intersections_result.hits:
             id_a = intersection[N.STREET_A][N.ID]
@@ -293,6 +517,15 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         self._intersection_hits = self._build_intersection_hits(intersections)
 
     def _apply_sort(self, hits):
+        """Ordena los resultados de direcciones. El ordenamiento se hace
+        localmente ya que en 'planner_steps' se modifican los lados de las
+        intersecciones. El ordenamiento se realiza exclusivamente sobre la
+        calle 1.
+
+        Args:
+            hits (list): Lista de resultados de búsqueda de direcciones.
+
+        """
         order = self._query.get('order')
         if not order:
             return
@@ -306,6 +539,17 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             raise ValueError('Invalid sort field')
 
     def _build_intersection_hits(self, intersections):
+        """Construye los resultados de la búsqueda de direcciones a partir de
+        los datos generados en 'planner_steps'.
+
+        Args:
+            intersections (list): Lista de tuplas, cada una conteniendo la
+                calle 1, calle 2 y el 'Point' de intersección entre las dos.
+
+        Returns:
+            list: Lista de resultados de la búsqueda de direcciones.
+
+        """
         intersection_hits = []
         fields = self._format[N.FIELDS]
 
@@ -328,6 +572,17 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         return intersection_hits
 
     def get_query_result(self):
+        """Retorna los resultados de la búsqueda de direcciones. Este método
+        debe ser invocado luego de haber recorrido todo el iterador obtenido
+        con 'planner_steps'.
+
+        Se utiliza el 'total' y 'offset' de la búsqueda #3 (intersecciones)
+        como metadatos de los resultados.
+
+        Returns:
+            QueryResult: Resultados de la búsqueda de direcciones.
+
+        """
         if not self._intersection_hits:
             return QueryResult.empty()
 
@@ -337,9 +592,37 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
 
 class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
+    """AddressQueryPlanner para direcciones de tipo 'between'. Una dirección
+    'between' es del tipo '<calle 1> entre <calle 2> y <calle 3>'.
+
+    Ver documentación de la clase AddressQueryPlanner para más información.
+
+    """
 
     class BetweenEntry:
+        """Reprsenta una dirección 'between' potencial durante la búsqueda de
+        direcciones.
+
+        Attributes:
+            street_1 (dict): Calle 1 (documento).
+            street_1_point (Point): Punto sobre la calle 1 (calculado
+                utilizando la altura '_numerical_door_number').
+            street_2 (dict): Calle 2 (documento).
+            street_2_point (Point): Punto de intersección entre la calle 1 y la
+                calle 2.
+            street_3 (dict): Calle 3 (documento).
+            street_3_point (Point): Punto de intersección entre la calle 1 y la
+                calle 3.
+
+        """
+
         def __init__(self, street_1):
+            """Inicializa un objeto de tipo 'BetweenEntry'.
+
+            Args:
+                street_1 (dict): Ver atributo 'street_1'.
+
+            """
             self.street_1 = street_1
             self.street_1_point = None
 
@@ -350,6 +633,13 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             self.street_3_point = None
 
         def valid(self):
+            """Comprueba que el resultado potencial 'between' sea válido.
+
+            Returns:
+                bool: Verdadero si las tres calles están presentes y las
+                    calles 2 y 3 no están a mas de cierta distancia entre sí.
+
+            """
             if not all((self.street_1, self.street_2, self.street_3)):
                 return False
 
@@ -359,24 +649,63 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             return distance < constants.BTWN_DISTANCE_TOLERANCE_M
 
         def point(self):
+            """Devuelve el punto 'Point' que representa la dirección
+            encontrada.
+
+            Returns:
+                Point: Punto representativo de la dirección. Si calculó la
+                    posición de la altura sobre la calle 1, se utiliza ese
+                    dato. Si no, se utiliza el promedio de los puntos de las
+                    dos intersecciones encontradas (calle 1-2, calle 1-3).
+
+            """
             if self.street_1_point:
                 return self.street_1_point
 
             return self.street_2_point.midpoint(self.street_3_point)
 
     def __init__(self, query, fmt):
+        """Inicializa un objeto de tipo 'AddressBtwnQueryPlanner'.
+
+        Args:
+            query (dict): Ver atributo '_query'.
+            fmt (dict): Ver atributo '_format'.
+
+        """
         self._between_hits = None
         super().__init__(query, fmt)
 
     def _process_intersections(self, intersections, street_1_ids, street_2_ids,
                                street_3_ids, street_1_points):
+        """Procesa los resultados de las tres búsquedas realizadas en
+        'planner_steps', para generar los 'BetweenEntry' que representan
+        resultados potenciales a la búsqueda de direcciones.
+
+        Args:
+            intersections (list): Lista de intersecciones encontradas
+                (documentos).
+            street_1_ids (set): Conjunto de IDs de resultados para la calle 1.
+            street_2_ids (set): Conjunto de IDs de resultados para la calle 2.
+            street_3_ids (set): Conjunto de IDs de resultados para la calle 3.
+            street_1_points (dict): Posición calculada utilizando la altura
+                sobre cada resultado de la calle 1.
+
+        Returns:
+            list: Lista de 'BetweenEntry', cada una representando un resultado
+                potencial.
+
+        """
         between_entries = {}
         street_2_3_ids = street_2_ids | street_3_ids
 
+        # Recorrer cada intersección. Las intersecciones pueden ser entre las
+        # calles 1 y 2, o 1 y 3. Es necesario distinguir entre las dos
+        # opciones.
         for intersection in intersections:
             id_a = intersection[N.STREET_A][N.ID]
             id_b = intersection[N.STREET_B][N.ID]
 
+            # Comprobar que la intersección es entre las calles 1 y 2, o 1 y 3
             if id_a in street_1_ids and id_b in street_2_3_ids:
                 street_1 = intersection[N.STREET_A]
                 street_other = intersection[N.STREET_B]
@@ -388,6 +717,8 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                     'Unknown street IDs for intersection {} - {}'.format(id_a,
                                                                          id_b))
 
+            # Si la calle 1 no está en between_entries, construir un nuevo
+            # BetweenEntry.
             if street_1[N.ID] in between_entries:
                 entry = between_entries[street_1[N.ID]]
             else:
@@ -399,6 +730,9 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
 
             point = Point.from_geojson_point(intersection[N.GEOM])
 
+            # Tomar nuestro BetweenEntry asociado a la calle 1, y asignarle su
+            # calle 2 o 3. Un BetweenEntry está completo cuando tiene las tres
+            # calles asignadas (1, 2 y 3).
             if street_other[N.ID] in street_2_ids:
                 entry.street_2 = street_other
                 entry.street_2_point = point
@@ -409,9 +743,33 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                 raise RuntimeError('Unknown street ID: {}'.format(
                     street_other[N.ID]))
 
-        return between_entries
+        # Luego de iterar, algunos 'BetweenEntry' van a contener las tres
+        # calles necesarias, y otros no.
+        return between_entries.values()
 
     def planner_steps(self):
+        """Crea un iterador de ElasticsearchSearch, representando los pasos
+        requeridos para completar la búsqueda de los datos la dirección.
+
+        Pasos requeridos:
+            1) Búsqueda de la calle principal (calle 1).
+            2) Búsqueda de la calle 2.
+            3) Búsqueda de la calle 3.
+            4) Búsqueda de intersecciones entre las calles 1 y 2, y las calles
+               1 y 3 (en simultáneo).
+
+        Explicación: Primero, se buscan las calles 1, 2 y 3, obteniendo todos
+        los IDs de las mismas. Luego, se buscan intersecciones de calles que
+        hagan referencia a los IDs obtenidos: intersecciones entre las calles
+        1 y 2, y entre las 1 y 3. Finalmente, se itera sobre cada intersección
+        comprobando qué calles contiene, y se construyen los resultados
+        finales.
+
+        Yields:
+            ElasticsearchSearch: Búsqueda que debe ser ejecutada por el
+                invocador de 'next()'.
+
+        """
         # Buscar la primera calle, incluyendo la altura si está presente
         result = yield self._build_street_search(
             self._address_data.street_names[0], True)
@@ -463,10 +821,20 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         # Las tres calles deben estar presentes, y las dos intersecciones
         # deben estar a menos de cierta distancia entre sí
         self._between_hits = self._build_between_hits(
-            entry for entry in entries.values() if entry.valid()
+            entry for entry in entries if entry.valid()
         )
 
     def _build_between_hits(self, entries):
+        """Construye los resultados de la búsqueda de direcciones, dada una
+        lista de 'BetweenEntry' válidas.
+
+        Args:
+            entries (list): Lista de 'BetweenEntry'.
+
+        Returns:
+            list: Resultados de la búsqueda de direcciones.
+
+        """
         between_hits = []
         fields = self._format[N.FIELDS]
 
@@ -497,6 +865,20 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         return between_hits
 
     def get_query_result(self):
+        """Retorna los resultados de la búsqueda de direcciones. Este método
+        debe ser invocado luego de haber recorrido todo el iterador obtenido
+        con 'planner_steps'.
+
+        Se utiliza la longitud de los resultados encontrados como 'total', y
+        0 como 'offset'. Esto se debe a que ninguna de las búsquedas ejecutadas
+        representa correctamente el total de resultados posibles que existen (
+        ya que gran parte del procesamiento se hace localmente, combinando
+        resultados de las mismas).
+
+        Returns:
+            QueryResult: Resultados de la búsqueda de direcciones.
+
+        """
         if not self._between_hits:
             return QueryResult.empty()
 
@@ -506,7 +888,23 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                                             0)
 
 
-def run_query_planners(es, query_planners):
+def _run_query_planners(es, query_planners):
+    """Ejecuta las búsquedas requeridas por un conjunto de
+    'AddressQueryPlanner'.
+
+    Para lograr esto, se utiliza el método 'planner_steps' de cada uno para
+    obtener un iterador de 'ElasticsearchSearch'. Luego, se ejecutan todas las
+    búsquedas a la vez utilizando 'run_searches', y se entregan los resultados
+    a los iteradores. El proceso se repite hasta que todos los iteradores hayan
+    finalizado. De esta forma, se logra ejecutar varias búsquedas de
+    direcciones de distintos tipos, minimizando la cantidad de consultas hechas
+    a Elasticsearch.
+
+    Args:
+        es (Elasticsearch): Conexión a Elasticsearch.
+        query_planners (list): Lista de 'AddressQueryPlanner' o derivados.
+
+    """
     iterators = [planner.planner_steps() for planner in query_planners]
     iteration_data = []
 
@@ -534,6 +932,20 @@ def run_query_planners(es, query_planners):
 
 
 def run_address_queries(es, queries, formats):
+    """Punto de entrada del módulo 'address.py'. Toma una lista de consultas de
+    direcciones y las ejecuta, devolviendo los resultados QueryResult.
+
+    Args:
+        es (Elasticsearch): Conexión a Elasticsearch.
+        queries (list): Lista de búsquedas en forma de diccionarios de
+            parámetros.
+        formats (list): Lista de parámetros de formato de cada búsqueda, en
+            forma de diccionario.
+
+    Returns:
+        list: Lista de QueryResult, una por cada búsqueda.
+
+    """
     query_planners = []
 
     for query, fmt in zip(queries, formats):
@@ -552,7 +964,7 @@ def run_address_queries(es, queries, formats):
 
         query_planners.append(query_planner)
 
-    run_query_planners(es, query_planners)
+    _run_query_planners(es, query_planners)
 
     return [
         query_planner.get_query_result()

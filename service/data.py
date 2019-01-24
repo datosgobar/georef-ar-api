@@ -458,6 +458,7 @@ class StreetsSearch(ElasticsearchSearch):
             consultas adicionales a otros índices).
 
     """
+
     def __init__(self, query):
         """Inicializa un objeto de tipo StreetsSearch.
 
@@ -565,6 +566,7 @@ class IntersectionsSearch(ElasticsearchSearch):
     'intersecciones' para buscar datos.
 
     """
+
     def __init__(self, query):
         """Inicializa un objeto de tipo IntersectionsSearch.
 
@@ -583,7 +585,10 @@ class IntersectionsSearch(ElasticsearchSearch):
         con los parámetros que no fueron procesados.
 
         Args:
-            ids (list): Filtrar por IDs de intersecciones.
+            ids (tuple): Filtrar por IDs de intersecciones. La tupla debe
+                contener exactamente dos listas de IDs: se buscan
+                intersecciones donde la calle A pertenezca a la primera lista,
+                y donde la calle B pertenezca a la segunda (o vice versa).
             geo_shape_geoms (list): Lista de geometrías GeoJSON a utilizar para
                 filtrar por intersección con geometrías.
             department (list, str): Filtrar por nombre o IDs de departamentos.
@@ -653,6 +658,7 @@ class _StatesGeometrySearch(TerritoriesSearch):
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
     """
+
     def __init__(self, query):
         super().__init__(es_config.geom_index_for(N.STATES), query)
 
@@ -663,6 +669,7 @@ class StatesSearch(TerritoriesSearch):
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
     """
+
     def __init__(self, query):
         super().__init__(N.STATES, query,
                          geom_search_class=_StatesGeometrySearch)
@@ -677,6 +684,7 @@ class _DepartmentsGeometrySearch(TerritoriesSearch):
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
     """
+
     def __init__(self, query):
         super().__init__(es_config.geom_index_for(N.DEPARTMENTS), query)
 
@@ -687,6 +695,7 @@ class DepartmentsSearch(TerritoriesSearch):
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
     """
+
     def __init__(self, query):
         super().__init__(N.DEPARTMENTS, query,
                          geom_search_class=_DepartmentsGeometrySearch)
@@ -701,6 +710,7 @@ class _MunicipalitiesGeometrySearch(TerritoriesSearch):
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
     """
+
     def __init__(self, query):
         super().__init__(es_config.geom_index_for(N.MUNICIPALITIES), query)
 
@@ -711,6 +721,7 @@ class MunicipalitiesSearch(TerritoriesSearch):
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
     """
+
     def __init__(self, query):
         super().__init__(N.MUNICIPALITIES, query,
                          geom_search_class=_MunicipalitiesGeometrySearch)
@@ -722,6 +733,7 @@ class LocalitiesSearch(TerritoriesSearch):
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
     """
+
     def __init__(self, query):
         super().__init__(N.LOCALITIES, query)
 
