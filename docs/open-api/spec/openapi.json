@@ -41,6 +41,22 @@
                         "type": "string",
                         "example": "Santa Fe"
                     },
+		    "nombre_largo": {
+			"type": "string",
+			"example": "Provincia de Santa Fe"
+		    },
+		    "iso_nombre": {
+			"type": "string",
+			"example": "Santa Fe"
+		    },
+		    "iso_id": {
+			"type": "string",
+			"example": "AR-S"
+		    },
+		    "categoria": {
+			"type": "string",
+			"example": "Provincia"
+		    },
 		    "centroide": {
 			"type": "object",
 			"properties": {
@@ -145,6 +161,10 @@
                         "type": "string",
                         "example": "Rosario"
                     },
+                    "nombre_completo": {
+                        "type": "string",
+                        "example": "Departamento Rosario"
+                    },
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
@@ -160,7 +180,11 @@
 				"example": -62.526029
 			    }
 			}
-		    }
+		    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "Departamento"
+                    },
                 }
             },
             "departamento_sin_coordenadas": {
@@ -268,6 +292,10 @@
                         "type": "string",
                         "example": "Granadero Baigorria"
                     },
+                    "nombre_completo": {
+                        "type": "string",
+                        "example": "Municipio Granadero Baigorria"
+                    },
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
@@ -283,7 +311,11 @@
 				"example": -60.704006
 			    }
 			}
-		    }
+		    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "Municipio"
+                    }
                 }
             },
             "municipio_sin_coordenadas": {
@@ -400,7 +432,7 @@
 		    "municipio": {
 			"$ref": "#/components/schemas/municipio_sin_coordenadas"
 		    },
-                    "tipo": {
+                    "categoria": {
                         "type": "string",
                         "example": "Componente de localidad compuesta (LC)",
                         "enum": [
@@ -511,21 +543,69 @@
             "direccion": {
                 "type": "object",
                 "properties": {
-                    "altura": {
-                        "type": "integer",
-                        "example": 400
-                    },
+		    "altura": {
+			"type": "object",
+			"properties": {
+			    "valor": {
+				"type": "integer",
+				"example": 400
+			    },
+			    "unidad": {
+				"type": "string",
+				"example": "Nro."
+			    }
+			}
+		    },
                     "departamento": {
 			"$ref": "#/components/schemas/departamento_sin_coordenadas"
                     },
-                    "id": {
-                        "type": "string",
-                        "example": "8208416001280"
-                    },
-                    "nombre": {
-                        "type": "string",
-                        "example": "URQUIZA"
-                    },
+		    "calle": {
+			"type": "object",
+			"properties": {
+			    "id": {
+				"type": "string",
+				"example": "8208416001280"
+			    },
+			    "nombre": {
+				"type": "string",
+				"example": "URQUIZA"
+			    },
+			    "categoria": {
+				"type": "string"
+			    }
+			}
+		    },
+		    "calle_cruce_1": {
+			"type": "object",
+			"properties": {
+			    "id": {
+				"type": "string"
+			    },
+			    "nombre": {
+				"type": "string"
+			    },
+			    "categoria": {
+				"type": "string"
+			    }
+			}
+		    },
+		    "calle_cruce_2": {
+			"type": "object",
+			"properties": {
+			    "id": {
+				"type": "string"
+			    },
+			    "nombre": {
+				"type": "string"
+			    },
+			    "categoria": {
+				"type": "string"
+			    }
+			}
+		    },
+		    "piso": {
+			"type": "string"
+		    },
                     "nomenclatura": {
                         "type": "string",
                         "example": "URQUIZA 400, Rosario, Santa Fe"
@@ -533,7 +613,7 @@
                     "provincia": {
 			"$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
-                    "tipo": {
+                    "categoria": {
                         "type": "string",
                         "example": "CALLE"
                     }
@@ -583,9 +663,6 @@
 			    "properties": {
 				"direccion": {
 				    "$ref": "#/components/schemas/param_direccion"
-				},
-				"tipo": {
-				    "$ref": "#/components/schemas/param_tipo_calle"
 				},
 				"provincia": {
 				    "$ref": "#/components/schemas/param_provincia"
@@ -673,7 +750,7 @@
                     "provincia": {
 			"$ref": "#/components/schemas/provincia_sin_coordenadas"
                     },
-                    "tipo": {
+                    "categoria": {
                         "type": "string",
                         "example": "CALLE",
                         "enum": [
@@ -736,8 +813,8 @@
 				"nombre": {
 				    "$ref": "#/components/schemas/param_nombre"
 				},
-				"tipo": {
-				    "$ref": "#/components/schemas/param_tipo_calle"
+				"categoria": {
+				    "$ref": "#/components/schemas/param_categoria_calle"
 				},
 				"provincia": {
 				    "$ref": "#/components/schemas/param_provincia"
@@ -906,11 +983,10 @@
 		"type": "string",
 		"enum": ["json", "geojson", "xml"]
 	    },
-	    "param_tipo_calle": {
+	    "param_categoria_calle": {
 		"type": "string",
 		"minLength": 1,
-		"example": "calle",
-		"enum": ["calle", "avenida", "pasaje"]
+		"example": "avenida"
 	    },
 	    "param_direccion": {
 		"type": "string",
@@ -1115,12 +1191,12 @@
 		    "$ref": "#/components/schemas/param_formato_sin_csv"
 		}
 	    },
-            "tipo_calle": {
-                "name": "tipo",
-                "description": "Tipo de calle.",
+            "categoria_calle": {
+                "name": "categoria",
+                "description": "Filtrar por categoría de la calle.",
                 "in": "query",
                 "schema": {
-		    "$ref": "#/components/schemas/param_tipo_calle"
+		    "$ref": "#/components/schemas/param_categoria_calle"
                 }
             },
 	    "lat": {
@@ -1563,7 +1639,7 @@
 			"$ref": "#/components/parameters/nombre"
 		    },
 		    {
-			"$ref": "#/components/parameters/tipo_calle"
+			"$ref": "#/components/parameters/categoria_calle"
 		    },
 		    {
 			"$ref": "#/components/parameters/provincia"
