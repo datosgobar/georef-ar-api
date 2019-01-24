@@ -117,7 +117,9 @@ class SearchStatesTest(GeorefLiveTest):
         fields_lists = [
             ['fuente', 'id', 'nombre'],
             ['fuente', 'id', 'centroide.lat', 'centroide.lon', 'nombre'],
-            ['fuente', 'id', 'centroide.lat', 'nombre']
+            ['fuente', 'id', 'centroide.lat', 'nombre'],
+            ['fuente', 'id', 'categoria', 'nombre'],
+            ['fuente', 'id', 'categoria', 'nombre', 'iso_id']
         ]
         fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
@@ -145,7 +147,9 @@ class SearchStatesTest(GeorefLiveTest):
         preseleccionados llamado 'completo'."""
         self.assert_fields_set_equals('completo',
                                       ['id', 'nombre', 'centroide.lat',
-                                       'centroide.lon', 'fuente'])
+                                       'centroide.lon', 'fuente',
+                                       'categoria', 'iso_id', 'iso_nombre',
+                                       'nombre_completo'])
 
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
@@ -421,11 +425,17 @@ class SearchStatesTest(GeorefLiveTest):
     def test_csv_fields(self):
         """Una consulta CSV debería tener ciertos campos, ordenados de una
         forma específica."""
-        resp = self.get_response({'formato': 'csv'})
+        resp = self.get_response({'formato': 'csv', 'campos': 'completo'})
         headers = next(resp)
-        self.assertListEqual(headers, ['provincia_id', 'provincia_nombre',
+        self.assertListEqual(headers, ['provincia_id',
+                                       'provincia_nombre',
+                                       'provincia_nombre_completo',
+                                       'provincia_iso_id',
+                                       'provincia_iso_nombre',
                                        'provincia_centroide_lat',
-                                       'provincia_centroide_lon'])
+                                       'provincia_centroide_lon',
+                                       'provincia_fuente',
+                                       'provincia_categoria'])
 
     def test_csv_quoting(self):
         """El primer campo de la respuesta CSV (ID) siempre debe estar
@@ -486,10 +496,14 @@ class SearchStatesTest(GeorefLiveTest):
         deberían corresponder a los campos obtenidos en otros formatos."""
         self.assert_shp_fields('completo', [
             'nombre',
+            'nombre_comp',
             'id',
             'centr_lat',
             'centr_lon',
-            'fuente'
+            'fuente',
+            'iso_id',
+            'iso_nombre',
+            'categoria'
         ])
 
 

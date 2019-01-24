@@ -42,13 +42,13 @@ class SearchAddressesBaseTest(GeorefLiveTest):
                                       ['altura.valor', 'altura.unidad',
                                        'piso',
                                        'calle.id', 'calle.nombre',
-                                       'calle.tipo',
+                                       'calle.categoria',
                                        'calle_cruce_1.id',
                                        'calle_cruce_1.nombre',
-                                       'calle_cruce_1.tipo',
+                                       'calle_cruce_1.categoria',
                                        'calle_cruce_2.id',
                                        'calle_cruce_2.nombre',
-                                       'calle_cruce_2.tipo',
+                                       'calle_cruce_2.categoria',
                                        'departamento.id',
                                        'departamento.nombre',
                                        'nomenclatura',
@@ -63,13 +63,13 @@ class SearchAddressesBaseTest(GeorefLiveTest):
                                       ['altura.valor', 'altura.unidad',
                                        'piso',
                                        'calle.id', 'calle.nombre',
-                                       'calle.tipo',
+                                       'calle.categoria',
                                        'calle_cruce_1.id',
                                        'calle_cruce_1.nombre',
-                                       'calle_cruce_1.tipo',
+                                       'calle_cruce_1.categoria',
                                        'calle_cruce_2.id',
                                        'calle_cruce_2.nombre',
-                                       'calle_cruce_2.tipo',
+                                       'calle_cruce_2.categoria',
                                        'departamento.id',
                                        'departamento.nombre',
                                        'nomenclatura',
@@ -454,7 +454,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""
-        params = ['direccion', 'tipo', 'departamento', 'provincia', 'max',
+        params = ['direccion', 'categoria', 'departamento', 'provincia', 'max',
                   'campos']
         self.assert_empty_params_return_400(params)
 
@@ -496,7 +496,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             },
             {
                 'direccion': COMMON_ADDRESS,
-                'campos': 'calle.nombre,calle.tipo'
+                'campos': 'calle.nombre,calle.categoria'
             },
             {
                 'direccion': COMMON_ADDRESS,
@@ -542,7 +542,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'direccion': COMMON_ADDRESS,
-            'campos': 'nombre,tipo,ubicacion.lat'
+            'campos': 'nombre,categoria,ubicacion.lat'
         })
 
     def test_empty_csv_valid(self):
@@ -556,29 +556,31 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         forma específica."""
         resp = self.get_response({
             'formato': 'csv',
-            'direccion': COMMON_ADDRESS
+            'direccion': COMMON_ADDRESS,
+            'campos': 'completo'
         })
 
         headers = next(resp)
         self.assertListEqual(headers, ['direccion_nomenclatura',
                                        'calle_nombre',
                                        'calle_id',
-                                       'calle_tipo',
+                                       'calle_categoria',
                                        'altura_valor',
                                        'altura_unidad',
                                        'calle_cruce_1_nombre',
                                        'calle_cruce_1_id',
-                                       'calle_cruce_1_tipo',
+                                       'calle_cruce_1_categoria',
                                        'calle_cruce_2_nombre',
                                        'calle_cruce_2_id',
-                                       'calle_cruce_2_tipo',
+                                       'calle_cruce_2_categoria',
                                        'piso',
                                        'provincia_id',
                                        'provincia_nombre',
                                        'departamento_id',
                                        'departamento_nombre',
                                        'direccion_lat',
-                                       'direccion_lon'])
+                                       'direccion_lon',
+                                       'direccion_fuente'])
 
     def test_csv_empty_value(self):
         """Un valor vacío (None) debería estar representado como '' en CSV."""

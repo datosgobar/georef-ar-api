@@ -42,7 +42,7 @@ class SearchStreetsTest(GeorefLiveTest):
             'nombre',
             'nomenclatura',
             'provincia',
-            'tipo'
+            'categoria'
         ])
         self.assertListEqual(fields, sorted(data.keys()))
 
@@ -132,7 +132,7 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'departamento.nombre',
                                        'nomenclatura',
                                        'provincia.id', 'provincia.nombre',
-                                       'tipo'])
+                                       'categoria'])
 
     def test_complete_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
@@ -147,7 +147,7 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'departamento.nombre',
                                        'nomenclatura',
                                        'provincia.id', 'provincia.nombre',
-                                       'tipo'])
+                                       'categoria'])
 
     def test_field_prefixes(self):
         """Se debería poder especificar prefijos de otros campos como campos
@@ -188,13 +188,13 @@ class SearchStreetsTest(GeorefLiveTest):
 
         for street_type, street_type_long in street_types:
             res = self.get_response({
-                'tipo': street_type_long,
+                'categoria': street_type_long,
                 'max': 100
             })
 
             validations.append(len(res) > 0)
             validations.append(all(
-                street['tipo'] == street_type for street in res
+                street['categoria'] == street_type for street in res
             ))
 
         assert(validations and all(validations))
@@ -217,7 +217,7 @@ class SearchStreetsTest(GeorefLiveTest):
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""
-        params = ['nombre', 'tipo', 'departamento', 'provincia', 'max',
+        params = ['nombre', 'categoria', 'departamento', 'provincia', 'max',
                   'campos']
         self.assert_empty_params_return_400(params)
 
@@ -264,7 +264,7 @@ class SearchStreetsTest(GeorefLiveTest):
                 'nombre': 'CORRIENTES'
             },
             {
-                'tipo': 'avenida'
+                'categoria': 'avenida'
             },
             {
                 'max': 3
@@ -273,7 +273,7 @@ class SearchStreetsTest(GeorefLiveTest):
                 'id': '8208416001280'
             },
             {
-                'campos': 'nombre,tipo'
+                'campos': 'nombre,categoria'
             },
             {
                 'provincia': '02'
@@ -315,13 +315,13 @@ class SearchStreetsTest(GeorefLiveTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'nombre': 'SANTA FE',
-            'campos': 'nombre,id,tipo'
+            'campos': 'nombre,id,categoria'
         })
 
     def test_csv_fields(self):
         """Una consulta CSV debería tener ciertos campos, ordenados de una
         forma específica."""
-        resp = self.get_response({'formato': 'csv'})
+        resp = self.get_response({'formato': 'csv', 'campos': 'completo'})
         headers = next(resp)
         self.assertListEqual(headers, ['calle_id',
                                        'calle_nombre',
@@ -330,11 +330,12 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'calle_altura_fin_derecha',
                                        'calle_altura_fin_izquierda',
                                        'calle_nomenclatura',
-                                       'calle_tipo',
+                                       'calle_categoria',
                                        'provincia_id',
                                        'provincia_nombre',
                                        'departamento_id',
-                                       'departamento_nombre'])
+                                       'departamento_nombre',
+                                       'calle_fuente'])
 
     def test_xml_format(self):
         """Se debería poder obtener resultados en formato XML (sin
@@ -347,7 +348,7 @@ class SearchStreetsTest(GeorefLiveTest):
         self.assert_valid_xml({
             'max': 100,
             'nombre': 'mayo',
-            'tipo': 'avenida'
+            'categoria': 'avenida'
         })
 
     def test_shp_format(self):
@@ -364,7 +365,7 @@ class SearchStreetsTest(GeorefLiveTest):
         self.assert_valid_shp_query({
             'max': 500,
             'campos': 'completo',
-            'tipo': 'avenida'
+            'categoria': 'avenida'
         })
 
     def test_shp_record_fields(self):
@@ -378,7 +379,7 @@ class SearchStreetsTest(GeorefLiveTest):
             'prov_nombre',
             'dpto_nombre',
             'dpto_id',
-            'tipo',
+            'categoria',
             'alt_ini_der',
             'alt_ini_izq',
             'alt_fin_der',

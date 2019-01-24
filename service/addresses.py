@@ -135,7 +135,6 @@ class AddressQueryPlanner:
         if dept:
             address_hit[N.DEPT] = dept
 
-        address_hit[N.SOURCE] = constants.INDEX_SOURCES[N.STREETS]
         address_hit[N.DOOR_NUM] = {
             N.VALUE: self._address_data.door_number_value,
             N.UNIT: self._address_data.door_number_unit
@@ -165,16 +164,10 @@ class AddressQueryPlanner:
         if not elasticsearch_street_hit:
             elasticsearch_street_hit = {}
 
-        keys = [N.ID, N.NAME, N.TYPE]
-
         street_entity = {
             key: elasticsearch_street_hit.get(key)
-            for key in keys
+            for key in [N.ID, N.NAME, N.CATEGORY]
         }
-
-        # TODO: Borrar y usar 'categoria' directamente
-        if not street_entity[N.TYPE]:
-            street_entity[N.TYPE] = elasticsearch_street_hit.get(N.CATEGORY)
 
         return street_entity
 
@@ -266,6 +259,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             address_hit[N.STREET] = self._build_street_entity(street)
             address_hit[N.STREET_X1] = self._build_street_entity()
             address_hit[N.STREET_X2] = self._build_street_entity()
+            address_hit[N.SOURCE] = street[N.SOURCE]
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(street)
@@ -561,6 +555,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             address_hit[N.STREET_X1] = self._build_street_entity(street_2)
             address_hit[N.STREET_X2] = self._build_street_entity()
             address_hit[N.LOCATION] = point.to_json_location()
+            address_hit[N.SOURCE] = street_1[N.SOURCE]
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(street_1,
@@ -847,6 +842,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                 entry.street_2)
             address_hit[N.STREET_X2] = self._build_street_entity(
                 entry.street_3)
+            address_hit[N.SOURCE] = entry.street_1[N.SOURCE]
 
             if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
                 point = entry.point()

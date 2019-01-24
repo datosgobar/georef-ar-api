@@ -1027,7 +1027,8 @@ PARAMS_STATES = EndpointParameters(shared_params={
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON],
-                                 complete=[N.SOURCE]),
+                                 complete=[N.SOURCE, N.COMPLETE_NAME, N.ISO_ID,
+                                           N.ISO_NAME, N.CATEGORY]),
     N.MAX: IntParameter(default=24, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0,
@@ -1054,7 +1055,8 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME],
-                                 complete=[N.SOURCE, N.STATE_INTERSECTION]),
+                                 complete=[N.SOURCE, N.STATE_INTERSECTION,
+                                           N.COMPLETE_NAME, N.CATEGORY]),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0,
@@ -1082,7 +1084,8 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME],
-                                 complete=[N.SOURCE, N.STATE_INTERSECTION]),
+                                 complete=[N.SOURCE, N.STATE_INTERSECTION,
+                                           N.CATEGORY, N.COMPLETE_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0,
@@ -1111,7 +1114,7 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME, N.DEPT_ID,
                                            N.DEPT_NAME, N.MUN_ID, N.MUN_NAME,
-                                           N.TYPE],
+                                           N.CATEGORY],
                                  complete=[N.SOURCE]),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
@@ -1142,9 +1145,9 @@ _ADDRESSES_STANDARD_FIELDS = [
     N.DEPT_ID, N.DEPT_NAME,
     N.DOOR_NUM_UNIT,
     N.FLOOR,
-    N.STREET_TYPE,
-    N.STREET_X1_TYPE,
-    N.STREET_X2_TYPE,
+    N.STREET_CATEGORY,
+    N.STREET_X1_CATEGORY,
+    N.STREET_X2_CATEGORY,
     N.LOCATION_LAT, N.LOCATION_LON
 ]
 
@@ -1177,7 +1180,7 @@ PARAMS_STREETS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(entities=[N.MUN, N.DEPT, N.STATE]),
-    N.TYPE: StrParameter(),
+    N.CATEGORY: StrParameter(),
     N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
     N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
@@ -1186,7 +1189,7 @@ PARAMS_STREETS = EndpointParameters(shared_params={
                                  standard=[N.START_R, N.START_L, N.END_R,
                                            N.END_L, N.STATE_ID, N.STATE_NAME,
                                            N.DEPT_ID, N.DEPT_NAME, N.FULL_NAME,
-                                           N.TYPE],
+                                           N.CATEGORY],
                                  complete=[N.SOURCE]),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
@@ -1212,7 +1215,8 @@ PARAMS_LOCATION = EndpointParameters(shared_params={
                                         N.LON],
                                  standard=[N.DEPT_ID, N.DEPT_NAME, N.MUN_ID,
                                            N.MUN_NAME],
-                                 complete=[N.SOURCE])
+                                 complete=[N.STATE_SOURCE, N.DEPT_SOURCE,
+                                           N.MUN_SOURCE])
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml'])
 })

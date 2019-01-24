@@ -142,7 +142,8 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
                                       ['id', 'fuente', 'nombre',
                                        'centroide.lat', 'centroide.lon',
                                        'provincia.id', 'provincia.nombre',
-                                       'provincia.interseccion'])
+                                       'provincia.interseccion',
+                                       'categoria', 'nombre_completo'])
 
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
@@ -413,14 +414,18 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
     def test_csv_fields(self):
         """Una consulta CSV debería tener ciertos campos, ordenados de una
         forma específica."""
-        resp = self.get_response({'formato': 'csv'})
+        resp = self.get_response({'formato': 'csv', 'campos': 'completo'})
         headers = next(resp)
         self.assertListEqual(headers, ['municipio_id',
                                        'municipio_nombre',
+                                       'municipio_nombre_completo',
                                        'municipio_centroide_lat',
                                        'municipio_centroide_lon',
                                        'provincia_id',
-                                       'provincia_nombre'])
+                                       'provincia_nombre',
+                                       'provincia_interseccion',
+                                       'municipio_fuente',
+                                       'municipio_categoria'])
 
     def test_xml_format(self):
         """Se debería poder obtener resultados en formato XML (sin
@@ -463,7 +468,9 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
             'prov_intscn',
             'centr_lat',
             'centr_lon',
-            'fuente'
+            'fuente',
+            'categoria',
+            'nombre_comp'
         ])
 
 

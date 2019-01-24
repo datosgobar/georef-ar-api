@@ -89,7 +89,9 @@ class SearchLocationTest(GeorefLiveTest):
                                        'lat', 'lon', 'departamento.id',
                                        'departamento.nombre',
                                        'municipio.id', 'municipio.nombre',
-                                       'fuente'],
+                                       'provincia.fuente',
+                                       'departamento.fuente',
+                                       'municipio.fuente'],
                                       {'lat': location[0], 'lon': location[1]},
                                       iterable=False)
 
@@ -98,10 +100,10 @@ class SearchLocationTest(GeorefLiveTest):
         location = LOCATIONS[0]
         fields_lists = [
             ['provincia.id', 'provincia.nombre', 'lat', 'lon'],
-            ['departamento.id', 'fuente', 'lat', 'lon', 'provincia.id',
-             'provincia.nombre'],
+            ['departamento.id', 'provincia.fuente', 'lat', 'lon',
+             'provincia.id', 'provincia.nombre'],
             ['lon', 'municipio.id', 'provincia.id',
-             'provincia.nombre', 'lat', 'fuente']
+             'provincia.nombre', 'lat', 'municipio.fuente']
         ]
         fields_lists = [sorted(l) for l in fields_lists]
 

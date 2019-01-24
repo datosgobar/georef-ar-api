@@ -4,7 +4,6 @@ Contiene variables con valores constantes.
 """
 
 from flask import current_app
-from service import names as N
 
 API_NAME = 'georef-ar-api'
 
@@ -17,14 +16,6 @@ ADDRESS_PARSER_CACHE_SIZE = current_app.config['ADDRESS_PARSER_CACHE_SIZE']
 ISCT_DOOR_NUM_TOLERANCE_M = 50
 BTWN_DOOR_NUM_TOLERANCE_M = 150
 BTWN_DISTANCE_TOLERANCE_M = 200
-
-INDEX_SOURCES = {
-    N.STATES: N.SOURCE_IGN,
-    N.DEPARTMENTS: N.SOURCE_IGN,
-    N.MUNICIPALITIES: N.SOURCE_IGN,
-    N.LOCALITIES: N.SOURCE_BAHRA,
-    N.STREETS: N.SOURCE_INDEC
-}
 
 MIN_AUTOCOMPLETE_CHARS = 4
 DEFAULT_SEARCH_SIZE = 10

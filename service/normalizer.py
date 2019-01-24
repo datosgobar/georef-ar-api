@@ -6,7 +6,7 @@ de los recursos que expone la API.
 
 import logging
 from flask import current_app
-from service import data, params, formatter, addresses, constants
+from service import data, params, formatter, addresses
 from service import names as N
 from service.query_result import QueryResult
 from service.geometry import Point
@@ -103,13 +103,8 @@ def process_entity_single(request, name, param_parser, key_translations):
     es = get_elasticsearch()
     search_class = data.entity_search_class(name)
     search = search_class(query)
-    # result = data.search_entities(es, name, [query], expand_geometries)[0]
 
     data.ElasticsearchSearch.run_searches(es, [search])
-
-    source = constants.INDEX_SOURCES[name]
-    for match in search.result.hits:
-        match[N.SOURCE] = source
 
     query_result = QueryResult.from_entity_list(search.result.hits,
                                                 search.result.total,
@@ -167,11 +162,6 @@ def process_entity_bulk(request, name, param_parser, key_translations):
     searches = [search_class(query) for query in queries]
 
     data.ElasticsearchSearch.run_searches(es, searches)
-
-    source = constants.INDEX_SOURCES[name]
-    for search in searches:
-        for match in search.result.hits:
-            match[N.SOURCE] = source
 
     query_results = [
         QueryResult.from_entity_list(search.result.hits,
@@ -335,7 +325,7 @@ def build_street_query_format(parsed_params):
         N.DEPT: 'department',
         N.EXACT: 'exact',
         N.FIELDS: 'fields',
-        N.TYPE: 'street_type',
+        N.CATEGORY: 'category',
         N.OFFSET: 'offset',
         N.ORDER: 'order',
         N.MAX: 'size'
@@ -380,10 +370,6 @@ def process_street_single(request):
     search = data.StreetsSearch(query)
     data.ElasticsearchSearch.run_searches(es, [search])
 
-    source = constants.INDEX_SOURCES[N.STREETS]
-    for match in search.result.hits:
-        match[N.SOURCE] = source
-
     query_result = QueryResult.from_entity_list(search.result.hits,
                                                 search.result.total,
                                                 search.result.offset)
@@ -423,11 +409,6 @@ def process_street_bulk(request):
     searches = [data.StreetsSearch(query) for query in queries]
 
     data.ElasticsearchSearch.run_searches(es, searches)
-
-    source = constants.INDEX_SOURCES[N.STREETS]
-    for search in searches:
-        for match in search.result.hits:
-            match[N.SOURCE] = source
 
     query_results = [
         QueryResult.from_entity_list(search.result.hits,
@@ -618,7 +599,8 @@ def build_location_result(query, state, dept, muni):
     """
     empty_entity = {
         N.ID: None,
-        N.NAME: None
+        N.NAME: None,
+        N.SOURCE: None
     }
 
     if not state:
@@ -626,20 +608,16 @@ def build_location_result(query, state, dept, muni):
         state = empty_entity.copy()
         dept = empty_entity.copy()
         muni = empty_entity.copy()
-        source = None
     else:
         dept = dept or empty_entity.copy()
         muni = muni or empty_entity.copy()
-        # TODO: Cambiar a 'fuentes'?
-        source = constants.INDEX_SOURCES[N.STATES]
 
     return {
         N.STATE: state,
         N.DEPT: dept,
         N.MUN: muni,
         N.LAT: query['lat'],
-        N.LON: query['lon'],
-        N.SOURCE: source
+        N.LON: query['lon']
     }
 
 
@@ -712,7 +690,7 @@ def process_location_queries(es, queries):
     for query in queries:
         search = data.StatesSearch({
             'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
-            'fields': [N.ID, N.NAME],
+            'fields': [N.ID, N.NAME, N.SOURCE],
             'size': 1
         })
 
@@ -721,7 +699,7 @@ def process_location_queries(es, queries):
 
         search = data.DepartmentsSearch({
             'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
-            'fields': [N.ID, N.NAME],
+            'fields': [N.ID, N.NAME, N.SOURCE],
             'size': 1
         })
 
@@ -730,7 +708,7 @@ def process_location_queries(es, queries):
 
         search = data.MunicipalitiesSearch({
             'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
-            'fields': [N.ID, N.NAME],
+            'fields': [N.ID, N.NAME, N.SOURCE],
             'size': 1
         })
 

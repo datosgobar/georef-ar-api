@@ -87,7 +87,7 @@ class SearchLocalityTest(GeorefLiveTest):
             'provincia',
             'departamento',
             'municipio',
-            'tipo'
+            'categoria'
         ])
         self.assertListEqual(fields, sorted(data.keys()))
 
@@ -125,7 +125,7 @@ class SearchLocalityTest(GeorefLiveTest):
                                        'provincia.nombre', 'departamento.id',
                                        'departamento.nombre',
                                        'municipio.id', 'municipio.nombre',
-                                       'tipo'])
+                                       'categoria'])
 
     def test_complete_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
@@ -137,7 +137,7 @@ class SearchLocalityTest(GeorefLiveTest):
                                        'departamento.id',
                                        'departamento.nombre',
                                        'municipio.id', 'municipio.nombre',
-                                       'tipo'])
+                                       'categoria'])
 
     def test_field_prefixes(self):
         """Se debería poder especificar prefijos de otros campos como campos
@@ -449,7 +449,7 @@ class SearchLocalityTest(GeorefLiveTest):
     def test_csv_fields(self):
         """Una consulta CSV debería tener ciertos campos, ordenados de una
         forma específica."""
-        resp = self.get_response({'formato': 'csv'})
+        resp = self.get_response({'formato': 'csv', 'campos': 'completo'})
         headers = next(resp)
         self.assertListEqual(headers, ['localidad_id',
                                        'localidad_nombre',
@@ -461,7 +461,8 @@ class SearchLocalityTest(GeorefLiveTest):
                                        'departamento_nombre',
                                        'municipio_id',
                                        'municipio_nombre',
-                                       'localidad_tipo'])
+                                       'localidad_fuente',
+                                       'localidad_categoria'])
 
     def test_xml_format(self):
         """Se debería poder obtener resultados en formato XML (sin
@@ -505,7 +506,7 @@ class SearchLocalityTest(GeorefLiveTest):
             'muni_id',
             'dpto_nombre',
             'dpto_id',
-            'tipo',
+            'categoria',
             'centr_lat',
             'centr_lon',
             'fuente'

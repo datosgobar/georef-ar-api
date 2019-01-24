@@ -472,7 +472,7 @@ class StreetsSearch(ElasticsearchSearch):
         super().__init__(N.STREETS, query)
 
     def _read_query(self, ids=None, name=None, department=None, state=None,
-                    street_type=None, order=None, exact=False, number=None,
+                    category=None, order=None, exact=False, number=None,
                     **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
         'self._search'. Luego, invoca al método '_read_query' de la superclase
@@ -483,6 +483,7 @@ class StreetsSearch(ElasticsearchSearch):
             name (str): Filtrar por nombre de calles.
             department (list, str): Filtrar por nombre o IDs de departamentos.
             state (list, str): Filtrar por nombre o IDs de provincias.
+            category (str): Filtrar por tipo de calle.
             exact (bool): Si es verdadero, desactivar la búsqueda fuzzy para
                 todos los parámetros de texto siendo utilizados (nombre,
                 provincia, etc.).
@@ -507,10 +508,10 @@ class StreetsSearch(ElasticsearchSearch):
                 exact
             ))
 
-        if street_type:
+        if category:
             self._search = self._search.query(build_match_query(
-                N.TYPE,
-                street_type,
+                N.CATEGORY,
+                category,
                 fuzzy=True
             ))
 

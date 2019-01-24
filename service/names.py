@@ -53,6 +53,9 @@ CENTROID = 'centroide'
 COMPLETE = 'completo'
 DOOR_NUM = 'altura'
 END = 'fin'
+ISO_ID = 'iso_id'
+ISO_NAME = 'iso_nombre'
+COMPLETE_NAME = 'nombre_completo'
 EXACT = 'exacto'
 FIELDS = 'campos'
 ERROR = 'error'
@@ -66,7 +69,6 @@ CATEGORY = 'categoria'
 ID = 'id'
 LAT = 'lat'
 LEFT = 'izquierda'
-TYPE = 'tipo'
 LON = 'lon'
 MAX = 'max'
 NAME = 'nombre'
@@ -81,11 +83,6 @@ TOTAL = 'total'
 UNIT = 'unidad'
 VALUE = 'valor'
 
-# Fuentes
-SOURCE_BAHRA = 'BAHRA'
-SOURCE_IGN = 'IGN'
-SOURCE_INDEC = 'INDEC'
-
 ##########################
 #    Valores compuestos  #
 ##########################
@@ -94,10 +91,13 @@ SOURCE_INDEC = 'INDEC'
 STATE_ID = join(STATE, ID)
 STATE_INTERSECTION = join(STATE, INTERSECTION)
 STATE_NAME = join(STATE, NAME)
+STATE_SOURCE = join(STATE, SOURCE)
 DEPT_ID = join(DEPT, ID)
 DEPT_NAME = join(DEPT, NAME)
+DEPT_SOURCE = join(DEPT, SOURCE)
 MUN_ID = join(MUN, ID)
 MUN_NAME = join(MUN, NAME)
+MUN_SOURCE = join(MUN, SOURCE)
 EXACT_SUFFIX = join('{}', EXACT)
 C_LAT = join(CENTROID, LAT)
 C_LON = join(CENTROID, LON)
@@ -115,13 +115,13 @@ DOOR_NUM_VAL = join(DOOR_NUM, VALUE)
 # Campos de calles
 STREET_ID = join(STREET, ID)
 STREET_NAME = join(STREET, NAME)
-STREET_TYPE = join(STREET, TYPE)
+STREET_CATEGORY = join(STREET, CATEGORY)
 STREET_X1_ID = join(STREET_X1, ID)
 STREET_X1_NAME = join(STREET_X1, NAME)
-STREET_X1_TYPE = join(STREET_X1, TYPE)
+STREET_X1_CATEGORY = join(STREET_X1, CATEGORY)
 STREET_X2_ID = join(STREET_X2, ID)
 STREET_X2_NAME = join(STREET_X2, NAME)
-STREET_X2_TYPE = join(STREET_X2, TYPE)
+STREET_X2_CATEGORY = join(STREET_X2, CATEGORY)
 
 ##########################
 #        Plurales        #
