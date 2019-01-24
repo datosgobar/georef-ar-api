@@ -2,13 +2,15 @@
 La API permite a los usuarios operar con las geometrías de distintas entidades geográficas. A continuación, se detallan los recursos y parámetros que permiten a los usuarios realizar estas operaciones.
 
 ## Parámetro `interseccion`
-Los recursos `/provincias`, `/departamentos` y `/municipios` cuentan con el parámetro `interseccion`. El parámetro permite buscar entidades utilizando intersección de geometrías como filtro. El parámetro debe tomar valores con el siguiente formato:
+Los recursos `/provincias`, `/departamentos`, `/municipios` y `/calles` cuentan con el parámetro `interseccion`. El parámetro permite buscar entidades utilizando intersección de geometrías como filtro. El parámetro debe tomar valores con el siguiente formato:
 
 	interseccion=<tipo de entidad>:<id 1>[:<id 2>:...]
 
 Al aplicar el filtro `interseccion`, se buscan entidades que compartan área con cualquiera de las entidades listadas en la lista de IDs. Entonces, utilizar (por ejemplo) `/municipios?interseccion=departamento:18105` buscaría todos los municipios que interseccionen con el departamento con ID 18105, mientras que utilizar `/departamentos?interseccion=municipio:620133:540378` buscaría todos los departamentos que interseccionen con el municipio con ID 620133 **o** el municipio con ID 540378.
 
-!!! note ""
+De la misma forma, utilizar `/calles?interseccion=municipio:620133` buscaría todas las calles que estén contenidas en el municipio con ID 620133. También es posible buscar municipios a partir de una calle: `/municipios?interseccion=calle:0638503000235` buscaría el municipio que contiene a la calle con ID 0638503000235.
+
+!!! warning "IDs inválidos"
 	Todos los IDs listados que no correspondan a una entidad geográfica existente serán ignorados.
 
 Ejemplo completo de llamado a la API:

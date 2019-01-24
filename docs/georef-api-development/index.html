@@ -333,6 +333,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../geom-operations/" title="Operaciones con geometrías" class="md-nav__link">
+      Operaciones con geometrías
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-nav__link">
       Usar en planillas de cálculo
     </a>
@@ -694,18 +706,6 @@
 
 
   <li class="md-nav__item">
-    <a href="../python3.6/" title="Instalación de Python 3.6" class="md-nav__link">
-      Instalación de Python 3.6
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
     <a href="../georef-api-data/" title="Proceso de ETL y Datos" class="md-nav__link">
       Proceso de ETL y Datos
     </a>
@@ -720,6 +720,18 @@
   <li class="md-nav__item">
     <a href="../history/" title="Historial de versiones" class="md-nav__link">
       Historial de versiones
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../python3.6/" title="Instalación de Python 3.6" class="md-nav__link">
+      Instalación de Python 3.6
     </a>
   </li>
 
@@ -1074,6 +1086,7 @@ $ source venv/bin/activate
 <li>Modificación de <em>mappeos</em> de tipos de Elasticsearch</li>
 <li>Modificación de analizadores de texto de Elasticsearch</li>
 <li>Modificación de listado de sinónimos</li>
+<li>Modificación de listado de términos excluyentes</li>
 </ul>
 <p>Cualquiera de las dos opciones también permite indexar datos selectivamente: se debe especificar el nombre del índice a crear/re-indexar. Por ejemplo:</p>
 <pre><code class="bash">(venv) $ make index INDEX_NAME=localidades
@@ -1090,6 +1103,7 @@ $ source venv/bin/activate
 <li><code>municipios-geometria</code></li>
 <li><code>localidades</code></li>
 <li><code>calles</code></li>
+<li><code>intersecciones</code></li>
 </ul>
 <h3 id="5-correr-api">5. Correr API<a class="headerlink" href="#5-correr-api" title="Permanent link">&para;</a></h3>
 <h4 id="entornos-de-desarrollo">Entornos de desarrollo<a class="headerlink" href="#entornos-de-desarrollo" title="Permanent link">&para;</a></h4>
@@ -1153,7 +1167,7 @@ $ sudo systemctl start georef-api.service
 <p>El archivo de configuración <code>config/georef.cfg</code> debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en <code>georef.example.cfg</code>) utilizan el portal de descargas <code>infra.datos.gob.ar</code>, que siempre provee la última versión de los archivos JSON disponibles. La rama <code>master</code> de <code>georef-ar-api</code> siempre se mantiene compatible con la última versión de los datos disponibles en <code>infra.datos.gob.ar</code>.</p>
 </li>
 <li>
-<p>El archivo de configuración <code>config/georef.cfg</code> también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto, en <code>georef.example.cfg</code>, puede ser utilizado.</p>
+<p>El archivo de configuración <code>config/georef.cfg</code> también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto en <code>georef.example.cfg</code> puede ser utilizado, ya que utiliza la versión del archivo almacenado en <code>infra.datos.gob.ar</code>. El mismo criterio se aplica al archivo de términos excluyentes.</p>
 </li>
 </ul>
                 
@@ -1191,13 +1205,13 @@ $ sudo systemctl start georef-api.service
           </a>
         
         
-          <a href="../python3.6/" title="Instalación de Python 3.6" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../georef-api-data/" title="Proceso de ETL y Datos" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Instalación de Python 3.6
+                Proceso de ETL y Datos
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

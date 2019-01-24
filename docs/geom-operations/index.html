@@ -13,7 +13,7 @@
         <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
       
       
-        <link rel="canonical" href="http://apis.datos.gob.ar/georef/bulk/">
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/geom-operations/">
       
       
         <meta name="author" content="Datos Argentina">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Consultas por lotes - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+        <title>Operaciones con geometrías - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
       
     
     
@@ -104,7 +104,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#consutas-por-lotes" tabindex="1" class="md-skip">
+      <a href="#operaciones-con-geometrias" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -130,7 +130,7 @@
                 API del Servicio de Normalización de Datos Geográficos de Argentina
               </span>
               <span class="md-header-nav__topic">
-                Consultas por lotes
+                Operaciones con geometrías
               </span>
             
           
@@ -321,6 +321,18 @@
           
           
 
+
+  <li class="md-nav__item">
+    <a href="../bulk/" title="Consultas por lotes" class="md-nav__link">
+      Consultas por lotes
+    </a>
+  </li>
+
+        
+          
+          
+          
+
   
 
 
@@ -332,11 +344,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        Consultas por lotes
+        Operaciones con geometrías
       </label>
     
-    <a href="./" title="Consultas por lotes" class="md-nav__link md-nav__link--active">
-      Consultas por lotes
+    <a href="./" title="Operaciones con geometrías" class="md-nav__link md-nav__link--active">
+      Operaciones con geometrías
     </a>
     
       
@@ -350,36 +362,16 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ejemplos-de-uso" title="Ejemplos de uso" class="md-nav__link">
-    Ejemplos de uso
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#busqueda-de-municipios-en-lotes" title="Búsqueda de municipios en lotes" class="md-nav__link">
-    Búsqueda de municipios en lotes
+  <a href="#parametro-interseccion" title="Parámetro interseccion" class="md-nav__link">
+    Parámetro interseccion
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#normalizacion-de-direcciones-en-lotes" title="Normalización de direcciones en lotes" class="md-nav__link">
-    Normalización de direcciones en lotes
+      
+        <li class="md-nav__item">
+  <a href="#recurso-ubicacion" title="Recurso /ubicacion" class="md-nav__link">
+    Recurso /ubicacion
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#entidades-geograficas-en-varios-puntos" title="Entidades geográficas en varios puntos" class="md-nav__link">
-    Entidades geográficas en varios puntos
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -391,18 +383,6 @@
   
 </nav>
     
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../geom-operations/" title="Operaciones con geometrías" class="md-nav__link">
-      Operaciones con geometrías
-    </a>
   </li>
 
         
@@ -580,36 +560,16 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ejemplos-de-uso" title="Ejemplos de uso" class="md-nav__link">
-    Ejemplos de uso
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#busqueda-de-municipios-en-lotes" title="Búsqueda de municipios en lotes" class="md-nav__link">
-    Búsqueda de municipios en lotes
+  <a href="#parametro-interseccion" title="Parámetro interseccion" class="md-nav__link">
+    Parámetro interseccion
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#normalizacion-de-direcciones-en-lotes" title="Normalización de direcciones en lotes" class="md-nav__link">
-    Normalización de direcciones en lotes
+      
+        <li class="md-nav__item">
+  <a href="#recurso-ubicacion" title="Recurso /ubicacion" class="md-nav__link">
+    Recurso /ubicacion
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#entidades-geograficas-en-varios-puntos" title="Entidades geográficas en varios puntos" class="md-nav__link">
-    Entidades geográficas en varios puntos
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -630,243 +590,92 @@
               
                 
                 
-                <h1 id="consutas-por-lotes">Consutas por lotes<a class="headerlink" href="#consutas-por-lotes" title="Permanent link">&para;</a></h1>
-<p>Todos los recursos de la API tienen una variante <code>POST</code> que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo. Las versiones de los recursos <code>POST</code> aceptan los mismos parámetros que las <code>GET</code>, con la excepción del parámetro <code>formato</code>, que necesariamente toma el valor <code>json</code>. Adicionalmente, todos los parámetros se envían a través del cuerpo de la consulta HTTP, y no como parte del <em>query string</em>.</p>
-<p>Por ejemplo, las siguientes tres consultas:</p>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&amp;campos=nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&amp;campos=nombre</code></a></p>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&amp;campos=nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&amp;campos=nombre</code></a></p>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=san luis&amp;campos=nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=san luis&amp;campos=nombre</code></a></p>
-<p>Son equivalentes a la siguiente consulta <code>POST</code> por lotes:</p>
-<p><code>POST</code> <code>https://apis.datos.gob.ar/georef/api/provincias</code></p>
-<pre><code class="json">{
-    &quot;provincias&quot;: [
-        {
-            &quot;nombre&quot;: &quot;cordoba&quot;,
-            &quot;campos&quot;: &quot;nombre&quot;
-        },
-        {
-            &quot;nombre&quot;: &quot;chaco&quot;,
-            &quot;campos&quot;: &quot;nombre&quot;
-        },
-        {
-            &quot;nombre&quot;: &quot;san luis&quot;,
-            &quot;campos&quot;: &quot;nombre&quot;
-        }
-    ]
-}
+                <h1 id="operaciones-con-geometrias">Operaciones con Geometrías<a class="headerlink" href="#operaciones-con-geometrias" title="Permanent link">&para;</a></h1>
+<p>La API permite a los usuarios operar con las geometrías de distintas entidades geográficas. A continuación, se detallan los recursos y parámetros que permiten a los usuarios realizar estas operaciones.</p>
+<h2 id="parametro-interseccion">Parámetro <code>interseccion</code><a class="headerlink" href="#parametro-interseccion" title="Permanent link">&para;</a></h2>
+<p>Los recursos <code>/provincias</code>, <code>/departamentos</code>, <code>/municipios</code> y <code>/calles</code> cuentan con el parámetro <code>interseccion</code>. El parámetro permite buscar entidades utilizando intersección de geometrías como filtro. El parámetro debe tomar valores con el siguiente formato:</p>
+<pre><code>interseccion=&lt;tipo de entidad&gt;:&lt;id 1&gt;[:&lt;id 2&gt;:...]
 </code></pre>
-
-<p>Que resultaría en la siguiente respuesta JSON:</p>
-<pre><code class="json">{
-    &quot;resultados&quot;: [
-        {
-            &quot;cantidad&quot;: 1,
-            &quot;inicio&quot;: 0,
-            &quot;provincias&quot;: [
-                {
-                    &quot;id&quot;: &quot;14&quot;,
-                    &quot;nombre&quot;: &quot;Córdoba&quot;
-                }
-            ],
-            &quot;total&quot;: 1
-        },
-        {
-            &quot;cantidad&quot;: 1,
-            &quot;inicio&quot;: 0,
-            &quot;provincias&quot;: [
-                {
-                    &quot;id&quot;: &quot;22&quot;,
-                    &quot;nombre&quot;: &quot;Chaco&quot;
-                }
-            ],
-            &quot;total&quot;: 1
-        },
-        {
-            &quot;cantidad&quot;: 1,
-            &quot;inicio&quot;: 0,
-            &quot;provincias&quot;: [
-                {
-                    &quot;id&quot;: &quot;74&quot;,
-                    &quot;nombre&quot;: &quot;San Luis&quot;
-                }
-            ],
-            &quot;total&quot;: 1
-        }
-    ]
-}
-</code></pre>
-
-<p>Como se muestra en el ejemplo, la respuesta contiene una lista <code>resultados</code>, con los resultados de cada consulta individual adentro. Las estructuras de las respuestas se mantienen idénticas que los recursos <code>GET</code>.</p>
-<div class="admonition note">
-<p>El total de los parámetros <code>max</code> sumados de todas las consultas no debe superar los 5000.
-Por ejemplo, se permite enviar 5000 consultas con <code>max=1</code>, o 100 consultas con <code>max=50</code>, pero no 5000 consultas con <code>max=10</code>.</p>
+<p>Al aplicar el filtro <code>interseccion</code>, se buscan entidades que compartan área con cualquiera de las entidades listadas en la lista de IDs. Entonces, utilizar (por ejemplo) <code>/municipios?interseccion=departamento:18105</code> buscaría todos los municipios que interseccionen con el departamento con ID 18105, mientras que utilizar <code>/departamentos?interseccion=municipio:620133:540378</code> buscaría todos los departamentos que interseccionen con el municipio con ID 620133 <strong>o</strong> el municipio con ID 540378.</p>
+<p>De la misma forma, utilizar <code>/calles?interseccion=municipio:620133</code> buscaría todas las calles que estén contenidas en el municipio con ID 620133. También es posible buscar municipios a partir de una calle: <code>/municipios?interseccion=calle:0638503000235</code> buscaría el municipio que contiene a la calle con ID 0638503000235.</p>
+<div class="admonition warning">
+<p class="admonition-title">IDs inválidos</p>
+<p>Todos los IDs listados que no correspondan a una entidad geográfica existente serán ignorados.</p>
 </div>
-<p>Utilizando los recursos por lotes, se pueden normalizar mayores cantidades de datos en menos tiempo. Por ejemplo, si se cuenta con 50000 direcciones, tan solo se necesitan 10 consultas para normalizar el activo de datos entero. Utilizando los recursos <code>GET</code>, se necesitarían 50000 (una por dato).</p>
-<h2 id="ejemplos-de-uso">Ejemplos de uso<a class="headerlink" href="#ejemplos-de-uso" title="Permanent link">&para;</a></h2>
-<p>A diferencia de los recursos <code>GET</code>, los ejemplos de operaciones por lotes se muestran utilizando comandos construídos sobre la herramienta <code>curl</code>. La sección de <a href="../python-usage/">ejemplos con Python</a> también contiene ejemplos de uso de los recursos <code>POST</code>.</p>
-<h3 id="busqueda-de-municipios-en-lotes">Búsqueda de municipios en lotes<a class="headerlink" href="#busqueda-de-municipios-en-lotes" title="Permanent link">&para;</a></h3>
-<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/municipios&quot; \
--H 'Content-Type: application/json' -d'
-{
+<p>Ejemplo completo de llamado a la API:</p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/municipios?interseccion=departamento:18105"><code>https://apis.datos.gob.ar/georef/api/municipios?interseccion=departamento:18105</code></a></p>
+<pre><code class="json">{
     &quot;municipios&quot;: [
         {
-            &quot;nombre&quot;: &quot;belgrano&quot;,
-            &quot;max&quot;: 1,
-            &quot;campos&quot;: &quot;id, nombre&quot;
-        },
-        {
-            &quot;nombre&quot;: &quot;martin&quot;,
-            &quot;max&quot;: 1,
-            &quot;provincia&quot;: &quot;la pampa&quot;,
-            &quot;aplanar&quot;: true
-        }
-    ]
-}
-'
-</code></pre>
-
-<p>Resultados:</p>
-<pre><code class="json">{
-    &quot;resultados&quot;: [
-        {
-            &quot;municipios&quot;: [
-                {
-                    &quot;id&quot;: &quot;060301&quot;,
-                    &quot;nombre&quot;: &quot;General Belgrano&quot;
-                }
-            ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 8,
-            &quot;inicio&quot;: 0
-        },
-        {
-            &quot;municipios&quot;: [
-                {
-                    &quot;centroide_lat&quot;: -35.361211,
-                    &quot;centroide_lon&quot;: -64.294073,
-                    &quot;id&quot;: &quot;420126&quot;,
-                    &quot;nombre&quot;: &quot;Embajador Martini&quot;,
-                    &quot;provincia_id&quot;: &quot;42&quot;,
-                    &quot;provincia_nombre&quot;: &quot;La Pampa&quot;
-                }
-            ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 2,
-            &quot;inicio&quot;: 0
-        }
-    ]
-}
-</code></pre>
-
-<h3 id="normalizacion-de-direcciones-en-lotes">Normalización de direcciones en lotes<a class="headerlink" href="#normalizacion-de-direcciones-en-lotes" title="Permanent link">&para;</a></h3>
-<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/direcciones&quot; \
--H 'Content-Type: application/json' -d'
-{
-    &quot;direcciones&quot;: [
-        {
-            &quot;direccion&quot;: &quot;santa fe 3100&quot;,
-            &quot;max&quot;: 1,
-            &quot;campos&quot;: &quot;id, nombre, altura&quot;
-        },
-        {
-            &quot;direccion&quot;: &quot;corientes 4010&quot;,
-            &quot;max&quot;: 1,
-            &quot;campos&quot;: &quot;id, nombre, altura&quot;,
-            &quot;departamento&quot;: &quot;General López&quot;
-        }
-    ]
-}
-'
-</code></pre>
-
-<p>Resultados:</p>
-<pre><code class="json">{
-    &quot;resultados&quot;: [
-        {
-            &quot;direcciones&quot;: [
-                {
-                    &quot;altura&quot;: 3100,
-                    &quot;id&quot;: &quot;0642701011435&quot;,
-                    &quot;nombre&quot;: &quot;SANTA FE&quot;
-                }
-            ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 25,
-            &quot;inicio&quot;: 0
-        },
-        {
-            &quot;direcciones&quot;: [
-                {
-                    &quot;altura&quot;: 4010,
-                    &quot;id&quot;: &quot;8204229000610&quot;,
-                    &quot;nombre&quot;: &quot;CORRIENTES&quot;
-                }
-            ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 1,
-            &quot;inicio&quot;: 0
-        }
-    ]
-}
-</code></pre>
-
-<h3 id="entidades-geograficas-en-varios-puntos">Entidades geográficas en varios puntos<a class="headerlink" href="#entidades-geograficas-en-varios-puntos" title="Permanent link">&para;</a></h3>
-<pre><code>curl -X POST &quot;https://apis.datos.gob.ar/georef/api/ubicacion&quot; \
--H 'Content-Type: application/json' -d'
-{
-    &quot;ubicaciones&quot;: [
-        {
-            &quot;lat&quot;: -27.274161,
-            &quot;lon&quot;: -66.752929,
-            &quot;campos&quot;: &quot;completo&quot;
-        },
-        {
-            &quot;lat&quot;: -31.480693,
-            &quot;lon&quot;: -59.092813,
-            &quot;aplanar&quot;: true,
-            &quot;campos&quot;: &quot;completo&quot;
-        }
-    ]
-}
-'
-</code></pre>
-
-<p>Resultados:</p>
-<pre><code class="json">{
-    &quot;resultados&quot;: [
-        {
-            &quot;ubicacion&quot;: {
-                &quot;fuente&quot;: &quot;IGN&quot;,
-                &quot;municipio&quot;: {
-                    &quot;nombre&quot;: &quot;Hualfín&quot;,
-                    &quot;id&quot;: &quot;100077&quot;
-                },
-                &quot;lon&quot;: -66.752929,
-                &quot;provincia&quot;: {
-                    &quot;nombre&quot;: &quot;Catamarca&quot;,
-                    &quot;id&quot;: &quot;10&quot;
-                },
-                &quot;lat&quot;: -27.274161,
-                &quot;departamento&quot;: {
-                    &quot;nombre&quot;: &quot;Belén&quot;,
-                    &quot;id&quot;: &quot;10035&quot;
-                }
+            &quot;centroide&quot;: {
+                &quot;lat&quot;: -28.508559,
+                &quot;lon&quot;: -58.031593
+            },
+            &quot;id&quot;: &quot;180042&quot;,
+            &quot;nombre&quot;: &quot;Concepción&quot;,
+            &quot;provincia&quot;: {
+                &quot;id&quot;: &quot;18&quot;,
+                &quot;nombre&quot;: &quot;Corrientes&quot;
             }
         },
-        {
-            &quot;ubicacion&quot;: {
-                &quot;departamento_nombre&quot;: &quot;Villaguay&quot;,
-                &quot;lon&quot;: -59.092813,
-                &quot;municipio_id&quot;: null,
-                &quot;lat&quot;: -31.480693,
-                &quot;fuente&quot;: &quot;IGN&quot;,
-                &quot;provincia_nombre&quot;: &quot;Entre Ríos&quot;,
-                &quot;provincia_id&quot;: &quot;30&quot;,
-                &quot;departamento_id&quot;: &quot;30113&quot;,
-                &quot;municipio_nombre&quot;: null
-            }
+        { ... } // 9 resultados omitidos
+    ],
+    &quot;cantidad&quot;: 10,
+    &quot;total&quot;: 13,
+    &quot;inicio&quot;: 0
+}
+</code></pre>
+
+<p>Aunque el recurso <code>/provincias</code> acepta el parámetro <code>interseccion</code>, se recomienda utilizar filtros por IDs y no por geometrías al momento de buscar provincias, ya que el filtrado por ID es más performante. Por ejemplo, la consulta <code>/provincias?interseccion=departamento:18105</code> es equivalente a la consulta <code>/provincias?id=18</code>, ya que los primeros dos dígitos de los códigos de los departamentos siempre corresponden a su provincia.</p>
+<h2 id="recurso-ubicacion">Recurso <code>/ubicacion</code><a class="headerlink" href="#recurso-ubicacion" title="Permanent link">&para;</a></h2>
+<p>En la <a href="/">sección de inicio</a>, se dió un ejemplo de uso del recurso <code>/ubicacion</code> para enriquecer datos existentes. El recurso utiliza las geometrías de las entidades geográficas para determinar cuáles contienen al punto especificado por el usuario a través de los parámetros <code>lat</code> y <code>lon</code>. Las entidades devueltas son las siguientes:</p>
+<ul>
+<li>Provincia</li>
+<li>Departamento</li>
+<li>Municipio <em>(opcional)</em></li>
+</ul>
+<p>Dependiendo del punto elegido, es posible no obtener un municipio como parte de la respuesta de la API. Como ejemplo, se muestran dos llamados distintos al recurso <code>/ubicacion</code>.</p>
+<p>Con municipio:</p>
+<p><code>GET</code><a href="https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529"><code>https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529</code></a></p>
+<pre><code class="json">{
+    &quot;ubicacion&quot;: {
+        &quot;departamento&quot;: {
+            &quot;id&quot;: &quot;10035&quot;,
+            &quot;nombre&quot;: &quot;Belén&quot;
+        },
+        &quot;lat&quot;: -27.2741,
+        &quot;lon&quot;: -66.7529,
+        &quot;municipio&quot;: {
+            &quot;id&quot;: &quot;100077&quot;,
+            &quot;nombre&quot;: &quot;Hualfín&quot;
+        },
+        &quot;provincia&quot;: {
+            &quot;id&quot;: &quot;10&quot;,
+            &quot;nombre&quot;: &quot;Catamarca&quot;
         }
-    ]
+    }
+}
+</code></pre>
+
+<p>Sin municipio:</p>
+<p><code>GET</code><a href="https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&amp;lon=-62.898"><code>https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&amp;lon=-62.898</code></a></p>
+<pre><code class="json">{
+    &quot;ubicacion&quot;: {
+        &quot;departamento&quot;: {
+            &quot;id&quot;: &quot;86028&quot;,
+            &quot;nombre&quot;: &quot;Avellaneda&quot;
+        },
+        &quot;lat&quot;: -28.504,
+        &quot;lon&quot;: -62.898,
+        &quot;municipio&quot;: {
+            &quot;id&quot;: null,
+            &quot;nombre&quot;: null
+        },
+        &quot;provincia&quot;: {
+            &quot;id&quot;: &quot;86&quot;,
+            &quot;nombre&quot;: &quot;Santiago del Estero&quot;
+        }
+    }
 }
 </code></pre>
                 
@@ -889,7 +698,7 @@ Por ejemplo, se permite enviar 5000 consultas con <code>max=1</code>, o 100 cons
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../quick-start/" title="Ejemplos de uso" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../bulk/" title="Consultas por lotes" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -898,19 +707,19 @@ Por ejemplo, se permite enviar 5000 consultas con <code>max=1</code>, o 100 cons
                 <span class="md-footer-nav__direction">
                   Anterior
                 </span>
-                Ejemplos de uso
+                Consultas por lotes
               </span>
             </div>
           </a>
         
         
-          <a href="../geom-operations/" title="Operaciones con geometrías" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Operaciones con geometrías
+                Usar en planillas de cálculo
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
