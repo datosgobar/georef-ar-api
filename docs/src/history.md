@@ -1,5 +1,34 @@
 # Historial de versiones
 
+## **0.3.0** - 2019/01/24
+- Agrega XML como nuevo formato de respuesta de datos para todos los recursos. Para utilizarlo, agregar `formato=xml` a los parámetros de la URL.
+- Agrega *Shapefile* como nuevo formato de respuesta de datos para todos los recursos (excepto `/direcciones` y `/ubicacion`). Para utilizarlo, agregar `formato=shp` a los parámetros de la URL. El archivo descargado contiene las geometrías e información de todas las entidades filtradas.
+- El parámetro `id` ahora acepta listas de IDs separadas por comas. Otros parámetros que aceptaban un ID también aceptan ahora listas de IDs.
+- Actualiza versión de datos de ETL a `9.0.0`.
+- Corrige mensajes de error equivocados.
+- Cambios varios al recurso `/direcciones`:
+	- Utilizando la librería [`georef-ar-address`](https://github.com/datosgobar/georef-ar-address), se mejoró el proceso de parseo de las direcciones recibidas. Ahora, se aceptan más tipos de direcciones, y la API es capaz de detectar errores comunes de escritura.
+	- Se removió el parámetro `tipo`.
+	- Se modificó el campo de respuesta `altura` a un objecto `altura` que contiene los valores `valor` y `unidad.`
+	- Se removieron los campos `nombre` y `id`, y se agregaron los nuevos campos objeto `calle`, `calle_cruce_1` y `calle_cruce_2`. Cada uno contiene los campos `nombre`, `id` y `categoria`, y representan las calles normalizadas que fueron detectadas en la dirección de entrada.
+	- Se agregó el campo `piso`.
+	- Se modificaron los nombres y el orden de los campos de respuesta en formato CSV.
+- Cambios al recurso `/provincias`:
+	- Se agregaron los campos `nombre_completo`, `iso_id`, `iso_nombre` y `categoria`.
+- Cambios al recurso `/departamentos`:
+	- Se agregaron los campos `nombre_completo` y `categoria`.
+- Cambios al recurso `/municipios`:
+	- Se agregaron los campos `nombre_completo` y `categoria`.
+	- Parámetro `interseccion`: agrega `calle` como tipo de entidad posible a utilizar.
+- Cambios al recurso `/localidades`:
+	- Se modificó el nombre del campo `tipo` a `categoria`.
+- Cambios al recurso `/calles`:
+	- Se modificó el nombre del campo `tipo` a `categoria`.
+	- Se modificó el nombre del parámetro `tipo` a `categoria`.
+	- Agrega parámetro `interseccion`: permite buscar calles por intersección con geometrías de otras entidades.
+- Cambios al recurso `/ubicacion`:
+	 - Se removió el campo `fuente`, y se agregaron los campos `provincia.fuente`, `departamento.fuente` y `municipio.fuente`.
+
 ## **0.2.3** - 2018/12/11
 - Modifica formato de respuestas CSV: todos los campos no-numéricos ahora son devueltos entre comillas dobles. El cambio permite a algunas herramientas manejar mejor los valores de IDs, que consisten enteramente de dígitos, pero deberían ser tratados como texto.
 - El parámetro 'direccion' del recurso `/direcciones` ahora acepta direcciones con altura 0.
