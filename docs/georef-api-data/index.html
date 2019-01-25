@@ -333,8 +333,32 @@
 
 
   <li class="md-nav__item">
+    <a href="../addresses/" title="Normalización de direcciones" class="md-nav__link">
+      Normalización de direcciones
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../geom-operations/" title="Operaciones con geometrías" class="md-nav__link">
       Operaciones con geometrías
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../shapefiles/" title="Descarga de geometrías" class="md-nav__link">
+      Descarga de geometrías
     </a>
   </li>
 
@@ -567,6 +591,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#intersecciones-de-calles" title="Intersecciones de Calles" class="md-nav__link">
+    Intersecciones de Calles
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -718,6 +749,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#intersecciones-de-calles" title="Intersecciones de Calles" class="md-nav__link">
+    Intersecciones de Calles
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -741,7 +779,7 @@
                 
                 
                 <h1 id="modelo-de-datos-para-georef-api">Modelo de datos para Georef API<a class="headerlink" href="#modelo-de-datos-para-georef-api" title="Permanent link">&para;</a></h1>
-<p>Los archivos de datos de Georef consisten de cinco (5) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades y calles.</p>
+<p>Los archivos de datos de Georef consisten de seis (6) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles e intersecciones de calles.</p>
 <h2 id="etl">ETL<a class="headerlink" href="#etl" title="Permanent link">&para;</a></h2>
 <p>Los datos utilizados por Georef API son obtenidos a través de un proceso de ETL. El código del mismo se encuentra en el repositorio GitHub <a href="https://github.com/datosgobar/georef-ar-etl">georef-ar-etl</a>, así también como su <a href="https://github.com/datosgobar/georef-ar-etl/blob/master/docs/install.md">guía de instalación y uso</a>.</p>
 <h2 id="fuentes">Fuentes<a class="headerlink" href="#fuentes" title="Permanent link">&para;</a></h2>
@@ -765,18 +803,21 @@
 <li>Enlace: <a href="https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas">Portal de geoservicios de INDEC</a></li>
 </ul>
 <h2 id="archivos">Archivos<a class="headerlink" href="#archivos" title="Permanent link">&para;</a></h2>
-<p>A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo <code>version</code> se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la <code>7.0.0</code>.</p>
+<p>A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo <code>version</code> se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la <code>9.0.0</code>.</p>
 <h3 id="provincias">Provincias<a class="headerlink" href="#provincias" title="Permanent link">&para;</a></h3>
 <p>El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;7.0.0&quot;, // Versión de archivo
-    &quot;fuente&quot;: &quot;IGN&quot;, // Fuente de los datos
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
     &quot;datos&quot;: [ // Lista de entidades
         {
             &quot;id&quot;: &quot;90&quot;, // ID de provincia
-            &quot;nombre&quot;: &quot;Tucumán&quot;, // Nombre de provincia
+            &quot;nombre&quot;: &quot;Tucumán&quot;, // Nombre de provincia,
+            &quot;nombre_completo&quot;: &quot;Provincia de Tucumán&quot;, // Nombre completo
+            &quot;iso_id&quot;: &quot;AR-T&quot;, // Identificador ISO 3166-2
+            &quot;iso_nombre&quot;: &quot;Tucumán&quot;, // Nombre ISO
+            &quot;categoria&quot;: &quot;Provincia&quot;, // Tipo de entidad
             &quot;centroide&quot;: {
                 &quot;lat&quot;: -26.9478, // Latitud de centroide
                 &quot;lon&quot;: -65.36475 // Longitud de centroide
@@ -784,7 +825,8 @@
             &quot;geometria&quot;: { // Geometría en formato GeoJSON
                 &quot;type&quot;: &quot;MultiPolygon&quot;,
                 &quot;coordinates&quot;: [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
-            }
+            },
+            &quot;fuente&quot;: &quot;IGN&quot; // Fuente del dato
         },
         { ... },
     ]
@@ -796,12 +838,13 @@
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;7.0.0&quot;, // Versión de archivo
-    &quot;fuente&quot;: &quot;IGN&quot;, // Fuente de los datos
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
     &quot;datos&quot;: [ // Lista de entidades
         {
             &quot;id&quot;: &quot;06427&quot;, // ID del departamento
             &quot;nombre&quot;: &quot;La Matanza&quot;, // Nombre del departamento
+            &quot;nombre_completo&quot;: &quot;Partido de la Matanza&quot;, // Nombre completo
+            &quot;categoria&quot;: &quot;Partido&quot;, // Tipo de entidad
             &quot;centroide&quot;: {
                 &quot;lat&quot;: -34.770165, // Latitud de centroide
                 &quot;lon&quot;: -58.625449  // Longitud de centroide
@@ -814,7 +857,8 @@
                 &quot;id&quot;: &quot;06&quot;,
                 &quot;nombre&quot;: &quot;Buenos Aires&quot;,
                 &quot;interseccion&quot;: &quot;0.0412936&quot; // Porcentaje del área de la provincia que ocupa el depto.
-            }
+            },
+            &quot;fuente&quot;: &quot;ARBA - Gerencia de Servicios Catastrales&quot; // Fuente del dato
         },
         { ... },
     ]
@@ -826,12 +870,13 @@
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;7.0.0&quot;, // Versión de archivo
-    &quot;fuente&quot;: &quot;IGN&quot;, // Fuente de los datos
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
     &quot;datos&quot;: [ // Lista de entidades
         {
             &quot;id&quot;: &quot;060105&quot;, // ID del municipio
             &quot;nombre&quot;: &quot;Bolívar&quot;, // Nombre del municipio
+            &quot;nombre_completo&quot;: &quot;Municipio Bolívar&quot;, // Nombre completo
+            &quot;categoria&quot;: &quot;Municipio&quot;, // Tipo de entidad
             &quot;centroide&quot;: {
                 &quot;lat&quot;: -36.298222, // Latitud de centroide
                 &quot;lon&quot;: -61.149648  // Longitud de centroide
@@ -844,7 +889,8 @@
                 &quot;id&quot;: &quot;06&quot;,
                 &quot;nombre&quot;: &quot;Buenos Aires&quot;,
                 &quot;interseccion&quot;: &quot;0.0100845&quot; // Porcentaje del área de la provincia que ocupa el municipio
-            }
+            },
+            &quot;fuente&quot;: &quot;ARBA - Gerencia de Servicios Catastrales&quot; // Fuente del dato
         },
         { ... },
     ]
@@ -856,13 +902,12 @@
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;7.0.0&quot;, // Versión de archivo
-    &quot;fuente&quot;: &quot;BAHRA&quot;, // Fuente de los datos
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
     &quot;datos&quot;: [ // Lista de entidades
         {
             &quot;id&quot;: &quot;06189080000&quot;, // ID de la localidad
             &quot;nombre&quot;: &quot;San Roman&quot;, // Nombre de la localidad
-            &quot;tipo&quot;: &quot;Localidad simple (LS)&quot;, // Tipo de asentamiento BAHRA
+            &quot;categoria&quot;: &quot;Localidad simple (LS)&quot;, // Tipo de asentamiento BAHRA
             &quot;centroide&quot;: {
                 &quot;lat&quot;: -38.741555, // Latitud de centroide
                 &quot;lon&quot;: -61.537720  // Longitud de centroide
@@ -872,17 +917,18 @@
                 &quot;coordinates&quot;: [[-61.5377, -38.7415], ...]
             },
             &quot;municipio&quot;: { // Municipio que contiene a la localidad
-                &quot;id&quot;: &quot;060189&quot;, // Puede ser null
-                &quot;nombre&quot;: &quot;Coronel Dorrego&quot; // Puede ser null
+                &quot;id&quot;: &quot;060189&quot;, // Puede ser nulo
+                &quot;nombre&quot;: &quot;Coronel Dorrego&quot; // Puede ser nulo
             },
             &quot;departamento&quot;: { // Departamento que contiene a la localidad
-                &quot;id&quot;: &quot;06070&quot;,
-                &quot;nombre&quot;: &quot;Baradero&quot;
+                &quot;id&quot;: &quot;06189&quot;,
+                &quot;nombre&quot;: &quot;Coronel Dorrego&quot;
             },
             &quot;provincia&quot;: {  // Provincia que contiene a la localidad
                 &quot;id&quot;: &quot;06&quot;,
                 &quot;nombre&quot;: &quot;Buenos Aires&quot;
-            }
+            },
+            &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
         },
         { ... },
     ]
@@ -894,14 +940,13 @@
 <pre><code>{
     &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
     &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
-    &quot;version&quot;: &quot;7.0.0&quot;, // Versión de archivo
-    &quot;fuente&quot;: &quot;INDEC&quot;, // Fuente de los datos
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
     &quot;datos&quot;: [ // Lista de vías de circulación
         {
             &quot;nomenclatura&quot;: &quot;LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires&quot;, // Nomenclatura: 'nombre, departamento, provincia'
             &quot;id&quot;: &quot;0202101007345&quot;, // ID de la vía de circulación
             &quot;nombre&quot;: &quot;LARREA&quot;, // Nombre de vía de circulación
-            &quot;tipo&quot;: &quot;CALLE&quot;, // Tipo de vía de circulación
+            &quot;categoria&quot;: &quot;CALLE&quot;, // Tipo de vía de circulación
             &quot;altura&quot;: {
                 &quot;inicio&quot;: {
                     &quot;derecha&quot;: 1, // Número inicial de altura (lado derecho)
@@ -923,8 +968,59 @@
             &quot;provincia&quot;: { // Provincia
                 &quot;nombre&quot;: &quot;Ciudad Autónoma de Buenos Aires&quot;,
                 &quot;id&quot;: &quot;02&quot;
-            }
+            },
+            &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
         },
+        { ... },
+    ]
+}
+</code></pre>
+
+<h3 id="intersecciones-de-calles">Intersecciones de Calles<a class="headerlink" href="#intersecciones-de-calles" title="Permanent link">&para;</a></h3>
+<p>El archivo de datos de intersecciones debe tener formato JSON, y no debe tener intersecciones repetidas. Dadas las calles con ID X y ID Z, solo debe estar presente la intersección X-Z o Z-X. Su esquema de datos debe ser el siguiente:</p>
+<pre><code>{
+    &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
+    &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
+    &quot;datos&quot;: [ // Lista de intersecciones
+        {
+            &quot;id&quot;: &quot;0207001002300-0207001007975&quot;, // ID de la calle A, ID de la calle B
+            &quot;calle_a&quot;: {
+                &quot;id&quot;: &quot;0207001002300&quot;, // ID de la calle A
+                &quot;nombre&quot;: &quot;BOSTON&quot;, // Nombre de la calle A
+                &quot;departamento&quot;: { // Departamento de la calle A
+                    &quot;id&quot;: &quot;02070&quot;,
+                    &quot;nombre&quot;: &quot;Comuna 10&quot;
+                },
+                &quot;provincia&quot;: { // Provincia de la calle A
+                    &quot;id&quot;: &quot;02&quot;,
+                    &quot;nombre&quot;: &quot;Ciudad Autónoma de Buenos Aires&quot;
+                },
+                &quot;categoria&quot;: &quot;CALLE&quot;, // Tipo de la calle A
+                &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
+            },
+            &quot;calle_b&quot;: {
+                &quot;id&quot;: &quot;0207001007975&quot;, // ID de la calle B
+                &quot;nombre&quot;: &quot;MARCOS SASTRE&quot;, // Nombre de la calle B
+                &quot;departamento&quot;: { // Departamento de la calle B
+                    &quot;id&quot;: &quot;02070&quot;,
+                    &quot;nombre&quot;: &quot;Comuna 10&quot;
+                },
+                &quot;provincia&quot;: { // Provincia de la calle B
+                    &quot;id&quot;: &quot;02&quot;,
+                    &quot;nombre&quot;: &quot;Ciudad Autónoma de Buenos Aires&quot;
+                },
+                &quot;categoria&quot;: &quot;CALLE&quot;, // Tipo de la calle B
+                &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
+            },
+            &quot;geometria&quot;: { // Geometría en formato GeoJSON
+                &quot;type&quot;: &quot;Point&quot;,
+                &quot;coordinates&quot;: [
+                    -58.5077676091915,
+                    -34.6150993860767
+                ]
+            }
+        }
         { ... },
     ]
 }

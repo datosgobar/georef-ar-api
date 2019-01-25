@@ -421,8 +421,32 @@
 
 
   <li class="md-nav__item">
+    <a href="../addresses/" title="Normalización de direcciones" class="md-nav__link">
+      Normalización de direcciones
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../geom-operations/" title="Operaciones con geometrías" class="md-nav__link">
       Operaciones con geometrías
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../shapefiles/" title="Descarga de geometrías" class="md-nav__link">
+      Descarga de geometrías
     </a>
   </li>
 
@@ -755,34 +779,53 @@
 </code></pre>
 
 <h3 id="normalizacion-de-direcciones">Normalización de direcciones<a class="headerlink" href="#normalizacion-de-direcciones" title="Permanent link">&para;</a></h3>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&amp;direccion=Florida%201801"><code>https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&amp;direccion=Florida 1801</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&amp;direccion=Florida%20al%201801"><code>https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&amp;direccion=Florida al 1801</code></a></p>
 <pre><code>{
     &quot;direcciones&quot;: [
         {
-            &quot;altura&quot;: 1801,
-            &quot;departamento&quot;: {
-                &quot;id&quot;: &quot;06270&quot;,
-                &quot;nombre&quot;: &quot;JOSÉ M. EZEIZA&quot;
+            &quot;altura&quot;: {
+                &quot;unidad&quot;: null,
+                &quot;valor&quot;: &quot;1801&quot;
             },
-            &quot;id&quot;: &quot;0627001001875&quot;,
-            &quot;nombre&quot;: &quot;FLORIDA&quot;,
-            &quot;nomenclatura&quot;: &quot;FLORIDA 1801, JOSÉ M. EZEIZA, BUENOS AIRES&quot;,
+            &quot;calle&quot;: {
+                &quot;categoria&quot;: &quot;CALLE&quot;,
+                &quot;id&quot;: &quot;0653901003005&quot;,
+                &quot;nombre&quot;: &quot;FLORIDA&quot;
+            },
+            &quot;calle_cruce_1&quot;: {
+                &quot;categoria&quot;: null,
+                &quot;id&quot;: null,
+                &quot;nombre&quot;: null
+            },
+            &quot;calle_cruce_2&quot;: {
+                &quot;categoria&quot;: null,
+                &quot;id&quot;: null,
+                &quot;nombre&quot;: null
+            },
+            &quot;departamento&quot;: {
+                &quot;id&quot;: &quot;06539&quot;,
+                &quot;nombre&quot;: &quot;Merlo&quot;
+            },
+            &quot;nomenclatura&quot;: &quot;FLORIDA 1801, Merlo, Buenos Aires&quot;,
+            &quot;piso&quot;: null,
             &quot;provincia&quot;: {
                 &quot;id&quot;: &quot;06&quot;,
-                &quot;nombre&quot;: &quot;BUENOS AIRES&quot;
+                &quot;nombre&quot;: &quot;Buenos Aires&quot;
             },
-            &quot;tipo&quot;: &quot;CALLE&quot;
-        },
-        { ... } // 9 resultados omitidos
+            &quot;ubicacion&quot;: {
+                &quot;lat&quot;: null,
+                &quot;lon&quot;: null
+            }
+        }
     ],
     &quot;cantidad&quot;: 1,
-    &quot;total&quot;: 13,
+    &quot;total&quot;: 1,
     &quot;inicio&quot;: 0
 }
 </code></pre>
 
 <h3 id="listado-de-calles">Listado de calles<a class="headerlink" href="#listado-de-calles" title="Permanent link">&para;</a></h3>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&amp;tipo=avenida"><code>https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&amp;tipo=avenida</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&amp;tipo=avenida"><code>https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&amp;categoria=avenida</code></a></p>
 <pre><code>{
     &quot;calles&quot;: [
         {
@@ -807,8 +850,9 @@
                 &quot;id&quot;: &quot;90&quot;,
                 &quot;nombre&quot;: &quot;Tucumán&quot;
             },
-            &quot;tipo&quot;: &quot;AV&quot;
-        }, { ... } // 2 resultados omitidos
+            &quot;categoria&quot;: &quot;AV&quot;
+        },
+        { ... } // 2 resultados omitidos
     ],
     &quot;cantidad&quot;: 3,
     &quot;total&quot;: 3,
