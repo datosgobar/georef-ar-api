@@ -7,7 +7,7 @@
 - Actualiza versión de datos de ETL a `9.0.0`.
 - Corrige mensajes de error equivocados.
 - Cambios varios al recurso `/direcciones`:
-	- Utilizando la librería [georef-ar-address](https://github.com/datosgobar/georef-ar-address), se mejoró el proceso de interpretación de las direcciones recibidas. Ahora, se aceptan más tipos de direcciones, y la API es capaz de detectar errores comunes de escritura.
+	- Utilizando la librería [georef-ar-address](https://github.com/datosgobar/georef-ar-address), se mejoró el proceso de interpretación de las direcciones recibidas. Ahora, se aceptan más tipos de direcciones, y la API es capaz de detectar errores comunes de escritura. Para más detalles, consultar la nueva documentación de [normalización de direcciones](addresses.md).
 	- Se removió el parámetro `tipo`.
 	- Se modificó el campo de respuesta `altura` a un objecto `altura` que contiene los valores `valor` y `unidad.`
 	- Se removieron los campos `nombre` y `id`, y se agregaron los nuevos campos objeto `calle`, `calle_cruce_1` y `calle_cruce_2`. Cada uno contiene los campos `nombre`, `id` y `categoria`, y representan las calles normalizadas que fueron detectadas en la dirección de entrada.
