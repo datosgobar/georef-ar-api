@@ -3,7 +3,7 @@
     "info": {
         "title": "georef-ar-api",
         "description": "API del Servicio de Normalización de Datos Geográficos de Argentina.\n\nPara ver ejemplos de uso de la API, dirigirse a la [página de documentación del proyecto](https://apis.datos.gob.ar/georef).\n\nPara leer el código de la API, acceder a [GitHub](https://github.com/datosgobar/georef-ar-api).\n\n---\n\n[Equipo de Datos de la Nación Argentina - Página GitHub](https://github.com/datosgobar)\n\n[Enviar un mail al Equipo de Datos de la Nación Argentina](mailto:datos@modernizacion.gob.ar)",
-        "version": "0.2.2"
+        "version": "0.3.0"
     },
     "tags": [
         {
@@ -17,7 +17,7 @@
     ],
     "components": {
         "schemas": {
-            "provincia_sin_coordenadas": {
+            "provincia_sub_entidad": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -166,7 +166,7 @@
                         "example": "Departamento Rosario"
                     },
                     "provincia": {
-                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
                     },
 		    "centroide": {
 			"type": "object",
@@ -187,7 +187,7 @@
                     },
                 }
             },
-            "departamento_sin_coordenadas": {
+            "departamento_sub_entidad": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -297,7 +297,7 @@
                         "example": "Municipio Granadero Baigorria"
                     },
                     "provincia": {
-                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
                     },
 		    "centroide": {
 			"type": "object",
@@ -318,7 +318,7 @@
                     }
                 }
             },
-            "municipio_sin_coordenadas": {
+            "municipio_sub_entidad": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -416,7 +416,7 @@
                 "type": "object",
                 "properties": {
                     "departamento": {
-                        "$ref": "#/components/schemas/departamento_sin_coordenadas"
+                        "$ref": "#/components/schemas/departamento_sub_entidad"
                     },
                     "id": {
                         "type": "string",
@@ -427,10 +427,10 @@
                         "example": "Granadero Baigorria"
                     },
                     "provincia": {
-                        "$ref": "#/components/schemas/provincia_sin_coordenadas"
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
                     },
 		    "municipio": {
-			"$ref": "#/components/schemas/municipio_sin_coordenadas"
+			"$ref": "#/components/schemas/municipio_sub_entidad"
 		    },
                     "categoria": {
                         "type": "string",
@@ -557,7 +557,7 @@
 			}
 		    },
                     "departamento": {
-			"$ref": "#/components/schemas/departamento_sin_coordenadas"
+			"$ref": "#/components/schemas/departamento_sub_entidad"
                     },
 		    "calle": {
 			"type": "object",
@@ -611,7 +611,7 @@
                         "example": "URQUIZA 400, Rosario, Santa Fe"
                     },
                     "provincia": {
-			"$ref": "#/components/schemas/provincia_sin_coordenadas"
+			"$ref": "#/components/schemas/provincia_sub_entidad"
                     },
                     "categoria": {
                         "type": "string",
@@ -702,7 +702,7 @@
                 "type": "object",
                 "properties": {
                     "departamento": {
-			"$ref": "#/components/schemas/departamento_sin_coordenadas"
+			"$ref": "#/components/schemas/departamento_sub_entidad"
                     },
 		    "altura": {
 			"type": "object",
@@ -748,7 +748,7 @@
                         "example": "URQUIZA, Rosario, Santa Fe"
                     },
                     "provincia": {
-			"$ref": "#/components/schemas/provincia_sin_coordenadas"
+			"$ref": "#/components/schemas/provincia_sub_entidad"
                     },
                     "categoria": {
                         "type": "string",
@@ -853,13 +853,13 @@
                 "type": "object",
 		"properties": {
 		    "departamento": {
-			"$ref": "#/components/schemas/departamento_sin_coordenadas"
+			"$ref": "#/components/schemas/departamento_sub_entidad"
 		    },
 		    "provincia": {
-			"$ref": "#/components/schemas/provincia_sin_coordenadas"
+			"$ref": "#/components/schemas/provincia_sub_entidad"
 		    },
 		    "municipio": {
-			"$ref": "#/components/schemas/municipio_sin_coordenadas"
+			"$ref": "#/components/schemas/municipio_sub_entidad"
 		    },
 		    "lat": {
 			"type": "number",
