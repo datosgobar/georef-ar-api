@@ -12,6 +12,7 @@ nav:
     - Ejemplos de uso: quick-start.md
     - Consultas por lotes: bulk.md
     - Operaciones con geometrías: geom-operations.md
+    - Descarga de geometrías: shapefiles.md
     - Usar en planillas de cálculo: spreadsheet-integration.md
     - Usar en Python: python-usage.md
     - Autenticarse con JWT: jwt-token.md
