@@ -556,9 +556,6 @@
 			    }
 			}
 		    },
-                    "departamento": {
-			"$ref": "#/components/schemas/departamento_sub_entidad"
-                    },
 		    "calle": {
 			"type": "object",
 			"properties": {
@@ -610,8 +607,24 @@
                         "type": "string",
                         "example": "URQUIZA 400, Rosario, Santa Fe"
                     },
+		    "ubicacion": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.932417
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.688217
+			    }
+			}
+		    },
                     "provincia": {
 			"$ref": "#/components/schemas/provincia_sub_entidad"
+                    },
+                    "departamento": {
+			"$ref": "#/components/schemas/departamento_sub_entidad"
                     },
                     "categoria": {
                         "type": "string",
