@@ -87,35 +87,54 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 ```
 
 ### Normalización de direcciones
-`GET` [`https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida 1801`](https://apis.datos.gob.ar/georef/api/direcciones?provincia=bsas&direccion=Florida%201801)
+`GET` [`https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&direccion=Florida al 1801`](https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&direccion=Florida%20al%201801)
 ```
 {
     "direcciones": [
-        {
-            "altura": 1801,
-            "departamento": {
-                "id": "06270",
-                "nombre": "JOSÉ M. EZEIZA"
-            },
-            "id": "0627001001875",
-            "nombre": "FLORIDA",
-            "nomenclatura": "FLORIDA 1801, JOSÉ M. EZEIZA, BUENOS AIRES",
-            "provincia": {
-                "id": "06",
-                "nombre": "BUENOS AIRES"
-            },
-            "tipo": "CALLE"
-        },
-        { ... } // 9 resultados omitidos
+		{
+			"altura": {
+				"unidad": null,
+				"valor": "1801"
+			},
+			"calle": {
+				"categoria": "CALLE",
+				"id": "0653901003005",
+				"nombre": "FLORIDA"
+			},
+			"calle_cruce_1": {
+				"categoria": null,
+				"id": null,
+				"nombre": null
+			},
+			"calle_cruce_2": {
+				"categoria": null,
+				"id": null,
+				"nombre": null
+			},
+			"departamento": {
+				"id": "06539",
+				"nombre": "Merlo"
+			},
+			"nomenclatura": "FLORIDA 1801, Merlo, Buenos Aires",
+			"piso": null,
+			"provincia": {
+				"id": "06",
+				"nombre": "Buenos Aires"
+			},
+			"ubicacion": {
+				"lat": null,
+				"lon": null
+			}
+		}
     ],
     "cantidad": 1,
-    "total": 13,
+    "total": 1,
     "inicio": 0
 }
 ```
 
 ### Listado de calles
-`GET` [`https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&tipo=avenida`](https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&tipo=avenida)
+`GET` [`https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&categoria=avenida`](https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&tipo=avenida)
 ```
 {
     "calles": [
@@ -141,8 +160,9 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
                 "id": "90",
                 "nombre": "Tucumán"
             },
-            "tipo": "AV"
-        }, { ... } // 2 resultados omitidos
+            "categoria": "AV"
+        },
+		{ ... } // 2 resultados omitidos
     ],
     "cantidad": 3,
     "total": 3,
