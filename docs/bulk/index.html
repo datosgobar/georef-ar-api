@@ -655,7 +655,7 @@
                 
                 
                 <h1 id="consutas-por-lotes">Consutas por lotes<a class="headerlink" href="#consutas-por-lotes" title="Permanent link">&para;</a></h1>
-<p>Todos los recursos de la API tienen una variante <code>POST</code> que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo. Las versiones de los recursos <code>POST</code> aceptan los mismos parámetros que las <code>GET</code>, con la excepción del parámetro <code>formato</code>, que necesariamente toma el valor <code>json</code>. Adicionalmente, todos los parámetros se envían a través del cuerpo de la consulta HTTP, y no como parte del <em>query string</em>.</p>
+<p>Todos los recursos de la API tienen una variante <code>POST</code> que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo. Las versiones de los recursos <code>POST</code> aceptan los mismos parámetros que las <code>GET</code>, con la excepción del parámetro <code>formato</code>, que obligatoriamente toma el valor <code>json</code>. Adicionalmente, todos los parámetros se envían a través del cuerpo de la consulta HTTP, y no como parte del <em>query string</em>.</p>
 <p>Por ejemplo, las siguientes tres consultas:</p>
 <p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&amp;campos=nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&amp;campos=nombre</code></a></p>
 <p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&amp;campos=nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&amp;campos=nombre</code></a></p>
@@ -790,12 +790,12 @@ Por ejemplo, se permite enviar 5000 consultas con <code>max=1</code>, o 100 cons
         {
             &quot;direccion&quot;: &quot;santa fe 3100&quot;,
             &quot;max&quot;: 1,
-            &quot;campos&quot;: &quot;id, nombre, altura&quot;
+            &quot;campos&quot;: &quot;basico&quot;
         },
         {
             &quot;direccion&quot;: &quot;corientes 4010&quot;,
             &quot;max&quot;: 1,
-            &quot;campos&quot;: &quot;id, nombre, altura&quot;,
+            &quot;campos&quot;: &quot;basico&quot;,
             &quot;departamento&quot;: &quot;General López&quot;
         }
     ]
@@ -807,28 +807,54 @@ Por ejemplo, se permite enviar 5000 consultas con <code>max=1</code>, o 100 cons
 <pre><code class="json">{
     &quot;resultados&quot;: [
         {
+            &quot;cantidad&quot;: 1,
             &quot;direcciones&quot;: [
                 {
-                    &quot;altura&quot;: 3100,
-                    &quot;id&quot;: &quot;0642701011435&quot;,
-                    &quot;nombre&quot;: &quot;SANTA FE&quot;
+                    &quot;altura&quot;: {
+                        &quot;valor&quot;: &quot;3100&quot;
+                    },
+                    &quot;calle&quot;: {
+                        &quot;id&quot;: &quot;0642701011435&quot;,
+                        &quot;nombre&quot;: &quot;SANTA FE&quot;
+                    },
+                    &quot;calle_cruce_1&quot;: {
+                        &quot;id&quot;: null,
+                        &quot;nombre&quot;: null
+                    },
+                    &quot;calle_cruce_2&quot;: {
+                        &quot;id&quot;: null,
+                        &quot;nombre&quot;: null
+                    },
+                    &quot;nomenclatura&quot;: &quot;SANTA FE 3100, La Matanza, Buenos Aires&quot;
                 }
             ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 25,
-            &quot;inicio&quot;: 0
+            &quot;inicio&quot;: 0,
+            &quot;total&quot;: 29
         },
         {
+            &quot;cantidad&quot;: 1,
             &quot;direcciones&quot;: [
                 {
-                    &quot;altura&quot;: 4010,
-                    &quot;id&quot;: &quot;8204229000610&quot;,
-                    &quot;nombre&quot;: &quot;CORRIENTES&quot;
+                    &quot;altura&quot;: {
+                        &quot;valor&quot;: &quot;4010&quot;
+                    },
+                    &quot;calle&quot;: {
+                        &quot;id&quot;: &quot;8204229000610&quot;,
+                        &quot;nombre&quot;: &quot;CORRIENTES&quot;
+                    },
+                    &quot;calle_cruce_1&quot;: {
+                        &quot;id&quot;: null,
+                        &quot;nombre&quot;: null
+                    },
+                    &quot;calle_cruce_2&quot;: {
+                        &quot;id&quot;: null,
+                        &quot;nombre&quot;: null
+                    },
+                    &quot;nomenclatura&quot;: &quot;CORRIENTES 4010, General López, Santa Fe&quot;
                 }
             ],
-            &quot;cantidad&quot;: 1,
-            &quot;total&quot;: 1,
-            &quot;inicio&quot;: 0
+            &quot;inicio&quot;: 0,
+            &quot;total&quot;: 1
         }
     ]
 }
@@ -857,40 +883,44 @@ Por ejemplo, se permite enviar 5000 consultas con <code>max=1</code>, o 100 cons
 
 <p>Resultados:</p>
 <pre><code class="json">{
-    &quot;resultados&quot;: [
-        {
-            &quot;ubicacion&quot;: {
-                &quot;fuente&quot;: &quot;IGN&quot;,
-                &quot;municipio&quot;: {
-                    &quot;nombre&quot;: &quot;Hualfín&quot;,
-                    &quot;id&quot;: &quot;100077&quot;
-                },
-                &quot;lon&quot;: -66.752929,
-                &quot;provincia&quot;: {
-                    &quot;nombre&quot;: &quot;Catamarca&quot;,
-                    &quot;id&quot;: &quot;10&quot;
-                },
-                &quot;lat&quot;: -27.274161,
-                &quot;departamento&quot;: {
-                    &quot;nombre&quot;: &quot;Belén&quot;,
-                    &quot;id&quot;: &quot;10035&quot;
-                }
-            }
+  &quot;resultados&quot;: [
+    {
+      &quot;ubicacion&quot;: {
+        &quot;departamento&quot;: {
+          &quot;fuente&quot;: &quot;Adm. Grl. de Catastro&quot;,
+          &quot;id&quot;: &quot;10035&quot;,
+          &quot;nombre&quot;: &quot;Belén&quot;
         },
-        {
-            &quot;ubicacion&quot;: {
-                &quot;departamento_nombre&quot;: &quot;Villaguay&quot;,
-                &quot;lon&quot;: -59.092813,
-                &quot;municipio_id&quot;: null,
-                &quot;lat&quot;: -31.480693,
-                &quot;fuente&quot;: &quot;IGN&quot;,
-                &quot;provincia_nombre&quot;: &quot;Entre Ríos&quot;,
-                &quot;provincia_id&quot;: &quot;30&quot;,
-                &quot;departamento_id&quot;: &quot;30113&quot;,
-                &quot;municipio_nombre&quot;: null
-            }
+        &quot;lat&quot;: -27.274161,
+        &quot;lon&quot;: -66.752929,
+        &quot;municipio&quot;: {
+          &quot;fuente&quot;: &quot;Adm. Grl. de Catastro&quot;,
+          &quot;id&quot;: &quot;100077&quot;,
+          &quot;nombre&quot;: &quot;Hualfín&quot;
+        },
+        &quot;provincia&quot;: {
+          &quot;fuente&quot;: &quot;IGN&quot;,
+          &quot;id&quot;: &quot;10&quot;,
+          &quot;nombre&quot;: &quot;Catamarca&quot;
         }
-    ]
+      }
+    },
+    {
+      &quot;ubicacion&quot;: {
+        &quot;departamento_fuente&quot;: &quot;ATER - Direc. de Catastro&quot;,
+        &quot;departamento_id&quot;: &quot;30113&quot;,
+        &quot;departamento_nombre&quot;: &quot;Villaguay&quot;,
+        &quot;lat&quot;: -31.480693,
+        &quot;lon&quot;: -59.092813,
+        &quot;municipio_fuente&quot;: null,
+        &quot;municipio_id&quot;: null,
+        &quot;municipio_nombre&quot;: null,
+        &quot;provincia_fuente&quot;: &quot;IGN&quot;,
+        &quot;provincia_id&quot;: &quot;30&quot;,
+        &quot;provincia_nombre&quot;: &quot;Entre Ríos&quot;
+      }
+    }
+  ]
 }
 </code></pre>
                 
