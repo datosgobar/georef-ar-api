@@ -546,7 +546,7 @@ class AddressParameter(Parameter):
         # por worker (no se usan threads).
         self._parser_lock = threading.Lock()
 
-        cache = utils.LRUDict(constants.ADDRESS_PARSER_CACHE_SIZE)
+        cache = utils.LFUDict(constants.ADDRESS_PARSER_CACHE_SIZE)
         self._parser = AddressParser(cache=cache)
         super().__init__(required=True)
 

@@ -4,14 +4,14 @@ Contiene funciones y clases de varias utilidades.
 """
 
 
-class LRUDict:
-    """Diccionario LRU ("Least Recently Used").
+class LFUDict:
+    """Diccionario LFU ("Least Frequently Used").
 
     Implementa un diccionario similar a dict que cuenta con un tamaño máximo de
     ítems a almacenar. Cuando se llega al tamaño máximo y se quiere insertar un
     nuevo valor, se elimina primero el ítem menos utilizado automáticamente.
 
-    Siempre se mantiene la propiedad len(LRUDict(N)) <= N.
+    Siempre se mantiene la propiedad len(LFUDict(N)) <= N.
 
     Attributes:
         _size (int): Tamaño máximo a alcanzar.
@@ -20,7 +20,7 @@ class LRUDict:
             utilizada desde su inserción*.
 
     """
-    class LRUDictItem:
+    class LFUDictItem:
         __slots__ = ['value', 'score']
 
         def __init__(self, value):
@@ -31,7 +31,7 @@ class LRUDict:
             return '{} [{}]'.format(self.value, self.score)
 
     def __init__(self, size):
-        """Inicializa un objeto de tipo LRUDict.
+        """Inicializa un objeto de tipo LFUDict.
 
         Args:
             size (int): Ver atributo '_size'.
@@ -107,7 +107,7 @@ class LRUDict:
             if len(self._dict) == self._size:
                 self._evict_min_key()
 
-            self._dict[key] = LRUDict.LRUDictItem(value)
+            self._dict[key] = LFUDict.LFUDictItem(value)
             self._last_new_key = key
         else:
             self._increase_key_score(key)
@@ -145,7 +145,7 @@ class LRUDict:
             str: Representación del diccionario.
 
         """
-        return 'LRUDict({})'.format(self._dict)
+        return 'LFUDict({})'.format(self._dict)
 
 
 def step_iterator(iterator, input_data=None):
