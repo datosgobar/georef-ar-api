@@ -1,6 +1,6 @@
 # Consutas por lotes
 
-Todos los recursos de la API tienen una variante `POST` que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo. Las versiones de los recursos `POST` aceptan los mismos parámetros que las `GET`, con la excepción del parámetro `formato`, que necesariamente toma el valor `json`. Adicionalmente, todos los parámetros se envían a través del cuerpo de la consulta HTTP, y no como parte del *query string*.
+Todos los recursos de la API tienen una variante `POST` que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo. Las versiones de los recursos `POST` aceptan los mismos parámetros que las `GET`, con la excepción del parámetro `formato`, que obligatoriamente toma el valor `json`. Adicionalmente, todos los parámetros se envían a través del cuerpo de la consulta HTTP, y no como parte del *query string*.
 
 Por ejemplo, las siguientes tres consultas:
 
@@ -150,12 +150,12 @@ curl -X POST "https://apis.datos.gob.ar/georef/api/direcciones" \
         {
             "direccion": "santa fe 3100",
             "max": 1,
-            "campos": "id, nombre, altura"
+            "campos": "basico"
         },
         {
             "direccion": "corientes 4010",
             "max": 1,
-			"campos": "id, nombre, altura",
+			"campos": "basico",
 			"departamento": "General López"
         }
     ]
@@ -167,28 +167,54 @@ Resultados:
 {
     "resultados": [
         {
+            "cantidad": 1,
             "direcciones": [
                 {
-                    "altura": 3100,
-                    "id": "0642701011435",
-                    "nombre": "SANTA FE"
+                    "altura": {
+                        "valor": "3100"
+                    },
+                    "calle": {
+                        "id": "0642701011435",
+                        "nombre": "SANTA FE"
+                    },
+                    "calle_cruce_1": {
+                        "id": null,
+                        "nombre": null
+                    },
+                    "calle_cruce_2": {
+                        "id": null,
+                        "nombre": null
+                    },
+                    "nomenclatura": "SANTA FE 3100, La Matanza, Buenos Aires"
                 }
             ],
-            "cantidad": 1,
-            "total": 25,
-            "inicio": 0
+            "inicio": 0,
+            "total": 29
         },
         {
+            "cantidad": 1,
             "direcciones": [
                 {
-                    "altura": 4010,
-                    "id": "8204229000610",
-                    "nombre": "CORRIENTES"
+                    "altura": {
+                        "valor": "4010"
+                    },
+                    "calle": {
+                        "id": "8204229000610",
+                        "nombre": "CORRIENTES"
+                    },
+                    "calle_cruce_1": {
+                        "id": null,
+                        "nombre": null
+                    },
+                    "calle_cruce_2": {
+                        "id": null,
+                        "nombre": null
+                    },
+                    "nomenclatura": "CORRIENTES 4010, General López, Santa Fe"
                 }
             ],
-            "cantidad": 1,
-            "total": 1,
-            "inicio": 0
+            "inicio": 0,
+            "total": 1
         }
     ]
 }
@@ -218,39 +244,43 @@ curl -X POST "https://apis.datos.gob.ar/georef/api/ubicacion" \
 Resultados:
 ```json
 {
-    "resultados": [
-        {
-            "ubicacion": {
-                "fuente": "IGN",
-                "municipio": {
-                    "nombre": "Hualfín",
-                    "id": "100077"
-                },
-                "lon": -66.752929,
-                "provincia": {
-                    "nombre": "Catamarca",
-                    "id": "10"
-                },
-                "lat": -27.274161,
-                "departamento": {
-                    "nombre": "Belén",
-                    "id": "10035"
-                }
-            }
+  "resultados": [
+    {
+      "ubicacion": {
+        "departamento": {
+          "fuente": "Adm. Grl. de Catastro",
+          "id": "10035",
+          "nombre": "Belén"
         },
-        {
-            "ubicacion": {
-                "departamento_nombre": "Villaguay",
-                "lon": -59.092813,
-                "municipio_id": null,
-                "lat": -31.480693,
-                "fuente": "IGN",
-                "provincia_nombre": "Entre Ríos",
-                "provincia_id": "30",
-                "departamento_id": "30113",
-                "municipio_nombre": null
-            }
+        "lat": -27.274161,
+        "lon": -66.752929,
+        "municipio": {
+          "fuente": "Adm. Grl. de Catastro",
+          "id": "100077",
+          "nombre": "Hualfín"
+        },
+        "provincia": {
+          "fuente": "IGN",
+          "id": "10",
+          "nombre": "Catamarca"
         }
-    ]
+      }
+    },
+    {
+      "ubicacion": {
+        "departamento_fuente": "ATER - Direc. de Catastro",
+        "departamento_id": "30113",
+        "departamento_nombre": "Villaguay",
+        "lat": -31.480693,
+        "lon": -59.092813,
+        "municipio_fuente": null,
+        "municipio_id": null,
+        "municipio_nombre": null,
+        "provincia_fuente": "IGN",
+        "provincia_id": "30",
+        "provincia_nombre": "Entre Ríos"
+      }
+    }
+  ]
 }
 ```
