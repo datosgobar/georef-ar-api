@@ -1,5 +1,9 @@
 # Historial de versiones
 
+## **0.3.1** - 2019/01/29
+- Mejora interpretación de direcciones (`georef-ar-address` versión `0.0.7`).
+- Corrige error HTTP 500 lanzado en normalización de direcciones, en casos donde el comienzo y el fin de alturas de la calle comparten el mismo valor, y la dirección tiene ese valor exacto como altura.
+
 ## **0.3.0** - 2019/01/24
 - Agrega XML como nuevo formato de respuesta de datos para todos los recursos. Para utilizarlo, agregar `formato=xml` a los parámetros de la URL.
 - Agrega *Shapefile* como nuevo formato de respuesta de datos para todos los recursos (excepto `/direcciones` y `/ubicacion`). Para utilizarlo, agregar `formato=shp` a los parámetros de la URL. El archivo descargado contiene las geometrías e información de todas las entidades filtradas. Para más detalles, consultar [la documentación de descarga de geometrías](shapefiles.md).

@@ -3,7 +3,7 @@
     "info": {
         "title": "georef-ar-api",
         "description": "API del Servicio de Normalización de Datos Geográficos de Argentina.\n\nPara ver ejemplos de uso de la API, dirigirse a la [página de documentación del proyecto](https://apis.datos.gob.ar/georef).\n\nPara leer el código de la API, acceder a [GitHub](https://github.com/datosgobar/georef-ar-api).\n\n---\n\n[Equipo de Datos de la Nación Argentina - Página GitHub](https://github.com/datosgobar)\n\n[Enviar un mail al Equipo de Datos de la Nación Argentina](mailto:datos@modernizacion.gob.ar)",
-        "version": "0.3.0"
+        "version": "0.3.1"
     },
     "tags": [
         {
