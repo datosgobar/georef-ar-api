@@ -48,7 +48,12 @@ def street_extents(door_nums, number):
 
 
 def street_number_location(geom, door_numbers, number):
-    """Obtiene las coordenadas de una altura dentro de una calle.
+    """Intenta obtener las coordenadas de una altura dentro de una calle
+    (georreferenciación). En algunos casos, es posible que la operacion falle
+    debido a problemas con los datos de la calle. Estos casos son:
+        - La calle está compuesta por dos o más tramos no conectados.
+        - Los valores de alturas (fin e inicio) de la calle son 0, o son
+          idénticos.
 
     Args:
         geom (dict): Geometría de la calle en formato GeoJSON.
@@ -67,6 +72,11 @@ def street_number_location(geom, door_numbers, number):
         raise TypeError('GeoJSON type must be MultiLineString')
 
     start, end = street_extents(door_numbers, number)
+    if start == end:
+        # Los valores de comienzo y fin de alturas de la calle tienen el mismo
+        # valor. Por el momento, considerar estos casos como inválidos.
+        return None
+
     shape = shapely.geometry.MultiLineString(geom['coordinates'])
     line = shapely.ops.linemerge(shape)
 
