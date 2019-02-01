@@ -282,7 +282,7 @@ class ElasticsearchSearch:
             2) Ejecutar búsquedas que requieren distintas cantides de pasos
                bajo una misma interfaz.
             3) Utilizar la funcionalidad de MultiSearch para hacer la menor
-               cantidad de consultas a Elasticsearch.
+               cantidad de consultas posible a Elasticsearch.
 
         Los resultados de cada búsqueda pueden ser accedidos vía el campo
         '.result' de cada una.
@@ -290,7 +290,9 @@ class ElasticsearchSearch:
         Args:
             es (Elasticsearch): Conexión a Elasticsearch.
             searches (list): Lista de búsquedas ElasticsearchSearch o
-                derivados.
+                derivados. La lista puede ser de cualquier largo ya que sus
+                contenidos son fraccionados por 'run_multisearch' para evitar
+                consultas demasiado extensas a Elasticsearch.
 
         """
         iterators = [search.search_steps() for search in searches]
