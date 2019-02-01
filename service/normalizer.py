@@ -6,7 +6,7 @@ de los recursos que expone la API.
 
 import logging
 from flask import current_app
-from service import data, params, formatter, addresses
+from service import data, params, formatter, address
 from service import names as N
 from service.query_result import QueryResult
 from service.geometry import Point
@@ -500,7 +500,7 @@ def process_address_queries(params_list):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    query_results = addresses.run_address_queries(es, queries, formats)
+    query_results = address.run_address_queries(es, queries, formats)
 
     return query_results, formats
 

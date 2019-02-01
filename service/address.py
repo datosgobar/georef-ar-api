@@ -1,4 +1,4 @@
-"""Módulo 'addresses' de georef-ar-api.
+"""Módulo 'address' de georef-ar-api.
 
 Contiene funciones y clases utilizadas para normalizar direcciones (recurso
 /direcciones). Este módulo puede ser considerado una extensión del módulo
