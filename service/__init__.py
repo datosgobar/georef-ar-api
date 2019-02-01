@@ -16,7 +16,9 @@ with app.app_context():
 
 
 def georef_console():
-    """TODO: Docs
+    """Inicia una consola interactiva de Python con algunos módulos de
+    georef-ar-api precargados para realizar pruebas rápidas.
+
     """
     import code
     with app.app_context():
