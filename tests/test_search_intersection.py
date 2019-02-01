@@ -23,6 +23,15 @@ class IntersectionsTest(GeorefLiveTest):
             ['06']
         )
 
+    def test_intersection_state_street(self):
+        """Se debería poder buscar provincias utilizando geometrías de
+        calles por intersección."""
+        self.assert_intersection_contains_ids(
+            'provincias',
+            {'interseccion': 'calle:7801407000555'},
+            ['78']
+        )
+
     def test_intersection_state_muni_dept(self):
         """Se debería poder buscar provincias utilizando geometrías de
         municipios y departamentos por intersección."""
@@ -48,6 +57,15 @@ class IntersectionsTest(GeorefLiveTest):
             'departamentos',
             {'interseccion': 'municipio:625056', 'max': 100},
             ['62035', '62014', '62049', '62091']
+        )
+
+    def test_intersection_dept_street(self):
+        """Se debería poder buscar departamentos utilizando geometrías de
+        calles por intersección."""
+        self.assert_intersection_contains_ids(
+            'departamentos',
+            {'interseccion': 'calle:0638503000700'},
+            ['06385']
         )
 
     def test_intersection_dept_muni_bounds(self):
@@ -129,6 +147,29 @@ class IntersectionsTest(GeorefLiveTest):
             {'interseccion': 'municipio:220084', 'max': 1000},
             ['2202801000850', '2202801000125', '2202801001110']
         )
+
+    def test_intersection_street_street(self):
+        """Se debería poder buscar calles utilizando geometrías de
+        calles por intersección."""
+        self.assert_intersection_contains_ids(
+            'calles',
+            {'interseccion': 'calle:0209101002235', 'max': 1000},
+            ['0209101011450', '0209101011450', '0209101008685']
+        )
+
+    def test_intersection_street_not_self_intersect(self):
+        """Cuando se buscan calles con geometrías de otra calle, la calle
+        utilizada no debería aparecer en los resultados."""
+        resp = self.get_response({
+            # Buscar calles que interseccionen con calle ID X, y limitar los
+            # resultados a calles con ID X. Como los resultados de intersección
+            # de calles con calle X no trae la calle X, cuando se limitan los
+            # resultados a ID == X, los resultados son vacíos.
+            'interseccion': 'calle:0209101002235',
+            'id': '0209101002235'
+        }, endpoint='/api/calles', entity='calles')
+
+        self.assertListEqual(resp, [])
 
     def test_intersection_invalid_id(self):
         """Una búsqueda por intersección de ID/s inválido/s debería resultar

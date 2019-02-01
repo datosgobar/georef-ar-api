@@ -922,8 +922,15 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path,
     # provincia que la entidad con ID == entity_id, ya que dos geometrías de
     # provincias distintas nunca pueden tener una intersección (sin importar el
     # tipo de entidad).
-    prefix_query = Prefix(id=entity_id[:constants.STATE_ID_LEN])
-    return GeoShape(**{field: options}) & prefix_query
+    prefix_query = Prefix(**{N.ID: entity_id[:constants.STATE_ID_LEN]})
+
+    # En caso de estar buscando entidades en un índice utilizando geometrías de
+    # entidades en el mismo índice, asegurarse de que los resultados no traigan
+    # la entidad que utilizamos como geometría (el dato de que una geometría
+    # intersecciona con si misma no es útil).
+    exclude_self_query = ~build_terms_query(N.ID, [entity_id])
+
+    return GeoShape(**{field: options}) & prefix_query & exclude_self_query
 
 
 def build_terms_query(field, values):

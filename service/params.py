@@ -1022,7 +1022,7 @@ class EndpointParameters():
 PARAMS_STATES = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STATE_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.MUN]),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.MUN, N.STREET]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1048,7 +1048,7 @@ PARAMS_STATES = EndpointParameters(shared_params={
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.DEPT_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(entities=[N.STATE, N.MUN]),
+    N.INTERSECTION: IntersectionParameter(entities=[N.STATE, N.MUN, N.STREET]),
     N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
@@ -1179,7 +1179,8 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 PARAMS_STREETS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(entities=[N.MUN, N.DEPT, N.STATE]),
+    N.INTERSECTION: IntersectionParameter(entities=[N.STREET, N.MUN, N.DEPT,
+                                                    N.STATE]),
     N.CATEGORY: StrParameter(),
     N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
     N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
