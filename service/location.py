@@ -4,7 +4,8 @@ Contiene las clases y funciones necesarias para la implementación del recurso
 /ubicacion de la API.
 """
 
-from service import data
+from service.data import ElasticsearchSearch, StatesSearch, DepartmentsSearch
+from service.data import MunicipalitiesSearch
 from service import names as N
 from service.geometry import Point
 from service.query_result import QueryResult
@@ -63,26 +64,24 @@ def run_location_queries(es, queries):
         list: Resultados de ubicaciones (QueryResult).
 
     """
-
     # TODO:
     # Por problemas con los datos de origen, se optó por utilizar una
-    # implementación simple para la la funcion 'process_location_queries'.
+    # implementación simple para la la funcion 'run_location_queries'.
     # Cuando los datos de departamentos cubran todo el departamento nacional,
     # se podría modificar la función para que funcione de la siguiente forma:
     #
     # (Recordar que las provincias y departamentos cubren todo el territorio
     # nacional, pero no los municipios.)
     #
-    # 1) Tomar las N consultas recibidas y enviar todas al índice de
-    #    departamentos.
-    # 2) Tomar las consultas *que retornaron una entidad*, y re-enviarlas pero
-    #    esta vez al índice de municipios. Las consultas que *no* retornaron
-    #    una entidad (es decir, no cayeron dentro de un depto.) quedan marcadas
-    #    como nulas.
-    # 3) Combinar los resultados de los pasos 1 y 2: Si la consulta no tiene
-    #    depto. asociado, su resultado es nulo. Si tiene depto., entonces
-    #    también tiene provincia. Si la consulta tiene municipio, entonces
-    #    tiene provincia, departamento y municipio.
+    # Por cada consulta, implementar un patrón similar al de address.py (con
+    # iteradores de consultas), donde cada iterador ('búsqueda') realiza los
+    # siguientes pasos:
+    #
+    # 1) Buscar la posición en el índice de departamentos.
+    # 2) Si se obtuvo un departamento, buscar la posición nuevamente pero en el
+    #    índice de municipios. Si no se obtuvo nada, cancelar la búsqueda.
+    # 3) Componer el departamento, la provincia del departamento y el municipio
+    #    en un QueryResult para completar la búsqueda.
 
     all_searches = []
 
@@ -91,40 +90,33 @@ def run_location_queries(es, queries):
     dept_searches = []
 
     for query in queries:
-        search = data.StatesSearch({
+        es_query = {
             'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
             'fields': [N.ID, N.NAME, N.SOURCE],
             'size': 1
-        })
+        }
 
+        # Buscar la posición en provincias, departamentos y municipios
+
+        search = StatesSearch(es_query)
         all_searches.append(search)
         state_searches.append(search)
 
-        search = data.DepartmentsSearch({
-            'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
-            'fields': [N.ID, N.NAME, N.SOURCE],
-            'size': 1
-        })
-
+        search = DepartmentsSearch(es_query)
         all_searches.append(search)
         dept_searches.append(search)
 
-        search = data.MunicipalitiesSearch({
-            'geo_shape_geoms': [Point.from_json_location(query).to_geojson()],
-            'fields': [N.ID, N.NAME, N.SOURCE],
-            'size': 1
-        })
-
+        search = MunicipalitiesSearch(es_query)
         all_searches.append(search)
         muni_searches.append(search)
 
-    data.ElasticsearchSearch.run_searches(es, all_searches)
+    # Ejecutar todas las búsquedas preparadas
+    ElasticsearchSearch.run_searches(es, all_searches)
 
     locations = []
-    for query, state_search, dept_search, muni_search in zip(queries,
-                                                             state_searches,
-                                                             dept_searches,
-                                                             muni_searches):
+    iterator = zip(queries, state_searches, dept_searches, muni_searches)
+
+    for query, state_search, dept_search, muni_search in iterator:
         # Ya que la query de tipo location retorna una o cero entidades,
         # extraer la primera entidad de los resultados, o tomar None si
         # no hay resultados.
