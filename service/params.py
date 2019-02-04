@@ -204,25 +204,6 @@ class Parameter:
 
         return parsed
 
-    def validate_values(self, vals):
-        """Comprueba que una serie de valores (ya con los tipos apropiados)
-        sean válidos como conjunto. Este método se utiliza durante el parseo
-        del body en requests POST, para validar uno o más valores como
-        conjunto. Por ejemplo, el parámetro 'max' establece que la suma de
-        todos los parámetros max recibidos no pueden estar por debajo o por
-        encima de ciertos valores.
-
-        Args:
-            vals (list): Lista de valores a validar en conjunto.
-
-        Raises:
-            ValueError: Si la validación no fue exitosa.
-
-        """
-        # Por default, un parámetro no realiza validaciones a nivel conjunto
-        # de valores.
-        pass
-
     def _check_value_in_choices(self, val):
         """Comprueba que un valor esté dentro de los valores permitidos del
         objeto Parameter. El valor ya debería estar parseado y tener el tipo
