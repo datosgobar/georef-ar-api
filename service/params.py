@@ -776,7 +776,7 @@ class EndpointParameters():
         self._set_validators[param_name].append(validator)
         return self
 
-    def parse_params_dict(self, params, received, from_source):
+    def _parse_params_dict(self, params, received, from_source):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP,
         utilizando el conjunto 'params' de parámetros.
 
@@ -842,10 +842,10 @@ class EndpointParameters():
             fmt = parsed.get(N.FORMAT, 'json')
             raise ParameterParsingException(errors, fmt)
 
-        self.cross_validate_params(parsed, from_source)
+        self._cross_validate_params(parsed, from_source)
         return parsed
 
-    def cross_validate_params(self, parsed, from_source):
+    def _cross_validate_params(self, parsed, from_source):
         """Ejecuta las validaciones de conjuntos de parámetros distintos. Por
         ejemplo, un validador puede comprobar que la suma de los parámetros
         'max' e 'inicio' no superen un cierto valor.
@@ -879,7 +879,7 @@ class EndpointParameters():
         if errors:
             raise ParameterParsingException(errors)
 
-    def validate_param_sets(self, results):
+    def _validate_param_sets(self, results):
         """Ejecuta las validaciones de conjuntos de valores para un parámetro.
         Por ejemplo, un validador puede comprobar que la suma de todos los
         parámetros 'max' en una request POST no supere un cierto valor. Notar
@@ -982,8 +982,8 @@ class EndpointParameters():
             parsed, errors = {}, {}
             if hasattr(param_dict, 'get'):
                 try:
-                    parsed = self.parse_params_dict(self._post_body_params,
-                                                    param_dict, 'body')
+                    parsed = self._parse_params_dict(self._post_body_params,
+                                                     param_dict, 'body')
                 except ParameterParsingException as e:
                     errors = e.errors
             else:
@@ -997,7 +997,7 @@ class EndpointParameters():
         if any(errors_list):
             raise ParameterParsingException(errors_list)
 
-        self.validate_param_sets(results)
+        self._validate_param_sets(results)
         return results
 
     def parse_get_params(self, qs_params):
@@ -1015,8 +1015,8 @@ class EndpointParameters():
                 de parámetros.
 
         """
-        return self.parse_params_dict(self._get_qs_params, qs_params,
-                                      'querystring')
+        return self._parse_params_dict(self._get_qs_params, qs_params,
+                                       'querystring')
 
 
 PARAMS_STATES = EndpointParameters(shared_params={

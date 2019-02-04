@@ -1,6 +1,6 @@
 from random import choice
 from service.params import ParamErrorType as T
-from service.formatter import value_to_xml, XML_ERROR_LIST_ITEM_NAMES
+from service.formatter import value_to_xml
 from . import GeorefMockTest
 
 ENDPOINTS = [
@@ -539,7 +539,7 @@ class ParamParsingTest(GeorefMockTest):
                                      expect_status=[400])
 
         json_as_xml = value_to_xml('errores', json_resp['errores'],
-                                   list_item_names=XML_ERROR_LIST_ITEM_NAMES)
+                                   list_item_names={'ayuda': 'item'})
 
         self.assert_xml_equal(xml_resp.find('errores'), json_as_xml)
 

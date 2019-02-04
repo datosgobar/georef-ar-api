@@ -11,7 +11,7 @@ from service.geometry import Point
 from service.query_result import QueryResult
 
 
-def build_location_result(query, state, dept, muni):
+def _build_location_result(query, state, dept, muni):
     """Construye un resultado para una consulta al endpoint de ubicación.
 
     Args:
@@ -123,6 +123,6 @@ def run_location_queries(es, queries):
         state = state_search.result.hits[0] if state_search.result else None
         dept = dept_search.result.hits[0] if dept_search.result else None
         muni = muni_search.result.hits[0] if muni_search.result else None
-        locations.append(build_location_result(query, state, dept, muni))
+        locations.append(_build_location_result(query, state, dept, muni))
 
     return locations

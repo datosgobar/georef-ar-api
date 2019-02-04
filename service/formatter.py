@@ -20,10 +20,10 @@ CSV_SEP = ','
 CSV_QUOTE = '"'
 CSV_NEWLINE = '\n'
 FLAT_SEP = '_'
-SHP_MAX_FIELD_CONTENT_LEN = 128
-SHP_MAX_FIELD_NAME_LEN = 11
+_SHP_MAX_FIELD_CONTENT_LEN = 128
+_SHP_MAX_FIELD_NAME_LEN = 11
 
-STATES_CSV_FIELDS = [
+_STATES_CSV_FIELDS = [
     (N.ID, [N.STATE, N.ID]),
     (N.NAME, [N.STATE, N.NAME]),
     (N.COMPLETE_NAME, [N.STATE, N.COMPLETE_NAME]),
@@ -35,7 +35,7 @@ STATES_CSV_FIELDS = [
     (N.CATEGORY, [N.STATE, N.CATEGORY])
 ]
 
-DEPARTMENTS_CSV_FIELDS = [
+_DEPARTMENTS_CSV_FIELDS = [
     (N.ID, [N.DEPT, N.ID]),
     (N.NAME, [N.DEPT, N.NAME]),
     (N.COMPLETE_NAME, [N.DEPT, N.COMPLETE_NAME]),
@@ -48,7 +48,7 @@ DEPARTMENTS_CSV_FIELDS = [
     (N.CATEGORY, [N.DEPT, N.CATEGORY])
 ]
 
-MUNICIPALITIES_CSV_FIELDS = [
+_MUNICIPALITIES_CSV_FIELDS = [
     (N.ID, [N.MUN, N.ID]),
     (N.NAME, [N.MUN, N.NAME]),
     (N.COMPLETE_NAME, [N.MUN, N.COMPLETE_NAME]),
@@ -61,7 +61,7 @@ MUNICIPALITIES_CSV_FIELDS = [
     (N.CATEGORY, [N.MUN, N.CATEGORY])
 ]
 
-LOCALITIES_CSV_FIELDS = [
+_LOCALITIES_CSV_FIELDS = [
     (N.ID, [N.LOCALITY, N.ID]),
     (N.NAME, [N.LOCALITY, N.NAME]),
     (N.C_LAT, [N.LOCALITY, N.CENTROID, N.LAT]),
@@ -76,7 +76,7 @@ LOCALITIES_CSV_FIELDS = [
     (N.CATEGORY, [N.LOCALITY, N.CATEGORY])
 ]
 
-STREETS_CSV_FIELDS = [
+_STREETS_CSV_FIELDS = [
     (N.ID, [N.STREET, N.ID]),
     (N.NAME, [N.STREET, N.NAME]),
     (N.START_R, [N.STREET, N.DOOR_NUM, N.START, N.RIGHT]),
@@ -92,7 +92,7 @@ STREETS_CSV_FIELDS = [
     (N.SOURCE, [N.STREET, N.SOURCE])
 ]
 
-ADDRESSES_CSV_FIELDS = [
+_ADDRESSES_CSV_FIELDS = [
     (N.FULL_NAME, [N.ADDRESS, N.FULL_NAME]),
     (N.STREET_NAME, [N.STREET, N.NAME]),
     (N.STREET_ID, [N.STREET, N.ID]),
@@ -116,22 +116,17 @@ ADDRESSES_CSV_FIELDS = [
 ]
 
 
-ENDPOINT_CSV_FIELDS = {
-    N.STATES: STATES_CSV_FIELDS,
-    N.DEPARTMENTS: DEPARTMENTS_CSV_FIELDS,
-    N.MUNICIPALITIES: MUNICIPALITIES_CSV_FIELDS,
-    N.LOCALITIES: LOCALITIES_CSV_FIELDS,
-    N.STREETS: STREETS_CSV_FIELDS,
-    N.ADDRESSES: ADDRESSES_CSV_FIELDS
+_ENDPOINT_CSV_FIELDS = {
+    N.STATES: _STATES_CSV_FIELDS,
+    N.DEPARTMENTS: _DEPARTMENTS_CSV_FIELDS,
+    N.MUNICIPALITIES: _MUNICIPALITIES_CSV_FIELDS,
+    N.LOCALITIES: _LOCALITIES_CSV_FIELDS,
+    N.STREETS: _STREETS_CSV_FIELDS,
+    N.ADDRESSES: _ADDRESSES_CSV_FIELDS
 }
 
 
-XML_ERROR_LIST_ITEM_NAMES = {
-    'ayuda': 'item'
-}
-
-
-SHP_SHORT_FIELD_NAMES = {
+_SHP_SHORT_FIELD_NAMES = {
     key.replace(N.FIELDS_SEP, FLAT_SEP): value
     for key, value in
     {
@@ -235,7 +230,7 @@ def flatten_dict(d, max_depth=3, sep=FLAT_SEP):
             del d[key]
 
 
-def create_xml_element(tag, content=None):
+def _create_xml_element(tag, content=None):
     """Crea un elemento XML con un contenido interno opcional.
 
     Args:
@@ -253,7 +248,7 @@ def create_xml_element(tag, content=None):
     return element
 
 
-def xml_flask_response(element, status=200):
+def _xml_flask_response(element, status=200):
     """Crea una respuesta HTTP con contenido XML.
 
     Args:
@@ -266,7 +261,7 @@ def xml_flask_response(element, status=200):
 
     """
     contents = io.StringIO()
-    root = create_xml_element(constants.API_NAME)
+    root = _create_xml_element(constants.API_NAME)
     root.append(element)
 
     ElementTree.ElementTree(root).write(contents, encoding='unicode',
@@ -311,7 +306,7 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
     if max_depth <= 0:
         raise RuntimeError("Maximum depth reached")
 
-    root = create_xml_element(tag)
+    root = _create_xml_element(tag)
 
     if isinstance(val, dict):
         for key in sorted(val):
@@ -338,7 +333,7 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
     return root
 
 
-def format_params_error_dict(error_dict):
+def _format_params_error_dict(error_dict):
     """Toma un diccionario de errores de parámetros y les da una estructura
     apropiada para ser incluidos en una respuesta HTTP con contenido JSON.
 
@@ -360,7 +355,7 @@ def format_params_error_dict(error_dict):
         }
 
         if param_error.help:
-            error['ayuda'] = param_error.help
+            error[N.HELP] = param_error.help
 
         results.append(error)
 
@@ -379,11 +374,11 @@ def create_param_error_response_single(errors, fmt):
         flask.Response: Respuesta HTTP con errores.
 
     """
-    errors_fmt = format_params_error_dict(errors)
+    errors_fmt = _format_params_error_dict(errors)
 
     if fmt == 'xml':
-        root = value_to_xml('errores', errors_fmt, XML_ERROR_LIST_ITEM_NAMES)
-        return xml_flask_response(root, status=400)
+        root = value_to_xml('errores', errors_fmt, {N.HELP: N.ITEM})
+        return _xml_flask_response(root, status=400)
 
     # Para cualquier formato que no sea XML, utilizar JSON para devolver
     # los errores.
@@ -403,7 +398,7 @@ def create_param_error_response_bulk(errors):
         flask.Response: Respuesta HTTP con errores.
 
     """
-    errors_fmt = [format_params_error_dict(d) for d in errors]
+    errors_fmt = [_format_params_error_dict(d) for d in errors]
 
     return make_response(jsonify({
         'errores': errors_fmt
@@ -486,7 +481,7 @@ def create_internal_error_response():
     }), 500)
 
 
-def format_result_xml(name, result, fmt):
+def _format_result_xml(name, result, fmt):
     """Toma el resultado de una consulta y la convierte a su equivalente en
     XML.
 
@@ -500,21 +495,21 @@ def format_result_xml(name, result, fmt):
 
     """
     # Remover campos no especificados por el usuario.
-    format_result_fields(result, fmt)
+    _format_result_fields(result, fmt)
 
-    root = create_xml_element(N.RESULT)
+    root = _create_xml_element(N.RESULT)
     if result.iterable:
         root.append(value_to_xml(name, result.entities))
-        root.append(create_xml_element(N.QUANTITY, len(result.entities)))
-        root.append(create_xml_element(N.TOTAL, result.total))
-        root.append(create_xml_element(N.OFFSET, result.offset))
+        root.append(_create_xml_element(N.QUANTITY, len(result.entities)))
+        root.append(_create_xml_element(N.TOTAL, result.total))
+        root.append(_create_xml_element(N.OFFSET, result.offset))
     else:
         root.append(value_to_xml(name, result.first_entity()))
 
     return root
 
 
-def create_xml_response_single(name, result, fmt):
+def _create_xml_response_single(name, result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato XML.
 
@@ -527,11 +522,11 @@ def create_xml_response_single(name, result, fmt):
         flask.Response: Respuesta HTTP 200 con contenido XML.
 
     """
-    root = format_result_xml(name, result, fmt)
-    return xml_flask_response(root)
+    root = _format_result_xml(name, result, fmt)
+    return _xml_flask_response(root)
 
 
-def create_shp_response_single(name, result, fmt):
+def _create_shp_response_single(name, result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta HTTP 200 con
     el resultado en formato SHP (Shapefile), comprimido en formato ZIP.
 
@@ -544,6 +539,9 @@ def create_shp_response_single(name, result, fmt):
         flask.Response: Respuesta HTTP con contenido SHP.
 
     """
+    if not result.iterable:
+        raise ValueError('SHP: Result must be iterable')
+
     contents = io.BytesIO()
     zip_file = zipfile.ZipFile(contents, mode='w')
 
@@ -556,24 +554,23 @@ def create_shp_response_single(name, result, fmt):
     keys = [field.replace(N.FIELDS_SEP, FLAT_SEP) for field in fmt[N.FIELDS]]
 
     for key in keys:
-        if len(key) > SHP_MAX_FIELD_NAME_LEN:
-            key = SHP_SHORT_FIELD_NAMES[key]
-        writer.field(key, 'C', SHP_MAX_FIELD_CONTENT_LEN)
+        if len(key) > _SHP_MAX_FIELD_NAME_LEN:
+            key = _SHP_SHORT_FIELD_NAMES[key]
+        writer.field(key, 'C', _SHP_MAX_FIELD_CONTENT_LEN)
 
-    if result.iterable:
-        for entity in result.entities:
-            writer.shape(entity[N.GEOM])
+    for entity in result.entities:
+        writer.shape(entity[N.GEOM])
 
-            flatten_dict(entity, max_depth=3)
-            record = []
-            for key in keys:
-                value = str(entity[key])
-                if len(value) > SHP_MAX_FIELD_CONTENT_LEN:
-                    value = value[:SHP_MAX_FIELD_CONTENT_LEN]
+        flatten_dict(entity, max_depth=3)
+        record = []
+        for key in keys:
+            value = str(entity[key])
+            if len(value) > _SHP_MAX_FIELD_CONTENT_LEN:
+                value = value[:_SHP_MAX_FIELD_CONTENT_LEN]
 
-                record.append(value)
+            record.append(value)
 
-            writer.record(*record)
+        writer.record(*record)
 
     writer.close()
 
@@ -590,7 +587,7 @@ def create_shp_response_single(name, result, fmt):
                      as_attachment=True)
 
 
-def create_csv_response_single(name, result, fmt):
+def _create_csv_response_single(name, result, fmt):
     """Toma un resultado (iterable) de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato CSV.
 
@@ -611,7 +608,7 @@ def create_csv_response_single(name, result, fmt):
 
         keys = []
         field_names = []
-        csv_fields = ENDPOINT_CSV_FIELDS[name]
+        csv_fields = _ENDPOINT_CSV_FIELDS[name]
 
         for original_field, csv_field_name in csv_fields:
             if original_field in fmt[N.FIELDS]:
@@ -633,7 +630,7 @@ def create_csv_response_single(name, result, fmt):
     }))
 
 
-def create_geojson_response_single(result, fmt):
+def _create_geojson_response_single(result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato GeoJSON.
 
@@ -646,7 +643,7 @@ def create_geojson_response_single(result, fmt):
 
     """
     # Remover campos no especificados por el usuario.
-    format_result_fields(result, fmt)
+    _format_result_fields(result, fmt)
 
     features = []
     for item in result.entities:
@@ -669,7 +666,7 @@ def create_geojson_response_single(result, fmt):
     return make_response(jsonify(geojson.FeatureCollection(features)))
 
 
-def format_result_json(name, result, fmt):
+def _format_result_json(name, result, fmt):
     """Toma el resultado de una consulta, y la devuelve con una estructura
     apropiada para ser convertida a JSON.
 
@@ -683,7 +680,7 @@ def format_result_json(name, result, fmt):
 
     """
     # Remover campos no especificados por el usuario.
-    format_result_fields(result, fmt)
+    _format_result_fields(result, fmt)
 
     if fmt.get(N.FLATTEN, False):
         if result.iterable:
@@ -703,7 +700,7 @@ def format_result_json(name, result, fmt):
     return {name: result.first_entity()}
 
 
-def create_json_response_single(name, result, fmt):
+def _create_json_response_single(name, result, fmt):
     """Toma un resultado de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato JSON.
 
@@ -716,11 +713,11 @@ def create_json_response_single(name, result, fmt):
         flask.Response: Respuesta HTTP con contenido JSON.
 
     """
-    json_response = format_result_json(name, result, fmt)
+    json_response = _format_result_json(name, result, fmt)
     return make_response(jsonify(json_response))
 
 
-def create_json_response_bulk(name, results, formats):
+def _create_json_response_bulk(name, results, formats):
     """Toma una lista de resultados de una consulta o más, y devuelve una
     respuesta HTTP 200 con los resultados en formato JSON.
 
@@ -734,7 +731,7 @@ def create_json_response_bulk(name, results, formats):
 
     """
     json_results = [
-        format_result_json(name, result, fmt)
+        _format_result_json(name, result, fmt)
         for result, fmt in zip(results, formats)
     ]
 
@@ -769,7 +766,7 @@ def filter_result_fields(result, fields_dict, max_depth=3):
             filter_result_fields(value, fields_dict[key], max_depth - 1)
 
 
-def format_result_fields(result, fmt):
+def _format_result_fields(result, fmt):
     """Dada la lista de campos en fmt[N.FIELDS], remueve los campos no
     especificados en cada entidad del resultado.
 
@@ -843,23 +840,23 @@ def create_ok_response(name, result, fmt):
 
     """
     if fmt[N.FORMAT] == 'json':
-        return create_json_response_single(name, result, fmt)
+        return _create_json_response_single(name, result, fmt)
 
     if fmt[N.FORMAT] == 'csv':
         if not result.iterable:
             raise ValueError(
                 'Can\'t create CSV response from non-iterable content')
 
-        return create_csv_response_single(name, result, fmt)
+        return _create_csv_response_single(name, result, fmt)
 
     if fmt[N.FORMAT] == 'xml':
-        return create_xml_response_single(name, result, fmt)
+        return _create_xml_response_single(name, result, fmt)
 
     if fmt[N.FORMAT] == 'geojson':
-        return create_geojson_response_single(result, fmt)
+        return _create_geojson_response_single(result, fmt)
 
     if fmt[N.FORMAT] == 'shp':
-        return create_shp_response_single(name, result, fmt)
+        return _create_shp_response_single(name, result, fmt)
 
     raise ValueError('Unknown format')
 
@@ -879,4 +876,4 @@ def create_ok_response_bulk(name, results, formats):
     """
     # El valor FMT de cada elemento de formats es 'json' (ya que en modo bulk
     # solo se permiten respuestas JSON).
-    return create_json_response_bulk(name, results, formats)
+    return _create_json_response_bulk(name, results, formats)

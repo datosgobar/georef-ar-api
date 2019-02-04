@@ -6,7 +6,7 @@ de los recursos que expone la API.
 
 import logging
 from flask import current_app
-from service import data, params, formatter, address, location
+from service import data, params, formatter, address, location, utils
 from service import names as N
 from service.query_result import QueryResult
 
@@ -35,31 +35,7 @@ def get_elasticsearch():
     return current_app.elasticsearch
 
 
-def translate_keys(d, translations, ignore=None):
-    """Cambia las keys del diccionario 'd', utilizando las traducciones
-    especificadas en 'translations'. Devuelve los resultados en un nuevo
-    diccionario.
-
-    Args:
-        d (dict): Diccionario a modificar.
-        translations (dict): Traducciones de keys (key anterior => key nueva.)
-        ignore (list): Keys de 'd' a no agregar al nuevo diccionario devuelto.
-
-    Returns:
-        dict: Diccionario con las keys modificadas.
-
-    """
-    if not ignore:
-        ignore = []
-
-    return {
-        translations.get(key, key): value
-        for key, value in d.items()
-        if key not in ignore
-    }
-
-
-def process_entity_single(request, name, param_parser, key_translations):
+def _process_entity_single(request, name, param_parser, key_translations):
     """Procesa una request GET para consultar datos de una entidad.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -86,8 +62,8 @@ def process_entity_single(request, name, param_parser, key_translations):
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     # Construir query a partir de parámetros
-    query = translate_keys(qs_params, key_translations,
-                           ignore=[N.FLATTEN, N.FORMAT])
+    query = utils.translate_keys(qs_params, key_translations,
+                                 ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
@@ -112,7 +88,7 @@ def process_entity_single(request, name, param_parser, key_translations):
     return formatter.create_ok_response(name, query_result, fmt)
 
 
-def process_entity_bulk(request, name, param_parser, key_translations):
+def _process_entity_bulk(request, name, param_parser, key_translations):
     """Procesa una request POST para consultar datos de una lista de entidades.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -143,8 +119,8 @@ def process_entity_bulk(request, name, param_parser, key_translations):
     formats = []
     for parsed_params in body_params:
         # Construir query a partir de parámetros
-        query = translate_keys(parsed_params, key_translations,
-                               ignore=[N.FLATTEN, N.FORMAT])
+        query = utils.translate_keys(parsed_params, key_translations,
+                                     ignore=[N.FLATTEN, N.FORMAT])
 
         # Construir reglas de formato a partir de parámetros
         fmt = {
@@ -172,7 +148,7 @@ def process_entity_bulk(request, name, param_parser, key_translations):
     return formatter.create_ok_response_bulk(name, query_results, formats)
 
 
-def process_entity(request, name, param_parser, key_translations):
+def _process_entity(request, name, param_parser, key_translations):
     """Procesa una request GET o POST para consultar datos de una entidad.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
     En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
@@ -192,11 +168,11 @@ def process_entity(request, name, param_parser, key_translations):
     """
     try:
         if request.method == 'GET':
-            return process_entity_single(request, name, param_parser,
-                                         key_translations)
+            return _process_entity_single(request, name, param_parser,
+                                          key_translations)
 
-        return process_entity_bulk(request, name, param_parser,
-                                   key_translations)
+        return _process_entity_bulk(request, name, param_parser,
+                                    key_translations)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: {}'.format(name))
@@ -214,7 +190,7 @@ def process_state(request):
         flask.Response: respuesta HTTP
 
     """
-    return process_entity(request, N.STATES, params.PARAMS_STATES, {
+    return _process_entity(request, N.STATES, params.PARAMS_STATES, {
         N.ID: 'ids',
         N.NAME: 'name',
         N.INTERSECTION: 'geo_shape_ids',
@@ -237,18 +213,19 @@ def process_department(request):
         flask.Response: respuesta HTTP
 
     """
-    return process_entity(request, N.DEPARTMENTS,
-                          params.PARAMS_DEPARTMENTS, {
-                              N.ID: 'ids',
-                              N.NAME: 'name',
-                              N.INTERSECTION: 'geo_shape_ids',
-                              N.STATE: 'state',
-                              N.EXACT: 'exact',
-                              N.ORDER: 'order',
-                              N.FIELDS: 'fields',
-                              N.OFFSET: 'offset',
-                              N.MAX: 'size'
-                          })
+    return _process_entity(
+        request, N.DEPARTMENTS,
+        params.PARAMS_DEPARTMENTS, {
+            N.ID: 'ids',
+            N.NAME: 'name',
+            N.INTERSECTION: 'geo_shape_ids',
+            N.STATE: 'state',
+            N.EXACT: 'exact',
+            N.ORDER: 'order',
+            N.FIELDS: 'fields',
+            N.OFFSET: 'offset',
+            N.MAX: 'size'
+        })
 
 
 def process_municipality(request):
@@ -262,18 +239,19 @@ def process_municipality(request):
         flask.Response: respuesta HTTP
 
     """
-    return process_entity(request, N.MUNICIPALITIES,
-                          params.PARAMS_MUNICIPALITIES, {
-                              N.ID: 'ids',
-                              N.NAME: 'name',
-                              N.INTERSECTION: 'geo_shape_ids',
-                              N.STATE: 'state',
-                              N.EXACT: 'exact',
-                              N.ORDER: 'order',
-                              N.FIELDS: 'fields',
-                              N.OFFSET: 'offset',
-                              N.MAX: 'size'
-                          })
+    return _process_entity(
+        request, N.MUNICIPALITIES,
+        params.PARAMS_MUNICIPALITIES, {
+            N.ID: 'ids',
+            N.NAME: 'name',
+            N.INTERSECTION: 'geo_shape_ids',
+            N.STATE: 'state',
+            N.EXACT: 'exact',
+            N.ORDER: 'order',
+            N.FIELDS: 'fields',
+            N.OFFSET: 'offset',
+            N.MAX: 'size'
+        })
 
 
 def process_locality(request):
@@ -287,7 +265,7 @@ def process_locality(request):
         flask.Response: respuesta HTTP
 
     """
-    return process_entity(request, N.LOCALITIES, params.PARAMS_LOCALITIES, {
+    return _process_entity(request, N.LOCALITIES, params.PARAMS_LOCALITIES, {
         N.ID: 'ids',
         N.NAME: 'name',
         N.STATE: 'state',
@@ -301,7 +279,7 @@ def process_locality(request):
     })
 
 
-def build_street_query_format(parsed_params):
+def _build_street_query_format(parsed_params):
     """Construye dos diccionarios a partir de parámetros de consulta
     recibidos, el primero representando la query a Elasticsearch a
     realizar y el segundo representando las propiedades de formato
@@ -316,7 +294,7 @@ def build_street_query_format(parsed_params):
 
     """
     # Construir query a partir de parámetros
-    query = translate_keys(parsed_params, {
+    query = utils.translate_keys(parsed_params, {
         N.ID: 'ids',
         N.NAME: 'name',
         N.INTERSECTION: 'geo_shape_ids',
@@ -340,7 +318,7 @@ def build_street_query_format(parsed_params):
     return query, fmt
 
 
-def process_street_single(request):
+def _process_street_single(request):
     """Procesa una request GET para consultar datos de calles.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -360,7 +338,7 @@ def process_street_single(request):
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
-    query, fmt = build_street_query_format(qs_params)
+    query, fmt = _build_street_query_format(qs_params)
 
     if fmt[N.FORMAT] == 'shp':
         query['fields'] += (N.GEOM,)
@@ -376,7 +354,7 @@ def process_street_single(request):
     return formatter.create_ok_response(N.STREETS, query_result, fmt)
 
 
-def process_street_bulk(request):
+def _process_street_bulk(request):
     """Procesa una request POST para consultar datos de calles.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -400,7 +378,7 @@ def process_street_bulk(request):
     queries = []
     formats = []
     for parsed_params in body_params:
-        query, fmt = build_street_query_format(parsed_params)
+        query, fmt = _build_street_query_format(parsed_params)
         queries.append(query)
         formats.append(fmt)
 
@@ -433,16 +411,16 @@ def process_street(request):
     """
     try:
         if request.method == 'GET':
-            return process_street_single(request)
+            return _process_street_single(request)
 
-        return process_street_bulk(request)
+        return _process_street_bulk(request)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: calles')
         return formatter.create_internal_error_response()
 
 
-def build_address_query_format(parsed_params):
+def _build_address_query_format(parsed_params):
     """Construye dos diccionarios a partir de parámetros de consulta
     recibidos, el primero representando la query a Elasticsearch a
     realizar y el segundo representando las propiedades de formato
@@ -457,7 +435,7 @@ def build_address_query_format(parsed_params):
 
     """
     # Construir query a partir de parámetros
-    query = translate_keys(parsed_params, {
+    query = utils.translate_keys(parsed_params, {
         N.DEPT: 'department',
         N.STATE: 'state',
         N.EXACT: 'exact',
@@ -476,7 +454,7 @@ def build_address_query_format(parsed_params):
     return query, fmt
 
 
-def process_address_queries(params_list):
+def _process_address_queries(params_list):
     """Ejecuta una lista de consultas de direcciones, partiendo desde los
     parámetros recibidos del usuario.
 
@@ -494,7 +472,7 @@ def process_address_queries(params_list):
     queries = []
     formats = []
     for parsed_params in params_list:
-        query, fmt = build_address_query_format(parsed_params)
+        query, fmt = _build_address_query_format(parsed_params)
         queries.append(query)
         formats.append(fmt)
 
@@ -504,7 +482,7 @@ def process_address_queries(params_list):
     return query_results, formats
 
 
-def process_address_single(request):
+def _process_address_single(request):
     """Procesa una request GET para normalizar una dirección.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -524,13 +502,13 @@ def process_address_single(request):
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
-    query_results, formats = process_address_queries([qs_params])
+    query_results, formats = _process_address_queries([qs_params])
 
     return formatter.create_ok_response(N.ADDRESSES, query_results[0],
                                         formats[0])
 
 
-def process_address_bulk(request):
+def _process_address_bulk(request):
     """Procesa una request POST para normalizar lote de direcciones.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -551,7 +529,7 @@ def process_address_bulk(request):
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
-    query_results, formats = process_address_queries(body_params)
+    query_results, formats = _process_address_queries(body_params)
 
     return formatter.create_ok_response_bulk(N.ADDRESSES, query_results,
                                              formats)
@@ -571,16 +549,16 @@ def process_address(request):
     """
     try:
         if request.method == 'GET':
-            return process_address_single(request)
+            return _process_address_single(request)
 
-        return process_address_bulk(request)
+        return _process_address_bulk(request)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: direcciones')
         return formatter.create_internal_error_response()
 
 
-def build_location_query_format(parsed_params):
+def _build_location_query_format(parsed_params):
     """Construye dos diccionarios a partir de parámetros de consulta
     recibidos, el primero representando la query a Elasticsearch a
     realizar y el segundo representando las propiedades de formato
@@ -594,7 +572,8 @@ def build_location_query_format(parsed_params):
 
     """
     # Construir query a partir de parámetros
-    query = translate_keys(parsed_params, {}, ignore=[N.FLATTEN, N.FORMAT])
+    query = utils.translate_keys(parsed_params, {}, ignore=[N.FLATTEN,
+                                                            N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
@@ -606,7 +585,7 @@ def build_location_query_format(parsed_params):
     return query, fmt
 
 
-def process_location_single(request):
+def _process_location_single(request):
     """Procesa una request GET para obtener entidades en un punto.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -626,7 +605,7 @@ def process_location_single(request):
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
-    query, fmt = build_location_query_format(qs_params)
+    query, fmt = _build_location_query_format(qs_params)
 
     es = get_elasticsearch()
     result = location.run_location_queries(es, [query])[0]
@@ -634,7 +613,7 @@ def process_location_single(request):
     return formatter.create_ok_response(N.LOCATION, result, fmt)
 
 
-def process_location_bulk(request):
+def _process_location_bulk(request):
     """Procesa una request POST para obtener entidades en varios puntos.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
@@ -658,7 +637,7 @@ def process_location_bulk(request):
     queries = []
     formats = []
     for parsed_params in body_params:
-        query, fmt = build_location_query_format(parsed_params)
+        query, fmt = _build_location_query_format(parsed_params)
         queries.append(query)
         formats.append(fmt)
 
@@ -683,9 +662,9 @@ def process_location(request):
     """
     try:
         if request.method == 'GET':
-            return process_location_single(request)
+            return _process_location_single(request)
 
-        return process_location_bulk(request)
+        return _process_location_bulk(request)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: ubicacion')

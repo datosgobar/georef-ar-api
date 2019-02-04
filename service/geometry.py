@@ -12,7 +12,7 @@ from service import names as N
 _MEAN_EARTH_RADIUS_KM = 6371
 
 
-def street_extents(door_nums, number):
+def _street_extents(door_nums, number):
     """Dados los datos de alturas de una calle, y una altura recibida en una
     consulta, retorna los extremos de la calle que contienen la altura.
     Idealmente, se utilizaría siempre start_r y end_l, pero al contar a veces
@@ -71,7 +71,7 @@ def street_number_location(geom, door_numbers, number):
     if geom['type'] != 'MultiLineString':
         raise TypeError('GeoJSON type must be MultiLineString')
 
-    start, end = street_extents(door_numbers, number)
+    start, end = _street_extents(door_numbers, number)
     if start == end:
         # Los valores de comienzo y fin de alturas de la calle tienen el mismo
         # valor. Por el momento, considerar estos casos como inválidos.

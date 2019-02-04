@@ -167,3 +167,27 @@ def step_iterator(iterator, input_data=None):
         return iterator.send(input_data)
     except StopIteration:
         return None
+
+
+def translate_keys(d, translations, ignore=None):
+    """Cambia las keys del diccionario 'd', utilizando las traducciones
+    especificadas en 'translations'. Devuelve los resultados en un nuevo
+    diccionario.
+
+    Args:
+        d (dict): Diccionario a modificar.
+        translations (dict): Traducciones de keys (key anterior => key nueva.)
+        ignore (list): Keys de 'd' a no agregar al nuevo diccionario devuelto.
+
+    Returns:
+        dict: Diccionario con las keys modificadas.
+
+    """
+    if not ignore:
+        ignore = []
+
+    return {
+        translations.get(key, key): value
+        for key, value in d.items()
+        if key not in ignore
+    }

@@ -58,7 +58,7 @@ def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
         raise DataConnectionException()
 
 
-def run_multisearch(es, searches):
+def _run_multisearch(es, searches):
     """Ejecuta una lista de búsquedas Elasticsearch utilizando la función
     MultiSearch. La cantidad de búsquedas que se envían a la vez es
     configurable vía la variable ES_MULTISEARCH_MAX_LEN.
@@ -202,7 +202,7 @@ class ElasticsearchSearch:
                 hit[N.ID] for hit in search.result.hits
             ]
 
-        self._search = self._search.query(build_geo_query(
+        self._search = self._search.query(_build_geo_query(
             N.GEOM,
             ids=checked_ids
         ))
@@ -273,7 +273,7 @@ class ElasticsearchSearch:
         Para ejecutar las búsquedas, se obtiene un iterador de búsquedas
         elasticsearch_dsl.Search por cada elemento de 'searches'. Utilizando
         los iteradores, se construyen listas de elasticsearch_dsl.Search, que
-        son luego ejecutadas utilizando 'run_multisearch'. Después, los
+        son luego ejecutadas utilizando '_run_multisearch'. Después, los
         resultados son devueltos a cada iterador, que pueden o no generar una
         nueva búsqueda elasticsearch_dsl.Search. El proceso se repite hasta que
         todos los iteradores hayan finalizado. Con todo este proceso se logra:
@@ -291,7 +291,7 @@ class ElasticsearchSearch:
             es (Elasticsearch): Conexión a Elasticsearch.
             searches (list): Lista de búsquedas ElasticsearchSearch o
                 derivados. La lista puede ser de cualquier largo ya que sus
-                contenidos son fraccionados por 'run_multisearch' para evitar
+                contenidos son fraccionados por '_run_multisearch' para evitar
                 consultas demasiado extensas a Elasticsearch.
 
         """
@@ -304,7 +304,7 @@ class ElasticsearchSearch:
                 iteration_data.append((iterator, search))
 
         while iteration_data:
-            responses = run_multisearch(es, [
+            responses = _run_multisearch(es, [
                 search for _, search in iteration_data
             ])
 
@@ -389,20 +389,20 @@ class TerritoriesSearch(ElasticsearchSearch):
         super()._read_query(**kwargs)
 
         if ids:
-            self._search = self._search.filter(build_terms_query(N.ID, ids))
+            self._search = self._search.filter(_build_terms_query(N.ID, ids))
 
         if name:
-            self._search = self._search.query(build_name_query(N.NAME, name,
-                                                               exact))
+            self._search = self._search.query(_build_name_query(N.NAME, name,
+                                                                exact))
 
         if geo_shape_geoms:
-            self._search = self._search.query(build_geo_query(
+            self._search = self._search.query(_build_geo_query(
                 N.GEOM,
                 geoms=geo_shape_geoms
             ))
 
         if municipality:
-            self._search = self._search.query(build_subentity_query(
+            self._search = self._search.query(_build_subentity_query(
                 N.MUN_ID,
                 N.MUN_NAME,
                 municipality,
@@ -410,7 +410,7 @@ class TerritoriesSearch(ElasticsearchSearch):
             ))
 
         if department:
-            self._search = self._search.query(build_subentity_query(
+            self._search = self._search.query(_build_subentity_query(
                 N.DEPT_ID,
                 N.DEPT_NAME,
                 department,
@@ -418,7 +418,7 @@ class TerritoriesSearch(ElasticsearchSearch):
             ))
 
         if state:
-            self._search = self._search.query(build_subentity_query(
+            self._search = self._search.query(_build_subentity_query(
                 N.STATE_ID,
                 N.STATE_NAME,
                 state,
@@ -498,20 +498,20 @@ class StreetsSearch(ElasticsearchSearch):
         super()._read_query(**kwargs)
 
         if ids:
-            self._search = self._search.filter(build_terms_query(
+            self._search = self._search.filter(_build_terms_query(
                 N.ID,
                 ids
             ))
 
         if name:
-            self._search = self._search.query(build_name_query(
+            self._search = self._search.query(_build_name_query(
                 N.NAME,
                 name,
                 exact
             ))
 
         if category:
-            self._search = self._search.query(build_match_query(
+            self._search = self._search.query(_build_match_query(
                 N.CATEGORY,
                 category,
                 fuzzy=True
@@ -519,17 +519,17 @@ class StreetsSearch(ElasticsearchSearch):
 
         if number:
             self._search = self._search.query(
-                build_range_query(N.START_R, '<=', number) |
-                build_range_query(N.START_L, '<=', number)
+                _build_range_query(N.START_R, '<=', number) |
+                _build_range_query(N.START_L, '<=', number)
             )
 
             self._search = self._search.query(
-                build_range_query(N.END_L, '>=', number) |
-                build_range_query(N.END_R, '>=', number)
+                _build_range_query(N.END_L, '>=', number) |
+                _build_range_query(N.END_R, '>=', number)
             )
 
         if department:
-            self._search = self._search.query(build_subentity_query(
+            self._search = self._search.query(_build_subentity_query(
                 N.DEPT_ID,
                 N.DEPT_NAME,
                 department,
@@ -537,7 +537,7 @@ class StreetsSearch(ElasticsearchSearch):
             ))
 
         if state:
-            self._search = self._search.query(build_subentity_query(
+            self._search = self._search.query(_build_subentity_query(
                 N.STATE_ID,
                 N.STATE_NAME,
                 state,
@@ -606,26 +606,26 @@ class IntersectionsSearch(ElasticsearchSearch):
 
         if ids:
             query_1 = (
-                build_terms_query(N.join(N.STREET_A, N.ID), ids[0]) &
-                build_terms_query(N.join(N.STREET_B, N.ID), ids[1])
+                _build_terms_query(N.join(N.STREET_A, N.ID), ids[0]) &
+                _build_terms_query(N.join(N.STREET_B, N.ID), ids[1])
             )
 
             query_2 = (
-                build_terms_query(N.join(N.STREET_A, N.ID), ids[1]) &
-                build_terms_query(N.join(N.STREET_B, N.ID), ids[0])
+                _build_terms_query(N.join(N.STREET_A, N.ID), ids[1]) &
+                _build_terms_query(N.join(N.STREET_B, N.ID), ids[0])
             )
 
             self._search = self._search.query(query_1 | query_2)
 
         if geo_shape_geoms:
-            self._search = self._search.query(build_geo_query(
+            self._search = self._search.query(_build_geo_query(
                 N.GEOM,
                 geoms=geo_shape_geoms
             ))
 
         if department:
             for side in [N.STREET_A, N.STREET_B]:
-                self._search = self._search.query(build_subentity_query(
+                self._search = self._search.query(_build_subentity_query(
                     N.join(side, N.DEPT_ID),
                     N.join(side, N.DEPT_NAME),
                     department,
@@ -634,7 +634,7 @@ class IntersectionsSearch(ElasticsearchSearch):
 
         if state:
             for side in [N.STREET_A, N.STREET_B]:
-                self._search = self._search.query(build_subentity_query(
+                self._search = self._search.query(_build_subentity_query(
                     N.join(side, N.STATE_ID),
                     N.join(side, N.STATE_NAME),
                     state,
@@ -652,7 +652,7 @@ class IntersectionsSearch(ElasticsearchSearch):
         self._result = ElasticsearchResult(response, self._offset)
 
 
-class _StatesGeometrySearch(TerritoriesSearch):
+class StatesGeometrySearch(TerritoriesSearch):
     """Representa una búsqueda de geometrías de provincias.
 
     Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
@@ -675,10 +675,10 @@ class StatesSearch(TerritoriesSearch):
 
     def __init__(self, query):
         super().__init__(N.STATES, query,
-                         geom_search_class=_StatesGeometrySearch)
+                         geom_search_class=StatesGeometrySearch)
 
 
-class _DepartmentsGeometrySearch(TerritoriesSearch):
+class DepartmentsGeometrySearch(TerritoriesSearch):
     """Representa una búsqueda de geometrías de departamentos.
 
     Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
@@ -701,10 +701,10 @@ class DepartmentsSearch(TerritoriesSearch):
 
     def __init__(self, query):
         super().__init__(N.DEPARTMENTS, query,
-                         geom_search_class=_DepartmentsGeometrySearch)
+                         geom_search_class=DepartmentsGeometrySearch)
 
 
-class _MunicipalitiesGeometrySearch(TerritoriesSearch):
+class MunicipalitiesGeometrySearch(TerritoriesSearch):
     """Representa una búsqueda de geometrías de municipios.
 
     Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
@@ -727,7 +727,7 @@ class MunicipalitiesSearch(TerritoriesSearch):
 
     def __init__(self, query):
         super().__init__(N.MUNICIPALITIES, query,
-                         geom_search_class=_MunicipalitiesGeometrySearch)
+                         geom_search_class=MunicipalitiesGeometrySearch)
 
 
 class LocalitiesSearch(TerritoriesSearch):
@@ -804,7 +804,7 @@ class ElasticsearchResult:
         return len(self._hits)
 
 
-def build_subentity_query(id_field, name_field, value, exact):
+def _build_subentity_query(id_field, name_field, value, exact):
     """Crea una condición de búsqueda por propiedades de una subentidad. Esta
     condición se utiliza para filtrar resultados utilizando IDs o nombre de una
     subentidad contenida por otra. Por ejemplo, se pueden buscar departamentos
@@ -823,12 +823,12 @@ def build_subentity_query(id_field, name_field, value, exact):
 
     """
     if isinstance(value, list):
-        return Bool(filter=[build_terms_query(id_field, value)])
+        return Bool(filter=[_build_terms_query(id_field, value)])
 
-    return build_name_query(name_field, value, exact)
+    return _build_name_query(name_field, value, exact)
 
 
-def build_geo_query(field, ids=None, geoms=None, relation='intersects'):
+def _build_geo_query(field, ids=None, geoms=None, relation='intersects'):
     """Crea una condición de búsqueda por propiedades de geometrías. La función
     permite especificar una o más geometrías (vía el ID de un documento, o su
     valor GeoJSON directo) y una relación (INTERSECTS, WITHIN, etc.), y luego
@@ -852,18 +852,18 @@ def build_geo_query(field, ids=None, geoms=None, relation='intersects'):
     if ids:
         for entity_type, id_list in ids.items():
             for entity_id in id_list:
-                query |= build_geo_indexed_shape_query(field, entity_type,
-                                                       entity_id, N.GEOM,
-                                                       relation)
+                query |= _build_geo_indexed_shape_query(field, entity_type,
+                                                        entity_id, N.GEOM,
+                                                        relation)
 
     if geoms:
         for geom in geoms:
-            query |= build_geo_shape_query(field, geom, relation)
+            query |= _build_geo_shape_query(field, geom, relation)
 
     return query
 
 
-def build_geo_shape_query(field, geom, relation):
+def _build_geo_shape_query(field, geom, relation):
     """Crea una condición de búsqueda por relación con una geometría en formato
     GeoJSON.
 
@@ -885,8 +885,8 @@ def build_geo_shape_query(field, geom, relation):
     return GeoShape(**{field: options})
 
 
-def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path,
-                                  relation):
+def _build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path,
+                                   relation):
     """Crea una condición de búsqueda por relación geométrica con una geometría
     pre-indexada. La geometría debe pertenecer a una entidad de tipo provincia,
     departamento o municipio.
@@ -930,12 +930,12 @@ def build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path,
     # entidades en el mismo índice, asegurarse de que los resultados no traigan
     # la entidad que utilizamos como geometría (el dato de que una geometría
     # intersecciona con si misma no es útil).
-    exclude_self_query = ~build_terms_query(N.ID, [entity_id])
+    exclude_self_query = ~_build_terms_query(N.ID, [entity_id])
 
     return GeoShape(**{field: options}) & prefix_query & exclude_self_query
 
 
-def build_terms_query(field, values):
+def _build_terms_query(field, values):
     """Crea una condición de búsqueda por términos exactos para Elasticsearch.
 
     Args:
@@ -949,7 +949,7 @@ def build_terms_query(field, values):
     return Terms(**{field: values})
 
 
-def build_name_query(field, value, exact=False):
+def _build_name_query(field, value, exact=False):
     """Crea una condición de búsqueda por nombre para Elasticsearch.
     Las entidades con nombres son, por el momento, las provincias, los
     departamentos, los municipios, las localidades y las calles.
@@ -965,20 +965,20 @@ def build_name_query(field, value, exact=False):
     """
     if exact:
         field = N.EXACT_SUFFIX.format(field)
-        return build_match_query(field, value, False)
+        return _build_match_query(field, value, False)
 
-    query = build_match_query(field, value, True, operator='and')
+    query = _build_match_query(field, value, True, operator='and')
 
     if len(value.strip()) >= constants.MIN_AUTOCOMPLETE_CHARS:
-        query |= build_match_phrase_prefix_query(field, value)
+        query |= _build_match_phrase_prefix_query(field, value)
 
-    query &= ~build_match_query(
+    query &= ~_build_match_query(
         field, value, analyzer=es_config.name_analyzer_excluding_terms)
 
     return query
 
 
-def build_match_phrase_prefix_query(field, value):
+def _build_match_phrase_prefix_query(field, value):
     """Crea una condición 'Match Phrase Prefix' para Elasticsearch.
 
     Args:
@@ -995,7 +995,7 @@ def build_match_phrase_prefix_query(field, value):
     return MatchPhrasePrefix(**{field: options})
 
 
-def build_range_query(field, operator, value):
+def _build_range_query(field, operator, value):
     """Crea una condición 'Range' para Elasticsearch.
 
     Args:
@@ -1022,7 +1022,8 @@ def build_range_query(field, operator, value):
     return Range(**{field: options})
 
 
-def build_match_query(field, value, fuzzy=False, operator='or', analyzer=None):
+def _build_match_query(field, value, fuzzy=False, operator='or',
+                       analyzer=None):
     """Crea una condición 'Match' para Elasticsearch.
 
     Args:
