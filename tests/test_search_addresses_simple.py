@@ -1,6 +1,7 @@
 import unittest
 import random
 from service import formatter
+from service.geometry import Point
 from . import GeorefLiveTest, asciifold
 
 COMMON_ADDRESS = 'Corrientes 1000'
@@ -450,6 +451,20 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             ))
 
         self.assertTrue(validations and all(validations))
+
+    def test_position(self):
+        """Cuando sea posible, se debería georreferenciar la dirección
+        utilizando los datos de la calle y la altura."""
+        resp = self.get_response({
+            'direccion': 'Billinghurst nro 650',
+            'departamento': 'Comuna 5'
+        })
+
+        point_resp = Point.from_json_location(resp[0]['ubicacion'])
+        point_target = Point(-58.415413, -34.602319)
+        error_m = point_resp.approximate_distance_meters(point_target)
+
+        self.assertTrue(error_m < 15, error_m)
 
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores

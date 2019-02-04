@@ -88,8 +88,10 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         })
         loc = resp[0]['ubicacion']
 
-        self.assertAlmostEqual(loc['lat'], -32.9519930139424)
-        self.assertAlmostEqual(loc['lon'], -60.636562374115)
+        point_isct = Point.from_json_location(loc)
+        point_target = Point(-60.636548, -32.952020)
+        error_m = point_isct.approximate_distance_meters(point_target)
+        self.assertTrue(error_m < 15, error_m)
 
     def test_intersection_nonexistent_door_num(self):
         """Si se especifica una intersección con altura, la posición de la
