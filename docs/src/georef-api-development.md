@@ -146,21 +146,21 @@ O También:
 ```
 
 #### Entornos productivos
-##### 5.1 Configurar servicio `georef-api` para `systemd`
-Copiar el archivo [`config/georef-api.service`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-api.service) a `/etc/systemd/system/` y configurarlo. Notar los campos marcados entre '`<`' y '`>`', que deben ser reemplazados por el usuario.
+##### 5.1 Configurar servicio `georef-ar-api` para `systemd`
+Copiar el archivo [`config/georef-ar-api.service`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service) a `/etc/systemd/system/` y configurarlo. Notar los campos marcados entre '`<`' y '`>`', que deben ser reemplazados por el usuario.
 
 ##### 5.2 Activar y arrancar el servicio
 ```bash
 $ sudo systemctl daemon-reload
-$ sudo systemctl enable georef-api.service
-$ sudo systemctl start georef-api.service
+$ sudo systemctl enable georef-ar-api.service
+$ sudo systemctl start georef-ar-api.service
 ```
 
 ##### 5.3 Configurar `nginx`
-Primero, crear `/etc/nginx/sites-available/georef-api` tomando como base la configuración del archivo [`georef-api.nginx`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-api.nginx).
+Primero, crear `/etc/nginx/sites-available/georef-ar-api.nginx` tomando como base la configuración del archivo [`georef-ar-api.nginx`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.nginx).
 
 ##### 5.4 (Opcional) Crear cache para `nginx`
-Si se desea activar el uso del cache de `nginx`, descomentar las líneas contentiendo las directivas `proxy_cache` y `proxy_cache_valid` del archivo `georef-api` creado. Luego, activar el cache `georef` agregando la siguiente línea al archivo de configuración `nginx.conf` (sección `http`):
+Si se desea activar el uso del cache de `nginx`, descomentar las líneas contentiendo las directivas `proxy_cache` y `proxy_cache_valid` del archivo `georef-ar-api.nginx` creado. Luego, activar el cache `georef` agregando la siguiente línea al archivo de configuración `nginx.conf` (sección `http`):
 
 ```nginx
 proxy_cache_path /data/nginx/cache levels=1:2 inactive=120m keys_zone=georef:10m use_temp_path=off;
@@ -171,17 +171,12 @@ Finalmente, crear el directorio `/data/nginx/cache`.
 ##### 5.5 Activar y validar configuración `nginx`
 Generar un link simbólico a la configuración del sitio:
 ```bash
-$ sudo ln -s /etc/nginx/sites-available/georef-api /etc/nginx/sites-enabled/georef-api
+$ sudo ln -s /etc/nginx/sites-available/georef-ar-api.nginx /etc/nginx/sites-enabled/georef-ar-api.nginx
 ```
 
 Validar la configuración:
 ```bash
-$ sudo nginx -t
-```
-
-Cargar la nueva configuración:
-```bash
-$ sudo nginx -s reload
+$ sudo nginx -T
 ```
 
 Reiniciar Nginx:
@@ -190,12 +185,15 @@ $ systemctl restart nginx.service
 ```
 
 ## Tests
-Ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):
+Para ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):
 ```bash
 (venv) $ make test
 ```
 
-Comprobar que no existan errores comunes en el código, y que su estilo sea correcto:
+Para más información sobre los tests, ver el archivo [`tests/README.md`](https://github.com/datosgobar/georef-ar-api/blob/master/tests/README.md).
+
+
+Para comprobar que no existan errores comunes en el código, y que su estilo sea correcto:
 ```bash
 (venv) $ make code_checks
 ```

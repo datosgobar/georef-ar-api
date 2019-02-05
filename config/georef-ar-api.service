@@ -1,5 +1,5 @@
 [Unit]
-Description=georef-api gunicorn daemon
+Description=georef-ar-api gunicorn daemon
 After=network.target
 
 [Service]
@@ -10,13 +10,13 @@ RuntimeDirectory=gunicorn
 # Completar el usuario
 User=<usuario>
 
-# Completar la ruta a georef-api
-WorkingDirectory=<ruta a georef-api>
+# Completar la ruta a georef-ar-api
+WorkingDirectory=<ruta a georef-ar-api>
 
-# Completar la ruta a georef-api
-ExecStart=<ruta a georef-api>/venv/bin/gunicorn \
+# Completar la ruta a georef-ar-api
+ExecStart=<ruta a georef-ar-api>/venv/bin/gunicorn \
           --pid /run/gunicorn/api-pid \
-          -w 4 \
+          -w 4 -k gevent \
           --bind 0.0.0.0:5000 service:app \
           --log-config config/logging.ini
 
