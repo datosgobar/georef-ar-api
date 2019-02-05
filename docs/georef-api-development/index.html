@@ -650,8 +650,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#51-configurar-servicio-georef-api-para-systemd" title="5.1 Configurar servicio georef-api para systemd" class="md-nav__link">
-    5.1 Configurar servicio georef-api para systemd
+  <a href="#51-configurar-servicio-georef-ar-api-para-systemd" title="5.1 Configurar servicio georef-ar-api para systemd" class="md-nav__link">
+    5.1 Configurar servicio georef-ar-api para systemd
   </a>
   
 </li>
@@ -942,8 +942,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#51-configurar-servicio-georef-api-para-systemd" title="5.1 Configurar servicio georef-api para systemd" class="md-nav__link">
-    5.1 Configurar servicio georef-api para systemd
+  <a href="#51-configurar-servicio-georef-ar-api-para-systemd" title="5.1 Configurar servicio georef-ar-api para systemd" class="md-nav__link">
+    5.1 Configurar servicio georef-ar-api para systemd
   </a>
   
 </li>
@@ -1140,33 +1140,29 @@ $ source venv/bin/activate
 </code></pre>
 
 <h4 id="entornos-productivos">Entornos productivos<a class="headerlink" href="#entornos-productivos" title="Permanent link">&para;</a></h4>
-<h5 id="51-configurar-servicio-georef-api-para-systemd">5.1 Configurar servicio <code>georef-api</code> para <code>systemd</code><a class="headerlink" href="#51-configurar-servicio-georef-api-para-systemd" title="Permanent link">&para;</a></h5>
-<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-api.service"><code>config/georef-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>', que deben ser reemplazados por el usuario.</p>
+<h5 id="51-configurar-servicio-georef-ar-api-para-systemd">5.1 Configurar servicio <code>georef-ar-api</code> para <code>systemd</code><a class="headerlink" href="#51-configurar-servicio-georef-ar-api-para-systemd" title="Permanent link">&para;</a></h5>
+<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service"><code>config/georef-ar-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>', que deben ser reemplazados por el usuario.</p>
 <h5 id="52-activar-y-arrancar-el-servicio">5.2 Activar y arrancar el servicio<a class="headerlink" href="#52-activar-y-arrancar-el-servicio" title="Permanent link">&para;</a></h5>
 <pre><code class="bash">$ sudo systemctl daemon-reload
-$ sudo systemctl enable georef-api.service
-$ sudo systemctl start georef-api.service
+$ sudo systemctl enable georef-ar-api.service
+$ sudo systemctl start georef-ar-api.service
 </code></pre>
 
 <h5 id="53-configurar-nginx">5.3 Configurar <code>nginx</code><a class="headerlink" href="#53-configurar-nginx" title="Permanent link">&para;</a></h5>
-<p>Primero, crear <code>/etc/nginx/sites-available/georef-api</code> tomando como base la configuración del archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-api.nginx"><code>georef-api.nginx</code></a>.</p>
+<p>Primero, crear <code>/etc/nginx/sites-available/georef-ar-api.nginx</code> tomando como base la configuración del archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.nginx"><code>georef-ar-api.nginx</code></a>.</p>
 <h5 id="54-opcional-crear-cache-para-nginx">5.4 (Opcional) Crear cache para <code>nginx</code><a class="headerlink" href="#54-opcional-crear-cache-para-nginx" title="Permanent link">&para;</a></h5>
-<p>Si se desea activar el uso del cache de <code>nginx</code>, descomentar las líneas contentiendo las directivas <code>proxy_cache</code> y <code>proxy_cache_valid</code> del archivo <code>georef-api</code> creado. Luego, activar el cache <code>georef</code> agregando la siguiente línea al archivo de configuración <code>nginx.conf</code> (sección <code>http</code>):</p>
+<p>Si se desea activar el uso del cache de <code>nginx</code>, descomentar las líneas contentiendo las directivas <code>proxy_cache</code> y <code>proxy_cache_valid</code> del archivo <code>georef-ar-api.nginx</code> creado. Luego, activar el cache <code>georef</code> agregando la siguiente línea al archivo de configuración <code>nginx.conf</code> (sección <code>http</code>):</p>
 <pre><code class="nginx">proxy_cache_path /data/nginx/cache levels=1:2 inactive=120m keys_zone=georef:10m use_temp_path=off;
 </code></pre>
 
 <p>Finalmente, crear el directorio <code>/data/nginx/cache</code>.</p>
 <h5 id="55-activar-y-validar-configuracion-nginx">5.5 Activar y validar configuración <code>nginx</code><a class="headerlink" href="#55-activar-y-validar-configuracion-nginx" title="Permanent link">&para;</a></h5>
 <p>Generar un link simbólico a la configuración del sitio:</p>
-<pre><code class="bash">$ sudo ln -s /etc/nginx/sites-available/georef-api /etc/nginx/sites-enabled/georef-api
+<pre><code class="bash">$ sudo ln -s /etc/nginx/sites-available/georef-ar-api.nginx /etc/nginx/sites-enabled/georef-ar-api.nginx
 </code></pre>
 
 <p>Validar la configuración:</p>
-<pre><code class="bash">$ sudo nginx -t
-</code></pre>
-
-<p>Cargar la nueva configuración:</p>
-<pre><code class="bash">$ sudo nginx -s reload
+<pre><code class="bash">$ sudo nginx -T
 </code></pre>
 
 <p>Reiniciar Nginx:</p>
@@ -1174,11 +1170,12 @@ $ sudo systemctl start georef-api.service
 </code></pre>
 
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
-<p>Ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):</p>
+<p>Para ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):</p>
 <pre><code class="bash">(venv) $ make test
 </code></pre>
 
-<p>Comprobar que no existan errores comunes en el código, y que su estilo sea correcto:</p>
+<p>Para más información sobre los tests, ver el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/tests/README.md"><code>tests/README.md</code></a>.</p>
+<p>Para comprobar que no existan errores comunes en el código, y que su estilo sea correcto:</p>
 <pre><code class="bash">(venv) $ make code_checks
 </code></pre>
 
