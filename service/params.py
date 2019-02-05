@@ -937,9 +937,7 @@ class EndpointParameters():
                                            'querystring')}
             ])
 
-        body_params = None
-        if isinstance(body, dict):
-            body_params = body.get(body_key)
+        body_params = body.get(body_key) if isinstance(body, dict) else None
 
         if not body_params or not isinstance(body_params, list):
             # No aceptar operaciones bulk que no sean listas, y no
@@ -950,11 +948,11 @@ class EndpointParameters():
                                       'body')}
             ])
 
-        if len(body_params) > constants.MAX_RESULT_LEN:
+        if len(body_params) > constants.MAX_BULK_LEN:
             raise ParameterParsingException([
                 {body_key: ParamError(
                     ParamErrorType.INVALID_BULK_LEN,
-                    strings.BULK_LEN_ERROR.format(constants.MAX_RESULT_LEN),
+                    strings.BULK_LEN_ERROR.format(constants.MAX_BULK_LEN),
                     'body')}
             ])
 

@@ -75,10 +75,13 @@ Que resultaría en la siguiente respuesta JSON:
 
 Como se muestra en el ejemplo, la respuesta contiene una lista `resultados`, con los resultados de cada consulta individual adentro. Las estructuras de las respuestas se mantienen idénticas que los recursos `GET`.
 
-!!! note ""
+!!! warning "Cantidad máxima de consultas"
     
-	El total de los parámetros `max` sumados de todas las consultas no debe superar los 5000.
-	Por ejemplo, se permite enviar 5000 consultas con `max=1`, o 100 consultas con `max=50`, pero no 5000 consultas con `max=10`.
+	La cantidad de consultas en una misma petición no debe superar las 1000.
+
+	Adicionalmente, el total de los parámetros `max` sumados de todas las consultas no debe superar los 5000.
+	Por ejemplo, se permite enviar 1000 consultas con `max=5`, o 100 consultas con `max=50`, pero no 1000 consultas con `max=10`.
+
 	
 Utilizando los recursos por lotes, se pueden normalizar mayores cantidades de datos en menos tiempo. Por ejemplo, si se cuenta con 50000 direcciones, tan solo se necesitan 10 consultas para normalizar el activo de datos entero. Utilizando los recursos `GET`, se necesitarían 50000 (una por dato).
 

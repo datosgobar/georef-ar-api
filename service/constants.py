@@ -9,6 +9,7 @@ API_NAME = 'georef-ar-api'
 
 MAX_RESULT_LEN = current_app.config['MAX_RESULT_LEN']
 MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
+MAX_BULK_LEN = current_app.config['MAX_BULK_LEN']
 ES_MULTISEARCH_MAX_LEN = current_app.config.get('ES_MULTISEARCH_MAX_LEN',
                                                 MAX_RESULT_LEN)
 ADDRESS_PARSER_CACHE_SIZE = current_app.config['ADDRESS_PARSER_CACHE_SIZE']

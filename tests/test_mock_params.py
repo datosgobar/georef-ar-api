@@ -1,4 +1,5 @@
 from random import choice
+from service import constants
 from service.params import ParamErrorType as T
 from service.formatter import value_to_xml
 from . import GeorefMockTest
@@ -428,7 +429,7 @@ class ParamParsingTest(GeorefMockTest):
     def test_max_bulk_len(self):
         """Debería haber un máximo de operaciones bulk posibles."""
         body = {
-            'calles': [{}] * 5001
+            'calles': [{}] * (constants.MAX_BULK_LEN + 1)
         }
 
         self.assert_errors_match('/calles', [

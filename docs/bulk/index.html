@@ -721,9 +721,11 @@
 </code></pre>
 
 <p>Como se muestra en el ejemplo, la respuesta contiene una lista <code>resultados</code>, con los resultados de cada consulta individual adentro. Las estructuras de las respuestas se mantienen idénticas que los recursos <code>GET</code>.</p>
-<div class="admonition note">
-<p>El total de los parámetros <code>max</code> sumados de todas las consultas no debe superar los 5000.
-Por ejemplo, se permite enviar 5000 consultas con <code>max=1</code>, o 100 consultas con <code>max=50</code>, pero no 5000 consultas con <code>max=10</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Cantidad máxima de consultas</p>
+<p>La cantidad de consultas en una misma petición no debe superar las 1000.</p>
+<p>Adicionalmente, el total de los parámetros <code>max</code> sumados de todas las consultas no debe superar los 5000.
+Por ejemplo, se permite enviar 1000 consultas con <code>max=5</code>, o 100 consultas con <code>max=50</code>, pero no 1000 consultas con <code>max=10</code>.</p>
 </div>
 <p>Utilizando los recursos por lotes, se pueden normalizar mayores cantidades de datos en menos tiempo. Por ejemplo, si se cuenta con 50000 direcciones, tan solo se necesitan 10 consultas para normalizar el activo de datos entero. Utilizando los recursos <code>GET</code>, se necesitarían 50000 (una por dato).</p>
 <h2 id="ejemplos-de-uso">Ejemplos de uso<a class="headerlink" href="#ejemplos-de-uso" title="Permanent link">&para;</a></h2>
