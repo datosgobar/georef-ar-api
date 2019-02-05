@@ -1,6 +1,8 @@
 # georef-ar-api
 [![Build Status](https://travis-ci.org/datosgobar/georef-ar-api.svg?branch=master)](https://travis-ci.org/datosgobar/georef-ar-api)
 ![Docs Status](https://readthedocs.org/projects/georef-ar-api/badge/?version=latest)
+![](https://img.shields.io/github/license/datosgobar/georef-ar-api.svg)
+![](https://img.shields.io/badge/python-3-blue.svg)
 
 API del Servicio de Normalización de Datos Geográficos de Argentina.
 
