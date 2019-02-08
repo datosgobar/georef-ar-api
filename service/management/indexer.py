@@ -196,6 +196,7 @@ class GeorefIndex:
     - municipios-geometria
     - localidades
     - calles
+    - intersecciones
 
     La clase GeorefIndex existe para simplificar la creación y actualización de
     los datos de los índices. La clase también permite crear respaldos

@@ -164,6 +164,22 @@ class SearchLocationTest(GeorefLiveTest):
         params = ['lat', 'lon']
         self.assert_empty_params_return_400(params)
 
+    def test_infinity(self):
+        """Cuando se especifica Infinity como valor numérico, se debe responder
+        con una respuesta 400."""
+        status = self.get_response(body={'lat': 'Infinity', 'lon': 'inf'},
+                                   return_value='status',
+                                   expect_status=[400])
+        self.assertEqual(status, 400)
+
+    def test_nan(self):
+        """Cuando se especifica NaN como valor numérico, se debe responder con
+        una respuesta 400."""
+        status = self.get_response(body={'lat': 'NaN', 'lon': 'NaN'},
+                                   return_value='status',
+                                   expect_status=[400])
+        self.assertEqual(status, 400)
+
     def test_unknown_param_returns_400(self):
         """El endpoint no debe aceptar parámetros desconocidos."""
         self.assert_unknown_param_returns_400()

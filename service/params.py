@@ -5,6 +5,7 @@ HTTP.
 """
 
 import threading
+import math
 from enum import Enum, unique
 from collections import defaultdict
 from georef_ar_address import AddressParser
@@ -497,7 +498,11 @@ class FloatParameter(Parameter):
 
     def _parse_value(self, val):
         try:
-            return float(val)
+            num = float(val)
+            if not math.isfinite(num):
+                raise ValueError(strings.FLOAT_VAL_ERROR)
+
+            return num
         except ValueError:
             raise ValueError(strings.FLOAT_VAL_ERROR)
 
