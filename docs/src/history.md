@@ -1,5 +1,8 @@
 # Historial de versiones
 
+## **0.3.3** - 2019/02/11
+- Corrige error HTTP 500 lanzado cuando se utilizaban valores como "NaN" o "Inifinity" para parámetros `lat` y `lon` en `/ubicacion`.
+
 ## **0.3.2** - 2019/02/05
 - El parámetro `interseccion` de los recursos `/provincias`, `/departamentos` y `/calles` ahora aceptan IDs de calles como parámetros.
 - Modifica cantidad de máxima de consultas en una sola petición POST a 1000 (era 5000). El nuevo valor permite normalizar datos a una velocidad prácticamente igual a la anterior, pero con una menor carga a la infraestructura.
