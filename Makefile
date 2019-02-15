@@ -77,3 +77,6 @@ docs:
 
 servedocs:
 	mkdocs serve
+
+pdf:
+	mkdocs_datosgobar md2pdf mkdocs.yml docs/georef-ar-api-docs.pdf

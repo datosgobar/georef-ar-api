@@ -1,0 +1,4079 @@
+
+        <link rel="stylesheet" href="pdf.css" type="text/css"/>
+        <h1 id="api-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina">
+ API del Servicio de Normalización de Datos Geográficos de Argentina
+</h1>
+<p>
+ <strong>
+  Versión
+ </strong>
+ : 0.3.3
+</p>
+<p>
+ La API del Servicio de Normalización de Datos Geográficos, permite normalizar y codificar los nombres de unidades territoriales de la Argentina (provincias, departamentos, municipios y localidades) y de sus calles, así como ubicar coordenadas dentro de ellas.
+</p>
+<p>
+ En la
+ <a href="https://datosgobar.github.io/paquete-apertura-datos/guia-interoperables/">
+  Guía para la identificación y uso de entidades interoperables
+ </a>
+ se explica cómo funcionan las
+ <a href="https://datosgobar.github.io/paquete-apertura-datos/guia-interoperables/#divisiones-o-unidades-territoriales-internas">
+  unidades territoriales internas de la Argentina
+ </a>
+ y la relación entre ellas.
+</p>
+<h2 id="normalizar">
+ Normalizar
+</h2>
+<p>
+ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usan, los datos son difíciles de cruzar entre sí y hay que normalizarlos antes.
+</p>
+<table>
+ <tr>
+  <td>
+   provincia
+  </td>
+ </tr>
+ <tr>
+  <td>
+   Santiago del Estero
+  </td>
+ </tr>
+ <tr>
+  <td>
+   Stgo. del Estero
+  </td>
+ </tr>
+ <tr>
+  <td>
+   S. del Estero
+  </td>
+ </tr>
+ <tr>
+  <td>
+   Sgo. del Estero
+  </td>
+ </tr>
+</table>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero">
+  <code>
+   https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"provincias"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Santiago del Estero"</span><span class="p">,</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"86"</span><span class="p">,</span>
+            <span class="nt">"centroide"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"lat"</span><span class="p">:</span> <span class="mf">-27.782412</span><span class="p">,</span>
+                <span class="nt">"lon"</span><span class="p">:</span> <span class="mf">-63.252387</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">"total"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre>
+</div>
+<h2 id="enriquecer">
+ Enriquecer
+</h2>
+<p>
+ Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, puede cruzarse con muchos datos más, relacionados a las unidades territoriales que lo contienen. Para esto hay que agregarlas a los datos originales.
+</p>
+<table>
+ <tr>
+  <td>
+   lat
+  </td>
+  <td>
+   lon
+  </td>
+ </tr>
+ <tr>
+  <td>
+   -27.2741
+  </td>
+  <td>
+   -66.7529
+  </td>
+ </tr>
+ <tr>
+  <td>
+   -34.603633
+  </td>
+  <td>
+   -58.3837587
+  </td>
+ </tr>
+</table>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529">
+  <code>
+   https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"ubicacion"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"departamento"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"10035"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Belén"</span>
+        <span class="p">},</span>
+        <span class="nt">"lat"</span><span class="p">:</span> <span class="mf">-27.2741</span><span class="p">,</span>
+        <span class="nt">"lon"</span><span class="p">:</span> <span class="mf">-66.7529</span><span class="p">,</span>
+        <span class="nt">"municipio"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"100077"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Hualfín"</span>
+        <span class="p">},</span>
+        <span class="nt">"provincia"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"10"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Catamarca"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre>
+</div>
+<h2 id="referencia">
+ Referencia
+</h2>
+<p>
+ Finalmente, se puede utilizar la API como punto de referencia al momento de crear datos que estén vinculados a datos geográficos. Por ejemplo, si se cuenta con un formulario en el que se debe mostrar a un usuario un listado de provincias, y luego un listado de municipios a partir de la provincia seleccionada, se podrían ejecutar las siguientes consultas:
+</p>
+<p>
+ Listar las provincias de la República Argentina:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/provincias">
+  <code>
+   https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"provincias"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Chaco"</span><span class="p">,</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"22"</span>
+        <span class="p">},</span>
+        <span class="p">{</span> <span class="err">...</span> <span class="p">}</span> <span class="err">//</span> <span class="mi">23</span> <span class="err">resultados</span> <span class="err">omitidos</span>
+    <span class="p">],</span>
+    <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="nt">"total"</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre>
+</div>
+<p>
+ Asumiendo que el usuario selecciona
+ <strong>
+  Chaco
+ </strong>
+ (ID:
+ <strong>
+  22
+ </strong>
+ ), se ejecutaría la siguiente consulta para obtener el listado de municipios:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/municipios?provincia=22&amp;campos=id,nombre&amp;max=100">
+  <code>
+   https://apis.datos.gob.ar/georef/api/municipios?provincia=22&amp;campos=id,nombre&amp;max=100
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"municipios"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Makallé"</span><span class="p">,</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"220161"</span>
+        <span class="p">},</span>
+        <span class="p">{</span> <span class="err">...</span> <span class="p">}</span> <span class="err">//</span> <span class="mi">67</span> <span class="err">resultados</span> <span class="err">omitidos</span>
+    <span class="p">],</span>
+    <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">68</span><span class="p">,</span>
+    <span class="nt">"total"</span><span class="p">:</span> <span class="mi">68</span><span class="p">,</span>
+    <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre>
+</div>
+<p>
+ Notar que al ser datos que no son modificados regularmente, es posible retener copias de los mismos para ser reutilizados en el futuro.
+</p>
+<hr/>
+<p>
+ <em>
+  Si sos usuario de la API de Normalización de Datos Geográficos y querés estar al tanto de los  cambios y novedades,
+  <a href="bit.ly/contacto-datos-argentina">
+   inscribite en la base de contactos de Datos Argentina
+  </a>
+  y elegí sobre qué temas querés que te escribamos.
+ </em>
+</p>
+<p>
+ <em>
+  ¿Tenés algo que contarnos? Nos encantaría que nos cuentes por
+  <a href="https://twitter.com/datosgobar">
+   Twitter
+  </a>
+  o por
+  <a href="mailto:datos@modernizacion.gob.ar">
+   mail
+  </a>
+  qué mejoró usar la API en tu trabajo y qué le falta para mejorar aún más.
+ </em>
+</p>
+<h1 id="ejemplos-de-uso">
+ Ejemplos de uso
+</h1>
+<h2 id="ejemplos-rapidos">
+ Ejemplos rápidos
+</h2>
+<p>
+ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los recursos
+ <code>
+  GET
+ </code>
+ :
+</p>
+<h3 id="busqueda-de-provincias">
+ Búsqueda de provincias
+</h3>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba">
+  <code>
+   https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "provincias": [
+        {
+            "id": "14",
+            "centroide": {
+                "lat": -32.142933,
+                "lon": -63.801753
+            },
+            "nombre": "CÓRDOBA"
+        }
+    ],
+    "cantidad": 1,
+    "total": 1,
+    "inicio": 0
+}
+</pre>
+</div>
+<h3 id="busqueda-de-departamentos">
+ Búsqueda de departamentos
+</h3>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/departamentos?provincia=jujuy&amp;max=16">
+  <code>
+   https://apis.datos.gob.ar/georef/api/departamentos?provincia=jujuy&amp;max=16
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "departamentos": [
+        {
+            "id": "38042",
+            "centroide": {
+                "lat": -24.194923,
+                "lon": -65.12645
+            },
+            "nombre": "PALPALÁ",
+            "provincia": {
+                "id": "38",
+                "nombre": "JUJUY"
+            }
+        },
+        { ... } // 15 departamentos omitidos
+    ],
+    "cantidad": 16,
+    "total": 16,
+    "inicio": 0
+}
+</pre>
+</div>
+<h3 id="busqueda-de-municipios">
+ Búsqueda de municipios
+</h3>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/municipios?provincia=tucuman&amp;aplanar">
+  <code>
+   https://apis.datos.gob.ar/georef/api/municipios?provincia=tucuman&amp;aplanar
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "municipios": [
+        {
+            "centroide_lat": -27.816619,
+            "centroide_lon": -65.199594,
+            "id": "908210",
+            "nombre": "Taco Ralo",
+            "provincia_id": "90",
+            "provincia_nombre": "Tucumán"
+        },
+        { ... } // 9 municipios omitidos
+    ],
+    "cantidad": 10,
+    "total": 112,
+    "inicio": 0
+}
+</pre>
+</div>
+<h3 id="busqueda-de-localidades">
+ Búsqueda de localidades
+</h3>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/localidades?provincia=chubut&amp;campos=nombre">
+  <code>
+   https://apis.datos.gob.ar/georef/api/localidades?provincia=chubut&amp;campos=nombre
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "localidades": [
+        {
+            "id": "26007030000",
+            "nombre": "PUERTO PIRAMIDE"
+        },
+        { ... } // 9 resultados omitidos
+    ],
+    "cantidad": 10,
+    "total": 90,
+    "inicio": 0
+}
+</pre>
+</div>
+<h3 id="normalizacion-de-direcciones">
+ Normalización de direcciones
+</h3>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&amp;direccion=Florida%20al%201801">
+  <code>
+   https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&amp;direccion=Florida al 1801
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "direcciones": [
+        {
+            "altura": {
+                "unidad": null,
+                "valor": "1801"
+            },
+            "calle": {
+                "categoria": "CALLE",
+                "id": "0653901003005",
+                "nombre": "FLORIDA"
+            },
+            "calle_cruce_1": {
+                "categoria": null,
+                "id": null,
+                "nombre": null
+            },
+            "calle_cruce_2": {
+                "categoria": null,
+                "id": null,
+                "nombre": null
+            },
+            "departamento": {
+                "id": "06539",
+                "nombre": "Merlo"
+            },
+            "nomenclatura": "FLORIDA 1801, Merlo, Buenos Aires",
+            "piso": null,
+            "provincia": {
+                "id": "06",
+                "nombre": "Buenos Aires"
+            },
+            "ubicacion": {
+                "lat": null,
+                "lon": null
+            }
+        }
+    ],
+    "cantidad": 1,
+    "total": 1,
+    "inicio": 0
+}
+</pre>
+</div>
+<h3 id="listado-de-calles">
+ Listado de calles
+</h3>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&amp;tipo=avenida">
+  <code>
+   https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&amp;categoria=avenida
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "calles": [
+        {
+            "altura": {
+                "fin": {
+                    "derecha": 0,
+                    "izquierda": 0
+                },
+                "inicio": {
+                    "derecha": 0,
+                    "izquierda": 0
+                }
+            },
+            "departamento": {
+                "id": "90077",
+                "nombre": "Río Chico"
+            },
+            "id": "9007701000050",
+            "nombre": "AV GRL SAVIO",
+            "nomenclatura": "AV GRL SAVIO, Río Chico, Tucumán",
+            "provincia": {
+                "id": "90",
+                "nombre": "Tucumán"
+            },
+            "categoria": "AV"
+        },
+        { ... } // 2 resultados omitidos
+    ],
+    "cantidad": 3,
+    "total": 3,
+    "inicio": 0
+}
+</pre>
+</div>
+<h1 id="consutas-por-lotes">
+ Consutas por lotes
+</h1>
+<p>
+ Todos los recursos de la API tienen una variante
+ <code>
+  POST
+ </code>
+ que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo. Las versiones de los recursos
+ <code>
+  POST
+ </code>
+ aceptan los mismos parámetros que las
+ <code>
+  GET
+ </code>
+ , con la excepción del parámetro
+ <code>
+  formato
+ </code>
+ , que obligatoriamente toma el valor
+ <code>
+  json
+ </code>
+ . Adicionalmente, todos los parámetros se envían a través del cuerpo de la consulta HTTP, y no como parte del
+ <em>
+  query string
+ </em>
+ .
+</p>
+<p>
+ Por ejemplo, las siguientes tres consultas:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&amp;campos=nombre">
+  <code>
+   https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&amp;campos=nombre
+  </code>
+ </a>
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&amp;campos=nombre">
+  <code>
+   https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&amp;campos=nombre
+  </code>
+ </a>
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=san luis&amp;campos=nombre">
+  <code>
+   https://apis.datos.gob.ar/georef/api/provincias?nombre=san luis&amp;campos=nombre
+  </code>
+ </a>
+</p>
+<p>
+ Son equivalentes a la siguiente consulta
+ <code>
+  POST
+ </code>
+ por lotes:
+</p>
+<p>
+ <code>
+  POST
+ </code>
+ <code>
+  https://apis.datos.gob.ar/georef/api/provincias
+ </code>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"provincias"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"cordoba"</span><span class="p">,</span>
+            <span class="nt">"campos"</span><span class="p">:</span> <span class="s2">"nombre"</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"chaco"</span><span class="p">,</span>
+            <span class="nt">"campos"</span><span class="p">:</span> <span class="s2">"nombre"</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"san luis"</span><span class="p">,</span>
+            <span class="nt">"campos"</span><span class="p">:</span> <span class="s2">"nombre"</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre>
+</div>
+<p>
+ Que resultaría en la siguiente respuesta JSON:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"resultados"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="nt">"provincias"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"14"</span><span class="p">,</span>
+                    <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Córdoba"</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">"total"</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="nt">"provincias"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"22"</span><span class="p">,</span>
+                    <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Chaco"</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">"total"</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="nt">"provincias"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"74"</span><span class="p">,</span>
+                    <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"San Luis"</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">"total"</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre>
+</div>
+<p>
+ Como se muestra en el ejemplo, la respuesta contiene una lista
+ <code>
+  resultados
+ </code>
+ , con los resultados de cada consulta individual adentro. Las estructuras de las respuestas se mantienen idénticas que los recursos
+ <code>
+  GET
+ </code>
+ .
+</p>
+<div class="admonition warning">
+ <p class="admonition-title">
+  Cantidad máxima de consultas
+ </p>
+ <p>
+  La cantidad de consultas en una misma petición no debe superar las 1000.
+ </p>
+ <p>
+  Adicionalmente, el total de los parámetros
+  <code>
+   max
+  </code>
+  sumados de todas las consultas no debe superar los 5000.
+Por ejemplo, se permite enviar 1000 consultas con
+  <code>
+   max=5
+  </code>
+  , o 100 consultas con
+  <code>
+   max=50
+  </code>
+  , pero no 1000 consultas con
+  <code>
+   max=10
+  </code>
+  .
+ </p>
+</div>
+<p>
+ Utilizando los recursos por lotes, se pueden normalizar mayores cantidades de datos en menos tiempo. Por ejemplo, si se cuenta con 50000 direcciones, tan solo se necesitan 10 consultas para normalizar el activo de datos entero. Utilizando los recursos
+ <code>
+  GET
+ </code>
+ , se necesitarían 50000 (una por dato).
+</p>
+<h2 id="ejemplos-de-uso">
+ Ejemplos de uso
+</h2>
+<p>
+ A diferencia de los recursos
+ <code>
+  GET
+ </code>
+ , los ejemplos de operaciones por lotes se muestran utilizando comandos construídos sobre la herramienta
+ <code>
+  curl
+ </code>
+ . La sección de
+ <a href="python-usage.md">
+  ejemplos con Python
+ </a>
+ también contiene ejemplos de uso de los recursos
+ <code>
+  POST
+ </code>
+ .
+</p>
+<h3 id="busqueda-de-municipios-en-lotes">
+ Búsqueda de municipios en lotes
+</h3>
+<div class="codehilite">
+ <pre><span></span>curl -X POST "https://apis.datos.gob.ar/georef/api/municipios" \
+-H 'Content-Type: application/json' -d'
+{
+    "municipios": [
+        {
+            "nombre": "belgrano",
+            "max": 1,
+            "campos": "id, nombre"
+        },
+        {
+            "nombre": "martin",
+            "max": 1,
+            "provincia": "la pampa",
+            "aplanar": true
+        }
+    ]
+}
+'
+</pre>
+</div>
+<p>
+ Resultados:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"resultados"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"municipios"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"060301"</span><span class="p">,</span>
+                    <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"General Belgrano"</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">"total"</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">"municipios"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">"centroide_lat"</span><span class="p">:</span> <span class="mf">-35.361211</span><span class="p">,</span>
+                    <span class="nt">"centroide_lon"</span><span class="p">:</span> <span class="mf">-64.294073</span><span class="p">,</span>
+                    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"420126"</span><span class="p">,</span>
+                    <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Embajador Martini"</span><span class="p">,</span>
+                    <span class="nt">"provincia_id"</span><span class="p">:</span> <span class="s2">"42"</span><span class="p">,</span>
+                    <span class="nt">"provincia_nombre"</span><span class="p">:</span> <span class="s2">"La Pampa"</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">"total"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre>
+</div>
+<h3 id="normalizacion-de-direcciones-en-lotes">
+ Normalización de direcciones en lotes
+</h3>
+<div class="codehilite">
+ <pre><span></span>curl -X POST "https://apis.datos.gob.ar/georef/api/direcciones" \
+-H 'Content-Type: application/json' -d'
+{
+    "direcciones": [
+        {
+            "direccion": "santa fe 3100",
+            "max": 1,
+            "campos": "basico"
+        },
+        {
+            "direccion": "corientes 4010",
+            "max": 1,
+            "campos": "basico",
+            "departamento": "General López"
+        }
+    ]
+}
+'
+</pre>
+</div>
+<p>
+ Resultados:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"resultados"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">"direcciones"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">"altura"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"valor"</span><span class="p">:</span> <span class="s2">"3100"</span>
+                    <span class="p">},</span>
+                    <span class="nt">"calle"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"0642701011435"</span><span class="p">,</span>
+                        <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"SANTA FE"</span>
+                    <span class="p">},</span>
+                    <span class="nt">"calle_cruce_1"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"id"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                        <span class="nt">"nombre"</span><span class="p">:</span> <span class="kc">null</span>
+                    <span class="p">},</span>
+                    <span class="nt">"calle_cruce_2"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"id"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                        <span class="nt">"nombre"</span><span class="p">:</span> <span class="kc">null</span>
+                    <span class="p">},</span>
+                    <span class="nt">"nomenclatura"</span><span class="p">:</span> <span class="s2">"SANTA FE 3100, La Matanza, Buenos Aires"</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="nt">"total"</span><span class="p">:</span> <span class="mi">29</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nt">"direcciones"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="nt">"altura"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"valor"</span><span class="p">:</span> <span class="s2">"4010"</span>
+                    <span class="p">},</span>
+                    <span class="nt">"calle"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"8204229000610"</span><span class="p">,</span>
+                        <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"CORRIENTES"</span>
+                    <span class="p">},</span>
+                    <span class="nt">"calle_cruce_1"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"id"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                        <span class="nt">"nombre"</span><span class="p">:</span> <span class="kc">null</span>
+                    <span class="p">},</span>
+                    <span class="nt">"calle_cruce_2"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"id"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+                        <span class="nt">"nombre"</span><span class="p">:</span> <span class="kc">null</span>
+                    <span class="p">},</span>
+                    <span class="nt">"nomenclatura"</span><span class="p">:</span> <span class="s2">"CORRIENTES 4010, General López, Santa Fe"</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="nt">"total"</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre>
+</div>
+<h3 id="entidades-geograficas-en-varios-puntos">
+ Entidades geográficas en varios puntos
+</h3>
+<div class="codehilite">
+ <pre><span></span>curl -X POST "https://apis.datos.gob.ar/georef/api/ubicacion" \
+-H 'Content-Type: application/json' -d'
+{
+    "ubicaciones": [
+        {
+            "lat": -27.274161,
+            "lon": -66.752929,
+            "campos": "completo"
+        },
+        {
+            "lat": -31.480693,
+            "lon": -59.092813,
+            "aplanar": true,
+            "campos": "completo"
+        }
+    ]
+}
+'
+</pre>
+</div>
+<p>
+ Resultados:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+  <span class="nt">"resultados"</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">"ubicacion"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"departamento"</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">"fuente"</span><span class="p">:</span> <span class="s2">"Adm. Grl. de Catastro"</span><span class="p">,</span>
+          <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"10035"</span><span class="p">,</span>
+          <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Belén"</span>
+        <span class="p">},</span>
+        <span class="nt">"lat"</span><span class="p">:</span> <span class="mf">-27.274161</span><span class="p">,</span>
+        <span class="nt">"lon"</span><span class="p">:</span> <span class="mf">-66.752929</span><span class="p">,</span>
+        <span class="nt">"municipio"</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">"fuente"</span><span class="p">:</span> <span class="s2">"Adm. Grl. de Catastro"</span><span class="p">,</span>
+          <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"100077"</span><span class="p">,</span>
+          <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Hualfín"</span>
+        <span class="p">},</span>
+        <span class="nt">"provincia"</span><span class="p">:</span> <span class="p">{</span>
+          <span class="nt">"fuente"</span><span class="p">:</span> <span class="s2">"IGN"</span><span class="p">,</span>
+          <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"10"</span><span class="p">,</span>
+          <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Catamarca"</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">"ubicacion"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"departamento_fuente"</span><span class="p">:</span> <span class="s2">"ATER - Direc. de Catastro"</span><span class="p">,</span>
+        <span class="nt">"departamento_id"</span><span class="p">:</span> <span class="s2">"30113"</span><span class="p">,</span>
+        <span class="nt">"departamento_nombre"</span><span class="p">:</span> <span class="s2">"Villaguay"</span><span class="p">,</span>
+        <span class="nt">"lat"</span><span class="p">:</span> <span class="mf">-31.480693</span><span class="p">,</span>
+        <span class="nt">"lon"</span><span class="p">:</span> <span class="mf">-59.092813</span><span class="p">,</span>
+        <span class="nt">"municipio_fuente"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">"municipio_id"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">"municipio_nombre"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+        <span class="nt">"provincia_fuente"</span><span class="p">:</span> <span class="s2">"IGN"</span><span class="p">,</span>
+        <span class="nt">"provincia_id"</span><span class="p">:</span> <span class="s2">"30"</span><span class="p">,</span>
+        <span class="nt">"provincia_nombre"</span><span class="p">:</span> <span class="s2">"Entre Ríos"</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre>
+</div>
+<h1 id="normalizacion-de-direcciones">
+ Normalización de Direcciones
+</h1>
+<p>
+ El recurso
+ <code>
+  /direcciones
+ </code>
+ de la API permite normalizar y georreferenciar direcciones de calles. Como todos los otros recursos, cuenta con varios filtros y opciones que permiten controlar los resultados obtenidos.
+</p>
+<h2 id="parametros-y-filtros">
+ Parámetros y filtros
+</h2>
+<p>
+ El único parámetro obligatorio del recurso
+ <code>
+  /direcciones
+ </code>
+ es
+ <code>
+  direccion
+ </code>
+ . El mismo debe tomar el valor de una dirección: es decir, una combinación de nombres de calles y una altura preferiblemente numérica. La API tolera direcciones con distintas estructuras, y se hace un esfuerzo en intentar interpretar qué información representa cada parte del valor recibido, teniendo en cuenta errores de escritura comunes. Para lograr esto, se utiliza la librería
+ <a href="https://github.com/datosgobar/georef-ar-address">
+  georef-ar-address
+ </a>
+ . En algunos casos, la estructura de la dirección no puede ser interpretada correctamente; para evitar estos casos se recomienda utilizar direcciones con el siguiente formato aproximado:
+</p>
+<ul>
+ <li>
+  <strong>
+   calle
+  </strong>
+  [altura]
+ </li>
+ <li>
+  <strong>
+   calle 1
+  </strong>
+  [altura]
+  <em>
+   esquina/y
+  </em>
+  <strong>
+   calle 2
+  </strong>
+ </li>
+ <li>
+  <strong>
+   calle 1
+  </strong>
+  <em>
+   esquina/y
+  </em>
+  <strong>
+   calle 2
+  </strong>
+  [altura]
+ </li>
+ <li>
+  <strong>
+   calle 1
+  </strong>
+  [altura]
+  <em>
+   entre
+  </em>
+  <strong>
+   calle 2
+  </strong>
+  y
+  <strong>
+   calle 3
+  </strong>
+ </li>
+ <li>
+  <strong>
+   calle 1
+  </strong>
+  <em>
+   entre
+  </em>
+  <strong>
+   calle 2
+  </strong>
+  y
+  <strong>
+   calle 3
+  </strong>
+  [altura]
+ </li>
+</ul>
+<p>
+ En todos los casos, el valor [altura] es opcional, y de estar presente puede ser seguido de un piso/número de departamento.
+</p>
+<p>
+ El resto de los parámetros aceptados por el recurso
+ <code>
+  /direccion
+ </code>
+ están listados en la
+ <a href="https://datosgobar.github.io/georef-ar-api/open-api">
+  referencia completa de la API
+ </a>
+ . Se recomienda utilizar los parámetros
+ <code>
+  provincia
+ </code>
+ y/o
+ <code>
+  departamento
+ </code>
+ para obtener resultados más precisos.
+</p>
+<h2 id="campos-de-respuesta">
+ Campos de respuesta
+</h2>
+<p>
+ Al normalizar una dirección, la API devuelve varios campos de datos. Para entender el significado de cada uno, es conveniente utilizar un ejemplo de uso:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/direcciones?direccion=Av.%20Santa%20Fe%20nro%20260%202ndo%20C,%20entre%20Santa%20Rosa%20y%20Col%C3%B3n&amp;departamento=capital&amp;provincia=cordoba">
+  https://apis.datos.gob.ar/georef/api/direcciones?direccion=Av. Santa Fe nro 260 2ndo C, entre Santa Rosa y Colón&amp;departamento=capital&amp;provincia=cordoba
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="nt">"direcciones"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"altura"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"unidad"</span><span class="p">:</span> <span class="s2">"nro"</span><span class="p">,</span>
+                <span class="nt">"valor"</span><span class="p">:</span> <span class="s2">"260"</span>
+            <span class="p">},</span>
+            <span class="nt">"calle"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"categoria"</span><span class="p">:</span> <span class="s2">"AV"</span><span class="p">,</span>
+                <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"1401401002460"</span><span class="p">,</span>
+                <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"AV SANTA FE"</span>
+            <span class="p">},</span>
+            <span class="nt">"calle_cruce_1"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"categoria"</span><span class="p">:</span> <span class="s2">"CALLE"</span><span class="p">,</span>
+                <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"1401401038100"</span><span class="p">,</span>
+                <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"SANTA ROSA"</span>
+            <span class="p">},</span>
+            <span class="nt">"calle_cruce_2"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"categoria"</span><span class="p">:</span> <span class="s2">"AV"</span><span class="p">,</span>
+                <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"1401401002060"</span><span class="p">,</span>
+                <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"AV COLON"</span>
+            <span class="p">},</span>
+            <span class="nt">"departamento"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"14014"</span><span class="p">,</span>
+                <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Capital"</span>
+            <span class="p">},</span>
+            <span class="nt">"nomenclatura"</span><span class="p">:</span> <span class="s2">"AV SANTA FE 260 (ENTRE SANTA ROSA Y AV COLON), Capital, Córdoba"</span><span class="p">,</span>
+            <span class="nt">"piso"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+            <span class="nt">"provincia"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"14"</span><span class="p">,</span>
+                <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Córdoba"</span>
+            <span class="p">},</span>
+            <span class="nt">"ubicacion"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"lat"</span><span class="p">:</span> <span class="mf">-31.4080674840673</span><span class="p">,</span>
+                <span class="nt">"lon"</span><span class="p">:</span> <span class="mf">-64.20062417513701</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="nt">"total"</span><span class="p">:</span> <span class="mi">1</span>
+<span class="p">}</span>
+</pre>
+</div>
+<p>
+ Como se puede observar, campos de respuesta estándar son:
+</p>
+<ul>
+ <li>
+  <code>
+   altura
+  </code>
+  <ul>
+   <li>
+    <code>
+     unidad
+    </code>
+    : Unidad de la altura, o prefijo del valor numérico de la misma.
+   </li>
+   <li>
+    <code>
+     valor
+    </code>
+    : Valor numérico de la altura.
+   </li>
+  </ul>
+ </li>
+ <li>
+  <code>
+   calle
+  </code>
+  : Propiedades de la primera calle presente en la dirección.
+  <ul>
+   <li>
+    <code>
+     nombre
+    </code>
+    : Nombre normalizado de la
+    <strong>
+     calle 1
+    </strong>
+    .
+   </li>
+   <li>
+    <code>
+     id
+    </code>
+    : ID de la
+    <strong>
+     calle 1
+    </strong>
+    .
+   </li>
+   <li>
+    <code>
+     categoria
+    </code>
+    : Tipo de la
+    <strong>
+     calle 1
+    </strong>
+    .
+   </li>
+  </ul>
+ </li>
+ <li>
+  <code>
+   calle_cruce_1
+  </code>
+  : Propiedades de la segunda calle presente en la dirección
+  <em>
+   (valores opcionales)
+  </em>
+  .
+  <ul>
+   <li>
+    <code>
+     nombre
+    </code>
+    : Nombre normalizado de la
+    <strong>
+     calle 2
+    </strong>
+    .
+   </li>
+   <li>
+    <code>
+     id
+    </code>
+    : ID de la
+    <strong>
+     calle 2
+    </strong>
+    .
+   </li>
+   <li>
+    <code>
+     categoria
+    </code>
+    : Tipo de la
+    <strong>
+     calle 2
+    </strong>
+    .
+   </li>
+  </ul>
+ </li>
+ <li>
+  <code>
+   calle_cruce_1
+  </code>
+  : Propiedades de la tercera calle presente en la dirección
+  <em>
+   (valores opcionales)
+  </em>
+  .
+  <ul>
+   <li>
+    <code>
+     nombre
+    </code>
+    : Nombre normalizado de la
+    <strong>
+     calle 3
+    </strong>
+    .
+   </li>
+   <li>
+    <code>
+     id
+    </code>
+    : ID de la
+    <strong>
+     calle 3
+    </strong>
+    .
+   </li>
+   <li>
+    <code>
+     categoria
+    </code>
+    : Tipo de la
+    <strong>
+     calle 3
+    </strong>
+    .
+   </li>
+  </ul>
+ </li>
+ <li>
+  <code>
+   departamento
+  </code>
+  : Departamento de la
+  <strong>
+   calle 1
+  </strong>
+  .
+ </li>
+ <li>
+  <code>
+   provincia
+  </code>
+  : Provincia de la
+  <strong>
+   calle 1
+  </strong>
+  .
+ </li>
+ <li>
+  <code>
+   piso
+  </code>
+  : Piso extraído de la dirección.
+ </li>
+ <li>
+  <code>
+   nomenclatura
+  </code>
+  : Versión normalizada de la dirección.
+ </li>
+ <li>
+  <code>
+   ubicacion
+  </code>
+  : Resultados de la georreferenciación de la dirección (
+  <code>
+   lon
+  </code>
+  y
+  <code>
+   lat
+  </code>
+  ). Cuando los valores están presentes, representan una
+  <strong>
+   aproximación
+  </strong>
+  de la ubicación de la dirección. Cuando no están presentes, se debe a que los datos indexados en la API no fueron suficientes para obtener un resultado estimativo. La efectividad de la georreferenciación varía de acuerdo a cada región del país.
+ </li>
+</ul>
+<h2 id="normalizacion-de-direcciones-por-lotes">
+ Normalización de direcciones por lotes
+</h2>
+<p>
+ Para normalizar grandes cantidades de direcciones, se recomienda utilizar los recursos de
+ <a href="bulk.md">
+  consultas por lotes
+ </a>
+ .
+</p>
+<h1 id="operaciones-con-geometrias">
+ Operaciones con Geometrías
+</h1>
+<p>
+ La API permite a los usuarios operar con las geometrías de distintas entidades geográficas. A continuación, se detallan los recursos y parámetros que permiten a los usuarios realizar estas operaciones.
+</p>
+<h2 id="parametro-interseccion">
+ Parámetro
+ <code>
+  interseccion
+ </code>
+</h2>
+<p>
+ Los recursos
+ <code>
+  /provincias
+ </code>
+ ,
+ <code>
+  /departamentos
+ </code>
+ ,
+ <code>
+  /municipios
+ </code>
+ y
+ <code>
+  /calles
+ </code>
+ cuentan con el parámetro
+ <code>
+  interseccion
+ </code>
+ . El parámetro permite buscar entidades utilizando intersección de geometrías como filtro. El parámetro debe tomar valores con el siguiente formato:
+</p>
+<div class="codehilite">
+ <pre><span></span>interseccion=&amp;lt;tipo de entidad&amp;gt;:&amp;lt;id 1&amp;gt;[:&amp;lt;id 2&amp;gt;:...]
+</pre>
+</div>
+<p>
+ Al aplicar el filtro
+ <code>
+  interseccion
+ </code>
+ , se buscan entidades que compartan área con cualquiera de las entidades listadas en la lista de IDs. Entonces, utilizar (por ejemplo)
+ <code>
+  /municipios?interseccion=departamento:18105
+ </code>
+ buscaría todos los municipios que interseccionen con el departamento con ID 18105, mientras que utilizar
+ <code>
+  /departamentos?interseccion=municipio:620133:540378
+ </code>
+ buscaría todos los departamentos que interseccionen con el municipio con ID 620133
+ <strong>
+  o
+ </strong>
+ el municipio con ID 540378.
+</p>
+<p>
+ De la misma forma, utilizar
+ <code>
+  /calles?interseccion=municipio:620133
+ </code>
+ buscaría todas las calles que estén contenidas en el municipio con ID 620133. También es posible buscar municipios a partir de una calle:
+ <code>
+  /municipios?interseccion=calle:0638503000235
+ </code>
+ buscaría el municipio que contiene a la calle con ID 0638503000235.
+</p>
+<div class="admonition warning">
+ <p class="admonition-title">
+  IDs inválidos
+ </p>
+ <p>
+  Todos los IDs listados que no correspondan a una entidad geográfica existente serán ignorados.
+ </p>
+</div>
+<p>
+ Ejemplo completo de llamado a la API:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/municipios?interseccion=departamento:18105">
+  <code>
+   https://apis.datos.gob.ar/georef/api/municipios?interseccion=departamento:18105
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"municipios"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"centroide"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"lat"</span><span class="p">:</span> <span class="mf">-28.508559</span><span class="p">,</span>
+                <span class="nt">"lon"</span><span class="p">:</span> <span class="mf">-58.031593</span>
+            <span class="p">},</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"180042"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Concepción"</span><span class="p">,</span>
+            <span class="nt">"provincia"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"18"</span><span class="p">,</span>
+                <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Corrientes"</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span> <span class="err">...</span> <span class="p">}</span> <span class="err">//</span> <span class="mi">9</span> <span class="err">resultados</span> <span class="err">omitidos</span>
+    <span class="p">],</span>
+    <span class="nt">"cantidad"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="nt">"total"</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span>
+    <span class="nt">"inicio"</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre>
+</div>
+<p>
+ Aunque el recurso
+ <code>
+  /provincias
+ </code>
+ acepta el parámetro
+ <code>
+  interseccion
+ </code>
+ , se recomienda utilizar filtros por IDs y no por geometrías al momento de buscar provincias, ya que el filtrado por ID es más performante. Por ejemplo, la consulta
+ <code>
+  /provincias?interseccion=departamento:18105
+ </code>
+ es equivalente a la consulta
+ <code>
+  /provincias?id=18
+ </code>
+ , ya que los primeros dos dígitos de los códigos de los departamentos siempre corresponden a su provincia.
+</p>
+<h2 id="recurso-ubicacion">
+ Recurso
+ <code>
+  /ubicacion
+ </code>
+</h2>
+<p>
+ En la
+ <a href="/">
+  sección de inicio
+ </a>
+ , se dió un ejemplo de uso del recurso
+ <code>
+  /ubicacion
+ </code>
+ para enriquecer datos existentes. El recurso utiliza las geometrías de las entidades geográficas para determinar cuáles contienen al punto especificado por el usuario a través de los parámetros
+ <code>
+  lat
+ </code>
+ y
+ <code>
+  lon
+ </code>
+ . Las entidades devueltas son las siguientes:
+</p>
+<ul>
+ <li>
+  Provincia
+ </li>
+ <li>
+  Departamento
+ </li>
+ <li>
+  Municipio
+  <em>
+   (opcional)
+  </em>
+ </li>
+</ul>
+<p>
+ Dependiendo del punto elegido, es posible no obtener un municipio como parte de la respuesta de la API. Como ejemplo, se muestran dos llamados distintos al recurso
+ <code>
+  /ubicacion
+ </code>
+ .
+</p>
+<p>
+ Con municipio:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529">
+  <code>
+   https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"ubicacion"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"departamento"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"10035"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Belén"</span>
+        <span class="p">},</span>
+        <span class="nt">"lat"</span><span class="p">:</span> <span class="mf">-27.2741</span><span class="p">,</span>
+        <span class="nt">"lon"</span><span class="p">:</span> <span class="mf">-66.7529</span><span class="p">,</span>
+        <span class="nt">"municipio"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"100077"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Hualfín"</span>
+        <span class="p">},</span>
+        <span class="nt">"provincia"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"10"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Catamarca"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre>
+</div>
+<p>
+ Sin municipio:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&amp;lon=-62.898">
+  <code>
+   https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&amp;lon=-62.898
+  </code>
+ </a>
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="p">{</span>
+    <span class="nt">"ubicacion"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"departamento"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"86028"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Avellaneda"</span>
+        <span class="p">},</span>
+        <span class="nt">"lat"</span><span class="p">:</span> <span class="mf">-28.504</span><span class="p">,</span>
+        <span class="nt">"lon"</span><span class="p">:</span> <span class="mf">-62.898</span><span class="p">,</span>
+        <span class="nt">"municipio"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="kc">null</span>
+        <span class="p">},</span>
+        <span class="nt">"provincia"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"86"</span><span class="p">,</span>
+            <span class="nt">"nombre"</span><span class="p">:</span> <span class="s2">"Santiago del Estero"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre>
+</div>
+<h1 id="descarga-de-geometrias">
+ Descarga de Geometrías
+</h1>
+<p>
+ La API permite la descarga de geometrías a través del formato
+ <a href="https://es.wikipedia.org/wiki/Shapefile">
+  ESRI Shapefile
+ </a>
+ . Para utilizar el formato, se debe agregar
+ <code>
+  formato=shp
+ </code>
+ a la lista de parámetros especificados en la URL. El formato Shapefile está disponible en los siguientes recursos (versión GET):
+</p>
+<ul>
+ <li>
+  <code>
+   /provincias
+  </code>
+ </li>
+ <li>
+  <code>
+   /departamentos
+  </code>
+ </li>
+ <li>
+  <code>
+   /municipios
+  </code>
+ </li>
+ <li>
+  <code>
+   /localidades
+  </code>
+ </li>
+ <li>
+  <code>
+   /calles
+  </code>
+ </li>
+</ul>
+<p>
+ Cuando se especifica
+ <code>
+  formato=shp
+ </code>
+ , la respuesta de la API es un archivo ZIP que contiene los tres archivos requeridos por el estándar:
+ <code>
+  .shp
+ </code>
+ ,
+ <code>
+  .shx
+ </code>
+ y
+ <code>
+  .dbf
+ </code>
+ . El archivo luego puede ser abierto con programas como
+ <a href="https://www.qgis.org/en/site/">
+  QGIS
+ </a>
+ .
+</p>
+<p>
+ Por ejemplo, si se desea obtener todas las calles del municipio Alta García (ID 141372), se puede utilizar la siguiente consulta:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/calles?interseccion=municipio:141372&amp;formato=shp&amp;max=1000">
+  https://apis.datos.gob.ar/georef/api/calles?interseccion=municipio:141372&amp;formato=shp&amp;max=1000
+ </a>
+</p>
+<p>
+ Que descargaría los siguientes datos:
+</p>
+<p>
+ <img alt="" src="assets/calles1.png"/>
+ <br/>
+</p>
+<p>
+ Si se desean descargar todos los departamentos de la provicina de Chaco, se puede utilizar la siguiente consulta:
+</p>
+<p>
+ <code>
+  GET
+ </code>
+ <a href="https://apis.datos.gob.ar/georef/api/departamentos?provincia=chaco&amp;formato=shp&amp;max=1000">
+  https://apis.datos.gob.ar/georef/api/departamentos?provincia=chaco&amp;formato=shp&amp;max=1000
+ </a>
+</p>
+<p>
+ Que descargaría los siguientes datos:
+</p>
+<p>
+ <img alt="" src="assets/departamentos1.png"/>
+</p>
+<h1 id="integracion-con-planillas-de-calculo">
+ Integración con planillas de cálculo
+</h1>
+<h2 id="google-drive">
+ Google Drive
+</h2>
+<h3 id="1-modificar-la-configuracion-regional">
+ 1. Modificar la configuración regional
+</h3>
+<p>
+ La API genera archivos CSV usando “.” como separador decimal. Para que Google Spreadsheet lea correctamente el archivo debe elegirse “Estados Unidos” o cualquier otra región compatible (esto sólo afecta a la lectura de coordenadas).
+</p>
+<p>
+ <img alt="" src="assets/google_drive_1.png"/>
+ <br/>
+ <br/>
+ <img alt="" src="assets/google_drive_2.png"/>
+ <br/>
+ <br/>
+ <img alt="" src="assets/google_drive_3.png"/>
+</p>
+<h3 id="2-importar-listados-de-unidades-territoriales">
+ 2. Importar listados de unidades territoriales
+</h3>
+<p>
+ Utilizamos la función
+ <code>
+  IMPORTDATA()
+ </code>
+ de Google Sheets y armamos la url de la entidad territorial que queremos importar. Por ejemplo "localidades de la provincia de Santa Fé":
+</p>
+<p>
+ <a href="https://apis.datos.gob.ar/georef/api/localidades?formato=csv&amp;max=1000&amp;provincia=santa%20fe">
+  <code>
+   https://apis.datos.gob.ar/georef/api/localidades?formato=csv&amp;max=1000&amp;provincia=santa%20fe
+  </code>
+ </a>
+</p>
+<p>
+ <img alt="" src="assets/google_drive_4.png"/>
+ <br/>
+ <br/>
+</p>
+<p>
+ y obtendremos:
+</p>
+<p>
+ <img alt="" src="assets/google_drive_5.png"/>
+ <br/>
+ <br/>
+</p>
+<h3 id="3-normalizar-un-listado-de-unidades-territoriales">
+ 3. Normalizar un listado de unidades territoriales
+</h3>
+<p>
+ Si tenemos un listado de provincias que queremos normalizar, como el siguiente:
+</p>
+<p>
+ <img alt="" src="assets/google_drive_6.png"/>
+ <br/>
+ <br/>
+</p>
+<p>
+ Podemos armar urls individuales para normalizar los nombres y traer alguno de sus atributos. Imaginemos que queremos el ID y el nombre normalizado.
+</p>
+<p>
+ Primero generamos la url para cada una de las provincias:
+</p>
+<p>
+ <img alt="" src="assets/google_drive_7.png"/>
+ <br/>
+ <br/>
+</p>
+<p>
+ y luego necesitamos importar una nueva función en la hoja de cálculo. Para eso, desde el menú:
+</p>
+<ol>
+ <li>
+  Herramientas → Editor de secuencia de comandos.
+ </li>
+ <li>
+  Borramos todo lo que hay en el editor y pegamos el siguiente
+  <a href="https://raw.githubusercontent.com/bradjasper/ImportJSON/master/ImportJSON.gs">
+   script
+  </a>
+  de
+  <a href="https://github.com/bradjasper">
+   Bradjasper
+  </a>
+  .
+ </li>
+ <li>
+  Renombremos el script como ImportJson.gs y guardamos.
+ </li>
+ <li>
+  Ahora ya podemos usar la función
+  <code>
+   =importJSON()
+  </code>
+  en una celda.
+ </li>
+</ol>
+<p>
+ <img alt="" src="assets/google_drive_8.png"/>
+ <br/>
+ <br/>
+</p>
+<p>
+ <code>
+  =ImportJSON(B2;”/provincias/id,/provincias/nombre”;”noInherit,noTruncate,noHeaders”)
+ </code>
+</p>
+<p>
+ y obtendremos:
+</p>
+<p>
+ <img alt="" src="assets/google_drive_9.png"/>
+ <br/>
+ <br/>
+</p>
+<h1 id="usar-en-python">
+ Usar en Python
+</h1>
+<h2 id="con-requests">
+ Con
+ <code>
+  requests
+ </code>
+</h2>
+<h3 id="normalizar-una-entidad">
+ Normalizar una entidad
+</h3>
+<div class="codehilite">
+ <pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+
+<span class="n">API_BASE_URL</span> <span class="o">=</span> <span class="s2">"https://apis.datos.gob.ar/georef/api/"</span>
+
+<span class="k">def</span> <span class="nf">get_similar</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">nombre</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s2">"nombre"</span><span class="p">]</span> <span class="o">=</span> <span class="n">nombre</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">"{}{}?{}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">API_BASE_URL</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">kwargs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="n">endpoint</span><span class="p">]</span>
+
+<span class="n">provincias</span> <span class="o">=</span> <span class="n">get_similar</span><span class="p">(</span><span class="s2">"provincias"</span><span class="p">,</span> <span class="s2">"San Juan"</span><span class="p">)</span>
+</pre>
+</div>
+<div class="codehilite">
+ <pre><span></span><span class="p">[{</span>
+    <span class="sa">u</span><span class="s1">'centroide'</span><span class="p">:</span> <span class="p">{</span>
+        <span class="sa">u</span><span class="s1">'lat'</span><span class="p">:</span> <span class="o">-</span><span class="mf">30.865368</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'lon'</span><span class="p">:</span> <span class="o">-</span><span class="mf">68.889491</span>
+    <span class="p">},</span>
+    <span class="sa">u</span><span class="s1">'id'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'70'</span><span class="p">,</span>
+    <span class="sa">u</span><span class="s1">'nombre'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'San Juan'</span>
+<span class="p">}]</span>
+</pre>
+</div>
+<h3 id="normalizar-varias-entidades">
+ Normalizar varias entidades
+</h3>
+<div class="codehilite">
+ <pre><span></span><span class="k">def</span> <span class="nf">get_similar_bulk</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">nombres</span><span class="p">):</span>
+    <span class="sd">"""Normaliza una lista de nombres de alguna de las entidades geográficas."""</span>
+
+    <span class="c1"># realiza consulta a la API</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">endpoint</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">"nombre"</span><span class="p">:</span> <span class="n">nombre</span><span class="p">,</span> <span class="s2">"max"</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span> <span class="k">for</span> <span class="n">nombre</span> <span class="ow">in</span> <span class="n">nombres</span>
+    <span class="p">]}</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">API_BASE_URL</span> <span class="o">+</span> <span class="n">endpoint</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+        <span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">}</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="c1"># convierte a una lista de "resultado más probable" o "vacío" cuando no hay</span>
+    <span class="n">parsed_results</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">single_result</span><span class="p">[</span><span class="n">endpoint</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">single_result</span><span class="p">[</span><span class="n">endpoint</span><span class="p">]</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">single_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s2">"resultados"</span><span class="p">]</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">parsed_results</span>
+
+<span class="n">provincias</span> <span class="o">=</span> <span class="n">get_similar_bulk</span><span class="p">(</span><span class="s2">"provincias"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"pxa"</span><span class="p">,</span> <span class="s2">"sant fe"</span><span class="p">])</span>
+</pre>
+</div>
+<div class="codehilite">
+ <pre><span></span><span class="p">[</span>
+    <span class="p">{},</span>
+    <span class="p">{</span>
+        <span class="sa">u</span><span class="s1">'centroide'</span><span class="p">:</span> <span class="p">{</span>
+            <span class="sa">u</span><span class="s1">'lat'</span><span class="p">:</span> <span class="o">-</span><span class="mf">30.706927</span><span class="p">,</span>
+            <span class="sa">u</span><span class="s1">'lon'</span><span class="p">:</span> <span class="o">-</span><span class="mf">60.949837</span>
+        <span class="p">},</span>
+        <span class="sa">u</span><span class="s1">'id'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'82'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'nombre'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'Santa Fe'</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre>
+</div>
+<h3 id="enriquecer-coordenadas-con-las-unidades-territoriales-que-las-contienen">
+ Enriquecer coordenadas con las unidades territoriales que las contienen
+</h3>
+<div class="codehilite">
+ <pre><span></span><span class="k">def</span> <span class="nf">get_territorial_units</span><span class="p">(</span><span class="n">ubicaciones</span><span class="p">):</span>
+    <span class="sd">"""Pide las unidades territoriales que contienen a c/punto de una lista de coordenadas."""</span>
+
+    <span class="c1"># realiza consulta a la API</span>
+    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">"ubicacion"</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"ubicaciones"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">"lat"</span><span class="p">:</span> <span class="n">ubicacion</span><span class="p">[</span><span class="s2">"lat"</span><span class="p">],</span> <span class="s2">"lon"</span><span class="p">:</span> <span class="n">ubicacion</span><span class="p">[</span><span class="s2">"lon"</span><span class="p">],</span> <span class="s2">"aplanar"</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">ubicacion</span> <span class="ow">in</span> <span class="n">ubicaciones</span>
+    <span class="p">]}</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">API_BASE_URL</span> <span class="o">+</span> <span class="n">endpoint</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+        <span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">}</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="c1"># convierte a una lista de "resultado más probable" o "vacío" cuando no hay</span>
+    <span class="n">parsed_results</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">single_result</span><span class="p">[</span><span class="n">endpoint</span><span class="p">]</span> <span class="k">if</span> <span class="n">single_result</span><span class="p">[</span><span class="n">endpoint</span><span class="p">]</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">single_result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s2">"resultados"</span><span class="p">]</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">parsed_results</span>
+
+<span class="n">ubicaciones</span> <span class="o">=</span> <span class="n">get_territorial_units</span><span class="p">([</span>
+    <span class="p">{</span><span class="s2">"lat"</span><span class="p">:</span> <span class="o">-</span><span class="mf">32.9477132</span><span class="p">,</span> <span class="s2">"lon"</span><span class="p">:</span> <span class="o">-</span><span class="mf">60.6304658</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">"lat"</span><span class="p">:</span> <span class="o">-</span><span class="mf">34.6037389</span><span class="p">,</span> <span class="s2">"lon"</span><span class="p">:</span> <span class="o">-</span><span class="mf">58.3815704</span><span class="p">}</span>
+<span class="p">])</span>
+</pre>
+</div>
+<div class="codehilite">
+ <pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="sa">u</span><span class="s1">'departamento_id'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'30105'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'departamento_nombre'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'Victoria'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'lat'</span><span class="p">:</span> <span class="o">-</span><span class="mf">32.9477132</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'lon'</span><span class="p">:</span> <span class="o">-</span><span class="mf">60.6304658</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'municipio_id'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'82210'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'municipio_nombre'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'Rosario'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'provincia_id'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'30'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'provincia_nombre'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'Entre Ríos'</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="sa">u</span><span class="s1">'departamento_id'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'02007'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'departamento_nombre'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'Comuna 1'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'lat'</span><span class="p">:</span> <span class="o">-</span><span class="mf">34.6037389</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'lon'</span><span class="p">:</span> <span class="o">-</span><span class="mf">58.3815704</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'municipio_id'</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'municipio_nombre'</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'provincia_id'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'02'</span><span class="p">,</span>
+        <span class="sa">u</span><span class="s1">'provincia_nombre'</span><span class="p">:</span> <span class="sa">u</span><span class="s1">'Ciudad Autónoma de Buenos Aires'</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre>
+</div>
+<h2 id="con-pandas">
+ Con
+ <code>
+  pandas
+ </code>
+</h2>
+<h3 id="consultar-listas-de-referencia">
+ Consultar listas de referencia
+</h3>
+<p>
+ Todas las consultas a la API en formato CSV, se pueden leer fácilmente a un
+ <code>
+  pandas.DataFrame
+ </code>
+ . De ahí se pueden tomar listas de referencia para distintas unidades territoriales.
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="n">provincias</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"https://apis.datos.gob.ar/georef/api/provincias?formato=csv"</span><span class="p">)</span>
+</pre>
+</div>
+<div class="codehilite">
+ <pre><span></span>provincia_id                                   provincia_nombre
+          14                                            Córdoba
+          22                                              Chaco
+          26                                             Chubut
+           6                                       Buenos Aires
+          10                                          Catamarca
+          30                                         Entre Ríos
+          34                                            Formosa
+          42                                           La Pampa
+          62                                          Río Negro
+          70                                           San Juan
+          78                                         Santa Cruz
+          82                                           Santa Fe
+          94  Tierra del Fuego, Antártida e Islas del Atlánt...
+          38                                              Jujuy
+          54                                           Misiones
+           2                    Ciudad Autónoma de Buenos Aires
+          18                                         Corrientes
+          46                                           La Rioja
+          66                                              Salta
+          86                                Santiago del Estero
+          50                                            Mendoza
+          58                                            Neuquén
+          74                                           San Luis
+          90                                            Tucumán
+</pre>
+</div>
+<h3 id="enriquecer-coordenadas">
+ Enriquecer coordenadas
+</h3>
+<div class="codehilite">
+ <pre><span></span><span class="k">def</span> <span class="nf">add_territorial_units</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">column_lat</span><span class="p">,</span> <span class="n">column_lon</span><span class="p">):</span>
+    <span class="sd">"""Agrega unidades territoriales que contienen coordenadas a un DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pandas.DataFrame): Un DataFrame que tiene coordenadas.</span>
+<span class="sd">        column_lat (str): Nombre de la columna que tiene latitud.</span>
+<span class="sd">        column_lon (str): Nombre de la columna que tiene longitud.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pandas.DataFrame: DataFrame original aumentado con unidades       territoriales que contienen a las coordenadas.</span>
+<span class="sd">    """</span>
+
+    <span class="c1"># toma una lista de coordenadas únicas (no repetidas)</span>
+    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">column_lon</span><span class="p">,</span> <span class="n">column_lat</span><span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">column_lon</span><span class="p">:</span> <span class="s2">"lon"</span><span class="p">,</span> <span class="n">column_lat</span><span class="p">:</span> <span class="s2">"lat"</span><span class="p">}</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s2">"records"</span><span class="p">)</span>
+
+    <span class="c1"># crea DataFrame de unidades territoriales que contienen a las coordenadas</span>
+    <span class="n">ubicaciones</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">get_territorial_units</span><span class="p">(</span><span class="n">coordinates</span><span class="p">))</span>
+
+    <span class="c1"># agrega las unidades territoriales al DataFrame original</span>
+    <span class="n">df_with_territorial_units</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+        <span class="n">ubicaciones</span><span class="p">,</span> <span class="s2">"left"</span><span class="p">,</span>
+        <span class="n">left_on</span><span class="o">=</span><span class="p">[</span><span class="n">column_lon</span><span class="p">,</span> <span class="n">column_lat</span><span class="p">],</span>
+        <span class="n">right_on</span><span class="o">=</span><span class="p">[</span><span class="s2">"lon"</span><span class="p">,</span> <span class="s2">"lat"</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># elimina columnas de coordenadas repetidas, dejando las originales</span>
+    <span class="k">return</span> <span class="n">df_with_territorial_units</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">"lon"</span><span class="p">,</span> <span class="s2">"lat"</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># descarga un CSV con coordenadas de aeropuertos</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"https://servicios.transporte.gob.ar/gobierno_abierto/descargar.php?t=aeropuertos&amp;d=detalle"</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">";"</span><span class="p">)</span>
+
+<span class="c1"># Agrega unidades territoriales que contienen coordenadas a un DataFrame</span>
+<span class="n">df_with_territorial_units</span> <span class="o">=</span> <span class="n">add_territorial_units</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">"longitud"</span><span class="p">,</span> <span class="s2">"latitud"</span><span class="p">)</span>
+</pre>
+</div>
+<div class="codehilite">
+ <pre><span></span>   tipo                       denominacion   latitud  longitud   elev  \
+Aeródromo       CORONEL BOGADO/AGROSERVICIOS -60.57066 -33.27226   44.0
+Aeródromo                       GENERAL ACHA -64.61351 -37.40164  277.0
+Aeródromo            ARRECIFES/LA CURA MALAL -60.14170 -34.07574   37.0
+Aeródromo                     PUERTO DESEADO -65.90410 -47.73511   82.0
+Aeródromo  BANDERA/AGROSERVICIOS DOÑA TERESA -62.26462 -28.85541   75.0
+
+departamento_id departamento_nombre municipio_id municipio_nombre  \
+          82084             Rosario       823393   Coronel Bogado
+          42154             Utracán       420133     General Acha
+          06077           Arrecifes       060077        Arrecifes
+          78014             Deseado         None             None
+          86077     General Taboada         None             None
+
+provincia_id     provincia_nombre
+          82             Santa Fe
+          42             La Pampa
+          06         Buenos Aires
+          78           Santa Cruz
+          86  Santiago del Estero
+</pre>
+</div>
+<!-- ## Con `data-cleaner` -->
+<h1 id="tokens-jwt">
+ Tokens JWT
+</h1>
+<p>
+ Si pertenecés a un organismo de la Administración Pública Nacional y querés incrementar la cuota de uso de la API de Georef, podés pedir un token y autenticarte utilizando
+ <a href="https://jwt.io/">
+  JWT
+ </a>
+ .
+</p>
+<p>
+ Para generar un token JWT, se requieren dos elementos: una
+ <em>
+  key
+ </em>
+ y un
+ <em>
+  secret
+ </em>
+ generados para el uso con la API.
+</p>
+<p>
+ Una vez obtenidos ambos elementos, se puede generar un token JWT utilizando, por ejemplo, Python o Node.js. A continuación, se muestran ejemplos utilizando los siguientes valores demostrativos:
+</p>
+<ul>
+ <li>
+  <code>
+   key = YXNkc2Rhc2RmYXNkZmFzZmRhc2RmYXNk
+  </code>
+ </li>
+ <li>
+  <code>
+   secret = dnVvODY4Yzc2bzhzNzZqOG83czY4b2Nq
+  </code>
+ </li>
+</ul>
+<p>
+ El algoritmo de autentificación de mensajes con
+ <em>
+  hash
+ </em>
+ utilizado es HMAC-SHA256 (
+ <code>
+  HS256
+ </code>
+ ).
+</p>
+<h2 id="python">
+ Python
+</h2>
+<p>
+ Utilizando la librería
+ <a href="https://github.com/jpadilla/pyjwt">
+  <code>
+   pyjwt
+  </code>
+ </a>
+ :
+</p>
+<div class="codehilite">
+ <pre><span></span>$ pip install pyjwt
+$ python
+</pre>
+</div>
+<div class="codehilite">
+ <pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">jwt</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">'YXNkc2Rhc2RmYXNkZmFzZmRhc2RmYXNk'</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">message</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">'iss'</span><span class="p">:</span> <span class="n">key</span> <span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">secret</span> <span class="o">=</span> <span class="s1">'dnVvODY4Yzc2bzhzNzZqOG83czY4b2Nq'</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">token_bytes</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">algorithm</span><span class="o">=</span><span class="s1">'HS256'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">token</span> <span class="o">=</span> <span class="n">token_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">token</span>
+<span class="s1">'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJZWE5rYzJSaGMyUm1ZWE5rWm1GelptUmhjMlJtWVhOayJ9.P4leoe9q_H3lmIlnpZuVFSt7ORgLhLfQ3JN_3FMexSo'</span>
+</pre>
+</div>
+<p>
+ Finalmente, para consumir la API de Georef, adjuntar el token generado en las cabeceras HTTP. A continuación, se muestra un ejemplo utilizando la librería
+ <a href="http://docs.python-requests.org/en/master/">
+  <code>
+   requests
+  </code>
+ </a>
+ :
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">requests</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">'Authorization'</span><span class="p">:</span> <span class="s1">'Bearer {}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'https://apis.datos.gob.ar/georef/api/provincias'</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="s1">'provincias'</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre>
+</div>
+<h2 id="nodejs">
+ Node.js
+</h2>
+<p>
+ Utilizando la librería
+ <a href="https://github.com/auth0/node-jsonwebtoken">
+  <code>
+   jswonwebtoken
+  </code>
+ </a>
+ :
+</p>
+<div class="codehilite">
+ <pre><span></span>$ npm install jsonwebtoken
+$ node
+</pre>
+</div>
+<div class="codehilite">
+ <pre><span></span><span class="o">&gt;</span> <span class="kd">var</span> <span class="nx">jwt</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'jsonwebtoken'</span><span class="p">)</span>
+<span class="o">&gt;</span> <span class="kd">var</span> <span class="nx">payload</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">'iss'</span><span class="o">:</span> <span class="s1">'YXNkc2Rhc2RmYXNkZmFzZmRhc2RmYXNk'</span> <span class="p">}</span>
+<span class="o">&gt;</span> <span class="kd">var</span> <span class="nx">secret</span> <span class="o">=</span> <span class="s1">'dnVvODY4Yzc2bzhzNzZqOG83czY4b2Nq'</span>
+<span class="o">&gt;</span> <span class="kd">var</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">jwt</span><span class="p">.</span><span class="nx">sign</span><span class="p">(</span><span class="nx">payload</span><span class="p">,</span> <span class="nx">secret</span><span class="p">,</span> <span class="p">{</span> <span class="s1">'noTimestamp'</span><span class="o">:</span> <span class="kc">true</span> <span class="p">})</span>
+<span class="o">&gt;</span> <span class="nx">token</span>
+<span class="s1">'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJZWE5rYzJSaGMyUm1ZWE5rWm1GelptUmhjMlJtWVhOayJ9.P4leoe9q_H3lmIlnpZuVFSt7ORgLhLfQ3JN_3FMexSo'</span>
+</pre>
+</div>
+<p>
+ Finalmente, para consumir la API de Georef, adjuntar el token generado en las cabeceras HTTP:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">&gt;</span> <span class="kd">var</span> <span class="nx">http</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'http'</span><span class="p">)</span>
+<span class="o">&gt;</span> <span class="nx">http</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span>
+    <span class="s1">'hostname'</span><span class="o">:</span> <span class="s1">'apis.datos.gob.ar'</span><span class="p">,</span>
+    <span class="s1">'path'</span><span class="o">:</span> <span class="s1">'/georef/api/provincias'</span><span class="p">,</span>
+    <span class="s1">'headers'</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s1">'authorization'</span><span class="o">:</span> <span class="s1">'Bearer '</span> <span class="o">+</span> <span class="nx">token</span>
+      <span class="p">}</span>
+  <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+    <span class="p">...</span>
+  <span class="p">})</span>
+</pre>
+</div>
+<h1 id="condiciones-de-uso">
+ Condiciones de uso
+</h1>
+<h2 id="legales">
+ Legales
+</h2>
+<p>
+ Los datos del Servicio de Normalización de Datos Geográficos de Argentina se disponibilizan bajo la licencia
+ <a href="https://creativecommons.org/licenses/by/4.0/deed.es">
+  Creative Commons Attribution 4.0
+ </a>
+ y pueden ser usados para cualquier fin, incluyendo fines comerciales.
+</p>
+<h2 id="tecnicas">
+ Técnicas
+</h2>
+<p>
+ La API del servicio de normalización se encuentra en estado
+ <em>
+  alpha
+ </em>
+ de desarrollo y las cuotas de uso abierto sin autenticación no están definidas.
+</p>
+<p>
+ A medida que el servicio madure en su desarrollo y en el uso que se le da, se establecerán cuotas explícitas de uso sin autenticación por IP.
+</p>
+<p>
+ Los organismos de la APN que requieran cuotas de uso más elevadas que las del servicio abierto, pueden solicitar un token a
+ <a href="mailto:datos@modernizacion.gob.ar">
+  datos@modernizacion.gob.ar
+ </a>
+ .
+</p>
+<h1 id="aplicaciones">
+ Aplicaciones
+</h1>
+<p>
+ Lista de proyectos y aplicaciones que utilizan, extienden o documentan la API del Servicio de Normalización de Datos Geográficos.
+</p>
+<h2 id="de-terceros">
+ De terceros
+</h2>
+<ul>
+ <li>
+  <a href="https://github.com/pdelboca/georefar">
+   pdelboca/georefar
+  </a>
+  : Interface en R para usar la API por
+  <a href="https://twitter.com/pdelboca">
+   @pdelboca
+  </a>
+  .
+ </li>
+ <li>
+  <a href="https://github.com/juancarlospaco/nim-georefar">
+   juancarlospaco/nim-georefar
+  </a>
+  : Inferface en Nim para usar la API por
+  <a href="https://github.com/juancarlospaco">
+   juancarlospaco (GitHub)
+  </a>
+  .
+ </li>
+</ul>
+<h2 id="contacto">
+ Contacto
+</h2>
+<p>
+ ¿Desarrollaste una librería o tenés un proyecto que usa la API? Te
+ <a href="https://twitter.com/datosgobar">
+  invitamos a contarnos
+ </a>
+ así la agregamos a esta lista.
+</p>
+<p>
+ Para todo lo demás, podés mandarnos tu comentario o consulta a
+ <a href="mailto:datos@modernizacion.gob.ar">
+  datos@modernizacion.gob.ar
+ </a>
+ .
+</p>
+<h1 id="guia-de-instalacion-para-desarrolladores">
+ Guía de instalación para desarrolladores
+</h1>
+<p>
+ En este documento se detallan los pasos a seguir si se desea configurar un servidor de API Georef propio.
+</p>
+<h2 id="dependencias">
+ Dependencias
+</h2>
+<ul>
+ <li>
+  <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html">
+   Elasticsearch &gt;=6.4.2
+  </a>
+ </li>
+ <li>
+  <a href="https://www.python.org/downloads/">
+   Python &gt;=3.6.x
+  </a>
+ </li>
+ <li>
+  <a href="https://nginx.org/">
+   Nginx
+  </a>
+  <em>
+   (para entornos productivos)
+  </em>
+ </li>
+</ul>
+<h2 id="instalacion">
+ Instalación
+</h2>
+<h3 id="1-elasticsearch">
+ 1. Elasticsearch
+</h3>
+<p>
+ Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más servidores (nodos).
+</p>
+<h4 id="11-instalar-el-entorno-de-ejecucion-para-java">
+ 1.1 Instalar el entorno de ejecución para Java:
+</h4>
+<div class="codehilite">
+ <pre><span></span>$ sudo apt install default-jre
+</pre>
+</div>
+<h4 id="12-instalar-elasticsearch">
+ 1.2 Instalar Elasticsearch
+</h4>
+<p>
+ Instalar Elasticsearch e iniciar el servicio con
+ <code>
+  systemctl
+ </code>
+ :
+</p>
+<div class="codehilite">
+ <pre><span></span>$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.4.2.deb
+$ sudo dpkg -i elasticsearch-6.4.2.deb
+$ sudo systemctl <span class="nb">enable</span> elasticsearch
+</pre>
+</div>
+<h4 id="13-aplicar-las-configuraciones-recomendadas">
+ 1.3 Aplicar las configuraciones recomendadas
+</h4>
+<p>
+ Editar el archivo
+ <code>
+  /etc/elasticsearch/elasticsearch.yml
+ </code>
+ (el valor de
+ <code>
+  node.name
+ </code>
+ debe ser único por nodo):
+</p>
+<div class="codehilite">
+ <pre><span></span>node.name: node-1
+http.max_content_length: 100mb
+</pre>
+</div>
+<p>
+ Editar el archivo
+ <code>
+  /etc/elasticsearch/jvm.options
+ </code>
+ (siguiendo las
+ <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html">
+  recomendaciones de Elasticsearch
+ </a>
+ ):
+</p>
+<div class="codehilite">
+ <pre><span></span># Tamaño del heap size de la JVM
+# Se recomienda utilizar siempre el mismo valor como mínimo y máximo
+# Ejemplo: 4 GB
+-Xms4g
+-Xmx4g
+</pre>
+</div>
+<h3 id="2-repositorio-y-dependencias">
+ 2. Repositorio y dependencias
+</h3>
+<h4 id="21-clonar-el-repositorio">
+ 2.1 Clonar el repositorio:
+</h4>
+<div class="codehilite">
+ <pre><span></span>$ git clone https://github.com/datosgobar/georef-ar-api.git
+$ <span class="nb">cd</span> georef-ar-api
+</pre>
+</div>
+<h4 id="22-crear-un-entorno-virtual-y-activarlo">
+ 2.2 Crear un entorno virtual y activarlo
+</h4>
+<div class="codehilite">
+ <pre><span></span>$ python3 -m venv venv
+$ <span class="nb">source</span> venv/bin/activate
+</pre>
+</div>
+<h4 id="23-instalar-dependencias-con-pip">
+ 2.3 Instalar dependencias con
+ <code>
+  pip
+ </code>
+</h4>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ pip3 install -r requirements.txt -r requirements-dev.txt
+</pre>
+</div>
+<h4 id="24-copiar-el-archivo-de-configuracion">
+ 2.4 Copiar el archivo de configuración
+</h4>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ cp config/georef.example.cfg config/georef.cfg
+</pre>
+</div>
+<p>
+ Luego, completar el archivo
+ <code>
+  config/georef.cfg
+ </code>
+ con los valores apropiados.
+</p>
+<h4 id="25-copiar-el-archivo-de-configuracion-de-logs">
+ 2.5 Copiar el archivo de configuración de logs
+</h4>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ cp config/logging.example.ini config/logging.ini
+</pre>
+</div>
+<p>
+ Luego, completar el archivo
+ <code>
+  config/logging.ini
+ </code>
+ con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.
+</p>
+<h3 id="3-crear-los-indices">
+ 3. Crear los índices
+</h3>
+<p>
+ Generar índices de entidades y calles:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make index
+</pre>
+</div>
+<p>
+ Listar los índices creados, y otros datos adicionales:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make print_index_stats
+</pre>
+</div>
+<h3 id="4-opcional-re-indexar-datos">
+ 4. (Opcional) Re-indexar datos
+</h3>
+<p>
+ Si se modifican los archivos de datos JSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:
+</p>
+<h4 id="indexar-datos-nuevos">
+ Indexar datos nuevos
+</h4>
+<p>
+ Si se desea actualizar los índices con los nuevos datos, solo si los datos entrantes son más recientes, se puede utilizar nuevamente:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make index
+</pre>
+</div>
+<h4 id="forzar-re-indexado">
+ Forzar re-indexado
+</h4>
+<p>
+ Si se desea forzar un re-indexado, es decir, si se desea indexar los datos nuevamente sin importar la fecha de creación, se debe utilizar la siguiente receta:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make index_forced
+</pre>
+</div>
+<p>
+ La receta
+ <code>
+  index_forced
+ </code>
+ intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en
+ <code>
+  config/georef.cfg
+ </code>
+ . El uso de la receta es recomendado cuando se requiere re-indexar los datos incondicionalmente, algunas situaciones donde esto es necesario son:
+</p>
+<ul>
+ <li>
+  Modificación de la estructura de los archivos de datos
+ </li>
+ <li>
+  Modificación de
+  <em>
+   mappeos
+  </em>
+  de tipos de Elasticsearch
+ </li>
+ <li>
+  Modificación de analizadores de texto de Elasticsearch
+ </li>
+ <li>
+  Modificación de listado de sinónimos
+ </li>
+ <li>
+  Modificación de listado de términos excluyentes
+ </li>
+</ul>
+<p>
+ Cualquiera de las dos opciones también permite indexar datos selectivamente: se debe especificar el nombre del índice a crear/re-indexar. Por ejemplo:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make index <span class="nv">INDEX_NAME</span><span class="o">=</span>localidades
+<span class="o">(</span>venv<span class="o">)</span> $ make index_forced <span class="nv">INDEX_NAME</span><span class="o">=</span>calles
+</pre>
+</div>
+<p>
+ Los nombres de los índices disponibles son:
+</p>
+<ul>
+ <li>
+  <code>
+   provincias
+  </code>
+ </li>
+ <li>
+  <code>
+   provincias-geometria
+  </code>
+ </li>
+ <li>
+  <code>
+   departamentos
+  </code>
+ </li>
+ <li>
+  <code>
+   departamentos-geometria
+  </code>
+ </li>
+ <li>
+  <code>
+   municipios
+  </code>
+ </li>
+ <li>
+  <code>
+   municipios-geometria
+  </code>
+ </li>
+ <li>
+  <code>
+   localidades
+  </code>
+ </li>
+ <li>
+  <code>
+   calles
+  </code>
+ </li>
+ <li>
+  <code>
+   intersecciones
+  </code>
+ </li>
+</ul>
+<h3 id="5-correr-api">
+ 5. Correr API
+</h3>
+<h4 id="entornos-de-desarrollo">
+ Entornos de desarrollo
+</h4>
+<p>
+ Correr la API de Georef utilizando un servidor de prueba (no apto para producción):
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make start_dev_server
+</pre>
+</div>
+<p>
+ O También:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make start_gunicorn_dev_server
+</pre>
+</div>
+<h4 id="entornos-productivos">
+ Entornos productivos
+</h4>
+<h5 id="51-configurar-servicio-georef-ar-api-para-systemd">
+ 5.1 Configurar servicio
+ <code>
+  georef-ar-api
+ </code>
+ para
+ <code>
+  systemd
+ </code>
+</h5>
+<p>
+ Copiar el archivo
+ <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service">
+  <code>
+   config/georef-ar-api.service
+  </code>
+ </a>
+ a
+ <code>
+  /etc/systemd/system/
+ </code>
+ y configurarlo. Notar los campos marcados entre '
+ <code>
+  &lt;
+ </code>
+ ' y '
+ <code>
+  &gt;
+ </code>
+ ', que deben ser reemplazados por el usuario.
+</p>
+<h5 id="52-activar-y-arrancar-el-servicio">
+ 5.2 Activar y arrancar el servicio
+</h5>
+<div class="codehilite">
+ <pre><span></span>$ sudo systemctl daemon-reload
+$ sudo systemctl <span class="nb">enable</span> georef-ar-api.service
+$ sudo systemctl start georef-ar-api.service
+</pre>
+</div>
+<h5 id="53-configurar-nginx">
+ 5.3 Configurar
+ <code>
+  nginx
+ </code>
+</h5>
+<p>
+ Primero, crear
+ <code>
+  /etc/nginx/sites-available/georef-ar-api.nginx
+ </code>
+ tomando como base la configuración del archivo
+ <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.nginx">
+  <code>
+   georef-ar-api.nginx
+  </code>
+ </a>
+ .
+</p>
+<h5 id="54-opcional-crear-cache-para-nginx">
+ 5.4 (Opcional) Crear cache para
+ <code>
+  nginx
+ </code>
+</h5>
+<p>
+ Si se desea activar el uso del cache de
+ <code>
+  nginx
+ </code>
+ , descomentar las líneas contentiendo las directivas
+ <code>
+  proxy_cache
+ </code>
+ y
+ <code>
+  proxy_cache_valid
+ </code>
+ del archivo
+ <code>
+  georef-ar-api.nginx
+ </code>
+ creado. Luego, activar el cache
+ <code>
+  georef
+ </code>
+ agregando la siguiente línea al archivo de configuración
+ <code>
+  nginx.conf
+ </code>
+ (sección
+ <code>
+  http
+ </code>
+ ):
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="k">proxy_cache_path</span> <span class="s">/data/nginx/cache</span> <span class="s">levels=1:2</span> <span class="s">inactive=120m</span> <span class="s">keys_zone=georef:10m</span> <span class="s">use_temp_path=off</span><span class="p">;</span>
+</pre>
+</div>
+<p>
+ Finalmente, crear el directorio
+ <code>
+  /data/nginx/cache
+ </code>
+ .
+</p>
+<h5 id="55-activar-y-validar-configuracion-nginx">
+ 5.5 Activar y validar configuración
+ <code>
+  nginx
+ </code>
+</h5>
+<p>
+ Generar un link simbólico a la configuración del sitio:
+</p>
+<div class="codehilite">
+ <pre><span></span>$ sudo ln -s /etc/nginx/sites-available/georef-ar-api.nginx /etc/nginx/sites-enabled/georef-ar-api.nginx
+</pre>
+</div>
+<p>
+ Validar la configuración:
+</p>
+<div class="codehilite">
+ <pre><span></span>$ sudo nginx -T
+</pre>
+</div>
+<p>
+ Reiniciar Nginx:
+</p>
+<div class="codehilite">
+ <pre><span></span>$ systemctl restart nginx.service
+</pre>
+</div>
+<h2 id="tests">
+ Tests
+</h2>
+<p>
+ Para ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make <span class="nb">test</span>
+</pre>
+</div>
+<p>
+ Para más información sobre los tests, ver el archivo
+ <a href="https://github.com/datosgobar/georef-ar-api/blob/master/tests/README.md">
+  <code>
+   tests/README.md
+  </code>
+ </a>
+ .
+</p>
+<p>
+ Para comprobar que no existan errores comunes en el código, y que su estilo sea correcto:
+</p>
+<div class="codehilite">
+ <pre><span></span><span class="o">(</span>venv<span class="o">)</span> $ make code_checks
+</pre>
+</div>
+<h2 id="archivos-de-datos">
+ Archivos de datos
+</h2>
+<ul>
+ <li>
+  <p>
+   La estructura de los archivos de datos JSON utilizados por Georef está detallada en
+   <a href="georef-api-data.md">
+    este documento
+   </a>
+   .
+  </p>
+ </li>
+ <li>
+  <p>
+   El archivo de configuración
+   <code>
+    config/georef.cfg
+   </code>
+   debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en
+   <code>
+    georef.example.cfg
+   </code>
+   ) utilizan el portal de descargas
+   <code>
+    infra.datos.gob.ar
+   </code>
+   , que siempre provee la última versión de los archivos JSON disponibles. La rama
+   <code>
+    master
+   </code>
+   de
+   <code>
+    georef-ar-api
+   </code>
+   siempre se mantiene compatible con la última versión de los datos disponibles en
+   <code>
+    infra.datos.gob.ar
+   </code>
+   .
+  </p>
+ </li>
+ <li>
+  <p>
+   El archivo de configuración
+   <code>
+    config/georef.cfg
+   </code>
+   también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto en
+   <code>
+    georef.example.cfg
+   </code>
+   puede ser utilizado, ya que utiliza la versión del archivo almacenado en
+   <code>
+    infra.datos.gob.ar
+   </code>
+   . El mismo criterio se aplica al archivo de términos excluyentes.
+  </p>
+ </li>
+</ul>
+<h1 id="modelo-de-datos-para-georef-api">
+ Modelo de datos para Georef API
+</h1>
+<p>
+ Los archivos de datos de Georef consisten de seis (6) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles e intersecciones de calles.
+</p>
+<h2 id="etl">
+ ETL
+</h2>
+<p>
+ Los datos utilizados por Georef API son obtenidos a través de un proceso de ETL. El código del mismo se encuentra en el repositorio GitHub
+ <a href="https://github.com/datosgobar/georef-ar-etl">
+  georef-ar-etl
+ </a>
+ , así también como su
+ <a href="https://github.com/datosgobar/georef-ar-etl/blob/master/docs/install.md">
+  guía de instalación y uso
+ </a>
+ .
+</p>
+<h2 id="fuentes">
+ Fuentes
+</h2>
+<p>
+ Los orígenes de los datos procesados en el ETL son:
+</p>
+<h3 id="unidades-territoriales">
+ Unidades Territoriales
+</h3>
+<ul>
+ <li>
+  Recursos:
+  <code>
+   /provincias
+  </code>
+  ,
+  <code>
+   /departamentos
+  </code>
+  ,
+  <code>
+   /municipios
+  </code>
+  ,
+  <code>
+   /ubicacion
+  </code>
+ </li>
+ <li>
+  Fuente:
+  <strong>
+   Instituto Geográfico Nacional (IGN)
+  </strong>
+ </li>
+ <li>
+  Enlace:
+  <a href="http://datos.gob.ar/dataset/ign-unidades-territoriales">
+   Datos Abiertos - Unidades Territoriales
+  </a>
+ </li>
+</ul>
+<h3 id="bahra">
+ BAHRA
+</h3>
+<ul>
+ <li>
+  Recursos:
+  <code>
+   /localidades
+  </code>
+ </li>
+ <li>
+  Fuente:
+  <strong>
+   Base de Asentamientos Humanos de la República Argentina (BAHRA)
+  </strong>
+ </li>
+ <li>
+  Enlace:
+  <a href="http://www.bahra.gob.ar/">
+   BAHRA - Descargas
+  </a>
+ </li>
+</ul>
+<h3 id="vias-de-circulacion">
+ Vías de Circulación
+</h3>
+<ul>
+ <li>
+  Recursos:
+  <code>
+   /calles
+  </code>
+  ,
+  <code>
+   /direcciones
+  </code>
+ </li>
+ <li>
+  Fuente:
+  <strong>
+   Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)
+  </strong>
+ </li>
+ <li>
+  Enlace:
+  <a href="https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas">
+   Portal de geoservicios de INDEC
+  </a>
+ </li>
+</ul>
+<h2 id="archivos">
+ Archivos
+</h2>
+<p>
+ A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo
+ <code>
+  version
+ </code>
+ se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la
+ <code>
+  9.0.0
+ </code>
+ .
+</p>
+<h3 id="provincias">
+ Provincias
+</h3>
+<p>
+ El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "timestamp": "1532435389", // Timestamp de creación
+    "fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+    "version": "9.0.0", // Versión de archivo
+    "datos": [ // Lista de entidades
+        {
+            "id": "90", // ID de provincia
+            "nombre": "Tucumán", // Nombre de provincia,
+            "nombre_completo": "Provincia de Tucumán", // Nombre completo
+            "iso_id": "AR-T", // Identificador ISO 3166-2
+            "iso_nombre": "Tucumán", // Nombre ISO
+            "categoria": "Provincia", // Tipo de entidad
+            "centroide": {
+                "lat": -26.9478, // Latitud de centroide
+                "lon": -65.36475 // Longitud de centroide
+            },
+            "geometria": { // Geometría en formato GeoJSON
+                "type": "MultiPolygon",
+                "coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
+            },
+            "fuente": "IGN" // Fuente del dato
+        },
+        { ... },
+    ]
+}
+</pre>
+</div>
+<h3 id="departamentos">
+ Departamentos
+</h3>
+<p>
+ El archivo de datos de departamentos debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "timestamp": "1532435389", // Timestamp de creación
+    "fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+    "version": "9.0.0", // Versión de archivo
+    "datos": [ // Lista de entidades
+        {
+            "id": "06427", // ID del departamento
+            "nombre": "La Matanza", // Nombre del departamento
+            "nombre_completo": "Partido de la Matanza", // Nombre completo
+            "categoria": "Partido", // Tipo de entidad
+            "centroide": {
+                "lat": -34.770165, // Latitud de centroide
+                "lon": -58.625449  // Longitud de centroide
+            },
+            "geometria": { // Geometría en formato GeoJSON
+                "type": "MultiPolygon",
+                "coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
+            },
+            "provincia": { // Provincia que contiene al departamento
+                "id": "06",
+                "nombre": "Buenos Aires",
+                "interseccion": "0.0412936" // Porcentaje del área de la provincia que ocupa el depto.
+            },
+            "fuente": "ARBA - Gerencia de Servicios Catastrales" // Fuente del dato
+        },
+        { ... },
+    ]
+}
+</pre>
+</div>
+<h3 id="municipios">
+ Municipios
+</h3>
+<p>
+ El archivo de datos de municipios debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "timestamp": "1532435389", // Timestamp de creación
+    "fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+    "version": "9.0.0", // Versión de archivo
+    "datos": [ // Lista de entidades
+        {
+            "id": "060105", // ID del municipio
+            "nombre": "Bolívar", // Nombre del municipio
+            "nombre_completo": "Municipio Bolívar", // Nombre completo
+            "categoria": "Municipio", // Tipo de entidad
+            "centroide": {
+                "lat": -36.298222, // Latitud de centroide
+                "lon": -61.149648  // Longitud de centroide
+            },
+            "geometria": { // Geometría en formato GeoJSON
+                "type": "MultiPolygon",
+                "coordinates": [[[[-58.4453, -34.4324], [-58.6463, -34.6841], ...]]]
+            },
+            "provincia": {  // Provincia que contiene al municipio
+                "id": "06",
+                "nombre": "Buenos Aires",
+                "interseccion": "0.0100845" // Porcentaje del área de la provincia que ocupa el municipio
+            },
+            "fuente": "ARBA - Gerencia de Servicios Catastrales" // Fuente del dato
+        },
+        { ... },
+    ]
+}
+</pre>
+</div>
+<h3 id="localidades">
+ Localidades
+</h3>
+<p>
+ El archivo de datos de localidades debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "timestamp": "1532435389", // Timestamp de creación
+    "fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+    "version": "9.0.0", // Versión de archivo
+    "datos": [ // Lista de entidades
+        {
+            "id": "06189080000", // ID de la localidad
+            "nombre": "San Roman", // Nombre de la localidad
+            "categoria": "Localidad simple (LS)", // Tipo de asentamiento BAHRA
+            "centroide": {
+                "lat": -38.741555, // Latitud de centroide
+                "lon": -61.537720  // Longitud de centroide
+            },
+            "geometria": { // Geometría en formato GeoJSON
+                "type": "MultiPoint",
+                "coordinates": [[-61.5377, -38.7415], ...]
+            },
+            "municipio": { // Municipio que contiene a la localidad
+                "id": "060189", // Puede ser nulo
+                "nombre": "Coronel Dorrego" // Puede ser nulo
+            },
+            "departamento": { // Departamento que contiene a la localidad
+                "id": "06189",
+                "nombre": "Coronel Dorrego"
+            },
+            "provincia": {  // Provincia que contiene a la localidad
+                "id": "06",
+                "nombre": "Buenos Aires"
+            },
+            "fuente": "INDEC" // Fuente del dato
+        },
+        { ... },
+    ]
+}
+</pre>
+</div>
+<h3 id="calles">
+ Calles
+</h3>
+<p>
+ El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "timestamp": "1532435389", // Timestamp de creación
+    "fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+    "version": "9.0.0", // Versión de archivo
+    "datos": [ // Lista de vías de circulación
+        {
+            "nomenclatura": "LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires", // Nomenclatura: 'nombre, departamento, provincia'
+            "id": "0202101007345", // ID de la vía de circulación
+            "nombre": "LARREA", // Nombre de vía de circulación
+            "categoria": "CALLE", // Tipo de vía de circulación
+            "altura": {
+                "inicio": {
+                    "derecha": 1, // Número inicial de altura (lado derecho)
+                    "izquierda": 2, // Número inicial de altura (lado izquierdo)
+                },
+                "fin": {
+                    "derecha": 799, // Número final de altura (lado derecho)
+                    "izquierda": 800, // Número final de altura (lado izquierdo)
+                }
+            },
+            "geometria": { // Geometría en formato GeoJSON
+                "type": "MultiLineString",
+                "coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
+            },
+            "departamento": { // Departamento
+                "nombre": "Comuna 3",
+                "id": "02021"
+            },
+            "provincia": { // Provincia
+                "nombre": "Ciudad Autónoma de Buenos Aires",
+                "id": "02"
+            },
+            "fuente": "INDEC" // Fuente del dato
+        },
+        { ... },
+    ]
+}
+</pre>
+</div>
+<h3 id="intersecciones-de-calles">
+ Intersecciones de Calles
+</h3>
+<p>
+ El archivo de datos de intersecciones debe tener formato JSON, y no debe tener intersecciones repetidas. Dadas las calles con ID X y ID Z, solo debe estar presente la intersección X-Z o Z-X. Su esquema de datos debe ser el siguiente:
+</p>
+<div class="codehilite">
+ <pre><span></span>{
+    "timestamp": "1532435389", // Timestamp de creación
+    "fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+    "version": "9.0.0", // Versión de archivo
+    "datos": [ // Lista de intersecciones
+        {
+            "id": "0207001002300-0207001007975", // ID de la calle A, ID de la calle B
+            "calle_a": {
+                "id": "0207001002300", // ID de la calle A
+                "nombre": "BOSTON", // Nombre de la calle A
+                "departamento": { // Departamento de la calle A
+                    "id": "02070",
+                    "nombre": "Comuna 10"
+                },
+                "provincia": { // Provincia de la calle A
+                    "id": "02",
+                    "nombre": "Ciudad Autónoma de Buenos Aires"
+                },
+                "categoria": "CALLE", // Tipo de la calle A
+                "fuente": "INDEC" // Fuente del dato
+            },
+            "calle_b": {
+                "id": "0207001007975", // ID de la calle B
+                "nombre": "MARCOS SASTRE", // Nombre de la calle B
+                "departamento": { // Departamento de la calle B
+                    "id": "02070",
+                    "nombre": "Comuna 10"
+                },
+                "provincia": { // Provincia de la calle B
+                    "id": "02",
+                    "nombre": "Ciudad Autónoma de Buenos Aires"
+                },
+                "categoria": "CALLE", // Tipo de la calle B
+                "fuente": "INDEC" // Fuente del dato
+            },
+            "geometria": { // Geometría en formato GeoJSON
+                "type": "Point",
+                "coordinates": [
+                    -58.5077676091915,
+                    -34.6150993860767
+                ]
+            }
+        }
+        { ... },
+    ]
+}
+</pre>
+</div>
+<h1 id="historial-de-versiones">
+ Historial de versiones
+</h1>
+<h2 id="033---20190211">
+ <strong>
+  0.3.3
+ </strong>
+ - 2019/02/11
+</h2>
+<ul>
+ <li>
+  Corrige error HTTP 500 lanzado cuando se utilizaban valores como "NaN" o "Inifinity" para parámetros
+  <code>
+   lat
+  </code>
+  y
+  <code>
+   lon
+  </code>
+  en
+  <code>
+   /ubicacion
+  </code>
+  .
+ </li>
+</ul>
+<h2 id="032---20190205">
+ <strong>
+  0.3.2
+ </strong>
+ - 2019/02/05
+</h2>
+<ul>
+ <li>
+  El parámetro
+  <code>
+   interseccion
+  </code>
+  de los recursos
+  <code>
+   /provincias
+  </code>
+  ,
+  <code>
+   /departamentos
+  </code>
+  y
+  <code>
+   /calles
+  </code>
+  ahora aceptan IDs de calles como parámetros.
+ </li>
+ <li>
+  Modifica cantidad de máxima de consultas en una sola petición POST a 1000 (era 5000). El nuevo valor permite normalizar datos a una velocidad prácticamente igual a la anterior, pero con una menor carga a la infraestructura.
+ </li>
+</ul>
+<h2 id="031---20190129">
+ <strong>
+  0.3.1
+ </strong>
+ - 2019/01/29
+</h2>
+<ul>
+ <li>
+  Mejora interpretación de direcciones (
+  <code>
+   georef-ar-address
+  </code>
+  versión
+  <code>
+   0.0.7
+  </code>
+  ).
+ </li>
+ <li>
+  Corrige error HTTP 500 lanzado en normalización de direcciones, en casos donde el comienzo y el fin de alturas de la calle comparten el mismo valor, y la dirección tiene ese valor exacto como altura.
+ </li>
+</ul>
+<h2 id="030---20190124">
+ <strong>
+  0.3.0
+ </strong>
+ - 2019/01/24
+</h2>
+<ul>
+ <li>
+  Agrega XML como nuevo formato de respuesta de datos para todos los recursos. Para utilizarlo, agregar
+  <code>
+   formato=xml
+  </code>
+  a los parámetros de la URL.
+ </li>
+ <li>
+  Agrega
+  <em>
+   Shapefile
+  </em>
+  como nuevo formato de respuesta de datos para todos los recursos (excepto
+  <code>
+   /direcciones
+  </code>
+  y
+  <code>
+   /ubicacion
+  </code>
+  ). Para utilizarlo, agregar
+  <code>
+   formato=shp
+  </code>
+  a los parámetros de la URL. El archivo descargado contiene las geometrías e información de todas las entidades filtradas. Para más detalles, consultar
+  <a href="shapefiles.md">
+   la documentación de descarga de geometrías
+  </a>
+  .
+ </li>
+ <li>
+  El parámetro
+  <code>
+   id
+  </code>
+  ahora acepta listas de IDs separadas por comas. Otros parámetros que aceptaban un ID también aceptan ahora listas de IDs.
+ </li>
+ <li>
+  Actualiza versión de datos de ETL a
+  <code>
+   9.0.0
+  </code>
+  .
+ </li>
+ <li>
+  Corrige mensajes de error equivocados.
+ </li>
+ <li>
+  Cambios varios al recurso
+  <code>
+   /direcciones
+  </code>
+  :
+  <ul>
+   <li>
+    Utilizando la librería
+    <a href="https://github.com/datosgobar/georef-ar-address">
+     georef-ar-address
+    </a>
+    , se mejoró el proceso de interpretación de las direcciones recibidas. Ahora, se aceptan más tipos de direcciones, y la API es capaz de detectar errores comunes de escritura. Para más detalles, consultar la nueva documentación de
+    <a href="addresses.md">
+     normalización de direcciones
+    </a>
+    .
+   </li>
+   <li>
+    Se removió el parámetro
+    <code>
+     tipo
+    </code>
+    .
+   </li>
+   <li>
+    Se modificó el campo de respuesta
+    <code>
+     altura
+    </code>
+    a un objecto
+    <code>
+     altura
+    </code>
+    que contiene los valores
+    <code>
+     valor
+    </code>
+    y
+    <code>
+     unidad.
+    </code>
+   </li>
+   <li>
+    Se removieron los campos
+    <code>
+     nombre
+    </code>
+    y
+    <code>
+     id
+    </code>
+    , y se agregaron los nuevos campos objeto
+    <code>
+     calle
+    </code>
+    ,
+    <code>
+     calle_cruce_1
+    </code>
+    y
+    <code>
+     calle_cruce_2
+    </code>
+    . Cada uno contiene los campos
+    <code>
+     nombre
+    </code>
+    ,
+    <code>
+     id
+    </code>
+    y
+    <code>
+     categoria
+    </code>
+    , y representan las calles normalizadas que fueron detectadas en la dirección de entrada.
+   </li>
+   <li>
+    Se agregó el campo
+    <code>
+     piso
+    </code>
+    .
+   </li>
+   <li>
+    Se modificaron los nombres y el orden de los campos de respuesta en formato CSV.
+   </li>
+  </ul>
+ </li>
+ <li>
+  Cambios al recurso
+  <code>
+   /provincias
+  </code>
+  :
+  <ul>
+   <li>
+    Se agregaron los campos
+    <code>
+     nombre_completo
+    </code>
+    ,
+    <code>
+     iso_id
+    </code>
+    ,
+    <code>
+     iso_nombre
+    </code>
+    y
+    <code>
+     categoria
+    </code>
+    .
+   </li>
+  </ul>
+ </li>
+ <li>
+  Cambios al recurso
+  <code>
+   /departamentos
+  </code>
+  :
+  <ul>
+   <li>
+    Se agregaron los campos
+    <code>
+     nombre_completo
+    </code>
+    y
+    <code>
+     categoria
+    </code>
+    .
+   </li>
+  </ul>
+ </li>
+ <li>
+  Cambios al recurso
+  <code>
+   /municipios
+  </code>
+  :
+  <ul>
+   <li>
+    Se agregaron los campos
+    <code>
+     nombre_completo
+    </code>
+    y
+    <code>
+     categoria
+    </code>
+    .
+   </li>
+   <li>
+    Parámetro
+    <code>
+     interseccion
+    </code>
+    : agrega
+    <code>
+     calle
+    </code>
+    como tipo de entidad posible a utilizar.
+   </li>
+  </ul>
+ </li>
+ <li>
+  Cambios al recurso
+  <code>
+   /localidades
+  </code>
+  :
+  <ul>
+   <li>
+    Se modificó el nombre del campo
+    <code>
+     tipo
+    </code>
+    a
+    <code>
+     categoria
+    </code>
+    .
+   </li>
+  </ul>
+ </li>
+ <li>
+  Cambios al recurso
+  <code>
+   /calles
+  </code>
+  :
+  <ul>
+   <li>
+    Se modificó el nombre del campo
+    <code>
+     tipo
+    </code>
+    a
+    <code>
+     categoria
+    </code>
+    .
+   </li>
+   <li>
+    Se modificó el nombre del parámetro
+    <code>
+     tipo
+    </code>
+    a
+    <code>
+     categoria
+    </code>
+    .
+   </li>
+   <li>
+    Agrega parámetro
+    <code>
+     interseccion
+    </code>
+    : permite buscar calles por intersección con geometrías de otras entidades.
+   </li>
+  </ul>
+ </li>
+ <li>
+  Cambios al recurso
+  <code>
+   /ubicacion
+  </code>
+  :
+  <ul>
+   <li>
+    Se removió el campo
+    <code>
+     fuente
+    </code>
+    , y se agregaron los campos
+    <code>
+     provincia.fuente
+    </code>
+    ,
+    <code>
+     departamento.fuente
+    </code>
+    y
+    <code>
+     municipio.fuente
+    </code>
+    .
+   </li>
+  </ul>
+ </li>
+</ul>
+<h2 id="023---20181211">
+ <strong>
+  0.2.3
+ </strong>
+ - 2018/12/11
+</h2>
+<ul>
+ <li>
+  Modifica formato de respuestas CSV: todos los campos no-numéricos ahora son devueltos entre comillas dobles. El cambio permite a algunas herramientas manejar mejor los valores de IDs, que consisten enteramente de dígitos, pero deberían ser tratados como texto.
+ </li>
+ <li>
+  El parámetro 'direccion' del recurso
+  <code>
+   /direcciones
+  </code>
+  ahora acepta direcciones con altura 0.
+ </li>
+ <li>
+  Mejora la fidelidad de resultados por en búsquedas por nombre: algunos términos de búsqueda ahora excluyen a otros, aunque sean textualmente similares. Por ejemplo, buscar 'salta' no incluye resultados con 'santa', ya que los dos términos refieren a entidades claramente distintas.
+ </li>
+</ul>
+<h2 id="022---20181105">
+ <strong>
+  0.2.2
+ </strong>
+ - 2018/11/05
+</h2>
+<ul>
+ <li>
+  El parámetro 'direccion' del recurso
+  <code>
+   /direcciones
+  </code>
+  ahora acepta direcciones sin altura (por ejemplo, "Avenida Santa Fe"). Este cambio permite utilizar la versión
+  <code>
+   POST
+  </code>
+  del recurso con mayor facilidad, en caso de tener grandes cantidades de datos con y sin alturas en un mismo conjunto.
+ </li>
+ <li>
+  Mejoras a mensajes de error para parámetros 'direccion' e 'interseccion'.
+ </li>
+</ul>
+<h2 id="021---20181025">
+ <strong>
+  0.2.1
+ </strong>
+ - 2018/10/25
+</h2>
+<ul>
+ <li>
+  Actualiza proceso de indexación para utilizar datos de ETL versión
+  <code>
+   6.0.0
+  </code>
+  .
+ </li>
+ <li>
+  Agrega mensaje de error descriptivo para errores HTTP 405.
+ </li>
+ <li>
+  Mejora parámetro 'campos': se permite especificar un prefixo para referirse a varios campos (por ejemplo,
+  <code>
+   provincia
+  </code>
+  para
+  <code>
+   provincia.id
+  </code>
+  y
+  <code>
+   provincia.nombre
+  </code>
+  ).
+ </li>
+ <li>
+  Agrega parámetro
+  <code>
+   interseccion
+  </code>
+  . El mismo permite buscar provincias, departamentos y municipios utilizando intersección de geometrías con otras entidades geográficas.
+  <ul>
+   <li>
+    Se pueden buscar provincias por intersección con municipios y departamentos.
+   </li>
+   <li>
+    Se pueden buscar departamentos por intersección con provincias y municipios.
+   </li>
+   <li>
+    Se pueden buscar municipios por intersección con provincias y departamentos.
+   </li>
+  </ul>
+ </li>
+ <li>
+  Agrega nuevo campo de datos
+  <code>
+   provincia.interseccion
+  </code>
+  a recursos
+  <code>
+   /municipios
+  </code>
+  y
+  <code>
+   /departamentos
+  </code>
+  . El campo especifica qué porcentaje del área de la provincia ocupa la entidad en sí.
+ </li>
+ <li>
+  Agrega nuevos recursos de descarga de datos completos. Estos recursos permiten descargar la totalidad de los datos utilizados por cada recurso, en distintos formatos. Por ejemplo, para descargar los datos de provincias, se puede acceder a las siguientes URLs:
+  <ul>
+   <li>
+    <a href="https://apis.datos.gob.ar/georef/api/provincias.json">
+     https://apis.datos.gob.ar/georef/api/provincias.json
+    </a>
+   </li>
+   <li>
+    <a href="https://apis.datos.gob.ar/georef/api/provincias.csv">
+     https://apis.datos.gob.ar/georef/api/provincias.csv
+    </a>
+   </li>
+   <li>
+    <a href="https://apis.datos.gob.ar/georef/api/provincias.geojson">
+     https://apis.datos.gob.ar/georef/api/provincias.geojson
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+<h2 id="020---20180921">
+ <strong>
+  0.2.0
+ </strong>
+ - 2018/09/21
+</h2>
+<ul>
+ <li>
+  Remueve campo 'departamento' de la entidad municipio. Esto se debe a que los departamentos no son padres jerárquicos de los municipios.
+ </li>
+ <li>
+  Agrega parámetro
+  <code>
+   orden
+  </code>
+  a recursos
+  <code>
+   /calles
+  </code>
+  y
+  <code>
+   /direcciones
+  </code>
+  .
+ </li>
+ <li>
+  Agrega formato GeoJSON a recurso
+  <code>
+   /direcciones
+  </code>
+  .
+ </li>
+ <li>
+  Agrega conjuntos de campos predefinidos al parámetro
+  <code>
+   campos
+  </code>
+  , los valores posibles son:
+  <ul>
+   <li>
+    <code>
+     basico
+    </code>
+   </li>
+   <li>
+    <code>
+     estandar
+    </code>
+    (utilizado por defecto)
+   </li>
+   <li>
+    <code>
+     completo
+    </code>
+   </li>
+  </ul>
+ </li>
+ <li>
+  Mueve campo de respuestas
+  <code>
+   fuente
+  </code>
+  a conjunto
+  <code>
+   completo
+  </code>
+  .
+ </li>
+ <li>
+  Permite el uso del parámetro
+  <code>
+   aplanar
+  </code>
+  en respuestas GeoJSON.
+ </li>
+</ul>
+<h2 id="016---20180907">
+ <strong>
+  0.1.6
+ </strong>
+ - 2018/09/07
+</h2>
+<ul>
+ <li>
+  Actualiza proceso de indexación para utilizar datos de ETL versión
+  <code>
+   4.0.0
+  </code>
+  .
+ </li>
+ <li>
+  Modifica manejo de altura en recurso
+  <code>
+   /direcciones
+  </code>
+  . La nueva versión del recurso intenta ubicar altura dentro de los extremos de la calle tomando en consideración que los datos pueden no siempre estar completos (o ser ideales). Este cambio también afecta la efectividad de la geolocalización de direcciones.
+ </li>
+</ul>
+<h2 id="015---20180904">
+ <strong>
+  0.1.5
+ </strong>
+ - 2018/09/04
+</h2>
+<ul>
+ <li>
+  Mejora mensajes de errores para varios casos:
+  <ul>
+   <li>
+    Acceso a recursos inexistentes (por ejemplo:
+    <code>
+     /provincia
+    </code>
+    ).
+   </li>
+   <li>
+    Valores inválidos para parámetros con elección limitada de valores (por ejemplo,
+    <code>
+     orden
+    </code>
+    ).
+   </li>
+   <li>
+    Listas de operaciones bulk inválidas.
+   </li>
+   <li>
+    Direcciones de calles malformadas.
+   </li>
+  </ul>
+ </li>
+ <li>
+  Agrega API de paginado.
+  <ul>
+   <li>
+    Nuevo parámetro:
+    <code>
+     inicio
+    </code>
+    .
+   </li>
+   <li>
+    Los resultados ahora incluyen tres metadatos:
+    <code>
+     cantidad
+    </code>
+    ,
+    <code>
+     total
+    </code>
+    e
+    <code>
+     inicio
+    </code>
+    .
+   </li>
+  </ul>
+ </li>
+</ul>
+<h2 id="014---20180823">
+ <strong>
+  0.1.4
+ </strong>
+ - 2018/08/23
+</h2>
+<ul>
+ <li>
+  Se modificó la interpretación del parámetro
+  <code>
+   direccion
+  </code>
+  del recurso
+  <code>
+   /direcciones
+  </code>
+  :
+  <ul>
+   <li>
+    Se ignoran ítems entre paréntesis y ocurrencias de "N°"
+   </li>
+   <li>
+    Se separa el texto utilizando "-", "," y "B°", y se intenta extraer una dirección (nombre + altura) de cada fragmento.
+   </li>
+  </ul>
+ </li>
+</ul>
+<h2 id="013---20180821">
+ <strong>
+  0.1.3
+ </strong>
+ - 2018/08/21
+</h2>
+<ul>
+ <li>
+  Se modificaron los siguientes campos:
+  <ul>
+   <li>
+    <code>
+     centroide_lat
+    </code>
+    y
+    <code>
+     centroide_lon
+    </code>
+    ahora están anidados.
+   </li>
+   <li>
+    Los campos
+    <code>
+     altura_inicio_derecha
+    </code>
+    ,
+    <code>
+     altura_fin_derecha
+    </code>
+    , etc. ahora están anidados.
+   </li>
+  </ul>
+ </li>
+ <li>
+  Se agregó una validación de valores repetidos para parámetro
+  <code>
+   campos
+  </code>
+  .
+ </li>
+ <li>
+  El recurso
+  <code>
+   /provincias
+  </code>
+  ahora acepta el parámetro
+  <code>
+   aplanar
+  </code>
+  .
+ </li>
+</ul>
+<h2 id="012---20180816">
+ <strong>
+  0.1.2
+ </strong>
+ - 2018/08/16
+</h2>
+<ul>
+ <li>
+  Se removió
+  <code>
+   d
+  </code>
+  como stopword en Elasticsearch.
+ </li>
+</ul>
+<h2 id="011---20180815">
+ <strong>
+  0.1.1
+ </strong>
+ - 2018/08/15
+</h2>
+<ul>
+ <li>
+  Se modificaron los siguientes campos:
+  <ul>
+   <li>
+    <code>
+     lat
+    </code>
+    ahora es
+    <code>
+     centroide_lat
+    </code>
+    .
+   </li>
+   <li>
+    <code>
+     lon
+    </code>
+    ahora es
+    <code>
+     centroide_lon
+    </code>
+    .
+   </li>
+   <li>
+    Los campos
+    <code>
+     inicio_derecha
+    </code>
+    ,
+    <code>
+     fin_derecha
+    </code>
+    , etc. ahora comienzan con
+    <code>
+     altura_
+    </code>
+    .
+   </li>
+  </ul>
+ </li>
+</ul>
+<h2 id="010---20180814">
+ <strong>
+  0.1.0
+ </strong>
+ - 2018/08/14
+</h2>
+<ul>
+ <li>
+  Versión inicial.
+ </li>
+</ul>
+<h1 id="instalacion-de-python-36">
+ Instalación de Python 3.6
+</h1>
+<p>
+ Para instalar Python 3.6 en entornos GNU/Linux, se puede utilizar la herramienta
+ <code>
+  pyenv
+ </code>
+ <a href="https://github.com/pyenv/pyenv">
+  disponible en GitHub
+ </a>
+ .
+ <code>
+  pyenv
+ </code>
+ permite al usuario instalar cualquier versión de Python existente, e incluso tener varias versiones instaladas simultáneamente.
+</p>
+<p>
+ A continuación, se detallan los pasos necesarios para instalar Python 3.6. Los mismos fueron creados utilizando Ubuntu 16.04.
+</p>
+<h2 id="1-descargar-pyenv">
+ 1. Descargar
+ <code>
+  pyenv
+ </code>
+</h2>
+<p>
+ Clonar el repositorio de
+ <code>
+  pyenv
+ </code>
+ en el directorio
+ <code>
+  ~/.pyenv
+ </code>
+ :
+</p>
+<div class="codehilite">
+ <pre><span></span>$ git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+</pre>
+</div>
+<h2 id="2-agregar-configuracion-de-pyenv-a-bashrc">
+ 2. Agregar configuración de
+ <code>
+  pyenv
+ </code>
+ a
+ <code>
+  ~/.bashrc
+ </code>
+</h2>
+<div class="codehilite">
+ <pre><span></span>$ <span class="nb">echo</span> <span class="s1">'export PYENV_ROOT="$HOME/.pyenv"'</span> &gt;&gt; ~/.bashrc
+$ <span class="nb">echo</span> <span class="s1">'export PATH="$PYENV_ROOT/bin:$PATH"'</span> &gt;&gt; ~/.bashrc
+$ <span class="nb">echo</span> -e <span class="s1">'if command -v pyenv 1&gt;/dev/null 2&gt;&amp;1; then\n  eval "$(pyenv init -)"\nfi'</span> &gt;&gt; ~/.bashrc
+</pre>
+</div>
+<h2 id="3-activar-la-nueva-configuracion">
+ 3. Activar la nueva configuración
+</h2>
+<div class="codehilite">
+ <pre><span></span>$ <span class="nb">source</span> ~/.bashrc
+</pre>
+</div>
+<h2 id="4-instalar-dependencias-para-compilar-python">
+ 4. Instalar dependencias para compilar Python
+</h2>
+<div class="codehilite">
+ <pre><span></span>$ sudo apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev
+</pre>
+</div>
+<h2 id="5-descargar-compilar-e-instalar-python-36">
+ 5. Descargar, compilar e instalar Python 3.6
+</h2>
+<div class="codehilite">
+ <pre><span></span>$ pyenv install <span class="m">3</span>.6.5
+</pre>
+</div>
+<h2 id="6-activar-python-36">
+ 6. Activar Python 3.6
+</h2>
+<p>
+ Una vez instalado Python 3.6, se debe activar su uso.
+ <code>
+  pyenv
+ </code>
+ permite establecer versiones de Python por directorio: de esta forma, es posible clonar el repositorio
+ <code>
+  georef-ar-api
+ </code>
+ en una ubicación, y activar el uso de Python 3.6 en la misma:
+</p>
+<div class="codehilite">
+ <pre><span></span>$ git clone https://github.com/datosgobar/georef-ar-api.git
+$ <span class="nb">cd</span> georef-ar-api
+$ pyenv version <span class="m">3</span>.6.5 <span class="c1"># activar el uso de Python 3.6</span>
+$ python --version    <span class="c1"># el comando 'python' ahora utiliza Python 3.6, en este directorio</span>
+Python <span class="m">3</span>.6.5
+$ pip --version       <span class="c1"># también se instala 'pip' automáticamente</span>
+pip <span class="m">9</span>.0.1 <span class="o">(</span>python <span class="m">3</span>.6.5<span class="o">)</span>
+</pre>
+</div>
+<p>
+ Notar que
+ <code>
+  pyenv
+ </code>
+ crea un archivo llamado
+ <code>
+  .python-version
+ </code>
+ , donde se especifica la versión de Python que debería ser utilizada en el directorio.
+</p>
