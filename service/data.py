@@ -107,6 +107,8 @@ class ElasticsearchSearch:
 
     """
 
+    __slots__ = ['_search', '_index', '_offset', '_result']
+
     def __init__(self, index, query):
         """Inicializa un objeto de tipo ElasticsearchSearch.
 
@@ -336,6 +338,8 @@ class TerritoriesSearch(ElasticsearchSearch):
 
     """
 
+    __slots__ = ['_geo_shape_ids', '_geom_search_class', '_fetch_geoms']
+
     def __init__(self, index, query, geom_search_class=None):
         """Inicializa un objeto de tipo TerritoriesSearch.
 
@@ -460,6 +464,8 @@ class StreetsSearch(ElasticsearchSearch):
             consultas adicionales a otros índices).
 
     """
+
+    __slots__ = ['_geo_shape_ids']
 
     def __init__(self, query):
         """Inicializa un objeto de tipo StreetsSearch.
@@ -782,6 +788,8 @@ class ElasticsearchResult:
             primero.
 
     """
+
+    __slots__ = ['_hits', '_total', '_offset']
 
     def __init__(self, response, offset):
         self._hits = [hit.to_dict() for hit in response.hits]
