@@ -500,7 +500,7 @@ class FloatParameter(Parameter):
         try:
             num = float(val)
             if not math.isfinite(num):
-                raise ValueError(strings.FLOAT_VAL_ERROR)
+                raise ValueError()
 
             return num
         except ValueError:
