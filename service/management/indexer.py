@@ -5,6 +5,7 @@ Contiene funciones de utilidad para descargar e indexar datos.
 
 import argparse
 import os
+import sys
 import urllib.parse
 import json
 import smtplib
@@ -18,6 +19,7 @@ from io import StringIO
 
 from elasticsearch import helpers
 import requests
+import tqdm
 
 from .. import app
 from .. import normalizer
@@ -550,9 +552,11 @@ class GeorefIndex:
 
         logger.info('Insertando documentos...')
 
-        for ok, response in helpers.streaming_bulk(es, operations,
-                                                   raise_on_error=False,
-                                                   request_timeout=ES_TIMEOUT):
+        iterator = helpers.streaming_bulk(es, operations, raise_on_error=False,
+                                          request_timeout=ES_TIMEOUT)
+
+        for ok, response in tqdm.tqdm(iterator, total=len(docs),
+                                      file=sys.stderr):
             if ok and response['create']['result'] == 'created':
                 creations += 1
             else:

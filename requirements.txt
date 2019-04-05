@@ -7,3 +7,4 @@ gunicorn[gevent]==19.9.0
 requests==2.20.0
 shapely==1.6.4.post2
 pyshp==2.0.1
+tqdm==4.31.1
