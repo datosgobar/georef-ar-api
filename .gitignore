@@ -70,3 +70,4 @@ logging.ini
 .coverage
 htmlcov/
 logs/
+cache/

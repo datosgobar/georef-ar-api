@@ -1,4 +1,4 @@
 flake8==3.5.0
-pylint==2.1.1
+pylint==2.3.1
 coverage==4.5.2
 gprof2dot==2017.9.19

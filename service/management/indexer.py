@@ -40,9 +40,12 @@ logger = logging.getLogger(__name__)
 # nuevas versiones de los archivos.
 ETL_FILE_VERSION = '9.0.0'
 
+LOGS_DIR = 'logs'
+CACHE_DIR = 'cache'
+
 SEPARATOR_WIDTH = 60
 SMTP_TIMEOUT = 10
-LOGS_DIR = 'logs'
+CHUNK_SIZE = 8192
 ACTIONS = ['index', 'index_stats']
 INDEX_NAMES = [
     N.STATES,
@@ -56,7 +59,7 @@ INDEX_NAMES = [
     N.INTERSECTIONS,
     'all'
 ]
-ES_TIMEOUT = 500
+ES_TIMEOUT = 720
 
 
 def setup_logger(l, stream):
@@ -130,43 +133,25 @@ def send_email(host, user, password, subject, message, recipients,
         smtp.send_message(msg)
 
 
-def download(url, tries=1, retry_delay=1, try_timeout=10, proxies=None,
-             verify=True):
+def download(url, filepath):
     """
-    Descarga un archivo a través del protocolo HTTP, en uno o más intentos.
+    Descarga un archivo a través del protocolo HTTP.
 
     Args:
         url (str): URL (schema HTTP) del archivo a descargar.
-        tries (int): Intentos a realizar (default: 1).
-        retry_delay (int o float): Tiempo a esperar, en segundos, entre cada
-            intento.
-        try_timeout (int o float): Tiempo máximo a esperar por intento.
-        proxies (dict): Proxies a utilizar. El diccionario debe contener los
-            valores 'http' y 'https', cada uno asociados a la URL del proxy
-            correspondiente.
+        filepath (str): Ruta del archivo a donde almacenar los datos.
 
     Raises:
         requests.exceptions.RequestException, requests.exceptions.HTTPError: en
             caso de ocurrir un error durante la descarga.
 
-    Returns:
-        bytes: Contenido del archivo
-
     """
-    for i in range(tries):
-        try:
-            response = requests.get(url, timeout=try_timeout, proxies=proxies,
-                                    verify=verify)
-            response.raise_for_status()
-            return response.content
+    with requests.get(url, stream=True) as req:
+        req.raise_for_status()
 
-        except requests.exceptions.RequestException as e:
-            download_exception = e
-
-            if i < tries - 1:
-                time.sleep(retry_delay)
-
-    raise download_exception
+        with open(filepath, 'wb') as f:
+            for chunk in req.iter_content(chunk_size=CHUNK_SIZE):
+                f.write(chunk)
 
 
 def print_log_separator(l, message):
@@ -276,23 +261,35 @@ class GeorefIndex:
         if fmt not in ['json', 'txt']:
             raise ValueError('Unknown file type')
 
-        if filepath in files_cache:
-            logger.info('Utilizando archivo cacheado:')
-            logger.info(' + {}'.format(filepath))
-            logger.info('')
-            return files_cache[filepath]
-
         data = None
         loadfn = json.loads if fmt == 'json' else str
+
+        if filepath in files_cache:
+            logger.info('Utilizando archivo cacheado para:')
+            logger.info(' + {}'.format(filepath))
+            logger.info('')
+            with open(files_cache[filepath]) as f:
+                return loadfn(f.read())
 
         if urllib.parse.urlparse(filepath).scheme in ['http', 'https']:
             logger.info('Descargando archivo remoto:')
             logger.info(' + {}'.format(filepath))
-            logger.info('')
 
             try:
-                content = download(filepath)
-                data = loadfn(content.decode())
+                os.makedirs(CACHE_DIR, exist_ok=True)
+                url_path = urllib.parse.urlparse(filepath).path
+                filename = url_path.rsplit('/', 1)[-1]
+                download_path = os.path.join(CACHE_DIR, filename)
+
+                logger.info(' + Destino: {}'.format(download_path))
+                logger.info('')
+
+                download(filepath, download_path)
+
+                with open(download_path) as f:
+                    data = loadfn(f.read())
+
+                files_cache[filepath] = download_path
             except requests.exceptions.RequestException as e:
                 logger.warning('No se pudo descargar el archivo:')
                 logger.warning(e)
@@ -317,9 +314,6 @@ class GeorefIndex:
                 logger.warning('No se pudo leer los contenidos del archivo:')
                 logger.warning(e)
                 logger.warning('')
-
-        if data:
-            files_cache[filepath] = data
 
         return data
 
