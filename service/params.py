@@ -62,16 +62,12 @@ class ParameterRequiredException(Exception):
 
     """
 
-    pass
-
 
 class InvalidChoiceException(Exception):
     """Excepción lanzada cuando un parámetro no tiene como valor uno de los
     valores permitidos.
 
     """
-
-    pass
 
 
 @unique
@@ -195,8 +191,8 @@ class Parameter:
         if val is None:
             if self._required:
                 raise ParameterRequiredException()
-            else:
-                return self._default
+
+            return self._default
 
         parsed = self._parse_value(val)
 
@@ -303,8 +299,8 @@ class IdsParameter(Parameter):
             item = item.rjust(self._id_length, self._padding_char)
             if item in ids:
                 raise ValueError(strings.ID_PARAM_UNIQUE.format(item))
-            else:
-                ids.add(item)
+
+            ids.add(item)
 
         return list(ids)
 

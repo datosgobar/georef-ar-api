@@ -25,8 +25,6 @@ class DataConnectionException(Exception):
 
     """
 
-    pass
-
 
 def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
     """Crea una conexión a Elasticsearch.
