@@ -17,7 +17,7 @@ Primero, instalar PostgreSQL, PostGIS y ogr2ogr utilizando el comando `apt`:
 ```bash
 $ sudo add-apt-repository -y ppa:ubuntugis/ppa
 $ sudo apt update
-$ sudo apt install postgresql-9.5 postgresql-9.5-postgis-2.4 gdal-bin
+$ sudo apt install postgresql-9.5 postgresql-9.5-postgis-2.4 gdal-bin libpq-dev
 ```
 
 ### 1.2 Código
