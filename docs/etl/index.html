@@ -13,7 +13,7 @@
         <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
       
       
-        <link rel="canonical" href="http://apis.datos.gob.ar/georef/shapefiles/">
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/etl/">
       
       
         <meta name="author" content="Datos Argentina">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Descarga de geometrías - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+        <title>Inicio - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
       
     
     
@@ -104,7 +104,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#descarga-de-geometrias" tabindex="1" class="md-skip">
+      <a href="#etl-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -130,7 +130,7 @@
                 API del Servicio de Normalización de Datos Geográficos de Argentina
               </span>
               <span class="md-header-nav__topic">
-                Descarga de geometrías
+                Inicio
               </span>
             
           
@@ -288,12 +288,10 @@
             
             
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
     
     <label class="md-nav__link" for="nav-2">
       Usuarios
@@ -357,20 +355,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-    <a href="./" title="Descarga de geometrías" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../shapefiles/" title="Descarga de geometrías" class="md-nav__link">
       Descarga de geometrías
     </a>
-    
   </li>
 
         
@@ -518,10 +507,12 @@
             
             
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
     
     <label class="md-nav__link" for="nav-5">
       ETL
@@ -537,11 +528,20 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../etl/" title="Inicio" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" title="Inicio" class="md-nav__link md-nav__link--active">
       Inicio
     </a>
+    
   </li>
 
         
@@ -604,25 +604,10 @@
               
                 
                 
-                <h1 id="descarga-de-geometrias">Descarga de Geometrías<a class="headerlink" href="#descarga-de-geometrias" title="Permanent link">&para;</a></h1>
-<p>La API permite la descarga de geometrías a través del formato <a href="https://es.wikipedia.org/wiki/Shapefile">ESRI Shapefile</a>. Para utilizar el formato, se debe agregar <code>formato=shp</code> a la lista de parámetros especificados en la URL. El formato Shapefile está disponible en los siguientes recursos (versión GET):</p>
-<ul>
-<li><code>/provincias</code></li>
-<li><code>/departamentos</code></li>
-<li><code>/municipios</code></li>
-<li><code>/localidades</code></li>
-<li><code>/calles</code></li>
-</ul>
-<p>Cuando se especifica <code>formato=shp</code>, la respuesta de la API es un archivo ZIP que contiene los tres archivos requeridos por el estándar: <code>.shp</code>, <code>.shx</code> y <code>.dbf</code>. El archivo luego puede ser abierto con programas como <a href="https://www.qgis.org/en/site/">QGIS</a>.</p>
-<p>Por ejemplo, si se desea obtener todas las calles del municipio Alta García (ID 141372), se puede utilizar la siguiente consulta:</p>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/calles?interseccion=municipio:141372&amp;formato=shp&amp;max=1000">https://apis.datos.gob.ar/georef/api/calles?interseccion=municipio:141372&amp;formato=shp&amp;max=1000</a></p>
-<p>Que descargaría los siguientes datos:</p>
-<p><img alt="" src="../assets/calles1.png" />
-<br></p>
-<p>Si se desean descargar todos los departamentos de la provicina de Chaco, se puede utilizar la siguiente consulta:</p>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/departamentos?provincia=chaco&amp;formato=shp&amp;max=1000">https://apis.datos.gob.ar/georef/api/departamentos?provincia=chaco&amp;formato=shp&amp;max=1000</a></p>
-<p>Que descargaría los siguientes datos:</p>
-<p><img alt="" src="../assets/departamentos1.png" /></p>
+                <h1 id="etl-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina">ETL del Servicio de Normalización de Datos Geográficos de Argentina<a class="headerlink" href="#etl-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina" title="Permanent link">&para;</a></h1>
+<p>El ETL Georef es el proyecto encargado de generar los activos de datos indexados por la API. El producto final del ETL es una serie de archivos JSON, que contienen información sobre varias entidades geográficas de la República Argentina.</p>
+<p>Las siguientes secciones de la documentación detallan la estructura de los archivos mencionados, y los pasos a seguir para instalar y ejecutar el ETL en un entorno propio.</p>
+<p>El código que compone el ETL puede encontrarse en: <a href="https://github.com/datosgobar/georef-ar-etl">https://github.com/datosgobar/georef-ar-etl</a>.</p>
                 
                   
                 
@@ -643,7 +628,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../geom-operations/" title="Operaciones con geometrías" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../python3.6/" title="Instalación de Python 3.6" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -652,19 +637,19 @@
                 <span class="md-footer-nav__direction">
                   Anterior
                 </span>
-                Operaciones con geometrías
+                Instalación de Python 3.6
               </span>
             </div>
           </a>
         
         
-          <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../etl-data/" title="Datos" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Usar en planillas de cálculo
+                Datos
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

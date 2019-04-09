@@ -13,7 +13,7 @@
         <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
       
       
-        <link rel="canonical" href="http://apis.datos.gob.ar/georef/python-usage/">
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/etl-data/">
       
       
         <meta name="author" content="Datos Argentina">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Usar en Python - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+        <title>Datos - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
       
     
     
@@ -104,7 +104,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#usar-en-python" tabindex="1" class="md-skip">
+      <a href="#modelo-de-datos-para-georef" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -130,7 +130,7 @@
                 API del Servicio de Normalización de Datos Geográficos de Argentina
               </span>
               <span class="md-header-nav__topic">
-                Usar en Python
+                Datos
               </span>
             
           
@@ -288,12 +288,10 @@
             
             
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
     
     <label class="md-nav__link" for="nav-2">
       Usuarios
@@ -381,103 +379,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Usar en Python
-      </label>
-    
-    <a href="./" title="Usar en Python" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../python-usage/" title="Usar en Python" class="md-nav__link">
       Usar en Python
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Contenidos de la sección</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#con-requests" title="Con requests" class="md-nav__link">
-    Con requests
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#normalizar-una-entidad" title="Normalizar una entidad" class="md-nav__link">
-    Normalizar una entidad
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#normalizar-varias-entidades" title="Normalizar varias entidades" class="md-nav__link">
-    Normalizar varias entidades
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enriquecer-coordenadas-con-las-unidades-territoriales-que-las-contienen" title="Enriquecer coordenadas con las unidades territoriales que las contienen" class="md-nav__link">
-    Enriquecer coordenadas con las unidades territoriales que las contienen
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#con-pandas" title="Con pandas" class="md-nav__link">
-    Con pandas
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#consultar-listas-de-referencia" title="Consultar listas de referencia" class="md-nav__link">
-    Consultar listas de referencia
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enriquecer-coordenadas" title="Enriquecer coordenadas" class="md-nav__link">
-    Enriquecer coordenadas
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -601,10 +507,12 @@
             
             
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
     
     <label class="md-nav__link" for="nav-5">
       ETL
@@ -632,11 +540,131 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../etl-data/" title="Datos" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Datos
+      </label>
+    
+    <a href="./" title="Datos" class="md-nav__link md-nav__link--active">
       Datos
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Contenidos de la sección</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fuentes" title="Fuentes" class="md-nav__link">
+    Fuentes
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unidades-territoriales" title="Unidades Territoriales" class="md-nav__link">
+    Unidades Territoriales
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bahra" title="BAHRA" class="md-nav__link">
+    BAHRA
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vias-de-circulacion" title="Vías de Circulación" class="md-nav__link">
+    Vías de Circulación
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#archivos" title="Archivos" class="md-nav__link">
+    Archivos
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provincias" title="Provincias" class="md-nav__link">
+    Provincias
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#departamentos" title="Departamentos" class="md-nav__link">
+    Departamentos
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#municipios" title="Municipios" class="md-nav__link">
+    Municipios
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#localidades" title="Localidades" class="md-nav__link">
+    Localidades
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calles" title="Calles" class="md-nav__link">
+    Calles
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intersecciones-de-calles" title="Intersecciones de Calles" class="md-nav__link">
+    Intersecciones de Calles
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -680,30 +708,30 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#con-requests" title="Con requests" class="md-nav__link">
-    Con requests
+  <a href="#fuentes" title="Fuentes" class="md-nav__link">
+    Fuentes
   </a>
   
     <nav class="md-nav">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#normalizar-una-entidad" title="Normalizar una entidad" class="md-nav__link">
-    Normalizar una entidad
+  <a href="#unidades-territoriales" title="Unidades Territoriales" class="md-nav__link">
+    Unidades Territoriales
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#normalizar-varias-entidades" title="Normalizar varias entidades" class="md-nav__link">
-    Normalizar varias entidades
+  <a href="#bahra" title="BAHRA" class="md-nav__link">
+    BAHRA
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#enriquecer-coordenadas-con-las-unidades-territoriales-que-las-contienen" title="Enriquecer coordenadas con las unidades territoriales que las contienen" class="md-nav__link">
-    Enriquecer coordenadas con las unidades territoriales que las contienen
+  <a href="#vias-de-circulacion" title="Vías de Circulación" class="md-nav__link">
+    Vías de Circulación
   </a>
   
 </li>
@@ -714,23 +742,51 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#con-pandas" title="Con pandas" class="md-nav__link">
-    Con pandas
+  <a href="#archivos" title="Archivos" class="md-nav__link">
+    Archivos
   </a>
   
     <nav class="md-nav">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#consultar-listas-de-referencia" title="Consultar listas de referencia" class="md-nav__link">
-    Consultar listas de referencia
+  <a href="#provincias" title="Provincias" class="md-nav__link">
+    Provincias
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#enriquecer-coordenadas" title="Enriquecer coordenadas" class="md-nav__link">
-    Enriquecer coordenadas
+  <a href="#departamentos" title="Departamentos" class="md-nav__link">
+    Departamentos
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#municipios" title="Municipios" class="md-nav__link">
+    Municipios
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#localidades" title="Localidades" class="md-nav__link">
+    Localidades
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calles" title="Calles" class="md-nav__link">
+    Calles
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#intersecciones-de-calles" title="Intersecciones de Calles" class="md-nav__link">
+    Intersecciones de Calles
   </a>
   
 </li>
@@ -757,221 +813,251 @@
               
                 
                 
-                <h1 id="usar-en-python">Usar en Python<a class="headerlink" href="#usar-en-python" title="Permanent link">&para;</a></h1>
-<h2 id="con-requests">Con <code>requests</code><a class="headerlink" href="#con-requests" title="Permanent link">&para;</a></h2>
-<h3 id="normalizar-una-entidad">Normalizar una entidad<a class="headerlink" href="#normalizar-una-entidad" title="Permanent link">&para;</a></h3>
-<pre><code class="python">import requests
-import urllib
-
-API_BASE_URL = &quot;https://apis.datos.gob.ar/georef/api/&quot;
-
-def get_similar(endpoint, nombre, **kwargs):
-    kwargs[&quot;nombre&quot;] = nombre
-    url = &quot;{}{}?{}&quot;.format(API_BASE_URL, endpoint, urllib.urlencode(kwargs))
-    return requests.get(url).json()[endpoint]
-
-provincias = get_similar(&quot;provincias&quot;, &quot;San Juan&quot;)
-</code></pre>
-
-<pre><code class="python">[{
-    u'centroide': {
-        u'lat': -30.865368,
-        u'lon': -68.889491
-    },
-    u'id': u'70',
-    u'nombre': u'San Juan'
-}]
-</code></pre>
-
-<h3 id="normalizar-varias-entidades">Normalizar varias entidades<a class="headerlink" href="#normalizar-varias-entidades" title="Permanent link">&para;</a></h3>
-<pre><code class="python">def get_similar_bulk(endpoint, nombres):
-    &quot;&quot;&quot;Normaliza una lista de nombres de alguna de las entidades geográficas.&quot;&quot;&quot;
-
-    # realiza consulta a la API
-    data = {
-        endpoint: [
-            {&quot;nombre&quot;: nombre, &quot;max&quot;: 1} for nombre in nombres
-    ]}
-    url = API_BASE_URL + endpoint
-    results = requests.post(
-        url, json=data, headers={&quot;Content-Type&quot;: &quot;application/json&quot;}
-    ).json()
-
-    # convierte a una lista de &quot;resultado más probable&quot; o &quot;vacío&quot; cuando no hay
-    parsed_results = [
-        single_result[endpoint][0] if single_result[endpoint] else {}
-        for single_result in results[&quot;resultados&quot;]
-    ]
-
-    return parsed_results
-
-provincias = get_similar_bulk(&quot;provincias&quot;, [&quot;pxa&quot;, &quot;sant fe&quot;])
-</code></pre>
-
-<pre><code class="python">[
-    {},
-    {
-        u'centroide': {
-            u'lat': -30.706927,
-            u'lon': -60.949837
+                <h1 id="modelo-de-datos-para-georef">Modelo de datos para Georef<a class="headerlink" href="#modelo-de-datos-para-georef" title="Permanent link">&para;</a></h1>
+<p>Los datos generados por el ETL Georef consisten de seis (6) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles e intersecciones de calles.</p>
+<h2 id="fuentes">Fuentes<a class="headerlink" href="#fuentes" title="Permanent link">&para;</a></h2>
+<p>Los orígenes de los datos procesados en el ETL son:</p>
+<h3 id="unidades-territoriales">Unidades Territoriales<a class="headerlink" href="#unidades-territoriales" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Recursos: <code>/provincias</code>, <code>/departamentos</code>, <code>/municipios</code>, <code>/ubicacion</code></li>
+<li>Fuente: <strong>Instituto Geográfico Nacional (IGN)</strong></li>
+<li>Enlace: <a href="http://datos.gob.ar/dataset/ign-unidades-territoriales">Datos Abiertos - Unidades Territoriales</a></li>
+</ul>
+<h3 id="bahra">BAHRA<a class="headerlink" href="#bahra" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Recursos: <code>/localidades</code></li>
+<li>Fuente: <strong>Base de Asentamientos Humanos de la República Argentina (BAHRA)</strong></li>
+<li>Enlace: <a href="http://www.bahra.gob.ar/">BAHRA - Descargas</a></li>
+</ul>
+<h3 id="vias-de-circulacion">Vías de Circulación<a class="headerlink" href="#vias-de-circulacion" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Recursos: <code>/calles</code>, <code>/direcciones</code></li>
+<li>Fuente: <strong>Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)</strong></li>
+<li>Enlace: <a href="https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas">Portal de geoservicios de INDEC</a></li>
+</ul>
+<h2 id="archivos">Archivos<a class="headerlink" href="#archivos" title="Permanent link">&para;</a></h2>
+<p>A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo <code>version</code> se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la <code>9.0.0</code>.</p>
+<h3 id="provincias">Provincias<a class="headerlink" href="#provincias" title="Permanent link">&para;</a></h3>
+<p>El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
+<pre><code>{
+    &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
+    &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
+    &quot;datos&quot;: [ // Lista de entidades
+        {
+            &quot;id&quot;: &quot;90&quot;, // ID de provincia
+            &quot;nombre&quot;: &quot;Tucumán&quot;, // Nombre de provincia,
+            &quot;nombre_completo&quot;: &quot;Provincia de Tucumán&quot;, // Nombre completo
+            &quot;iso_id&quot;: &quot;AR-T&quot;, // Identificador ISO 3166-2
+            &quot;iso_nombre&quot;: &quot;Tucumán&quot;, // Nombre ISO
+            &quot;categoria&quot;: &quot;Provincia&quot;, // Tipo de entidad
+            &quot;centroide&quot;: {
+                &quot;lat&quot;: -26.9478, // Latitud de centroide
+                &quot;lon&quot;: -65.36475 // Longitud de centroide
+            },
+            &quot;geometria&quot;: { // Geometría en formato GeoJSON
+                &quot;type&quot;: &quot;MultiPolygon&quot;,
+                &quot;coordinates&quot;: [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
+            },
+            &quot;fuente&quot;: &quot;IGN&quot; // Fuente del dato
         },
-        u'id': u'82',
-        u'nombre': u'Santa Fe'
-    }
-]
-</code></pre>
-
-<h3 id="enriquecer-coordenadas-con-las-unidades-territoriales-que-las-contienen">Enriquecer coordenadas con las unidades territoriales que las contienen<a class="headerlink" href="#enriquecer-coordenadas-con-las-unidades-territoriales-que-las-contienen" title="Permanent link">&para;</a></h3>
-<pre><code class="python">def get_territorial_units(ubicaciones):
-    &quot;&quot;&quot;Pide las unidades territoriales que contienen a c/punto de una lista de coordenadas.&quot;&quot;&quot;
-
-    # realiza consulta a la API
-    endpoint = &quot;ubicacion&quot;
-    data = {
-        &quot;ubicaciones&quot;: [
-            {&quot;lat&quot;: ubicacion[&quot;lat&quot;], &quot;lon&quot;: ubicacion[&quot;lon&quot;], &quot;aplanar&quot;: True}
-            for ubicacion in ubicaciones
-    ]}
-    url = API_BASE_URL + endpoint
-
-    results = requests.post(
-        url, json=data, headers={&quot;Content-Type&quot;: &quot;application/json&quot;}
-    ).json()
-
-    # convierte a una lista de &quot;resultado más probable&quot; o &quot;vacío&quot; cuando no hay
-    parsed_results = [
-        single_result[endpoint] if single_result[endpoint] else {}
-        for single_result in results[&quot;resultados&quot;]
+        { ... },
     ]
-
-    return parsed_results
-
-ubicaciones = get_territorial_units([
-    {&quot;lat&quot;: -32.9477132, &quot;lon&quot;: -60.6304658},
-    {&quot;lat&quot;: -34.6037389, &quot;lon&quot;: -58.3815704}
-])
+}
 </code></pre>
 
-<pre><code class="python">[
-    {
-        u'departamento_id': u'30105',
-        u'departamento_nombre': u'Victoria',
-        u'lat': -32.9477132,
-        u'lon': -60.6304658,
-        u'municipio_id': u'82210',
-        u'municipio_nombre': u'Rosario',
-        u'provincia_id': u'30',
-        u'provincia_nombre': u'Entre Ríos'
-    },
-    {
-        u'departamento_id': u'02007',
-        u'departamento_nombre': u'Comuna 1',
-        u'lat': -34.6037389,
-        u'lon': -58.3815704,
-        u'municipio_id': None,
-        u'municipio_nombre': None,
-        u'provincia_id': u'02',
-        u'provincia_nombre': u'Ciudad Autónoma de Buenos Aires'
-    }
-]
+<h3 id="departamentos">Departamentos<a class="headerlink" href="#departamentos" title="Permanent link">&para;</a></h3>
+<p>El archivo de datos de departamentos debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
+<pre><code>{
+    &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
+    &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
+    &quot;datos&quot;: [ // Lista de entidades
+        {
+            &quot;id&quot;: &quot;06427&quot;, // ID del departamento
+            &quot;nombre&quot;: &quot;La Matanza&quot;, // Nombre del departamento
+            &quot;nombre_completo&quot;: &quot;Partido de la Matanza&quot;, // Nombre completo
+            &quot;categoria&quot;: &quot;Partido&quot;, // Tipo de entidad
+            &quot;centroide&quot;: {
+                &quot;lat&quot;: -34.770165, // Latitud de centroide
+                &quot;lon&quot;: -58.625449  // Longitud de centroide
+            },
+            &quot;geometria&quot;: { // Geometría en formato GeoJSON
+                &quot;type&quot;: &quot;MultiPolygon&quot;,
+                &quot;coordinates&quot;: [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
+            },
+            &quot;provincia&quot;: { // Provincia que contiene al departamento
+                &quot;id&quot;: &quot;06&quot;,
+                &quot;nombre&quot;: &quot;Buenos Aires&quot;,
+                &quot;interseccion&quot;: &quot;0.0412936&quot; // Porcentaje del área de la provincia que ocupa el depto.
+            },
+            &quot;fuente&quot;: &quot;ARBA - Gerencia de Servicios Catastrales&quot; // Fuente del dato
+        },
+        { ... },
+    ]
+}
 </code></pre>
 
-<h2 id="con-pandas">Con <code>pandas</code><a class="headerlink" href="#con-pandas" title="Permanent link">&para;</a></h2>
-<h3 id="consultar-listas-de-referencia">Consultar listas de referencia<a class="headerlink" href="#consultar-listas-de-referencia" title="Permanent link">&para;</a></h3>
-<p>Todas las consultas a la API en formato CSV, se pueden leer fácilmente a un <code>pandas.DataFrame</code>. De ahí se pueden tomar listas de referencia para distintas unidades territoriales.</p>
-<pre><code class="python">import pandas as pd
-
-provincias = pd.read_csv(&quot;https://apis.datos.gob.ar/georef/api/provincias?formato=csv&quot;)
+<h3 id="municipios">Municipios<a class="headerlink" href="#municipios" title="Permanent link">&para;</a></h3>
+<p>El archivo de datos de municipios debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
+<pre><code>{
+    &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
+    &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
+    &quot;datos&quot;: [ // Lista de entidades
+        {
+            &quot;id&quot;: &quot;060105&quot;, // ID del municipio
+            &quot;nombre&quot;: &quot;Bolívar&quot;, // Nombre del municipio
+            &quot;nombre_completo&quot;: &quot;Municipio Bolívar&quot;, // Nombre completo
+            &quot;categoria&quot;: &quot;Municipio&quot;, // Tipo de entidad
+            &quot;centroide&quot;: {
+                &quot;lat&quot;: -36.298222, // Latitud de centroide
+                &quot;lon&quot;: -61.149648  // Longitud de centroide
+            },
+            &quot;geometria&quot;: { // Geometría en formato GeoJSON
+                &quot;type&quot;: &quot;MultiPolygon&quot;,
+                &quot;coordinates&quot;: [[[[-58.4453, -34.4324], [-58.6463, -34.6841], ...]]]
+            },
+            &quot;provincia&quot;: {  // Provincia que contiene al municipio
+                &quot;id&quot;: &quot;06&quot;,
+                &quot;nombre&quot;: &quot;Buenos Aires&quot;,
+                &quot;interseccion&quot;: &quot;0.0100845&quot; // Porcentaje del área de la provincia que ocupa el municipio
+            },
+            &quot;fuente&quot;: &quot;ARBA - Gerencia de Servicios Catastrales&quot; // Fuente del dato
+        },
+        { ... },
+    ]
+}
 </code></pre>
 
-<pre><code>provincia_id                                   provincia_nombre
-          14                                            Córdoba
-          22                                              Chaco
-          26                                             Chubut
-           6                                       Buenos Aires
-          10                                          Catamarca
-          30                                         Entre Ríos
-          34                                            Formosa
-          42                                           La Pampa
-          62                                          Río Negro
-          70                                           San Juan
-          78                                         Santa Cruz
-          82                                           Santa Fe
-          94  Tierra del Fuego, Antártida e Islas del Atlánt...
-          38                                              Jujuy
-          54                                           Misiones
-           2                    Ciudad Autónoma de Buenos Aires
-          18                                         Corrientes
-          46                                           La Rioja
-          66                                              Salta
-          86                                Santiago del Estero
-          50                                            Mendoza
-          58                                            Neuquén
-          74                                           San Luis
-          90                                            Tucumán
+<h3 id="localidades">Localidades<a class="headerlink" href="#localidades" title="Permanent link">&para;</a></h3>
+<p>El archivo de datos de localidades debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
+<pre><code>{
+    &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
+    &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
+    &quot;datos&quot;: [ // Lista de entidades
+        {
+            &quot;id&quot;: &quot;06189080000&quot;, // ID de la localidad
+            &quot;nombre&quot;: &quot;San Roman&quot;, // Nombre de la localidad
+            &quot;categoria&quot;: &quot;Localidad simple (LS)&quot;, // Tipo de asentamiento BAHRA
+            &quot;centroide&quot;: {
+                &quot;lat&quot;: -38.741555, // Latitud de centroide
+                &quot;lon&quot;: -61.537720  // Longitud de centroide
+            },
+            &quot;geometria&quot;: { // Geometría en formato GeoJSON
+                &quot;type&quot;: &quot;MultiPoint&quot;,
+                &quot;coordinates&quot;: [[-61.5377, -38.7415], ...]
+            },
+            &quot;municipio&quot;: { // Municipio que contiene a la localidad
+                &quot;id&quot;: &quot;060189&quot;, // Puede ser nulo
+                &quot;nombre&quot;: &quot;Coronel Dorrego&quot; // Puede ser nulo
+            },
+            &quot;departamento&quot;: { // Departamento que contiene a la localidad
+                &quot;id&quot;: &quot;06189&quot;,
+                &quot;nombre&quot;: &quot;Coronel Dorrego&quot;
+            },
+            &quot;provincia&quot;: {  // Provincia que contiene a la localidad
+                &quot;id&quot;: &quot;06&quot;,
+                &quot;nombre&quot;: &quot;Buenos Aires&quot;
+            },
+            &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
+        },
+        { ... },
+    ]
+}
 </code></pre>
 
-<h3 id="enriquecer-coordenadas">Enriquecer coordenadas<a class="headerlink" href="#enriquecer-coordenadas" title="Permanent link">&para;</a></h3>
-<pre><code class="python">def add_territorial_units(df, column_lat, column_lon):
-    &quot;&quot;&quot;Agrega unidades territoriales que contienen coordenadas a un DataFrame.
-
-    Args:
-        df (pandas.DataFrame): Un DataFrame que tiene coordenadas.
-        column_lat (str): Nombre de la columna que tiene latitud.
-        column_lon (str): Nombre de la columna que tiene longitud.
-
-    Returns:
-        pandas.DataFrame: DataFrame original aumentado con unidades       territoriales que contienen a las coordenadas.
-    &quot;&quot;&quot;
-
-    # toma una lista de coordenadas únicas (no repetidas)
-    coordinates = df[[column_lon, column_lat]].rename(
-        columns={column_lon: &quot;lon&quot;, column_lat: &quot;lat&quot;}
-    ).drop_duplicates().to_dict(&quot;records&quot;)
-
-    # crea DataFrame de unidades territoriales que contienen a las coordenadas
-    ubicaciones = pd.DataFrame(get_territorial_units(coordinates))
-
-    # agrega las unidades territoriales al DataFrame original
-    df_with_territorial_units = df.merge(
-        ubicaciones, &quot;left&quot;,
-        left_on=[column_lon, column_lat],
-        right_on=[&quot;lon&quot;, &quot;lat&quot;]
-    )
-
-    # elimina columnas de coordenadas repetidas, dejando las originales
-    return df_with_territorial_units.drop([&quot;lon&quot;, &quot;lat&quot;], axis=1)
-
-# descarga un CSV con coordenadas de aeropuertos
-df = pd.read_csv(&quot;https://servicios.transporte.gob.ar/gobierno_abierto/descargar.php?t=aeropuertos&amp;d=detalle&quot;, sep=&quot;;&quot;)
-
-# Agrega unidades territoriales que contienen coordenadas a un DataFrame
-df_with_territorial_units = add_territorial_units(df, &quot;longitud&quot;, &quot;latitud&quot;)
+<h3 id="calles">Calles<a class="headerlink" href="#calles" title="Permanent link">&para;</a></h3>
+<p>El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
+<pre><code>{
+    &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
+    &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
+    &quot;datos&quot;: [ // Lista de vías de circulación
+        {
+            &quot;nomenclatura&quot;: &quot;LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires&quot;, // Nomenclatura: 'nombre, departamento, provincia'
+            &quot;id&quot;: &quot;0202101007345&quot;, // ID de la vía de circulación
+            &quot;nombre&quot;: &quot;LARREA&quot;, // Nombre de vía de circulación
+            &quot;categoria&quot;: &quot;CALLE&quot;, // Tipo de vía de circulación
+            &quot;altura&quot;: {
+                &quot;inicio&quot;: {
+                    &quot;derecha&quot;: 1, // Número inicial de altura (lado derecho)
+                    &quot;izquierda&quot;: 2, // Número inicial de altura (lado izquierdo)
+                },
+                &quot;fin&quot;: {
+                    &quot;derecha&quot;: 799, // Número final de altura (lado derecho)
+                    &quot;izquierda&quot;: 800, // Número final de altura (lado izquierdo)
+                }
+            },
+            &quot;geometria&quot;: { // Geometría en formato GeoJSON
+                &quot;type&quot;: &quot;MultiLineString&quot;,
+                &quot;coordinates&quot;: [[[-58.52815846522327, -34.611800397637424], ...]]
+            },
+            &quot;departamento&quot;: { // Departamento
+                &quot;nombre&quot;: &quot;Comuna 3&quot;,
+                &quot;id&quot;: &quot;02021&quot;
+            },
+            &quot;provincia&quot;: { // Provincia
+                &quot;nombre&quot;: &quot;Ciudad Autónoma de Buenos Aires&quot;,
+                &quot;id&quot;: &quot;02&quot;
+            },
+            &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
+        },
+        { ... },
+    ]
+}
 </code></pre>
 
-<pre><code>   tipo                       denominacion   latitud  longitud   elev  \
-Aeródromo       CORONEL BOGADO/AGROSERVICIOS -60.57066 -33.27226   44.0
-Aeródromo                       GENERAL ACHA -64.61351 -37.40164  277.0
-Aeródromo            ARRECIFES/LA CURA MALAL -60.14170 -34.07574   37.0
-Aeródromo                     PUERTO DESEADO -65.90410 -47.73511   82.0
-Aeródromo  BANDERA/AGROSERVICIOS DOÑA TERESA -62.26462 -28.85541   75.0
-
-departamento_id departamento_nombre municipio_id municipio_nombre  \
-          82084             Rosario       823393   Coronel Bogado
-          42154             Utracán       420133     General Acha
-          06077           Arrecifes       060077        Arrecifes
-          78014             Deseado         None             None
-          86077     General Taboada         None             None
-
-provincia_id     provincia_nombre
-          82             Santa Fe
-          42             La Pampa
-          06         Buenos Aires
-          78           Santa Cruz
-          86  Santiago del Estero
+<h3 id="intersecciones-de-calles">Intersecciones de Calles<a class="headerlink" href="#intersecciones-de-calles" title="Permanent link">&para;</a></h3>
+<p>El archivo de datos de intersecciones debe tener formato JSON, y no debe tener intersecciones repetidas. Dadas las calles con ID X y ID Z, solo debe estar presente la intersección X-Z o Z-X. Su esquema de datos debe ser el siguiente:</p>
+<pre><code>{
+    &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
+    &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
+    &quot;datos&quot;: [ // Lista de intersecciones
+        {
+            &quot;id&quot;: &quot;0207001002300-0207001007975&quot;, // ID de la calle A, ID de la calle B
+            &quot;calle_a&quot;: {
+                &quot;id&quot;: &quot;0207001002300&quot;, // ID de la calle A
+                &quot;nombre&quot;: &quot;BOSTON&quot;, // Nombre de la calle A
+                &quot;departamento&quot;: { // Departamento de la calle A
+                    &quot;id&quot;: &quot;02070&quot;,
+                    &quot;nombre&quot;: &quot;Comuna 10&quot;
+                },
+                &quot;provincia&quot;: { // Provincia de la calle A
+                    &quot;id&quot;: &quot;02&quot;,
+                    &quot;nombre&quot;: &quot;Ciudad Autónoma de Buenos Aires&quot;
+                },
+                &quot;categoria&quot;: &quot;CALLE&quot;, // Tipo de la calle A
+                &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
+            },
+            &quot;calle_b&quot;: {
+                &quot;id&quot;: &quot;0207001007975&quot;, // ID de la calle B
+                &quot;nombre&quot;: &quot;MARCOS SASTRE&quot;, // Nombre de la calle B
+                &quot;departamento&quot;: { // Departamento de la calle B
+                    &quot;id&quot;: &quot;02070&quot;,
+                    &quot;nombre&quot;: &quot;Comuna 10&quot;
+                },
+                &quot;provincia&quot;: { // Provincia de la calle B
+                    &quot;id&quot;: &quot;02&quot;,
+                    &quot;nombre&quot;: &quot;Ciudad Autónoma de Buenos Aires&quot;
+                },
+                &quot;categoria&quot;: &quot;CALLE&quot;, // Tipo de la calle B
+                &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
+            },
+            &quot;geometria&quot;: { // Geometría en formato GeoJSON
+                &quot;type&quot;: &quot;Point&quot;,
+                &quot;coordinates&quot;: [
+                    -58.5077676091915,
+                    -34.6150993860767
+                ]
+            }
+        }
+        { ... },
+    ]
+}
 </code></pre>
-
-<!-- ## Con `data-cleaner` -->
                 
                   
                 
@@ -992,7 +1078,7 @@ provincia_id     provincia_nombre
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../etl/" title="Inicio" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1001,19 +1087,19 @@ provincia_id     provincia_nombre
                 <span class="md-footer-nav__direction">
                   Anterior
                 </span>
-                Usar en planillas de cálculo
+                Inicio
               </span>
             </div>
           </a>
         
         
-          <a href="../jwt-token/" title="Autenticarse con JWT" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../etl-install/" title="Instalación y Ejecución" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Autenticarse con JWT
+                Instalación y Ejecución
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
