@@ -200,7 +200,7 @@ Para comprobar que no existan errores comunes en el código, y que su estilo sea
 
 ## Archivos de datos
 
-- La estructura de los archivos de datos JSON utilizados por Georef está detallada en [este documento](georef-api-data.md).
+- La estructura de los archivos de datos JSON utilizados por Georef está detallada en [este documento](etl-data.md).
 
 - El archivo de configuración `config/georef.cfg` debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en `georef.example.cfg`) utilizan el portal de descargas `infra.datos.gob.ar`, que siempre provee la última versión de los archivos JSON disponibles. La rama `master` de `georef-ar-api` siempre se mantiene compatible con la última versión de los datos disponibles en `infra.datos.gob.ar`.
 

@@ -1,9 +1,6 @@
-# Modelo de datos para Georef API
+# Modelo de datos para Georef
 
-Los archivos de datos de Georef consisten de seis (6) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles e intersecciones de calles.
-
-## ETL
-Los datos utilizados por Georef API son obtenidos a través de un proceso de ETL. El código del mismo se encuentra en el repositorio GitHub [georef-ar-etl](https://github.com/datosgobar/georef-ar-etl), así también como su [guía de instalación y uso](https://github.com/datosgobar/georef-ar-etl/blob/master/docs/install.md).
+Los datos generados por el ETL Georef consisten de seis (6) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles e intersecciones de calles.
 
 ## Fuentes
 Los orígenes de los datos procesados en el ETL son:
