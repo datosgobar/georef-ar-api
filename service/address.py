@@ -5,13 +5,14 @@ Contiene funciones y clases utilizadas para normalizar direcciones (recurso
 'normalizer', con funciones específicas para el procesamiento de direcciones.
 """
 
+from abc import ABC, abstractmethod
 from service import names as N
 from service import data, constants, utils
 from service.geometry import Point, street_number_location
 from service.query_result import QueryResult
 
 
-class AddressQueryPlanner:
+class AddressQueryPlanner(ABC):
     """Representa una búsqueda de una dirección de calle. Buscar una dirección
     involucra potencialmente más de una consulta a la capa de datos (data.py),
     utilizando distintos índices, dependiendo del tipo de dirección. Para poder
@@ -49,6 +50,7 @@ class AddressQueryPlanner:
             self._numerical_door_number = \
                 self._address_data.normalized_door_number_value()
 
+    @abstractmethod
     def planner_steps(self):
         """Crea un iterador de ElasticsearchSearch, representando los pasos
         requeridos para completar la búsqueda de los datos la dirección.
@@ -61,6 +63,7 @@ class AddressQueryPlanner:
         """
         raise NotImplementedError()
 
+    @abstractmethod
     def get_query_result(self):
         """Retorna los resultados de la búsqueda de direcciones. Este método
         debe ser invocado luego de haber recorrido todo el iterador obtenido

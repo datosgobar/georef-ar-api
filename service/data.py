@@ -3,6 +3,7 @@
 Contiene funciones que ejecutan consultas a índices de Elasticsearch.
 """
 
+from abc import ABC, abstractmethod
 import elasticsearch
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
@@ -91,7 +92,7 @@ def _run_multisearch(es, searches):
     return responses
 
 
-class ElasticsearchSearch:
+class ElasticsearchSearch(ABC):
     """Representa una búsqueda a realizar utilizando Elasticsearch. Dependiendo
     de los parámetros de búsqueda, se puede llegar a necesitar más de una
     consulta a Elasticsearch para completar la misma.
@@ -124,6 +125,7 @@ class ElasticsearchSearch:
 
         self._read_query(**query)
 
+    @abstractmethod
     def search_steps(self):
         """Devuelve un iterador de búsquedas elasticsearch_dsl.Search, cada una
         representando un paso requerido para completar la búsqueda
