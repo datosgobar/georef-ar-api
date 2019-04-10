@@ -5,6 +5,7 @@ Contiene funciones de utilidad para descargar e indexar datos.
 
 import argparse
 import os
+import shutil
 import sys
 import urllib.parse
 import json
@@ -404,7 +405,16 @@ class GeorefIndex:
                                                excluding_terms,
                                                check_timestamp=not forced)
 
-        if forced and not ok:
+        if not self._backup_filepath:
+            if not ok:
+                logger.error('No se pudo indexar utilizando fuente primaria.')
+                logger.error('')
+
+            return
+
+        if ok:
+            self._write_backup(files_cache)
+        elif forced:
             logger.warning('No se pudo indexar utilizando fuente primaria.')
             logger.warning('Intentando nuevamente con backup...')
             logger.warning('')
@@ -417,9 +427,6 @@ class GeorefIndex:
             if not ok:
                 logger.error('No se pudo indexar utilizando backups.')
                 logger.error('')
-
-        if ok and self._backup_filepath:
-            self._write_backup(data)
 
     def _create_or_reindex_with_data(self, es, data, synonyms, excluding_terms,
                                      check_timestamp):
@@ -443,8 +450,8 @@ class GeorefIndex:
 
         """
         if not data:
-            logger.error('No existen datos a indexar.')
-            logger.error('')
+            logger.warning('No existen datos a indexar.')
+            logger.warning('')
             return False
 
         timestamp = data['timestamp']
@@ -497,19 +504,30 @@ class GeorefIndex:
         if old_index:
             self._delete_index(es, old_index)
 
+        logger.info('Indexado completo.')
+        logger.info('')
         return True
 
-    def _write_backup(self, data):
+    def _write_backup(self, files_cache):
         """Crea un archivo de respaldo situado en el path
-        'self._backup_filepath'.
+        'self._backup_filepath' a partir de 'self._filepath'.
 
         Args:
-            data (dict): Diccionario con datos indexados y sus metadatos.
+            files_cache (dict): Cache de archivos descargados/leídos
+                anteriormente durante el proceso de indexación actual.
 
         """
         logger.info('Creando archivo de backup...')
-        with open(self._backup_filepath, 'w') as f:
-            json.dump(data, f)
+        if urllib.parse.urlparse(self._filepath).scheme in ['http', 'https']:
+            # self._filepath es una URL, utilizar el archivo ya descargado en
+            # el cache.
+            source = files_cache[self._filepath]
+        else:
+            # self._filepath es un archivo local, tomar su ruta
+            source = self._filepath
+
+        shutil.copy(source, self._backup_filepath)
+
         logger.info('Archivo creado.')
         logger.info('')
 
