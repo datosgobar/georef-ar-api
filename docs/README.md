@@ -19,17 +19,12 @@ Luego de editar/crear cualquier archivo `.md` dentro de `src/`, se deben actuali
 (venv) $ pip install -r requirements-docs.txt
 ```
 
-2. Re-generar las tablas de contenidos. Se requiere instalar el comando `doctoc` utilizando `npm`.
-```bash
-(venv) $ make doctoc
-```
-
-3. Generar las nuevas páginas con *Read the Docs*:
+2. Generar las nuevas páginas con *Read the Docs*:
 ```bash
 (venv) $ make docs
 ```
 
-4. Subir los cambios a la rama `master`:
+3. Subir los cambios a la rama `master`:
 ```bash
 (venv) $ git add docs/
 (venv) $ git commit -m "<mensaje> [skip ci]"
