@@ -133,20 +133,21 @@ def send_email(host, user, password, subject, message, recipients,
         smtp.send_message(msg)
 
 
-def download(url, filepath):
+def download(url, filepath, timeout=30):
     """
     Descarga un archivo a través del protocolo HTTP.
 
     Args:
         url (str): URL (schema HTTP) del archivo a descargar.
         filepath (str): Ruta del archivo a donde almacenar los datos.
+        timeout (int): Timeout a utilizar en segundos.
 
     Raises:
         requests.exceptions.RequestException, requests.exceptions.HTTPError: en
             caso de ocurrir un error durante la descarga.
 
     """
-    with requests.get(url, stream=True) as req:
+    with requests.get(url, stream=True, timeout=timeout) as req:
         req.raise_for_status()
 
         with open(filepath, 'wb') as f:
