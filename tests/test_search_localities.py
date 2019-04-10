@@ -204,8 +204,8 @@ class SearchLocalityTest(GeorefLiveTest):
     def test_short_id_search(self):
         """La búsqueda por ID debe devolver la entidad correcta incluso si
         se omiten ceros iniciales."""
-        data = self.get_response({'id': '2000010000'})
-        self.assertTrue(data[0]['id'] == '02000010000')
+        data = self.get_response({'id': '6021020000'})
+        self.assertTrue(data[0]['id'] == '06021020000')
 
     def test_name_exact_gibberish_search(self):
         """La búsqueda por nombre exacto debe devolver 0 resultados cuando se

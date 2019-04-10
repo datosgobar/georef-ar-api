@@ -50,11 +50,12 @@ class SearchStreetsTest(GeorefLiveTest):
         """Los resultados deben poder ser ordenados por nombre."""
         resp = self.get_response({
             'orden': 'nombre',
-            'max': 1000
+            'max': 100
         })
 
         ordered = [r['nombre'] for r in resp]
         expected = sorted(ordered, key=asciifold)
+
         self.assertListEqual(ordered, expected)
 
     def test_id_ordering(self):

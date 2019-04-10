@@ -236,8 +236,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """La búsqueda exacta debe devolver las direcciones
         correspondientes."""
         addresses = [
-            (['0208401007915'], 'MANUELA PEDRAZA 1500'),
-            (['0627001001540'], 'DICKSON TURNER 600'),
+            (['0627001001535'], 'DICKSON TURNER 600'),
             (['1401401002655'], 'BALTAZAR PARDO DE FIGUEROA 600'),
             (['5002802006060'], 'PJE DR LENCINAS 700'),
             (['4202102000325'], 'AV PEDRO LURO 100'),
@@ -249,10 +248,10 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_address_exact_search_ignores_case(self):
         """La búsqueda exacta debe ignorar mayúsculas y minúsculas."""
         expected = [
-            (['0205601006685'], 'JOSE BARROS PAZOS 5000'),
-            (['0205601006685'], 'jose barros pazos 5000'),
-            (['0205601006685'], 'Jose Barros Pazos 5000'),
-            (['0205601006685'], 'JoSe BaRrOs PaZoS 5000')
+            (['0200801006685'], 'JOSE BARROS PAZOS 5000'),
+            (['0200801006685'], 'jose barros pazos 5000'),
+            (['0200801006685'], 'Jose Barros Pazos 5000'),
+            (['0200801006685'], 'JoSe BaRrOs PaZoS 5000')
         ]
 
         self.assert_address_search_id_matches(expected, exact=True)
@@ -301,8 +300,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['0676305002780'], 'ARACONDEGUI 500'),     # -1 caracteres (de 8+)
             (['0676305002780'], 'zZARACONDEGUI 500'),   # +1 caracteres (de 8+)
             (['0676305002780'], 'zZARACONDEGUIi 500'),  # +2 caracteres (de 8+)
-            (['0202801006430'], 'NCLAN 3000'),         # -1 caracteres (de 4-7)
-            (['0202801006430'], 'iINCLAN 3000')        # +1 caracteres (de 4-7)
+            (['0200401006430'], 'NCLAN 3000'),         # -1 caracteres (de 4-7)
+            (['0200401006430'], 'iINCLAN 3000')        # +1 caracteres (de 4-7)
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -321,15 +320,15 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """La búsqueda aproximada debe también actuar como autocompletar cuando
         la longitud de la query es >= 4."""
         expected = [
-            (['0207701007975'], 'MARCOS SASTRE 2600'),
-            (['0207701007975'], 'MARCOS SASTR 2600'),
-            (['0207701007975'], 'MARCOS SAST 2600'),
-            (['0207701007975'], 'MARCOS SAS 2600'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREIRE 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREIR 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREI 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FRE 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FR 2000')
+            (['0201101007975'], 'MARCOS SASTRE 2600'),
+            (['0201101007975'], 'MARCOS SASTR 2600'),
+            (['0201101007975'], 'MARCOS SAST 2600'),
+            (['0201101007975'], 'MARCOS SAS 2600'),
+            (['0201301004195', '0201201004195'], 'CAP GRL RAMON FREIRE 2000'),
+            (['0201301004195', '0201201004195'], 'CAP GRL RAMON FREIR 2000'),
+            (['0201301004195', '0201201004195'], 'CAP GRL RAMON FREI 2000'),
+            (['0201301004195', '0201201004195'], 'CAP GRL RAMON FRE 2000'),
+            (['0201301004195', '0201201004195'], 'CAP GRL RAMON FR 2000')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -358,8 +357,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['5804201000085'], 'av estanislao flore 1000'),
             (['5804201000085'], 'AV ESTANISLAOOO FLORES 1000'),
             (['8208427000835'], 'AVenide ESTANISLAO lope 1000'),
-            (['0203501005600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
-            (['0203501005600'], 'fransisco acuna figeroa 1000')
+            (['0200501005600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
+            (['0200501005600'], 'fransisco acuna figeroa 1000')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -413,8 +412,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """Se debe poder filtrar los resultados por nombre de departamento."""
         validations = []
         departments = [
-            ('02007', 'COMUNA 1'),
-            ('02105', 'COMUNA 15'),
+            ('02001', 'COMUNA 1'),
+            ('02015', 'COMUNA 15'),
             ('66147', 'ROSARIO DE LERMA')
         ]
 
