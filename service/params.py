@@ -881,7 +881,7 @@ class EndpointParameters():
 
         """
         # Comenzar con un diccionario de errores vacío por cada consulta.
-        errors_list = [{}] * len(results)
+        errors_list = [{} for _ in range(len(results))]
 
         for name in self._post_body_params.keys():
             validators = self._set_validators[name]
