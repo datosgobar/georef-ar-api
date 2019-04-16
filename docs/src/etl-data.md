@@ -1,6 +1,6 @@
 # Modelo de datos para Georef
 
-Los datos generados por el ETL Georef consisten de seis (6) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles e intersecciones de calles.
+Los datos generados por el ETL Georef consisten de siete (7) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles, cuadras e intersecciones de calles.
 
 ## Fuentes
 Los orígenes de los datos procesados en el ETL son:
@@ -20,8 +20,15 @@ Los orígenes de los datos procesados en el ETL son:
 - Fuente: **Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)**
 - Enlace: [Portal de geoservicios de INDEC](https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas)
 
+### Cuadras
+- Recursos: `/calles`, `/direcciones`
+- Fuente: **Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)**
+- Enlace: [GeoServer INDEC](https://geoservicios.indec.gov.ar/geoserver)
+
 ## Archivos
 A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `9.0.0`.
+
+Todas las geometrías incluidas en los archivos utilizan el sistema de coordenadas **WGS84** (**EPSG 4326**).
 
 ### Provincias
 El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:
@@ -196,6 +203,39 @@ El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe 
 			"fuente": "INDEC" // Fuente del dato
 		},
 		{ ... },
+	]
+}
+```
+
+### Cuadras
+El archivo de datos de cuadras debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+```
+{
+	"timestamp": "1532435389", // Timestamp de creación
+	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
+	"version": "9.0.0", // Versión de archivo
+	"datos": [ // Lista de cuadras
+		{
+		    "id": "020700100230012345", // ID de la cuadra
+			"calle": {
+				"id": "0207001002300", // ID de la calle
+				"nombre": "BOSTON", // Nombre de la calle
+				"departamento": { // Departamento de la calle
+					"id": "02070",
+					"nombre": "Comuna 10"
+				},
+				"provincia": { // Provincia de la calle
+					"id": "02",
+					"nombre": "Ciudad Autónoma de Buenos Aires"
+				},
+				"categoria": "CALLE", // Tipo de la calle
+				"fuente": "INDEC" // Fuente del dato
+			},
+			"geometria": { // Geometría en formato GeoJSON
+				"type": "MultiLineString",
+				"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
+			}
+		}
 	]
 }
 ```
