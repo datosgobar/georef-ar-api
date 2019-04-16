@@ -71,6 +71,13 @@ class SearchLocalityTest(GeorefLiveTest):
         # IDs de entidades entre resultados.
         self.assertEqual(len(results), page_size * pages)
 
+    def test_null_dept_locality(self):
+        """Las localidades con departamento nulo deberían ser válidas y existir
+        en la API."""
+        resp = self.get_response({'id': '02000010000'})
+        self.assertTrue(resp[0]['departamento']['id'] is None and
+                        resp[0]['departamento']['nombre'] is None)
+
     def test_total_results(self):
         """Dada una query sin parámetros, se deben retornar los metadatos de
         resultados apropiados."""
@@ -463,6 +470,18 @@ class SearchLocalityTest(GeorefLiveTest):
                                        'municipio_nombre',
                                        'localidad_fuente',
                                        'localidad_categoria'])
+
+    def test_csv_empty_value(self):
+        """Un valor vacío (None) debería estar representado como '' en CSV."""
+        resp = self.get_response({
+            'formato': 'csv',
+            'id': '78007020000'
+        })
+
+        header = next(resp)
+        row = next(resp)
+        self.assertTrue(row[header.index('municipio_id')] == '' and
+                        row[header.index('municipio_nombre')] == '')
 
     def test_xml_format(self):
         """Se debería poder obtener resultados en formato XML (sin

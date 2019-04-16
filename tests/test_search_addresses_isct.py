@@ -68,11 +68,11 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
     def test_intersection_location_with_door_num(self):
         """Si se especifica una intersección con altura, se debería utilizar
         la posición de la altura sobre la primera calle como posición final."""
-        resp_simple = self.get_response({'direccion': 'Cerro Beldevere 500'})
+        resp_simple = self.get_response({'direccion': 'Cerro Beldevere 501'})
         loc_simple = resp_simple[0]['ubicacion']
 
         resp_isct = self.get_response({
-            'direccion': 'Cerro Beldevere 500 y El Calafate'
+            'direccion': 'Cerro Beldevere 501 y El Calafate'
         })
         loc_isct = resp_isct[0]['ubicacion']
 
@@ -114,7 +114,7 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         """La posición de una intersección debería estar cerca a la posición de
         una altura sobre la primera calle cerca de la esquina."""
         resp_simple = self.get_response({
-            'direccion': 'Dr. Adolfo Guemes al 550',
+            'direccion': 'Dr. Adolfo Guemes al 600',
             'departamento': '66028'
         })
 

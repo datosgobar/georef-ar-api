@@ -12,15 +12,14 @@ from service import names as N
 _MEAN_EARTH_RADIUS_KM = 6371
 
 
-def _street_extents(door_nums, number):
-    """Dados los datos de alturas de una calle, y una altura recibida en una
-    consulta, retorna los extremos de la calle que contienen la altura.
-    Idealmente, se utilizaría siempre start_r y end_l, pero al contar a veces
-    con datos incompletos, se flexibiliza la elección de extremos para poder
-    geolocalizar más direcciones.
+def _street_block_extents(door_nums, number):
+    """Dados los datos de alturas de una cuadra, y una altura recibida en una
+    consulta, retorna los extremos de la cuadra que contienen la altura. Los
+    valores devueltos corresponderán al lado derecho o izquierdo de la cuadra,
+    o None.
 
     Args:
-        door_nums (dict): Datos de alturas de la calle.
+        door_nums (dict): Datos de alturas de la cuadra.
         number (int): Altura recibida en una consulta.
 
     Raises:
@@ -28,7 +27,7 @@ def _street_extents(door_nums, number):
             combinación de extremos.
 
     Returns:
-        tuple (int, int): Altura inicial y final de la calle que contienen la
+        tuple (int, int): Altura inicial y final de la cuadra que contienen la
             altura especificada.
 
     """
@@ -37,28 +36,36 @@ def _street_extents(door_nums, number):
     end_r = door_nums[N.END][N.RIGHT]
     end_l = door_nums[N.END][N.LEFT]
 
-    combinations = [(start_r, end_l), (start_l, end_r), (start_r, end_r),
-                    (start_l, end_l)]
+    if start_r <= number <= end_r:
+        return start_r, end_r
 
-    for start, end in combinations:
-        if start <= number <= end:
-            return start, end
+    if start_l <= number <= end_l:
+        return start_l, end_l
 
     raise ValueError('Street number out of range')
 
 
-def street_number_location(geom, door_numbers, number):
+def street_block_number_location(geom, door_numbers, number,
+                                 approximate=False):
     """Intenta obtener las coordenadas de una altura dentro de una calle
-    (georreferenciación). En algunos casos, es posible que la operacion falle
-    debido a problemas con los datos de la calle. Estos casos son:
-        - La calle está compuesta por dos o más tramos no conectados.
-        - Los valores de alturas (fin e inicio) de la calle son 0, o son
+    (georreferenciación). Para lograr esto, se toma la geometría de la cuadra
+    obtenida vía Elasticsearch, y se realiza una interpolación utilizando los
+    datos de inicio/fin de alturas de la cuadra.
+
+    En algunos casos, es posible que la operacion falle debido a problemas con
+    los datos de la cuadra. Estos casos son:
+        - La cuadra está compuesta por dos o más tramos no conectados. Esto
+          solo sucede en algunas localidades censales, y es un problema de
+          datos que debería corregirse.
+        - Los valores de alturas (fin e inicio) de la cuadra son 0, o son
           idénticos.
 
     Args:
-        geom (dict): Geometría de la calle en formato GeoJSON.
-        door_numbers (dict): Límites de altura de la calle.
+        geom (dict): Geometría de la cuadra en formato GeoJSON.
+        door_numbers (dict): Límites de altura de la cuadra.
         number (int or None): Número de puerta o altura.
+        approximate (bool): Si es verdadero, devolver un estimado de las
+            coordenadas en caso de que la interpolación falle.
 
     Raises:
         TypeError: Cuando la geometría no es de tipo Point.
@@ -71,23 +78,29 @@ def street_number_location(geom, door_numbers, number):
     if geom['type'] != 'MultiLineString':
         raise TypeError('GeoJSON type must be MultiLineString')
 
-    start, end = _street_extents(door_numbers, number)
-    if start == end:
-        # Los valores de comienzo y fin de alturas de la calle tienen el mismo
-        # valor. Por el momento, considerar estos casos como inválidos.
-        return None
-
     shape = shapely.geometry.MultiLineString(geom['coordinates'])
     line = shapely.ops.linemerge(shape)
 
-    if isinstance(line, shapely.geometry.LineString):
-        # Si la geometría de la calle pudo ser combinada para formar un único
-        # tramo, encontrar la ubicación interpolando la altura con el inicio y
-        # fin de altura de la calle.
-        ip = line.interpolate((number - start) / (end - start),
-                              normalized=True)
+    if isinstance(line, shapely.geometry.LineString) and number is not None:
+        start, end = _street_block_extents(door_numbers, number)
 
-        return Point.from_shapely_point(ip)
+        if start < end:
+            # Se cumplen las condiciones:
+            #  - La geometría de la cuadra pudo ser combinada en un solo tramo
+            #    contínuo (verdadero en el mayor de los casos).
+            #  - La altura a buscar no es None (puede ser 0).
+            #  - Los extremos inicio y comienzo de la cuadra no son iguales.
+            # Con las condiciones dadas, realizar la interpolación y retornar
+            # el resultado.
+            ip = line.interpolate((number - start) / (end - start),
+                                  normalized=True)
+
+            return Point.from_shapely_point(ip)
+
+    if approximate:
+        # Si cualquiera de las condiciones falló pero se permiten estimados,
+        # retornar el centroide de la cuadra.
+        return Point.from_shapely_point(line.centroid)
 
     return None
 

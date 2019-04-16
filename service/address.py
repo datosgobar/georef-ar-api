@@ -8,7 +8,7 @@ Contiene funciones y clases utilizadas para normalizar direcciones (recurso
 from abc import ABC, abstractmethod
 from service import names as N
 from service import data, constants, utils
-from service.geometry import Point, street_number_location
+from service.geometry import Point, street_block_number_location
 from service.query_result import QueryResult
 
 
@@ -75,11 +75,47 @@ class AddressQueryPlanner(ABC):
         """
         raise NotImplementedError()
 
+    def _build_street_blocks_search(self, street, add_number=False,
+                                    force_all=False):
+        """Método de utilidad para crear búsquedas de tipo StreetBlocksSearch.
+        Para buscar una calle, se consulta el índice de cuadras, en lugar del
+        de calles. Esto se debe a que ambos índices representan los mismos
+        datos (las calles de Argentina), pero el de cuadras contiene datos con
+        mucha mayor granularidad: por cada cuadra de la calle, se tiene la
+        altura inicial y final. Como cada cuadra es una recta (en lugar de
+        varias) en la mayoría de los casos es trivial calcular la posición
+        geográfica de una dirección sobre ellas.
+
+        Args:
+            street (str): Nombre de la calle a buscar.
+            add_number (bool): Si es verdadero, agrega a la búsqueda un
+                filtrado por altura, utilizando el atributo
+                '_numerical_door_number'.
+            force_all (bool): Si es verdadero, se ignoran los parámetros
+                'size' y 'offset' de la consulta original, y se buscan todas
+                las intersecciones posibles.
+
+        Returns:
+            StreetBlocksSearch: Búsqueda de cuadras para ejecutar.
+
+        """
+        query = self._query.copy()
+
+        query['name'] = street
+        if add_number and self._numerical_door_number:
+            query['number'] = self._numerical_door_number
+
+        if force_all:
+            query['size'] = constants.MAX_RESULT_LEN
+            query['offset'] = 0
+
+        return data.StreetBlocksSearch(query)
+
     def _address_full_name(self, *streets):
         """Obtiene una representación canónica de una dirección, utilizando los
         nombres ya normalizados de las calles que la componen (y su altura).
 
-        Por ejemplo, 'Srmiento al 1443' se convierte a 'SARMIENTO 1443'.
+        Por ejemplo, 'Sarmiento al 1443' se convierte a 'SARMIENTO 1443'.
         'Santa fe esq. Pampa' se convierte a 'SANTA FE (ESQUINA LA PAMPA)'.
 
         Args:
@@ -213,6 +249,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
     Ver documentación de la clase AddressQueryPlanner para más información.
 
     """
+
     def __init__(self, query, fmt):
         """Inicializa un objeto de tipo 'AddressSimpleQueryPlanner'.
 
@@ -236,17 +273,13 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
                 invocador de 'next()'.
 
         """
-        query = self._query.copy()
-        query['name'] = self._address_data.street_names[0]
-
-        if self._numerical_door_number:
-            query['number'] = self._numerical_door_number
-
-        self._elasticsearch_result = yield data.StreetsSearch(query)
+        name = self._address_data.street_names[0]
+        self._elasticsearch_result = yield self._build_street_blocks_search(
+            name, add_number=True)
 
     def _build_address_hits(self):
         """Construye los resultados de la búsqueda de direcciones a partir
-        del atributo '_elasticsearch_result'.
+        del atributo '_elasticsearch_result' (lista de cuadras).
 
         Returns:
             list: Lista de resultados.
@@ -255,7 +288,8 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         address_hits = []
         fields = self._format[N.FIELDS]
 
-        for street in self._elasticsearch_result.hits:
+        for street_block in self._elasticsearch_result.hits:
+            street = street_block[N.STREET]
             address_hit = self._build_base_address_hit(street.get(N.STATE),
                                                        street.get(N.DEPT))
 
@@ -267,16 +301,15 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(street)
 
-            if (N.LOCATION_LAT in fields or N.LOCATION_LON in fields) and \
-               self._numerical_door_number:
-                point = street_number_location(
-                    street[N.GEOM],
-                    street[N.DOOR_NUM],
-                    self._numerical_door_number
+            if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
+                point = street_block_number_location(
+                    street_block[N.GEOM],
+                    street_block[N.DOOR_NUM],
+                    self._numerical_door_number,
+                    approximate=True
                 )
 
-                if point:
-                    address_hit[N.LOCATION] = point.to_json_location()
+                address_hit[N.LOCATION] = point.to_json_location()
 
             address_hits.append(address_hit)
 
@@ -319,7 +352,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         super().__init__(query, fmt)
 
     def _build_intersections_search(self, street_1_ids, street_2_ids,
-                                    points, tolerance_m, ignore_max=False):
+                                    points, tolerance_m, force_all=False):
         """Método de utilidad para construir objetos IntersectionsSearch, para
         buscar intersecciones de calles.
 
@@ -333,7 +366,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
                 de cualquier círculo de la lista.
             tolerance_m (float): Distancia en metros a utilizar como radio de
                 los círculos.
-            ignore_max (bool): Si es verdadero, se ignoran los parámetros
+            force_all (bool): Si es verdadero, se ignoran los parámetros
                 'size' y 'offset' de la consulta original, y se buscan todas
                 las intersecciones posibles.
 
@@ -345,7 +378,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         query.pop('order', None)
         query['ids'] = (list(street_1_ids), list(street_2_ids))
 
-        if ignore_max:
+        if force_all:
             query['size'] = constants.MAX_RESULT_LEN
             query['offset'] = 0
 
@@ -357,29 +390,9 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
         return data.IntersectionsSearch(query)
 
-    def _build_street_search(self, street, add_number=False):
-        """Método de utilidad para crear búsquedas de tipo StreetsSearch.
-
-        Args:
-            street (str): Nombre de la calle a buscar.
-            add_number (bool): Si es verdadero, agrega a la búsqueda un
-                filtrado por altura, utilizando el atributo
-                '_numerical_door_number'.
-
-        """
-        query = self._query.copy()
-
-        query['name'] = street
-        if add_number and self._numerical_door_number:
-            query['number'] = self._numerical_door_number
-        query['size'] = constants.MAX_RESULT_LEN
-        query['offset'] = 0
-
-        return data.StreetsSearch(query)
-
-    def _read_street_1_results(self, result):
-        """Lee los resultados de la búsqueda de la primera calle. Los
-        resultados de la primera calle se manejan separadamente ya que
+    def _read_street_blocks_1_results(self, result):
+        """Lee los resultados de la búsqueda de cuadras de la primera calle.
+        Los resultados de la primera calle se manejan separadamente ya que
         potencialmente se necesite calcular la posición de la altura
         especificada sobre la misma.
 
@@ -402,10 +415,12 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         # geográfica de cada altura por cada resultado de la calle 1.
         # Ignorar los resultados donde la ubicación no se puede calcular.
         if self._numerical_door_number:
-            for street in result.hits:
-                point = street_number_location(
-                    street[N.GEOM],
-                    street[N.DOOR_NUM],
+            for street_block in result.hits:
+                street = street_block[N.STREET]
+
+                point = street_block_number_location(
+                    street_block[N.GEOM],
+                    street_block[N.DOOR_NUM],
                     self._numerical_door_number
                 )
 
@@ -418,7 +433,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             # ninguna posición sobre la calle 1, porque se usa la posición de
             # la/s intersección/es de las calles, que ya está/n
             # pre-calculada/s.
-            street_1_ids = {hit[N.ID] for hit in result.hits}
+            street_1_ids = {hit[N.STREET][N.ID] for hit in result.hits}
 
         return street_1_ids, street_1_points
 
@@ -444,11 +459,14 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
 
         """
         # Buscar la primera calle, incluyendo la altura si está presente
-        result = yield self._build_street_search(
-            self._address_data.street_names[0], True)
+        result = yield self._build_street_blocks_search(
+            self._address_data.street_names[0],
+            add_number=True,
+            force_all=True
+        )
 
         if result:
-            street_1_ids, street_1_points = self._read_street_1_results(
+            street_1_ids, street_1_points = self._read_street_blocks_1_results(
                 result)
 
             if not street_1_ids:
@@ -459,12 +477,14 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         else:
             return
 
-        result = yield self._build_street_search(
-            self._address_data.street_names[1])
+        result = yield self._build_street_blocks_search(
+            self._address_data.street_names[1],
+            force_all=True
+        )
 
         if result:
             # Resultados de la segunda calle
-            street_2_ids = {hit[N.ID] for hit in result.hits}
+            street_2_ids = {hit[N.STREET][N.ID] for hit in result.hits}
         else:
             return
 
@@ -769,11 +789,14 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
 
         """
         # Buscar la primera calle, incluyendo la altura si está presente
-        result = yield self._build_street_search(
-            self._address_data.street_names[0], True)
+        result = yield self._build_street_blocks_search(
+            self._address_data.street_names[0],
+            add_number=True,
+            force_all=True
+        )
 
         if result:
-            street_1_ids, street_1_points = self._read_street_1_results(
+            street_1_ids, street_1_points = self._read_street_blocks_1_results(
                 result)
 
             if not street_1_ids:
@@ -784,21 +807,25 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         else:
             return
 
-        result = yield self._build_street_search(
-            self._address_data.street_names[1])
+        result = yield self._build_street_blocks_search(
+            self._address_data.street_names[1],
+            force_all=True
+        )
 
         if result:
             # Resultados de la segunda calle
-            street_2_ids = {hit[N.ID] for hit in result.hits}
+            street_2_ids = {hit[N.STREET][N.ID] for hit in result.hits}
         else:
             return
 
-        result = yield self._build_street_search(
-            self._address_data.street_names[2])
+        result = yield self._build_street_blocks_search(
+            self._address_data.street_names[2],
+            force_all=True
+        )
 
         if result:
             # Resultados de la tercera calle
-            street_3_ids = {hit[N.ID] for hit in result.hits}
+            street_3_ids = {hit[N.STREET][N.ID] for hit in result.hits}
         else:
             return
 
@@ -809,7 +836,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             street_2_3_ids,
             street_1_points.values(),
             constants.BTWN_DOOR_NUM_TOLERANCE_M,
-            ignore_max=True
+            force_all=True
         )
 
         entries = self._process_intersections(result.hits, street_1_ids,
