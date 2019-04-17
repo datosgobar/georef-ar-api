@@ -93,7 +93,7 @@ class AddressQueryPlanner(ABC):
                 '_numerical_door_number'.
             force_all (bool): Si es verdadero, se ignoran los parámetros
                 'size' y 'offset' de la consulta original, y se buscan todas
-                las intersecciones posibles.
+                las cuadras posibles.
 
         Returns:
             StreetBlocksSearch: Búsqueda de cuadras para ejecutar.
@@ -229,7 +229,7 @@ class AddressNoneQueryPlanner(AddressQueryPlanner):
             ElasticsearchSearch: Búsqueda a realizar.
 
         """
-        return iter(())
+        return iter(())  # Iterador vacío
 
     def get_query_result(self):
         """Retorna los resultados de la búsqueda de direcciones. En el caso de
@@ -374,7 +374,10 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         query = self._query.copy()
 
         # El orden por id/nombre se hace localmente (para direcciones de tipo
-        # intersection y between)
+        # intersection y between). Esto se debe a que los resultados para estos
+        # tipos de direcciones son construidos a partir de más de una búsqueda
+        # a Elasticsearch, por lo que ordenar los resultados se deber hacer al
+        # final, una vez que todos los resultados están listos.
         query.pop('order', None)
         query['ids'] = (list(street_1_ids), list(street_2_ids))
 
@@ -465,16 +468,13 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             force_all=True
         )
 
-        if result:
-            street_1_ids, street_1_points = self._read_street_blocks_1_results(
-                result)
+        street_1_ids, street_1_points = self._read_street_blocks_1_results(
+            result)
 
-            if not street_1_ids:
-                # Ninguno de los resultados pudo ser utilizado para
-                # calcular la ubicación, o no se encontraron resultados.
-                # Devolver 0 resultados de intersección.
-                return
-        else:
+        if not street_1_ids:
+            # Ninguno de los resultados pudo ser utilizado para
+            # calcular la ubicación, o no se encontraron resultados.
+            # Devolver 0 resultados de intersección.
             return
 
         result = yield self._build_street_blocks_search(
@@ -482,24 +482,21 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             force_all=True
         )
 
-        if result:
-            # Resultados de la segunda calle
-            street_2_ids = {hit[N.STREET][N.ID] for hit in result.hits}
-        else:
+        # Resultados de la segunda calle
+        street_2_ids = {hit[N.STREET][N.ID] for hit in result.hits}
+        if not street_2_ids:
             return
 
         # Buscar intersecciones que tengan nuestras dos calles en cualquier
         # orden ("Calle 1 y Calle 2" o "Calle 2 y Calle 1"). Si tenemos altura,
         # comprobar que las intersecciones no estén a mas de X metros de cada
         # ubicación sobre la calle 1 que calculamos anteriormente.
-        result = yield self._build_intersections_search(
+        self._intersections_result = yield self._build_intersections_search(
             street_1_ids,
             street_2_ids,
             street_1_points.values(),
             constants.ISCT_DOOR_NUM_TOLERANCE_M
         )
-
-        self._intersections_result = result
 
         # Iterar sobre los resultados, fijándose si cada intersección tiene la
         # calle 1 del lado A o B. Si la calle 1 está del lado B, invertir la
@@ -795,16 +792,13 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             force_all=True
         )
 
-        if result:
-            street_1_ids, street_1_points = self._read_street_blocks_1_results(
-                result)
+        street_1_ids, street_1_points = self._read_street_blocks_1_results(
+            result)
 
-            if not street_1_ids:
-                # Ninguno de los resultados pudo ser utilizado para
-                # calcular la ubicación, o no se encontraron resultados.
-                # Devolver 0 resultados de intersección.
-                return
-        else:
+        if not street_1_ids:
+            # Ninguno de los resultados pudo ser utilizado para
+            # calcular la ubicación, o no se encontraron resultados.
+            # Devolver 0 resultados de intersección.
             return
 
         result = yield self._build_street_blocks_search(
@@ -812,10 +806,9 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             force_all=True
         )
 
-        if result:
-            # Resultados de la segunda calle
-            street_2_ids = {hit[N.STREET][N.ID] for hit in result.hits}
-        else:
+        # Resultados de la segunda calle
+        street_2_ids = {hit[N.STREET][N.ID] for hit in result.hits}
+        if not street_2_ids:
             return
 
         result = yield self._build_street_blocks_search(
@@ -823,10 +816,9 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             force_all=True
         )
 
-        if result:
-            # Resultados de la tercera calle
-            street_3_ids = {hit[N.STREET][N.ID] for hit in result.hits}
-        else:
+        # Resultados de la tercera calle
+        street_3_ids = {hit[N.STREET][N.ID] for hit in result.hits}
+        if not street_3_ids:
             return
 
         street_2_3_ids = street_2_ids | street_3_ids
@@ -918,13 +910,15 @@ def _run_query_planners(es, query_planners):
     """Ejecuta las búsquedas requeridas por un conjunto de
     'AddressQueryPlanner'.
 
-    Para lograr esto, se utiliza el método 'planner_steps' de cada uno para
-    obtener un iterador de 'ElasticsearchSearch'. Luego, se ejecutan todas las
-    búsquedas a la vez utilizando 'run_searches', y se entregan los resultados
-    a los iteradores. El proceso se repite hasta que todos los iteradores hayan
-    finalizado. De esta forma, se logra ejecutar varias búsquedas de
-    direcciones de distintos tipos, minimizando la cantidad de consultas hechas
-    a Elasticsearch.
+    Para lograr esto, se utiliza el método 'planner_steps' de cada
+    'AddressQueryPlanner' para obtener un iterador de 'ElasticsearchSearch'. A
+    cada iterador se le pide la primera búsqueda a ejecutar utilizando
+    'next()'. Luego, se ejecutan todas las búsquedas a la vez utilizando
+    'run_searches', y se entregan los resultados a los iteradores. El proceso
+    se repite hasta que todos los iteradores no tengan más busquedas a
+    realizar. De esta forma, se logra ejecutar varias búsquedas de direcciones
+    de distintos tipos, minimizando la cantidad de consultas hechas a
+    Elasticsearch.
 
     Args:
         es (Elasticsearch): Conexión a Elasticsearch.
