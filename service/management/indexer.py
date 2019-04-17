@@ -45,7 +45,7 @@ LOGS_DIR = 'logs'
 CACHE_DIR = 'cache'
 
 SEPARATOR_WIDTH = 60
-SMTP_TIMEOUT = 10
+SMTP_TIMEOUT = 30
 CHUNK_SIZE = 8192
 ACTIONS = ['index', 'index_stats']
 INDEX_NAMES = [
@@ -100,7 +100,7 @@ def setup_logger(l, stream):
 
 
 def send_email(host, user, password, subject, message, recipients,
-               attachments=None, timeout=SMTP_TIMEOUT):
+               attachments=None, ssl=True, port=0, timeout=SMTP_TIMEOUT):
     """Envía un mail a un listado de destinatarios.
 
     Args:
@@ -113,11 +113,18 @@ def send_email(host, user, password, subject, message, recipients,
         attachments (dict): Diccionario de contenidos <str, str> a adjuntar en
             el mail. Las claves representan los nombres de los contenidos y los
             valores representan los contenidos en sí.
+        ssl (bool): Verdadero si la conexión inicial debería utilizar SSL/TLS.
+        port (int): Puerto a utilizar (0 para utilizar el default).
         timeout (int): Tiempo máximo a esperar en segundos para establecer la
             conexión al servidor SMTP.
 
     """
-    with smtplib.SMTP_SSL(host, timeout=timeout) as smtp:
+    client_class = smtplib.SMTP_SSL if ssl else smtplib.SMTP
+    with client_class(host, timeout=timeout, port=port) as smtp:
+        if not ssl:
+            smtp.starttls()
+            smtp.ehlo()
+
         smtp.login(user, password)
 
         msg = MIMEMultipart()
@@ -732,8 +739,17 @@ def send_index_email(config, forced, env, log):
     msg = 'Indexación de datos para Georef API. Modo forzado: {}'.format(
         forced)
 
-    send_email(config['host'], config['user'], config['password'], subject,
-               msg, config['recipients'], {'log.txt': log})
+    send_email(
+        host=config['host'],
+        user=config['user'],
+        password=config['password'],
+        subject=subject,
+        message=msg,
+        recipients=config['recipients'],
+        attachments={'log.txt': log},
+        ssl=config['ssl'],
+        port=config['port']
+    )
 
 
 def run_index(es, forced, name='all'):
