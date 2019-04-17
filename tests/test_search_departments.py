@@ -21,7 +21,7 @@ DEPARTMENTS = [
     (['22161'], 'TAPENAGÁ'),
     (['58091'], 'PEHUENCHES'),
     (['78042'], 'MAGALLANES'),
-    (['02084'], 'COMUNA 12'),
+    (['02012'], 'COMUNA 12'),
     (['26014'], 'CUSHAMEN'),
     (['50119'], 'TUNUYÁN'),
     (['62056'], 'ÑORQUINCO'),
@@ -42,7 +42,6 @@ class SearchDepartmentsTest(GeorefLiveTest):
         self.entity = 'departamentos'
         super().setUp()
 
-    @unittest.skip('Existen departamentos con geometrías inválidas.')
     def test_529_departments_present(self):
         """Deben existir 529 departamentos."""
         data = self.get_response(return_value='full')

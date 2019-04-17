@@ -4,6 +4,7 @@ Contiene clases utilizadas para leer y validar parámetros recibidos en requests
 HTTP.
 """
 
+from abc import ABC, abstractmethod
 import threading
 import math
 from enum import Enum, unique
@@ -120,7 +121,7 @@ class ParamError:
         return self._help
 
 
-class Parameter:
+class Parameter(ABC):
     """Representa un parámetro cuyo valor es recibido a través de una request
     HTTP.
 
@@ -218,6 +219,7 @@ class Parameter:
         if val not in self._choices:
             raise InvalidChoiceException(strings.INVALID_CHOICE)
 
+    @abstractmethod
     def _parse_value(self, val):
         """Parsea un valor de tipo string y devuelve el resultado con el tipo
         apropiado.
@@ -879,7 +881,7 @@ class EndpointParameters():
 
         """
         # Comenzar con un diccionario de errores vacío por cada consulta.
-        errors_list = [{}] * len(results)
+        errors_list = [{} for _ in range(len(results))]
 
         for name in self._post_body_params.keys():
             validators = self._set_validators[name]

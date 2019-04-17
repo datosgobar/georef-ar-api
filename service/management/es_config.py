@@ -338,6 +338,12 @@ class Intersection(Entity):
     geometria = GeoShape()
 
 
+class StreetBlock(Entity):
+    calle = StreetSimpleField
+    altura = StreetNumbersField
+    geometria = GeoShape()
+
+
 def create_index(es, name, doc_class, synonyms=None, excluding_terms=None):
     """Crea un índice Elasticsearch utilizando un nombre y una clase de
     documento.

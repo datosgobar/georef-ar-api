@@ -1,5 +1,6 @@
 import unittest
 import random
+import itertools
 from service import formatter
 from service.geometry import Point
 from . import GeorefLiveTest, asciifold
@@ -110,7 +111,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """Los resultados deberían poder ser paginados."""
         page_size = 10
         pages = 5
-        results = set()
+        points = []
 
         for i in range(pages):
             resp = self.get_response({
@@ -120,11 +121,14 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             })
 
             for result in resp:
-                results.add(result['calle']['id'])
+                points.append(result['ubicacion'])
 
-        # Si el paginado funciona correctamente, no deberían haberse repetido
-        # IDs de entidades entre resultados.
-        self.assertEqual(len(results), page_size * pages)
+        # Si el paginado funciona correctamente, todos los puntos obtenidos
+        # deberían provenir de distintas direcciones posibles. No se deberían
+        # haber repetido direcciones (ubicaciones) entre iteraciones.
+        for p1, p2 in itertools.combinations(points, 2):
+            self.assertNotAlmostEqual(p1['lat'], p2['lat'])
+            self.assertNotAlmostEqual(p1['lon'], p2['lon'])
 
     def test_flatten_results(self):
         """Los resultados se deberían poder obtener en formato aplanado."""
@@ -236,12 +240,11 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """La búsqueda exacta debe devolver las direcciones
         correspondientes."""
         addresses = [
-            (['0208401007915'], 'MANUELA PEDRAZA 1500'),
-            (['0627001001540'], 'DICKSON TURNER 600'),
+            (['0627001001535'], 'DICKSON TURNER 600'),
             (['1401401002655'], 'BALTAZAR PARDO DE FIGUEROA 600'),
             (['5002802006060'], 'PJE DR LENCINAS 700'),
-            (['4202102000325'], 'AV PEDRO LURO 100'),
-            (['6602805000690'], 'AV DEL BICENT DE LA BATALLA DE SALTA 1200')
+            (['4202102000325'], 'AV PEDRO LURO 600'),
+            (['6602805000690'], 'AV DEL BICENT DE LA BATALLA DE SALTA 1201')
         ]
 
         self.assert_address_search_id_matches(addresses, exact=True)
@@ -249,10 +252,10 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_address_exact_search_ignores_case(self):
         """La búsqueda exacta debe ignorar mayúsculas y minúsculas."""
         expected = [
-            (['0205601006685'], 'JOSE BARROS PAZOS 5000'),
-            (['0205601006685'], 'jose barros pazos 5000'),
-            (['0205601006685'], 'Jose Barros Pazos 5000'),
-            (['0205601006685'], 'JoSe BaRrOs PaZoS 5000')
+            (['0200801006685'], 'JOSE BARROS PAZOS 5500'),
+            (['0200801006685'], 'jose barros pazos 5500'),
+            (['0200801006685'], 'Jose Barros Pazos 5500'),
+            (['0200801006685'], 'JoSe BaRrOs PaZoS 5500')
         ]
 
         self.assert_address_search_id_matches(expected, exact=True)
@@ -260,10 +263,10 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_address_exact_search_ignores_tildes(self):
         """La búsqueda exacta debe ignorar tildes."""
         expected = [
-            (['0663804007285'], 'INT MANUEL MARTIGNONÉ 500'),
-            (['0663804007285'], 'INT MANUEL MARTIGNONE 500'),
-            (['0663804007285'], 'INT MANUEL MARTIGNOÑE 500'),
-            (['0663804007285'], 'INT MANUEL MARTIGÑONÉ 500')
+            (['0663804007285'], 'INT MANUEL MARTIGNONÉ 250'),
+            (['0663804007285'], 'INT MANUEL MARTIGNONE 250'),
+            (['0663804007285'], 'INT MANUEL MARTIGNOÑE 250'),
+            (['0663804007285'], 'INT MANUEL MARTIGÑONÉ 250')
         ]
 
         self.assert_address_search_id_matches(expected, exact=True)
@@ -277,7 +280,10 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             res = self.get_response(params)
             results.append(sorted([p['calle']['id'] for p in res]))
 
-        self.assertListEqual([sorted(ids) for ids, _ in term_matches], results)
+        target = [sorted(ids) for ids, _ in term_matches]
+        self.assertListEqual(target, results,
+                             '\nTarget:\n{}\nResult:\n{}\n'.format(target,
+                                                                   results))
 
     def test_address_exact_gibberish_search(self):
         """La búsqueda exacta debe devolver 0 resultados cuando se utiliza una
@@ -297,12 +303,12 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_address_search_fuzziness(self):
         """La búsqueda aproximada debe tener una tolerancia de AUTO:4,8."""
         expected = [
-            (['0676305002780'], 'RACONDEGUI 500'),      # -2 caracteres (de 8+)
-            (['0676305002780'], 'ARACONDEGUI 500'),     # -1 caracteres (de 8+)
-            (['0676305002780'], 'zZARACONDEGUI 500'),   # +1 caracteres (de 8+)
-            (['0676305002780'], 'zZARACONDEGUIi 500'),  # +2 caracteres (de 8+)
-            (['0202801006430'], 'NCLAN 3000'),         # -1 caracteres (de 4-7)
-            (['0202801006430'], 'iINCLAN 3000')        # +1 caracteres (de 4-7)
+            (['0676305002780'], 'RACONDEGUI 301'),      # -2 caracteres (de 8+)
+            (['0676305002780'], 'ARACONDEGUI 301'),     # -1 caracteres (de 8+)
+            (['0676305002780'], 'zZARACONDEGUI 301'),   # +1 caracteres (de 8+)
+            (['0676305002780'], 'zZARACONDEGUIi 301'),  # +2 caracteres (de 8+)
+            (['0200401006430'], 'NCLAN 3000'),         # -1 caracteres (de 4-7)
+            (['0200401006430'], 'iINCLAN 3000')        # +1 caracteres (de 4-7)
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -321,15 +327,15 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """La búsqueda aproximada debe también actuar como autocompletar cuando
         la longitud de la query es >= 4."""
         expected = [
-            (['0207701007975'], 'MARCOS SASTRE 2600'),
-            (['0207701007975'], 'MARCOS SASTR 2600'),
-            (['0207701007975'], 'MARCOS SAST 2600'),
-            (['0207701007975'], 'MARCOS SAS 2600'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREIRE 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREIR 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FREI 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FRE 2000'),
-            (['0209101004195', '0208401004195'], 'CAP GRL RAMON FR 2000')
+            (['0201101007975'], 'MARCOS SASTRE 2600'),
+            (['0201101007975'], 'MARCOS SASTR 2600'),
+            (['0201101007975'], 'MARCOS SAST 2600'),
+            (['0201101007975'], 'MARCOS SAS 2600'),
+            (['0201301004195'], 'CAP GRL RAMON FREIRE 2201'),
+            (['0201301004195'], 'CAP GRL RAMON FREIR 2201'),
+            (['0201301004195'], 'CAP GRL RAMON FREI 2201'),
+            (['0201301004195'], 'CAP GRL RAMON FRE 2201'),
+            (['0201301004195'], 'CAP GRL RAMON FR 2201')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -357,9 +363,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['5804201000085'], 'avenida estanislao flore 1000'),
             (['5804201000085'], 'av estanislao flore 1000'),
             (['5804201000085'], 'AV ESTANISLAOOO FLORES 1000'),
-            (['8208427000835'], 'AVenide ESTANISLAO lope 1000'),
-            (['0203501005600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
-            (['0203501005600'], 'fransisco acuna figeroa 1000')
+            (['0200501005600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
+            (['0200501005600'], 'fransisco acuna figeroa 1000')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -413,8 +418,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """Se debe poder filtrar los resultados por nombre de departamento."""
         validations = []
         departments = [
-            ('02007', 'COMUNA 1'),
-            ('02105', 'COMUNA 15'),
+            ('02001', 'COMUNA 1'),
+            ('02015', 'COMUNA 15'),
             ('66147', 'ROSARIO DE LERMA')
         ]
 
@@ -465,6 +470,38 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         error_m = point_resp.approximate_distance_meters(point_target)
 
         self.assertTrue(error_m < 15, error_m)
+
+    def test_position_no_number(self):
+        """Si no se especifica una altura, se debería retornar varias
+        direcciones sin altura, y con su ubicación siendo el centroide de cada
+        cuadra."""
+        resp = self.get_response({
+            'direccion': 'Dean Funes',
+            'provincia': '14'
+        })
+
+        for address in resp:
+            self.assertTrue(address['ubicacion']['lat'] is not None and
+                            address['ubicacion']['lon'] is not None)
+
+    def test_position_noncontinuous_street(self):
+        """Varias calles NO pueden ser representadas utilizando una única recta
+        continua, ya que son interrumpidas por otras calles, edificios, etc.
+        Sin embargo, al tener datos de altura cuadra por cuadra, estos
+        problemas no afectan el cálculo de posición de altura.
+
+        Este test comprueba que se puede georreferenciar una dirección sobre
+        una calle (Arribeños, CABA) que NO es continua. Antes de incorporar los
+        datos de cuadras en la API, esto no era posible.
+        """
+        resp = self.get_response({
+            'direccion': 'Arribeños 2230',
+            'departamento': 'Comuna 13'
+        })
+
+        for address in resp:
+            self.assertTrue(address['ubicacion']['lat'] is not None and
+                            address['ubicacion']['lon'] is not None)
 
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
@@ -596,20 +633,6 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
                                        'direccion_lat',
                                        'direccion_lon',
                                        'direccion_fuente'])
-
-    def test_csv_empty_value(self):
-        """Un valor vacío (None) debería estar representado como '' en CSV."""
-        resp = self.get_response({
-            'formato': 'csv',
-            'direccion': 'NAON 1200',
-            'departamento': 6427,  # 0 inicial agregado por API
-            'max': 1
-        })
-
-        header = next(resp)
-        row = next(resp)
-        self.assertTrue(row[header.index('direccion_lat')] == '' and
-                        row[header.index('direccion_lon')] == '')
 
     def test_geojson_format(self):
         """Se debería poder obtener resultados en formato

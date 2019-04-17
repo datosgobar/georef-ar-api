@@ -1,4 +1,4 @@
-# Guía de instalación para desarrolladores
+# Guía de instalación y ejecución para desarrolladores
 
 En este documento se detallan los pasos a seguir si se desea configurar un servidor de API Georef propio.
 
@@ -132,6 +132,7 @@ Los nombres de los índices disponibles son:
 - `localidades`
 - `calles`
 - `intersecciones`
+- `cuadras`
 
 ### 5. Correr API 
 #### Entornos de desarrollo

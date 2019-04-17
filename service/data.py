@@ -3,6 +3,7 @@
 Contiene funciones que ejecutan consultas a índices de Elasticsearch.
 """
 
+from abc import ABC, abstractmethod
 import elasticsearch
 from elasticsearch_dsl import Search, MultiSearch
 from elasticsearch_dsl.query import Match, Range, MatchPhrasePrefix, GeoShape
@@ -91,7 +92,7 @@ def _run_multisearch(es, searches):
     return responses
 
 
-class ElasticsearchSearch:
+class ElasticsearchSearch(ABC):
     """Representa una búsqueda a realizar utilizando Elasticsearch. Dependiendo
     de los parámetros de búsqueda, se puede llegar a necesitar más de una
     consulta a Elasticsearch para completar la misma.
@@ -124,6 +125,7 @@ class ElasticsearchSearch:
 
         self._read_query(**query)
 
+    @abstractmethod
     def search_steps(self):
         """Devuelve un iterador de búsquedas elasticsearch_dsl.Search, cada una
         representando un paso requerido para completar la búsqueda
@@ -478,8 +480,7 @@ class StreetsSearch(ElasticsearchSearch):
         super().__init__(N.STREETS, query)
 
     def _read_query(self, ids=None, name=None, department=None, state=None,
-                    category=None, order=None, exact=False, number=None,
-                    **kwargs):
+                    category=None, order=None, exact=False, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
         'self._search'. Luego, invoca al método '_read_query' de la superclase
         con los parámetros que no fueron procesados.
@@ -493,8 +494,6 @@ class StreetsSearch(ElasticsearchSearch):
             exact (bool): Si es verdadero, desactivar la búsqueda fuzzy para
                 todos los parámetros de texto siendo utilizados (nombre,
                 provincia, etc.).
-            number (int): Filtrar por altura de calle. El valor debe estar
-                contenido en los extremos inicio-fin de alturas de la calle.
             order (str): Campo a utilizar para ordenar los resultados.
             kwargs (dict): Parámetros a delegar a la superclase.
 
@@ -520,17 +519,6 @@ class StreetsSearch(ElasticsearchSearch):
                 category,
                 fuzzy=True
             ))
-
-        if number:
-            self._search = self._search.query(
-                _build_range_query(N.START_R, '<=', number) |
-                _build_range_query(N.START_L, '<=', number)
-            )
-
-            self._search = self._search.query(
-                _build_range_query(N.END_L, '>=', number) |
-                _build_range_query(N.END_R, '>=', number)
-            )
 
         if department:
             self._search = self._search.query(_build_subentity_query(
@@ -650,6 +638,106 @@ class IntersectionsSearch(ElasticsearchSearch):
 
         Pasos requeridos:
             1) Buscar intersecciones de calles.
+
+        """
+        response = yield self._search
+        self._result = ElasticsearchResult(response, self._offset)
+
+
+class StreetBlocksSearch(ElasticsearchSearch):
+    """Representa una búsqueda de cuadras de calles. Utiliza el índice
+    'cuadras' para buscar datos.
+
+    """
+
+    def __init__(self, query):
+        """Inicializa un objeto de tipo StreetBlocksSearch.
+
+        Args:
+            query (dict): Parámetros de la búsqueda. Ver el método
+                '_read_query' para tomar nota de los valores permitidos
+                dentro del diccionario.
+
+        """
+        super().__init__(N.STREET_BLOCKS, query)
+
+    def _read_query(self, name=None, category=None, department=None,
+                    state=None, number=None, exact=False, order=None,
+                    **kwargs):
+        """Lee los parámetros de búsqueda recibidos y los agrega al atributo
+        'self._search'. Luego, invoca al método '_read_query' de la superclase
+        con los parámetros que no fueron procesados.
+
+        Args:
+            name (str): Filtrar por nombre de calles.
+            category (str): Filtrar por tipo de calle.
+            department (list, str): Filtrar por nombre o IDs de departamentos.
+            state (list, str): Filtrar por nombre o IDs de provincias.
+            number (int): Filtrar por altura de calle. El valor debe estar
+                contenido en los extremos inicio-fin de alturas de la cuadra.
+            exact (bool): Si es verdadero, desactivar la búsqueda fuzzy para
+                todos los parámetros de texto siendo utilizados (nombre,
+                provincia, etc.).
+            order (str): Campo a utilizar para ordenar los resultados.
+            kwargs (dict): Parámetros a delegar a la superclase.
+
+        """
+        super()._read_query(**kwargs)
+
+        if name:
+            self._search = self._search.query(_build_name_query(
+                N.join(N.STREET, N.NAME),
+                name,
+                exact
+            ))
+
+        if category:
+            self._search = self._search.query(_build_match_query(
+                N.join(N.STREET, N.CATEGORY),
+                category,
+                fuzzy=True
+            ))
+
+        if department:
+            self._search = self._search.query(_build_subentity_query(
+                N.join(N.STREET, N.DEPT_ID),
+                N.join(N.STREET, N.DEPT_NAME),
+                department,
+                exact
+            ))
+
+        if state:
+            self._search = self._search.query(_build_subentity_query(
+                N.join(N.STREET, N.STATE_ID),
+                N.join(N.STREET, N.STATE_NAME),
+                state,
+                exact
+            ))
+
+        if number is not None:
+            right_condition = (
+                _build_range_query(N.START_R, '<=', number) &
+                _build_range_query(N.END_R, '>=', number)
+            )
+
+            left_condition = (
+                _build_range_query(N.START_L, '<=', number) &
+                _build_range_query(N.END_L, '>=', number)
+            )
+
+            # El número debe estar contenido del lado derecho o del izquierdo
+            self._search = self._search.query(right_condition | left_condition)
+
+        if order:
+            if order == N.NAME:
+                order = N.EXACT_SUFFIX.format(order)
+            self._search = self._search.sort(N.join(N.STREET, order))
+
+    def search_steps(self):
+        """Ver documentación de 'ElasticsearchSearch.search_steps'.
+
+        Pasos requeridos:
+            1) Buscar cuadras.
 
         """
         response = yield self._search

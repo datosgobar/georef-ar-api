@@ -5,6 +5,7 @@ Contiene funciones de utilidad para descargar e indexar datos.
 
 import argparse
 import os
+import shutil
 import sys
 import urllib.parse
 import json
@@ -44,7 +45,7 @@ LOGS_DIR = 'logs'
 CACHE_DIR = 'cache'
 
 SEPARATOR_WIDTH = 60
-SMTP_TIMEOUT = 10
+SMTP_TIMEOUT = 30
 CHUNK_SIZE = 8192
 ACTIONS = ['index', 'index_stats']
 INDEX_NAMES = [
@@ -57,6 +58,7 @@ INDEX_NAMES = [
     N.LOCALITIES,
     N.STREETS,
     N.INTERSECTIONS,
+    N.STREET_BLOCKS,
     'all'
 ]
 ES_TIMEOUT = 720
@@ -98,7 +100,7 @@ def setup_logger(l, stream):
 
 
 def send_email(host, user, password, subject, message, recipients,
-               attachments=None, timeout=SMTP_TIMEOUT):
+               attachments=None, ssl=True, port=0, timeout=SMTP_TIMEOUT):
     """Envía un mail a un listado de destinatarios.
 
     Args:
@@ -111,11 +113,18 @@ def send_email(host, user, password, subject, message, recipients,
         attachments (dict): Diccionario de contenidos <str, str> a adjuntar en
             el mail. Las claves representan los nombres de los contenidos y los
             valores representan los contenidos en sí.
+        ssl (bool): Verdadero si la conexión inicial debería utilizar SSL/TLS.
+        port (int): Puerto a utilizar (0 para utilizar el default).
         timeout (int): Tiempo máximo a esperar en segundos para establecer la
             conexión al servidor SMTP.
 
     """
-    with smtplib.SMTP_SSL(host, timeout=timeout) as smtp:
+    client_class = smtplib.SMTP_SSL if ssl else smtplib.SMTP
+    with client_class(host, timeout=timeout, port=port) as smtp:
+        if not ssl:
+            smtp.starttls()
+            smtp.ehlo()
+
         smtp.login(user, password)
 
         msg = MIMEMultipart()
@@ -133,20 +142,21 @@ def send_email(host, user, password, subject, message, recipients,
         smtp.send_message(msg)
 
 
-def download(url, filepath):
+def download(url, filepath, timeout=30):
     """
     Descarga un archivo a través del protocolo HTTP.
 
     Args:
         url (str): URL (schema HTTP) del archivo a descargar.
         filepath (str): Ruta del archivo a donde almacenar los datos.
+        timeout (int): Timeout a utilizar en segundos.
 
     Raises:
         requests.exceptions.RequestException, requests.exceptions.HTTPError: en
             caso de ocurrir un error durante la descarga.
 
     """
-    with requests.get(url, stream=True) as req:
+    with requests.get(url, stream=True, timeout=timeout) as req:
         req.raise_for_status()
 
         with open(filepath, 'wb') as f:
@@ -403,7 +413,16 @@ class GeorefIndex:
                                                excluding_terms,
                                                check_timestamp=not forced)
 
-        if forced and not ok:
+        if not self._backup_filepath:
+            if not ok:
+                logger.error('No se pudo indexar utilizando fuente primaria.')
+                logger.error('')
+
+            return
+
+        if ok:
+            self._write_backup(files_cache)
+        elif forced:
             logger.warning('No se pudo indexar utilizando fuente primaria.')
             logger.warning('Intentando nuevamente con backup...')
             logger.warning('')
@@ -416,9 +435,6 @@ class GeorefIndex:
             if not ok:
                 logger.error('No se pudo indexar utilizando backups.')
                 logger.error('')
-
-        if ok and self._backup_filepath:
-            self._write_backup(data)
 
     def _create_or_reindex_with_data(self, es, data, synonyms, excluding_terms,
                                      check_timestamp):
@@ -442,8 +458,8 @@ class GeorefIndex:
 
         """
         if not data:
-            logger.error('No existen datos a indexar.')
-            logger.error('')
+            logger.warning('No existen datos a indexar.')
+            logger.warning('')
             return False
 
         timestamp = data['timestamp']
@@ -496,19 +512,30 @@ class GeorefIndex:
         if old_index:
             self._delete_index(es, old_index)
 
+        logger.info('Indexado completo.')
+        logger.info('')
         return True
 
-    def _write_backup(self, data):
+    def _write_backup(self, files_cache):
         """Crea un archivo de respaldo situado en el path
-        'self._backup_filepath'.
+        'self._backup_filepath' a partir de 'self._filepath'.
 
         Args:
-            data (dict): Diccionario con datos indexados y sus metadatos.
+            files_cache (dict): Cache de archivos descargados/leídos
+                anteriormente durante el proceso de indexación actual.
 
         """
         logger.info('Creando archivo de backup...')
-        with open(self._backup_filepath, 'w') as f:
-            json.dump(data, f)
+        if urllib.parse.urlparse(self._filepath).scheme in ['http', 'https']:
+            # self._filepath es una URL, utilizar el archivo ya descargado en
+            # el cache.
+            source = files_cache[self._filepath]
+        else:
+            # self._filepath es un archivo local, tomar su ruta
+            source = self._filepath
+
+        shutil.copy(source, self._backup_filepath)
+
         logger.info('Archivo creado.')
         logger.info('')
 
@@ -712,8 +739,17 @@ def send_index_email(config, forced, env, log):
     msg = 'Indexación de datos para Georef API. Modo forzado: {}'.format(
         forced)
 
-    send_email(config['host'], config['user'], config['password'], subject,
-               msg, config['recipients'], {'log.txt': log})
+    send_email(
+        host=config['host'],
+        user=config['user'],
+        password=config['password'],
+        subject=subject,
+        message=msg,
+        recipients=config['recipients'],
+        attachments={'log.txt': log},
+        ssl=config['ssl'],
+        port=config['port']
+    )
 
 
 def run_index(es, forced, name='all'):
@@ -797,8 +833,15 @@ def run_index(es, forced, name='all'):
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
-                    backup_filepath=os.path.join(backups_dir,
-                                                 'calles_intersecciones.json'))
+                    backup_filepath=os.path.join(
+                        backups_dir, 'calles_intersecciones.json')),
+        GeorefIndex(alias=N.STREET_BLOCKS,
+                    doc_class=es_config.StreetBlock,
+                    filepath=app.config['STREET_BLOCKS_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
+                    backup_filepath=os.path.join(backups_dir, 'cuadras.json'))
     ]
 
     files_cache = {}
