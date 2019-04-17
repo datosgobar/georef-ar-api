@@ -134,7 +134,7 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 ```
 
 ### Listado de calles
-`GET` [`https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&categoria=avenida`](https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&tipo=avenida)
+`GET` [`https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&categoria=avenida`](https://apis.datos.gob.ar/georef/api/calles?departamento=rio chico&categoria=avenida)
 ```
 {
     "calles": [
