@@ -446,10 +446,12 @@
             
             
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
     
     <label class="md-nav__link" for="nav-4">
       Desarrolladores
@@ -467,8 +469,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../georef-api-development/" title="Ambiente de desarrollo y deploy" class="md-nav__link">
-      Ambiente de desarrollo y deploy
+    <a href="../georef-api-development/" title="Instalación y Ejecución" class="md-nav__link">
+      Instalación y Ejecución
     </a>
   </li>
 
@@ -497,28 +499,22 @@
   </li>
 
         
-      </ul>
-    </nav>
-  </li>
-
-            <hr/>
           
-            
-            
-            
+          
+          
 
   
 
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-4" type="checkbox" id="nav-4-4" checked>
     
-    <label class="md-nav__link" for="nav-5">
+    <label class="md-nav__link" for="nav-4-4">
       ETL
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-4">
         ETL
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -657,6 +653,11 @@
     </nav>
   </li>
 
+        
+      </ul>
+    </nav>
+  </li>
+
             <hr/>
           
         </ul>
@@ -773,7 +774,7 @@
 <p>Primero, instalar PostgreSQL, PostGIS y ogr2ogr utilizando el comando <code>apt</code>:</p>
 <pre><code class="bash">$ sudo add-apt-repository -y ppa:ubuntugis/ppa
 $ sudo apt update
-$ sudo apt install postgresql-9.5 postgresql-9.5-postgis-2.4 gdal-bin
+$ sudo apt install postgresql-9.5 postgresql-9.5-postgis-2.4 gdal-bin libpq-dev
 </code></pre>
 
 <h3 id="12-codigo">1.2 Código<a class="headerlink" href="#12-codigo" title="Permanent link">&para;</a></h3>

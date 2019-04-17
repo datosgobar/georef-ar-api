@@ -446,10 +446,12 @@
             
             
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
     
     <label class="md-nav__link" for="nav-4">
       Desarrolladores
@@ -467,8 +469,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../georef-api-development/" title="Ambiente de desarrollo y deploy" class="md-nav__link">
-      Ambiente de desarrollo y deploy
+    <a href="../georef-api-development/" title="Instalación y Ejecución" class="md-nav__link">
+      Instalación y Ejecución
     </a>
   </li>
 
@@ -497,28 +499,22 @@
   </li>
 
         
-      </ul>
-    </nav>
-  </li>
-
-            <hr/>
           
-            
-            
-            
+          
+          
 
   
 
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-4" type="checkbox" id="nav-4-4" checked>
     
-    <label class="md-nav__link" for="nav-5">
+    <label class="md-nav__link" for="nav-4-4">
       ETL
     </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-5">
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-4">
         ETL
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -597,6 +593,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#cuadras" title="Cuadras" class="md-nav__link">
+    Cuadras
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -646,6 +649,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#cuadras_1" title="Cuadras" class="md-nav__link">
+    Cuadras
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#intersecciones-de-calles" title="Intersecciones de Calles" class="md-nav__link">
     Intersecciones de Calles
   </a>
@@ -677,6 +687,11 @@
     <a href="../etl-install/" title="Instalación y Ejecución" class="md-nav__link">
       Instalación y Ejecución
     </a>
+  </li>
+
+        
+      </ul>
+    </nav>
   </li>
 
         
@@ -736,6 +751,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#cuadras" title="Cuadras" class="md-nav__link">
+    Cuadras
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -785,6 +807,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#cuadras_1" title="Cuadras" class="md-nav__link">
+    Cuadras
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#intersecciones-de-calles" title="Intersecciones de Calles" class="md-nav__link">
     Intersecciones de Calles
   </a>
@@ -814,7 +843,7 @@
                 
                 
                 <h1 id="modelo-de-datos-para-georef">Modelo de datos para Georef<a class="headerlink" href="#modelo-de-datos-para-georef" title="Permanent link">&para;</a></h1>
-<p>Los datos generados por el ETL Georef consisten de seis (6) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles e intersecciones de calles.</p>
+<p>Los datos generados por el ETL Georef consisten de siete (7) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles, cuadras e intersecciones de calles.</p>
 <h2 id="fuentes">Fuentes<a class="headerlink" href="#fuentes" title="Permanent link">&para;</a></h2>
 <p>Los orígenes de los datos procesados en el ETL son:</p>
 <h3 id="unidades-territoriales">Unidades Territoriales<a class="headerlink" href="#unidades-territoriales" title="Permanent link">&para;</a></h3>
@@ -835,8 +864,15 @@
 <li>Fuente: <strong>Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)</strong></li>
 <li>Enlace: <a href="https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas">Portal de geoservicios de INDEC</a></li>
 </ul>
+<h3 id="cuadras">Cuadras<a class="headerlink" href="#cuadras" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Recursos: <code>/calles</code>, <code>/direcciones</code></li>
+<li>Fuente: <strong>Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)</strong></li>
+<li>Enlace: <a href="https://geoservicios.indec.gov.ar/geoserver">GeoServer INDEC</a></li>
+</ul>
 <h2 id="archivos">Archivos<a class="headerlink" href="#archivos" title="Permanent link">&para;</a></h2>
 <p>A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo <code>version</code> se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la <code>9.0.0</code>.</p>
+<p>Todas las geometrías incluidas en los archivos utilizan el sistema de coordenadas <strong>WGS84</strong> (<strong>EPSG 4326</strong>).</p>
 <h3 id="provincias">Provincias<a class="headerlink" href="#provincias" title="Permanent link">&para;</a></h3>
 <p>El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
 <pre><code>{
@@ -1005,6 +1041,38 @@
             &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
         },
         { ... },
+    ]
+}
+</code></pre>
+
+<h3 id="cuadras_1">Cuadras<a class="headerlink" href="#cuadras_1" title="Permanent link">&para;</a></h3>
+<p>El archivo de datos de cuadras debe tener formato JSON. Su esquema de datos debe ser el siguiente:</p>
+<pre><code>{
+    &quot;timestamp&quot;: &quot;1532435389&quot;, // Timestamp de creación
+    &quot;fecha_creacion&quot;: &quot;2018-07-24 12:29:49.813835+00:00&quot;, // Fecha de creación
+    &quot;version&quot;: &quot;9.0.0&quot;, // Versión de archivo
+    &quot;datos&quot;: [ // Lista de cuadras
+        {
+            &quot;id&quot;: &quot;020700100230012345&quot;, // ID de la cuadra
+            &quot;calle&quot;: {
+                &quot;id&quot;: &quot;0207001002300&quot;, // ID de la calle
+                &quot;nombre&quot;: &quot;BOSTON&quot;, // Nombre de la calle
+                &quot;departamento&quot;: { // Departamento de la calle
+                    &quot;id&quot;: &quot;02070&quot;,
+                    &quot;nombre&quot;: &quot;Comuna 10&quot;
+                },
+                &quot;provincia&quot;: { // Provincia de la calle
+                    &quot;id&quot;: &quot;02&quot;,
+                    &quot;nombre&quot;: &quot;Ciudad Autónoma de Buenos Aires&quot;
+                },
+                &quot;categoria&quot;: &quot;CALLE&quot;, // Tipo de la calle
+                &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
+            },
+            &quot;geometria&quot;: { // Geometría en formato GeoJSON
+                &quot;type&quot;: &quot;MultiLineString&quot;,
+                &quot;coordinates&quot;: [[[-58.52815846522327, -34.611800397637424], ...]]
+            }
+        }
     ]
 }
 </code></pre>
