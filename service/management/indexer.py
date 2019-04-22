@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizado el código para tomar
 # nuevas versiones de los archivos.
-ETL_FILE_VERSION = '9.0.0'
+ETL_FILE_VERSION = '10.0.0'
 
 LOGS_DIR = 'logs'
 CACHE_DIR = 'cache'
@@ -140,6 +140,36 @@ def send_email(host, user, password, subject, message, recipients,
             msg.attach(attachment)
 
         smtp.send_message(msg)
+
+
+def read_text_file(filepath):
+    """Retorna los contenidos de un archivo de texto.
+
+    Args:
+        filepath (str): Ruta local al archivo.
+
+    Returns:
+        str: Contenidos del archivo.
+
+    """
+    with open(filepath) as f:
+        return f.read()
+
+
+def read_ndjson_file(filepath):
+    """Retorna los contenidos de un archivo NDJSON (http://ndjson.org/) en
+    forma de un iterador de objetos.
+
+    Args:
+        filepath (str): Ruta local al archivo.
+
+    Yields:
+        dict: Objeto JSON en cada línea del archivo.
+
+    """
+    with open(filepath) as f:
+        for line in f:
+            yield json.loads(line)
 
 
 def download(url, filepath, timeout=30):
@@ -255,7 +285,7 @@ class GeorefIndex:
     def alias(self):
         return self._alias
 
-    def _fetch_data(self, filepath, files_cache, fmt='json'):
+    def _fetch_data(self, filepath, files_cache, fmt='ndjson'):
         """Retorna los contenidos de un archivo.
 
         Args:
@@ -265,21 +295,22 @@ class GeorefIndex:
             fmt (str): Formato de los contenidos del archivo.
 
         Returns:
-            dict, str: Contenido del archivo.
+            Iterator[dict], str: Contenido del archivo.
 
         """
-        if fmt not in ['json', 'txt']:
-            raise ValueError('Unknown file type')
-
         data = None
-        loadfn = json.loads if fmt == 'json' else str
+        if fmt == 'ndjson':
+            loadfn = read_ndjson_file
+        elif fmt == 'txt':
+            loadfn = read_text_file
+        else:
+            raise ValueError('Invalid format: {}'.format(fmt))
 
         if filepath in files_cache:
             logger.info('Utilizando archivo cacheado para:')
             logger.info(' + {}'.format(filepath))
             logger.info('')
-            with open(files_cache[filepath]) as f:
-                return loadfn(f.read())
+            return loadfn(files_cache[filepath])
 
         if urllib.parse.urlparse(filepath).scheme in ['http', 'https']:
             logger.info('Descargando archivo remoto:')
@@ -296,9 +327,7 @@ class GeorefIndex:
 
                 download(filepath, download_path)
 
-                with open(download_path) as f:
-                    data = loadfn(f.read())
-
+                data = loadfn(download_path)
                 files_cache[filepath] = download_path
             except requests.exceptions.RequestException as e:
                 logger.warning('No se pudo descargar el archivo:')
@@ -314,8 +343,7 @@ class GeorefIndex:
             logger.info('')
 
             try:
-                with open(filepath) as f:
-                    data = loadfn(f.read())
+                data = loadfn(filepath)
             except OSError as e:
                 logger.warning('No se pudo acceder al archivo local:')
                 logger.warning(e)
@@ -444,7 +472,7 @@ class GeorefIndex:
 
         Args:
             es (Elasticsearch): Cliente Elasticsearch.
-            data (dict): Diccionario con datos a indexar y sus metadatos.
+            data (Iterator[dict]): Iterador de datos a indexar (diccionarios).
             synonyms (list): Lista de sinónimos a utilizar en la configuración
                 de Elasticsearch.
             excluding_terms (list): Lista de términos excluyentes a utilizar en
@@ -462,10 +490,15 @@ class GeorefIndex:
             logger.warning('')
             return False
 
-        timestamp = data['timestamp']
-        date = data['fecha_creacion']
-        version = data['version']
-        docs = data['datos']
+        # El primer objeto del NDJSON son los metadatos
+        metadata = next(data)
+        timestamp = metadata['timestamp']
+        date = metadata['fecha_creacion']
+        version = metadata['version']
+        count = metadata['cantidad']
+
+        # El resto de los objetos son entidades a indexar
+        docs = data
 
         logger.info('Fecha de creación de datos: {}'.format(date))
         logger.info('Versión de datos API: {}'.format(ETL_FILE_VERSION))
@@ -506,7 +539,7 @@ class GeorefIndex:
             logger.info('')
 
         self._create_index(es, new_index, synonyms, excluding_terms)
-        self._insert_documents(es, new_index, docs)
+        self._insert_documents(es, new_index, docs, count)
 
         self._update_aliases(es, new_index, old_index)
         if old_index:
@@ -559,13 +592,14 @@ class GeorefIndex:
         es_config.create_index(es, index, self._doc_class, synonyms,
                                excluding_terms)
 
-    def _insert_documents(self, es, index, docs):
+    def _insert_documents(self, es, index, docs, count):
         """Inserta documentos dentro de un índice.
 
         Args:
             es (Elasticsearch): Cliente Elasticsearch.
             index (str): Nombre de índice.
-            docs (list): Lista de documentos a insertar.
+            docs (Iterator[dict]): Iterator de documentos a insertar.
+            count (int): Cantidad de documentos a insertar.
 
         """
         operations = self._bulk_update_generator(docs, index)
@@ -576,8 +610,7 @@ class GeorefIndex:
         iterator = helpers.streaming_bulk(es, operations, raise_on_error=False,
                                           request_timeout=ES_TIMEOUT)
 
-        for ok, response in tqdm.tqdm(iterator, total=len(docs),
-                                      file=sys.stderr):
+        for ok, response in tqdm.tqdm(iterator, total=count, file=sys.stderr):
             if ok and response['create']['result'] == 'created':
                 creations += 1
             else:
@@ -591,7 +624,7 @@ class GeorefIndex:
                 logger.warning('')
 
         logger.info('Resumen:')
-        logger.info(' + Documentos procesados: {}'.format(len(docs)))
+        logger.info(' + Documentos procesados: {}'.format(count))
         logger.info(' + Documentos creados: {}'.format(creations))
         logger.info(' + Errores: {}'.format(errors))
         logger.info('')
@@ -783,7 +816,7 @@ def run_index(es, forced, name='all'):
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'provincias.json')),
+                                                 'provincias.ndjson')),
         GeorefIndex(alias=es_config.geom_index_for(N.STATES),
                     doc_class=es_config.StateGeom,
                     filepath=app.config['STATES_FILE'],
@@ -795,7 +828,7 @@ def run_index(es, forced, name='all'):
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'departamentos.json')),
+                                                 'departamentos.ndjson')),
         GeorefIndex(alias=es_config.geom_index_for(N.DEPARTMENTS),
                     doc_class=es_config.DepartmentGeom,
                     filepath=app.config['DEPARTMENTS_FILE'],
@@ -807,7 +840,7 @@ def run_index(es, forced, name='all'):
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'municipios.json')),
+                                                 'municipios.ndjson')),
         GeorefIndex(alias=es_config.geom_index_for(N.MUNICIPALITIES),
                     doc_class=es_config.MunicipalityGeom,
                     filepath=app.config['MUNICIPALITIES_FILE'],
@@ -819,14 +852,15 @@ def run_index(es, forced, name='all'):
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'localidades.json')),
+                                                 'localidades.ndjson')),
         GeorefIndex(alias=N.STREETS,
                     doc_class=es_config.Street,
                     filepath=app.config['STREETS_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
-                    backup_filepath=os.path.join(backups_dir, 'calles.json')),
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'calles.ndjson')),
         GeorefIndex(alias=N.INTERSECTIONS,
                     doc_class=es_config.Intersection,
                     filepath=app.config['INTERSECTIONS_FILE'],
@@ -834,14 +868,15 @@ def run_index(es, forced, name='all'):
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(
-                        backups_dir, 'calles_intersecciones.json')),
+                        backups_dir, 'calles_intersecciones.ndjson')),
         GeorefIndex(alias=N.STREET_BLOCKS,
                     doc_class=es_config.StreetBlock,
                     filepath=app.config['STREET_BLOCKS_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
-                    backup_filepath=os.path.join(backups_dir, 'cuadras.json'))
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'cuadras.ndjson'))
     ]
 
     files_cache = {}
