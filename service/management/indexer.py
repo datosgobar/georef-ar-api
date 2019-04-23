@@ -376,7 +376,7 @@ class GeorefIndex:
             if line and not line.startswith('#')
         ]
 
-    def create_or_reindex(self, es, files_cache, forced=False):
+    def create_or_reindex(self, es, files_cache, forced=False, verbose=False):
         """Punto de entrada de la clase GeorefIndex. Permite crear o actualizar
         el índice.
 
@@ -409,6 +409,7 @@ class GeorefIndex:
                 anteriormente durante el proceso de indexación actual.
             forced (bool): Activa modo de actualización forzada (se ignoran los
                 timestamps).
+            verbose (bool): Mostrar más información en pantalla.
 
         """
         print_log_separator(logger,
@@ -439,7 +440,8 @@ class GeorefIndex:
 
         ok = self._create_or_reindex_with_data(es, data, synonyms,
                                                excluding_terms,
-                                               check_timestamp=not forced)
+                                               check_timestamp=not forced,
+                                               verbose=verbose)
 
         if not self._backup_filepath:
             if not ok:
@@ -458,14 +460,15 @@ class GeorefIndex:
             data = self._fetch_data(self._backup_filepath, files_cache)
             ok = self._create_or_reindex_with_data(es, data, synonyms,
                                                    excluding_terms,
-                                                   check_timestamp=False)
+                                                   check_timestamp=False,
+                                                   verbose=verbose)
 
             if not ok:
                 logger.error('No se pudo indexar utilizando backups.')
                 logger.error('')
 
     def _create_or_reindex_with_data(self, es, data, synonyms, excluding_terms,
-                                     check_timestamp):
+                                     check_timestamp, verbose=False):
         """Crea o actualiza el índice. Ver la documentación de
         'create_or_reindex' para más detalles del flujo de creación y
         actualización de índices.
@@ -479,6 +482,7 @@ class GeorefIndex:
                 la configuración de Elasticsearch.
             check_timestamp (bool): Cuando es falso, permite indexar datos con
                 timestamp anterior a los que ya están almacenados.
+            verbose (bool): Mostrar más información en pantalla.
 
         Returns:
             bool: Verdadero si la creación/actualización se ejecutó
@@ -539,7 +543,7 @@ class GeorefIndex:
             logger.info('')
 
         self._create_index(es, new_index, synonyms, excluding_terms)
-        self._insert_documents(es, new_index, docs, count)
+        self._insert_documents(es, new_index, docs, count, verbose)
 
         self._update_aliases(es, new_index, old_index)
         if old_index:
@@ -592,7 +596,7 @@ class GeorefIndex:
         es_config.create_index(es, index, self._doc_class, synonyms,
                                excluding_terms)
 
-    def _insert_documents(self, es, index, docs, count):
+    def _insert_documents(self, es, index, docs, count, verbose=False):
         """Inserta documentos dentro de un índice.
 
         Args:
@@ -600,6 +604,7 @@ class GeorefIndex:
             index (str): Nombre de índice.
             docs (Iterator[dict]): Iterator de documentos a insertar.
             count (int): Cantidad de documentos a insertar.
+            verbose (bool): Mostrar más información en pantalla.
 
         """
         operations = self._bulk_update_generator(docs, index)
@@ -610,7 +615,10 @@ class GeorefIndex:
         iterator = helpers.streaming_bulk(es, operations, raise_on_error=False,
                                           request_timeout=ES_TIMEOUT)
 
-        for ok, response in tqdm.tqdm(iterator, total=count, file=sys.stderr):
+        if verbose:
+            iterator = tqdm.tqdm(iterator, total=count, file=sys.stderr)
+
+        for ok, response in iterator:
             if ok and response['create']['result'] == 'created':
                 creations += 1
             else:
@@ -785,7 +793,7 @@ def send_index_email(config, forced, env, log):
     )
 
 
-def run_index(es, forced, name='all'):
+def run_index(es, forced, name='all', verbose=False):
     """Ejecuta la rutina de creación/actualización de los índices utilizados
     por Georef API.
 
@@ -795,6 +803,7 @@ def run_index(es, forced, name='all'):
             forzada.
         name (str): Nombre del índice a crear/actualizar. Si se utiliza el
             valor 'all', se crean/actualizan todos los índices.
+        verbose (bool): Mostrar más información en pantalla.
 
     """
     backups_dir = app.config['BACKUPS_DIR']
@@ -884,7 +893,7 @@ def run_index(es, forced, name='all'):
     for index in indices:
         if name in ['all', index.alias]:
             try:
-                index.create_or_reindex(es, files_cache, forced)
+                index.create_or_reindex(es, files_cache, forced, verbose)
             except Exception:  # pylint: disable=broad-except
                 logger.error('')
                 logger.exception('Ocurrió un error al indexar:')
@@ -945,6 +954,8 @@ def main():
                         help='Omitir chequeo de timestamp.')
     parser.add_argument('-i', '--info', action='store_true',
                         help='Mostrar información de índices y salir.')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='Imprimir información adicional.')
     args = parser.parse_args()
 
     setup_logger(logger, logger_stream)
@@ -954,7 +965,7 @@ def main():
             es = normalizer.get_elasticsearch()
 
             if args.mode == 'index':
-                run_index(es, args.forced, args.name)
+                run_index(es, args.forced, args.name, args.verbose)
             elif args.mode == 'index_stats':
                 run_info(es)
             else:
