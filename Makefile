@@ -16,11 +16,11 @@ check_config_file:
 
 index: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(INDEXER_PY) -m index -n $(INDEX_NAME)
+	python -m $(INDEXER_PY) -m index -n $(INDEX_NAME) -v
 
 index_forced: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
-	python -m $(INDEXER_PY) -m index -n $(INDEX_NAME) -f
+	python -m $(INDEXER_PY) -m index -n $(INDEX_NAME) -f -v
 
 print_index_stats: check_config_file
 	GEOREF_CONFIG=$(CFG_PATH) \
