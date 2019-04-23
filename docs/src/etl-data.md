@@ -1,6 +1,28 @@
 # Modelo de datos para Georef
 
-Los datos generados por el ETL Georef consisten de siete (7) archivos en formato JSON, los cuales contienen provincias, departamentos, municipios, localidades, calles, cuadras e intersecciones de calles.
+**Versión**: 10.0.0
+
+El fin del proceso ETL de Georef es producir archivos con datos de entidades geográficas. El ETL genera varios archivos: unos de ellos son utilizados para ser indexados por la API, y otros sirven para facilitar a usuarios de la API descargarse la totalidad de los datos en distintos formatos.
+
+Los archivos generados para ser indexados en la API tienen formato [NDJSON](http://ndjson.org/). El formato NDJSON consiste en un archivo de texto donde cada línea (separadas por `\n`) es un objeto JSON válido. Los archivos generados son:
+
+- `provincias.ndjson`
+- `departamentos.ndjson`
+- `municipios.ndjson`
+- `localidades.ndjson`
+- `calles.ndjson`
+- `intersecciones.ndjson`
+- `cuadras.ndjson`
+
+Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. Los archivos son:
+
+- `provincias.json`, `provincias.csv`, `provincias.geojson`
+- `departamentos.json`, `departamentos.csv`, `departamentos.geojson`
+- `municipios.json`, `municipios.csv`, `municipios.geojson`
+- `localidades.json`, `localidades.csv`, `localidades.geojson`
+- `calles.json`, `calles.csv`
+
+**Se recomienda el uso de los archivos NDJSON si se desea procesar todos los datos de entidades geográficas.** Esto se debe a que el formato se presta a ser leído por partes (líneas), lo cual facilita el procesamiento de los archivos de gran tamaño. Notar que los archivos en formato CSV **no** contienen las geometrías de las entidades.
 
 ## Fuentes
 Los orígenes de los datos procesados en el ETL son:
@@ -26,267 +48,245 @@ Los orígenes de los datos procesados en el ETL son:
 - Enlace: [GeoServer INDEC](https://geoservicios.indec.gov.ar/geoserver)
 
 ## Archivos
-A continuación se detallan, a través de ejemplos, los esquemas de los archivos para las entidades utilizadas. Notar que el campo `version` se utiliza al momento de indexar para determinar si los datos son compatibles con la versión de la API siendo utilizada; la versión detallada en este documento es la `9.0.0`.
+A continuación se detallan, a través de ejemplos, los esquemas de los archivos NDJSON para todas las entidades geográficas.
 
-Todas las geometrías incluidas en los archivos utilizan el sistema de coordenadas **WGS84** (**EPSG 4326**).
-
-### Provincias
-El archivo de datos de provincias debe tener formato JSON. Su esquema de datos debe ser el siguiente:
-```
+La primera línea de cada archivo contiene los metadatos del archivo. La estructura de los metadatos es la siguiente:
+```json
 {
 	"timestamp": "1532435389", // Timestamp de creación
 	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "9.0.0", // Versión de archivo
-	"datos": [ // Lista de entidades
-		{
-			"id": "90", // ID de provincia
-			"nombre": "Tucumán", // Nombre de provincia,
-			"nombre_completo": "Provincia de Tucumán", // Nombre completo
-			"iso_id": "AR-T", // Identificador ISO 3166-2
-			"iso_nombre": "Tucumán", // Nombre ISO
-			"categoria": "Provincia", // Tipo de entidad
-			"centroide": {
-				"lat": -26.9478, // Latitud de centroide
-				"lon": -65.36475 // Longitud de centroide
-			},
-			"geometria": { // Geometría en formato GeoJSON
-				"type": "MultiPolygon",
-				"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
-			},
-			"fuente": "IGN" // Fuente del dato
-		},
-		{ ... },
-	]
+	"version": "X.0.0", // Versión de archivo
+	"cantidad": 100 // Cantidad de entidades
 }
 ```
 
-### Departamentos
-El archivo de datos de departamentos debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+Recordar que todo el objeto JSON aparece serializado en la primera línea del archivo, de la siguiente forma:
+
+```json
+{"timestamp": "1532435389","fecha_creacion": "2018-07-24 12:29:49.813835+00:00","version":"X.0.0","cantidad": 100}
+```
+
+
+Luego, el resto de las líneas del archivo contienen las entidades en formato JSON, una por línea. Todas las geometrías incluidas en los archivos utilizan el sistema de coordenadas **WGS84** (**EPSG 4326**).
+
+### Provincias (`provincias.ndjson`)
+Cada línea del archivo de datos de provincias tiene la siguiente estructura:
 ```
 {
-	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "9.0.0", // Versión de archivo
-	"datos": [ // Lista de entidades
-		{
-			"id": "06427", // ID del departamento
-			"nombre": "La Matanza", // Nombre del departamento
-			"nombre_completo": "Partido de la Matanza", // Nombre completo
-			"categoria": "Partido", // Tipo de entidad
-			"centroide": {
-				"lat": -34.770165, // Latitud de centroide
-				"lon": -58.625449  // Longitud de centroide
-			},
-			"geometria": { // Geometría en formato GeoJSON
-				"type": "MultiPolygon",
-				"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
-			},
-			"provincia": { // Provincia que contiene al departamento
-				"id": "06",
-				"nombre": "Buenos Aires",
-				"interseccion": "0.0412936" // Porcentaje del área de la provincia que ocupa el depto.
-			},
-			"fuente": "ARBA - Gerencia de Servicios Catastrales" // Fuente del dato
-		},
-		{ ... },
-	]
+	"id": "90", // ID de provincia
+	"nombre": "Tucumán", // Nombre de provincia,
+	"nombre_completo": "Provincia de Tucumán", // Nombre completo
+	"iso_id": "AR-T", // Identificador ISO 3166-2
+	"iso_nombre": "Tucumán", // Nombre ISO
+	"categoria": "Provincia", // Tipo de entidad
+	"centroide": {
+		"lat": -26.9478, // Latitud de centroide
+		"lon": -65.36475 // Longitud de centroide
+	},
+	"geometria": { // Geometría en formato GeoJSON
+		"type": "MultiPolygon",
+		"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
+	},
+	"fuente": "IGN" // Fuente del dato
 }
 ```
 
-### Municipios
-El archivo de datos de municipios debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+### Departamentos (`departamentos.ndjson`)
+Cada línea del archivo de datos de departamentos tiene la siguiente estructura:
 ```
 {
-	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "9.0.0", // Versión de archivo
-	"datos": [ // Lista de entidades
-		{
-			"id": "060105", // ID del municipio
-			"nombre": "Bolívar", // Nombre del municipio
-			"nombre_completo": "Municipio Bolívar", // Nombre completo
-			"categoria": "Municipio", // Tipo de entidad
-			"centroide": {
-				"lat": -36.298222, // Latitud de centroide
-				"lon": -61.149648  // Longitud de centroide
-			},
-			"geometria": { // Geometría en formato GeoJSON
-				"type": "MultiPolygon",
-				"coordinates": [[[[-58.4453, -34.4324], [-58.6463, -34.6841], ...]]]
-			},
-			"provincia": {  // Provincia que contiene al municipio
-				"id": "06",
-				"nombre": "Buenos Aires",
-				"interseccion": "0.0100845" // Porcentaje del área de la provincia que ocupa el municipio
-			},
-			"fuente": "ARBA - Gerencia de Servicios Catastrales" // Fuente del dato
-		},
-		{ ... },
-	]
+	"id": "06427", // ID del departamento
+	"nombre": "La Matanza", // Nombre del departamento
+	"nombre_completo": "Partido de la Matanza", // Nombre completo
+	"categoria": "Partido", // Tipo de entidad
+	"centroide": {
+		"lat": -34.770165, // Latitud de centroide
+		"lon": -58.625449  // Longitud de centroide
+	},
+	"geometria": { // Geometría en formato GeoJSON
+		"type": "MultiPolygon",
+		"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
+	},
+	"provincia": { // Provincia que contiene al departamento
+		"id": "06",
+		"nombre": "Buenos Aires",
+		"interseccion": "0.0412936" // Porcentaje del área de la provincia que ocupa el depto.
+	},
+	"fuente": "ARBA - Gerencia de Servicios Catastrales" // Fuente del dato
 }
 ```
 
-### Localidades
-El archivo de datos de localidades debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+### Municipios (`municipios.ndjson`)
+Cada línea del archivo de datos de municipios tiene la siguiente estructura:
 ```
 {
-	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "9.0.0", // Versión de archivo
-	"datos": [ // Lista de entidades
-		{
-			"id": "06189080000", // ID de la localidad
-			"nombre": "San Roman", // Nombre de la localidad
-			"categoria": "Localidad simple (LS)", // Tipo de asentamiento BAHRA
-			"centroide": {
-				"lat": -38.741555, // Latitud de centroide
-				"lon": -61.537720  // Longitud de centroide
-			},
-			"geometria": { // Geometría en formato GeoJSON
-				"type": "MultiPoint",
-				"coordinates": [[-61.5377, -38.7415], ...]
-			},
-			"municipio": { // Municipio que contiene a la localidad
-				"id": "060189", // Puede ser nulo
-				"nombre": "Coronel Dorrego" // Puede ser nulo
-			},
-			"departamento": { // Departamento que contiene a la localidad
-				"id": "06189",
-				"nombre": "Coronel Dorrego"
-			},
-			"provincia": {  // Provincia que contiene a la localidad
-				"id": "06",
-				"nombre": "Buenos Aires"
-			},
-			"fuente": "INDEC" // Fuente del dato
-		},
-		{ ... },
-	]
+	"id": "060105", // ID del municipio
+	"nombre": "Bolívar", // Nombre del municipio
+	"nombre_completo": "Municipio Bolívar", // Nombre completo
+	"categoria": "Municipio", // Tipo de entidad
+	"centroide": {
+		"lat": -36.298222, // Latitud de centroide
+		"lon": -61.149648  // Longitud de centroide
+	},
+	"geometria": { // Geometría en formato GeoJSON
+		"type": "MultiPolygon",
+		"coordinates": [[[[-58.4453, -34.4324], [-58.6463, -34.6841], ...]]]
+	},
+	"provincia": {  // Provincia que contiene al municipio
+		"id": "06",
+		"nombre": "Buenos Aires",
+		"interseccion": "0.0100845" // Porcentaje del área de la provincia que ocupa el municipio
+	},
+	"fuente": "ARBA - Gerencia de Servicios Catastrales" // Fuente del dato
 }
 ```
 
-### Calles
-El archivo de datos de calles debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+### Localidades (`localidades.ndjson`)
+Cada línea del archivo de datos de localidades tiene la siguiente estructura:
 ```
 {
-	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "9.0.0", // Versión de archivo
-	"datos": [ // Lista de vías de circulación
-		{
-			"nomenclatura": "LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires", // Nomenclatura: 'nombre, departamento, provincia'
-			"id": "0202101007345", // ID de la vía de circulación
-			"nombre": "LARREA", // Nombre de vía de circulación
-			"categoria": "CALLE", // Tipo de vía de circulación
-			"altura": {
-				"inicio": {
-					"derecha": 1, // Número inicial de altura (lado derecho)
-					"izquierda": 2, // Número inicial de altura (lado izquierdo)
-				},
-				"fin": {
-					"derecha": 799, // Número final de altura (lado derecho)
-					"izquierda": 800, // Número final de altura (lado izquierdo)
-				}
-			},
-			"geometria": { // Geometría en formato GeoJSON
-				"type": "MultiLineString",
-				"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
-			},
-			"departamento": { // Departamento
-				"nombre": "Comuna 3",
-				"id": "02021"
-			},
-			"provincia": { // Provincia
-				"nombre": "Ciudad Autónoma de Buenos Aires",
-				"id": "02"
-			},
-			"fuente": "INDEC" // Fuente del dato
-		},
-		{ ... },
-	]
+	"id": "06189080000", // ID de la localidad
+	"nombre": "San Roman", // Nombre de la localidad
+	"categoria": "Localidad simple (LS)", // Tipo de asentamiento BAHRA
+	"centroide": {
+		"lat": -38.741555, // Latitud de centroide
+		"lon": -61.537720  // Longitud de centroide
+	},
+	"geometria": { // Geometría en formato GeoJSON
+		"type": "MultiPoint",
+		"coordinates": [[-61.5377, -38.7415], ...]
+	},
+	"municipio": { // Municipio que contiene a la localidad
+		"id": "060189", // Puede ser nulo
+		"nombre": "Coronel Dorrego" // Puede ser nulo
+	},
+	"departamento": { // Departamento que contiene a la localidad
+		"id": "06189",
+		"nombre": "Coronel Dorrego"
+	},
+	"provincia": {  // Provincia que contiene a la localidad
+		"id": "06",
+		"nombre": "Buenos Aires"
+	},
+	"fuente": "INDEC" // Fuente del dato
 }
 ```
 
-### Cuadras
-El archivo de datos de cuadras debe tener formato JSON. Su esquema de datos debe ser el siguiente:
+### Calles (`calles.ndjson`)
+Cada línea del archivo de datos de calles tiene la siguiente estructura:
 ```
 {
-	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "9.0.0", // Versión de archivo
-	"datos": [ // Lista de cuadras
-		{
-		    "id": "020700100230012345", // ID de la cuadra
-			"calle": {
-				"id": "0207001002300", // ID de la calle
-				"nombre": "BOSTON", // Nombre de la calle
-				"departamento": { // Departamento de la calle
-					"id": "02070",
-					"nombre": "Comuna 10"
-				},
-				"provincia": { // Provincia de la calle
-					"id": "02",
-					"nombre": "Ciudad Autónoma de Buenos Aires"
-				},
-				"categoria": "CALLE", // Tipo de la calle
-				"fuente": "INDEC" // Fuente del dato
-			},
-			"geometria": { // Geometría en formato GeoJSON
-				"type": "MultiLineString",
-				"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
-			}
+	"nomenclatura": "LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires", // Nomenclatura: 'nombre, departamento, provincia'
+	"id": "0202101007345", // ID de la vía de circulación
+	"nombre": "LARREA", // Nombre de vía de circulación
+	"categoria": "CALLE", // Tipo de vía de circulación
+	"altura": {
+		"inicio": {
+			"derecha": 1, // Número inicial de altura (lado derecho)
+			"izquierda": 2, // Número inicial de altura (lado izquierdo)
+		},
+		"fin": {
+			"derecha": 799, // Número final de altura (lado derecho)
+			"izquierda": 800, // Número final de altura (lado izquierdo)
 		}
-	]
+	},
+	"geometria": { // Geometría en formato GeoJSON
+		"type": "MultiLineString",
+		"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
+	},
+	"departamento": { // Departamento
+		"nombre": "Comuna 3",
+		"id": "02021"
+	},
+	"provincia": { // Provincia
+		"nombre": "Ciudad Autónoma de Buenos Aires",
+		"id": "02"
+	},
+	"fuente": "INDEC" // Fuente del dato
 }
 ```
 
-### Intersecciones de Calles
-El archivo de datos de intersecciones debe tener formato JSON, y no debe tener intersecciones repetidas. Dadas las calles con ID X y ID Z, solo debe estar presente la intersección X-Z o Z-X. Su esquema de datos debe ser el siguiente:
+### Intersecciones de Calles (`intersecciones.ndjson`)
+El archivo de datos de intersecciones no debe tener intersecciones repetidas. Es decir, dadas las calles con ID X y ID Z, solo debe estar presente la intersección X-Z o la Z-X, pero no ambas. Cada línea del archivo de datos de intersecciones tiene la siguiente estructura:
 ```
 {
-	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "9.0.0", // Versión de archivo
-	"datos": [ // Lista de intersecciones
-		{
-			"id": "0207001002300-0207001007975", // ID de la calle A, ID de la calle B
-			"calle_a": {
-				"id": "0207001002300", // ID de la calle A
-				"nombre": "BOSTON", // Nombre de la calle A
-				"departamento": { // Departamento de la calle A
-					"id": "02070",
-					"nombre": "Comuna 10"
-				},
-				"provincia": { // Provincia de la calle A
-					"id": "02",
-					"nombre": "Ciudad Autónoma de Buenos Aires"
-				},
-				"categoria": "CALLE", // Tipo de la calle A
-				"fuente": "INDEC" // Fuente del dato
-			},
-			"calle_b": {
-				"id": "0207001007975", // ID de la calle B
-				"nombre": "MARCOS SASTRE", // Nombre de la calle B
-				"departamento": { // Departamento de la calle B
-					"id": "02070",
-					"nombre": "Comuna 10"
-				},
-				"provincia": { // Provincia de la calle B
-					"id": "02",
-					"nombre": "Ciudad Autónoma de Buenos Aires"
-				},
-				"categoria": "CALLE", // Tipo de la calle B
-				"fuente": "INDEC" // Fuente del dato
-			},
-			"geometria": { // Geometría en formato GeoJSON
-				"type": "Point",
-				"coordinates": [
-					-58.5077676091915,
-					-34.6150993860767
-				]
-			}
-		}
-		{ ... },
-	]
+	"id": "0207001002300-0207001007975", // ID de la calle A, ID de la calle B
+	"calle_a": {
+		"id": "0207001002300", // ID de la calle A
+		"nombre": "BOSTON", // Nombre de la calle A
+		"departamento": { // Departamento de la calle A
+			"id": "02070",
+			"nombre": "Comuna 10"
+		},
+		"provincia": { // Provincia de la calle A
+			"id": "02",
+			"nombre": "Ciudad Autónoma de Buenos Aires"
+		},
+		"categoria": "CALLE", // Tipo de la calle A
+		"fuente": "INDEC" // Fuente del dato
+	},
+	"calle_b": {
+		"id": "0207001007975", // ID de la calle B
+		"nombre": "MARCOS SASTRE", // Nombre de la calle B
+		"departamento": { // Departamento de la calle B
+			"id": "02070",
+			"nombre": "Comuna 10"
+		},
+		"provincia": { // Provincia de la calle B
+			"id": "02",
+			"nombre": "Ciudad Autónoma de Buenos Aires"
+		},
+		"categoria": "CALLE", // Tipo de la calle B
+		"fuente": "INDEC" // Fuente del dato
+	},
+	"geometria": { // Geometría en formato GeoJSON
+		"type": "Point",
+		"coordinates": [
+			-58.5077676091915,
+			-34.6150993860767
+		]
+	}
 }
+```
+
+### Cuadras (`cuadras.ndjson`)
+Cada línea del archivo de datos de cuadras tiene la siguiente estructura:
+```
+{
+    "id": "020700100230012345", // ID de la cuadra
+	"calle": {
+		"id": "0207001002300", // ID de la calle
+		"nombre": "BOSTON", // Nombre de la calle
+		"departamento": { // Departamento de la calle
+			"id": "02070",
+			"nombre": "Comuna 10"
+		},
+		"provincia": { // Provincia de la calle
+			"id": "02",
+			"nombre": "Ciudad Autónoma de Buenos Aires"
+		},
+		"categoria": "CALLE", // Tipo de la calle
+		"fuente": "INDEC" // Fuente del dato
+	},
+	"geometria": { // Geometría en formato GeoJSON
+		"type": "MultiLineString",
+		"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
+	}
+}
+```
+
+## Procesamiento
+Para procesar los archivos de datos con Python, se puede utilizar el módulo estándar `json`. Se recomienda iterar sobre el objeto devuelto por `open()` para evitar cargar todo el archivo en memoria a la vez:
+
+```python
+import json
+
+with open('calles.ndjson') as f:
+	# Leer la línea de metadatos
+	metadata = json.loads(next(f))
+
+	# Leer cada línea y parsear el JSON
+	for line in f:
+		street = json.loads(line)
+		# La variable street ahora contiene un dict con los datos de la calle
 ```

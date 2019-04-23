@@ -1,5 +1,10 @@
 # Historial de versiones
 
+## **0.4.0** - 2019/04/23
+- Modifica fuente de datos utilizada para recurso `/direcciones`. Se aumentó considerablemente la cantidad de direcciones que pueden ser georreferenciadas.
+- Actualiza versión de datos de ETL a `10.0.0`.
+- Mejora interpretación de direcciones (`georef-ar-address` versión `0.0.8`).
+
 ## **0.3.3** - 2019/02/11
 - Corrige error HTTP 500 lanzado cuando se utilizaban valores como "NaN" o "Inifinity" para parámetros `lat` y `lon` en `/ubicacion`.
 
