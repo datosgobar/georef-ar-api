@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizado el código para tomar
 # nuevas versiones de los archivos.
-ETL_FILE_VERSION = '10.0.0'
+ETL_FILE_VERSION = '11.0.0'
 
 LOGS_DIR = 'logs'
 CACHE_DIR = 'cache'

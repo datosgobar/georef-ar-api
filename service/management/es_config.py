@@ -319,7 +319,6 @@ class Locality(Entity):
 
 class Street(Entity):
     nombre = NameField
-    nomenclatura = Text(index=False)
     altura = StreetNumbersField
     geometria = GeoShape()
     provincia = StateSimpleField

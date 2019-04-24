@@ -6,7 +6,7 @@ de los recursos que expone la API.
 
 import logging
 from flask import current_app
-from service import data, params, formatter, address, location, utils
+from service import data, params, formatter, address, location, utils, street
 from service import names as N
 from service.query_result import QueryResult
 
@@ -318,6 +318,37 @@ def _build_street_query_format(parsed_params):
     return query, fmt
 
 
+def _process_street_queries(params_list):
+    """Ejecuta una lista de consultas de calles, partiendo desde los parámetros
+    recibidos del usuario.
+
+    Args:
+        params_list (list): Lista de dict, cada dict conteniendo los parámetros
+            de una consulta al recurso de calles de la API.
+
+    Returns:
+        tuple: Tupla de (list, list), donde la primera lista contiene una
+            instancia de QueryResult por cada consulta, y la segunda lista
+            contiene una instancia de dict utilizada para darle formato al
+            resultado más tarde.
+
+    """
+    queries = []
+    formats = []
+    for parsed_params in params_list:
+        query, fmt = _build_street_query_format(parsed_params)
+        if fmt.get(N.FORMAT) == 'shp':
+            query['fields'] += (N.GEOM,)
+
+        queries.append(query)
+        formats.append(fmt)
+
+    es = get_elasticsearch()
+    query_results = street.run_street_queries(es, queries, formats)
+
+    return query_results, formats
+
+
 def _process_street_single(request):
     """Procesa una request GET para consultar datos de calles.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
@@ -338,20 +369,9 @@ def _process_street_single(request):
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
-    query, fmt = _build_street_query_format(qs_params)
-
-    if fmt[N.FORMAT] == 'shp':
-        query['fields'] += (N.GEOM,)
-
-    es = get_elasticsearch()
-    search = data.StreetsSearch(query)
-    data.ElasticsearchSearch.run_searches(es, [search])
-
-    query_result = QueryResult.from_entity_list(search.result.hits,
-                                                search.result.total,
-                                                search.result.offset)
-
-    return formatter.create_ok_response(N.STREETS, query_result, fmt)
+    query_results, formats = _process_street_queries([qs_params])
+    return formatter.create_ok_response(N.STREETS, query_results[0],
+                                        formats[0])
 
 
 def _process_street_bulk(request):
@@ -375,25 +395,7 @@ def _process_street_bulk(request):
     except params.ParameterParsingException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
-    queries = []
-    formats = []
-    for parsed_params in body_params:
-        query, fmt = _build_street_query_format(parsed_params)
-        queries.append(query)
-        formats.append(fmt)
-
-    es = get_elasticsearch()
-    searches = [data.StreetsSearch(query) for query in queries]
-
-    data.ElasticsearchSearch.run_searches(es, searches)
-
-    query_results = [
-        QueryResult.from_entity_list(search.result.hits,
-                                     search.result.total,
-                                     search.result.offset)
-        for search in searches
-    ]
-
+    query_results, formats = _process_street_queries(body_params)
     return formatter.create_ok_response_bulk(N.STREETS, query_results, formats)
 
 
