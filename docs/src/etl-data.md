@@ -1,6 +1,6 @@
 # Modelo de datos para Georef
 
-**Versión**: 10.0.0
+**Versión**: 11.0.0
 
 El fin del proceso ETL de Georef es producir archivos con datos de entidades geográficas. El ETL genera varios archivos: unos de ellos son utilizados para ser indexados por la API, y otros sirven para facilitar a usuarios de la API descargarse la totalidad de los datos en distintos formatos.
 
@@ -176,7 +176,6 @@ Cada línea del archivo de datos de localidades tiene la siguiente estructura:
 Cada línea del archivo de datos de calles tiene la siguiente estructura:
 ```
 {
-	"nomenclatura": "LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires", // Nomenclatura: 'nombre, departamento, provincia'
 	"id": "0202101007345", // ID de la vía de circulación
 	"nombre": "LARREA", // Nombre de vía de circulación
 	"categoria": "CALLE", // Tipo de vía de circulación
