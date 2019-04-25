@@ -79,18 +79,22 @@ Luego, completar el archivo `config/georef.cfg` con los valores apropiados.
 Luego, completar el archivo `config/logging.ini` con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.
 
 ### 3. Crear los índices
-Generar índices de entidades y calles:
+El siguiente paso es indexar todos los datos de entidades geográficas en Elasticsearch, para poder consultarlos vía el servidor de la API. Para lograr esto, la API acepta una serie de archivos NDJSON donde deberían estar almacenados los datos. La estructura de dichos archivos está detallada en [este documento](etl-data.md).
+
+El archivo de configuración `config/georef.cfg` debe especificar una ruta local o una URL externa para cada archivo de datos NDJSON. Notar que los valores por defecto (en `georef.example.cfg`) utilizan el portal de descargas `infra.datos.gob.ar`, que siempre provee la última versión de los archivos NDJSON disponibles. La rama `master` de `georef-ar-api` siempre se mantiene compatible con la última versión de los datos disponibles en `infra.datos.gob.ar`. El archivo de configuración también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto en `georef.example.cfg` también puede ser utilizado, ya que utiliza la versión del archivo almacenado en `infra.datos.gob.ar`. El mismo criterio se aplica al archivo de términos excluyentes. En resumen, si se utilizó `georef.example.cfg` como base para configurar la API, las URLs de los archivos ya deberían estar configuradas correctamente.
+
+Para indexar los datos, ejecutar:
 ```bash
 (venv) $ make index
 ```
-        
+
 Listar los índices creados, y otros datos adicionales:
 ```bash
 (venv) $ make print_index_stats
 ```
 	
 ### 4. (Opcional) Re-indexar datos
-Si se modifican los archivos de datos JSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:
+Si se modifican los archivos de datos NDJSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:
 
 #### Indexar datos nuevos
 Si se desea actualizar los índices con los nuevos datos, solo si los datos entrantes son más recientes, se puede utilizar nuevamente:
@@ -198,11 +202,3 @@ Para comprobar que no existan errores comunes en el código, y que su estilo sea
 ```bash
 (venv) $ make code_checks
 ```
-
-## Archivos de datos
-
-- La estructura de los archivos de datos JSON utilizados por Georef está detallada en [este documento](etl-data.md).
-
-- El archivo de configuración `config/georef.cfg` debe especificar una ruta local o una URL externa para cada archivo de datos JSON. Notar que los valores por defecto (en `georef.example.cfg`) utilizan el portal de descargas `infra.datos.gob.ar`, que siempre provee la última versión de los archivos JSON disponibles. La rama `master` de `georef-ar-api` siempre se mantiene compatible con la última versión de los datos disponibles en `infra.datos.gob.ar`.
-
-- El archivo de configuración `config/georef.cfg` también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto en `georef.example.cfg` puede ser utilizado, ya que utiliza la versión del archivo almacenado en `infra.datos.gob.ar`. El mismo criterio se aplica al archivo de términos excluyentes.

@@ -14,6 +14,7 @@ Los archivos generados para ser indexados en la API tienen formato [NDJSON](http
 - `intersecciones.ndjson`
 - `cuadras.ndjson`
 - `localidades-censales.ndjson`
+- `asentamientos.ndjson`
 
 Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. Los archivos son:
 
@@ -22,6 +23,8 @@ Los archivos generados para la descarga de datos para usuarios de la API tienen 
 - `municipios.json`, `municipios.csv`, `municipios.geojson`
 - `localidades.json`, `localidades.csv`, `localidades.geojson`
 - `calles.json`, `calles.csv`
+- `localidades-censales.json`, `localidades-censales.csv`, `localidades-censales.geojson`
+- `asentamientos.json`, `asentamientos.csv`, `asentamientos.geojson`
 
 **Se recomienda el uso de los archivos NDJSON si se desea procesar todos los datos de entidades geográficas.** Esto se debe a que el formato se presta a ser leído por partes (líneas), lo cual facilita el procesamiento de los archivos de gran tamaño. Notar que los archivos en formato CSV **no** contienen las geometrías de las entidades.
 
@@ -52,6 +55,9 @@ Los orígenes de los datos procesados en el ETL son:
 - Recursos: `/localidad-censales`
 - Fuente: **Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)**
 - Enlace: [Unidades Geoestadísticas - Cartografía y códigos geográficos del Sistema Estadístico Nacional](https://www.indec.gov.ar/codgeo.asp).
+
+## Descarga de los archivos
+Todos los archivos mencionados anteriormente pueden ser descargados desde el portal de descargas `infra.datos.gob.ar`. Los enlaces están catalogados en el portal de datos abiertos, bajo la [distribución del servicio de normalización de datos geográficos](https://datos.gob.ar/dataset/modernizacion-servicio-normalizacion-datos-geograficos).
 
 ## Archivos
 A continuación se detallan, a través de ejemplos, los esquemas de los archivos NDJSON para todas las entidades geográficas.
@@ -312,6 +318,37 @@ Cada línea del archivo de datos de localidades censales tiene la siguiente estr
             -34.9220666561801
         ]
     }
+}
+```
+
+### Asentamientos (`asentamientos.ndjson`)
+Cada línea del archivo de datos de asentamientos tiene la siguiente estructura (idéntica a la de localidades):
+```
+{
+	"id": "06189080000", // ID de la localidad
+	"nombre": "San Roman", // Nombre de la localidad
+	"categoria": "Localidad simple (LS)", // Tipo de asentamiento BAHRA
+	"centroide": {
+		"lat": -38.741555, // Latitud de centroide
+		"lon": -61.537720  // Longitud de centroide
+	},
+	"geometria": { // Geometría en formato GeoJSON
+		"type": "MultiPoint",
+		"coordinates": [[-61.5377, -38.7415], ...]
+	},
+	"municipio": { // Municipio que contiene a la localidad
+		"id": "060189", // Puede ser nulo
+		"nombre": "Coronel Dorrego" // Puede ser nulo
+	},
+	"departamento": { // Departamento que contiene a la localidad
+		"id": "06189",
+		"nombre": "Coronel Dorrego"
+	},
+	"provincia": {  // Provincia que contiene a la localidad
+		"id": "06",
+		"nombre": "Buenos Aires"
+	},
+	"fuente": "INDEC" // Fuente del dato
 }
 ```
 

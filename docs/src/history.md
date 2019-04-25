@@ -1,5 +1,9 @@
 # Historial de versiones
 
+## **0.4.1** - 2019/04/25
+- Agrega localidades de tipo `LCE` y `LSE` a recurso `/localidades`.
+- Actualiza versión de datos de ETL a `11.0.0`.
+
 ## **0.4.0** - 2019/04/23
 - Modifica fuente de datos utilizada para recurso `/direcciones`. Se aumentó considerablemente la cantidad de direcciones que pueden ser georreferenciadas.
 - Actualiza versión de datos de ETL a `10.0.0`.

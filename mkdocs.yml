@@ -14,6 +14,7 @@ nav:
     - Normalización de direcciones: addresses.md
     - Operaciones con geometrías: geom-operations.md
     - Descarga de geometrías: shapefiles.md
+    - Descarga de base completa: download.md
     - Usar en planillas de cálculo: spreadsheet-integration.md
     - Usar en Python: python-usage.md
     - Autenticarse con JWT: jwt-token.md
