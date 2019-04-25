@@ -13,6 +13,7 @@ Los archivos generados para ser indexados en la API tienen formato [NDJSON](http
 - `calles.ndjson`
 - `intersecciones.ndjson`
 - `cuadras.ndjson`
+- `localidades-censales.ndjson`
 
 Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. Los archivos son:
 
@@ -46,6 +47,11 @@ Los orígenes de los datos procesados en el ETL son:
 - Recursos: `/calles`, `/direcciones`
 - Fuente: **Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)**
 - Enlace: [GeoServer INDEC](https://geoservicios.indec.gov.ar/geoserver)
+
+### Localidades Censales
+- Recursos: `/localidad-censales`
+- Fuente: **Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)**
+- Enlace: [Unidades Geoestadísticas - Cartografía y códigos geográficos del Sistema Estadístico Nacional](https://www.indec.gov.ar/codgeo.asp).
 
 ## Archivos
 A continuación se detallan, a través de ejemplos, los esquemas de los archivos NDJSON para todas las entidades geográficas.
@@ -271,6 +277,41 @@ Cada línea del archivo de datos de cuadras tiene la siguiente estructura:
 		"type": "MultiLineString",
 		"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
 	}
+}
+```
+
+### Localidades Censales (`localidades-censales.ndjson`)
+Cada línea del archivo de datos de localidades censales tiene la siguiente estructura:
+```
+{
+    "id": "06441030", // ID de la localidad censal
+    "nombre": "La Plata", // Nombre de la localidad censal
+    "fuente": "INDEC", // Fuente del dato
+    "provincia": { // Provincia de la localidad censal
+        "id": "06",
+        "nombre": "Buenos Aires"
+    },
+    "departamento": { // Departamento de la localidad censal
+        "id": "06441",
+        "nombre": "La Plata"
+    },
+    "municipio": { // Municipio que contiene a la localidad censal
+        "id": "060441",
+        "nombre": "La Plata"
+    },
+    "categoria": "Componente de localidad compuesta (LC)", // Tipo de localidad del censo
+    "funcion": "CAPITAL_PROVINCIA", // Función administrativa, puede ser null
+    "centroide": {
+        "lon": -57.9543916496992, // Longitud del centroide
+        "lat": -34.9220666561801 // Latitud del centroide
+    },
+    "geometria": { // Geometría en formato GeoJSON
+        "type": "Point",
+        "coordinates": [
+            -57.9543916496992,
+            -34.9220666561801
+        ]
+    }
 }
 ```
 
