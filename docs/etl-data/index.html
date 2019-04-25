@@ -369,6 +369,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../download/" title="Descarga de base completa" class="md-nav__link">
+      Descarga de base completa
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-nav__link">
       Usar en planillas de cálculo
     </a>
@@ -600,8 +612,22 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#localidades-censales" title="Localidades Censales" class="md-nav__link">
+    Localidades Censales
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#descarga-de-los-archivos" title="Descarga de los archivos" class="md-nav__link">
+    Descarga de los archivos
+  </a>
   
 </li>
       
@@ -658,6 +684,20 @@
           <li class="md-nav__item">
   <a href="#cuadras-cuadrasndjson" title="Cuadras (cuadras.ndjson)" class="md-nav__link">
     Cuadras (cuadras.ndjson)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#localidades-censales-localidades-censalesndjson" title="Localidades Censales (localidades-censales.ndjson)" class="md-nav__link">
+    Localidades Censales (localidades-censales.ndjson)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#asentamientos-asentamientosndjson" title="Asentamientos (asentamientos.ndjson)" class="md-nav__link">
+    Asentamientos (asentamientos.ndjson)
   </a>
   
 </li>
@@ -765,8 +805,22 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#localidades-censales" title="Localidades Censales" class="md-nav__link">
+    Localidades Censales
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#descarga-de-los-archivos" title="Descarga de los archivos" class="md-nav__link">
+    Descarga de los archivos
+  </a>
   
 </li>
       
@@ -827,6 +881,20 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#localidades-censales-localidades-censalesndjson" title="Localidades Censales (localidades-censales.ndjson)" class="md-nav__link">
+    Localidades Censales (localidades-censales.ndjson)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#asentamientos-asentamientosndjson" title="Asentamientos (asentamientos.ndjson)" class="md-nav__link">
+    Asentamientos (asentamientos.ndjson)
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -857,7 +925,7 @@
                 
                 
                 <h1 id="modelo-de-datos-para-georef">Modelo de datos para Georef<a class="headerlink" href="#modelo-de-datos-para-georef" title="Permanent link">&para;</a></h1>
-<p><strong>Versión</strong>: 10.0.0</p>
+<p><strong>Versión</strong>: 11.0.0</p>
 <p>El fin del proceso ETL de Georef es producir archivos con datos de entidades geográficas. El ETL genera varios archivos: unos de ellos son utilizados para ser indexados por la API, y otros sirven para facilitar a usuarios de la API descargarse la totalidad de los datos en distintos formatos.</p>
 <p>Los archivos generados para ser indexados en la API tienen formato <a href="http://ndjson.org/">NDJSON</a>. El formato NDJSON consiste en un archivo de texto donde cada línea (separadas por <code>\n</code>) es un objeto JSON válido. Los archivos generados son:</p>
 <ul>
@@ -868,6 +936,8 @@
 <li><code>calles.ndjson</code></li>
 <li><code>intersecciones.ndjson</code></li>
 <li><code>cuadras.ndjson</code></li>
+<li><code>localidades-censales.ndjson</code></li>
+<li><code>asentamientos.ndjson</code></li>
 </ul>
 <p>Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. Los archivos son:</p>
 <ul>
@@ -876,6 +946,8 @@
 <li><code>municipios.json</code>, <code>municipios.csv</code>, <code>municipios.geojson</code></li>
 <li><code>localidades.json</code>, <code>localidades.csv</code>, <code>localidades.geojson</code></li>
 <li><code>calles.json</code>, <code>calles.csv</code></li>
+<li><code>localidades-censales.json</code>, <code>localidades-censales.csv</code>, <code>localidades-censales.geojson</code></li>
+<li><code>asentamientos.json</code>, <code>asentamientos.csv</code>, <code>asentamientos.geojson</code></li>
 </ul>
 <p><strong>Se recomienda el uso de los archivos NDJSON si se desea procesar todos los datos de entidades geográficas.</strong> Esto se debe a que el formato se presta a ser leído por partes (líneas), lo cual facilita el procesamiento de los archivos de gran tamaño. Notar que los archivos en formato CSV <strong>no</strong> contienen las geometrías de las entidades.</p>
 <h2 id="fuentes">Fuentes<a class="headerlink" href="#fuentes" title="Permanent link">&para;</a></h2>
@@ -904,6 +976,14 @@
 <li>Fuente: <strong>Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)</strong></li>
 <li>Enlace: <a href="https://geoservicios.indec.gov.ar/geoserver">GeoServer INDEC</a></li>
 </ul>
+<h3 id="localidades-censales">Localidades Censales<a class="headerlink" href="#localidades-censales" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Recursos: <code>/localidad-censales</code></li>
+<li>Fuente: <strong>Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)</strong></li>
+<li>Enlace: <a href="https://www.indec.gov.ar/codgeo.asp">Unidades Geoestadísticas - Cartografía y códigos geográficos del Sistema Estadístico Nacional</a>.</li>
+</ul>
+<h2 id="descarga-de-los-archivos">Descarga de los archivos<a class="headerlink" href="#descarga-de-los-archivos" title="Permanent link">&para;</a></h2>
+<p>Todos los archivos mencionados anteriormente pueden ser descargados desde el portal de descargas <code>infra.datos.gob.ar</code>. Los enlaces están catalogados en el portal de datos abiertos, bajo la <a href="https://datos.gob.ar/dataset/modernizacion-servicio-normalizacion-datos-geograficos">distribución del servicio de normalización de datos geográficos</a>.</p>
 <h2 id="archivos">Archivos<a class="headerlink" href="#archivos" title="Permanent link">&para;</a></h2>
 <p>A continuación se detallan, a través de ejemplos, los esquemas de los archivos NDJSON para todas las entidades geográficas.</p>
 <p>La primera línea de cada archivo contiene los metadatos del archivo. La estructura de los metadatos es la siguiente:</p>
@@ -1022,7 +1102,6 @@
 <h3 id="calles-callesndjson">Calles (<code>calles.ndjson</code>)<a class="headerlink" href="#calles-callesndjson" title="Permanent link">&para;</a></h3>
 <p>Cada línea del archivo de datos de calles tiene la siguiente estructura:</p>
 <pre><code>{
-    &quot;nomenclatura&quot;: &quot;LARREA, Comuna 3, Ciudad Autónoma de Buenos Aires&quot;, // Nomenclatura: 'nombre, departamento, provincia'
     &quot;id&quot;: &quot;0202101007345&quot;, // ID de la vía de circulación
     &quot;nombre&quot;: &quot;LARREA&quot;, // Nombre de vía de circulación
     &quot;categoria&quot;: &quot;CALLE&quot;, // Tipo de vía de circulación
@@ -1116,6 +1195,70 @@
         &quot;type&quot;: &quot;MultiLineString&quot;,
         &quot;coordinates&quot;: [[[-58.52815846522327, -34.611800397637424], ...]]
     }
+}
+</code></pre>
+
+<h3 id="localidades-censales-localidades-censalesndjson">Localidades Censales (<code>localidades-censales.ndjson</code>)<a class="headerlink" href="#localidades-censales-localidades-censalesndjson" title="Permanent link">&para;</a></h3>
+<p>Cada línea del archivo de datos de localidades censales tiene la siguiente estructura:</p>
+<pre><code>{
+    &quot;id&quot;: &quot;06441030&quot;, // ID de la localidad censal
+    &quot;nombre&quot;: &quot;La Plata&quot;, // Nombre de la localidad censal
+    &quot;fuente&quot;: &quot;INDEC&quot;, // Fuente del dato
+    &quot;provincia&quot;: { // Provincia de la localidad censal
+        &quot;id&quot;: &quot;06&quot;,
+        &quot;nombre&quot;: &quot;Buenos Aires&quot;
+    },
+    &quot;departamento&quot;: { // Departamento de la localidad censal
+        &quot;id&quot;: &quot;06441&quot;,
+        &quot;nombre&quot;: &quot;La Plata&quot;
+    },
+    &quot;municipio&quot;: { // Municipio que contiene a la localidad censal
+        &quot;id&quot;: &quot;060441&quot;,
+        &quot;nombre&quot;: &quot;La Plata&quot;
+    },
+    &quot;categoria&quot;: &quot;Componente de localidad compuesta (LC)&quot;, // Tipo de localidad del censo
+    &quot;funcion&quot;: &quot;CAPITAL_PROVINCIA&quot;, // Función administrativa, puede ser null
+    &quot;centroide&quot;: {
+        &quot;lon&quot;: -57.9543916496992, // Longitud del centroide
+        &quot;lat&quot;: -34.9220666561801 // Latitud del centroide
+    },
+    &quot;geometria&quot;: { // Geometría en formato GeoJSON
+        &quot;type&quot;: &quot;Point&quot;,
+        &quot;coordinates&quot;: [
+            -57.9543916496992,
+            -34.9220666561801
+        ]
+    }
+}
+</code></pre>
+
+<h3 id="asentamientos-asentamientosndjson">Asentamientos (<code>asentamientos.ndjson</code>)<a class="headerlink" href="#asentamientos-asentamientosndjson" title="Permanent link">&para;</a></h3>
+<p>Cada línea del archivo de datos de asentamientos tiene la siguiente estructura (idéntica a la de localidades):</p>
+<pre><code>{
+    &quot;id&quot;: &quot;06189080000&quot;, // ID de la localidad
+    &quot;nombre&quot;: &quot;San Roman&quot;, // Nombre de la localidad
+    &quot;categoria&quot;: &quot;Localidad simple (LS)&quot;, // Tipo de asentamiento BAHRA
+    &quot;centroide&quot;: {
+        &quot;lat&quot;: -38.741555, // Latitud de centroide
+        &quot;lon&quot;: -61.537720  // Longitud de centroide
+    },
+    &quot;geometria&quot;: { // Geometría en formato GeoJSON
+        &quot;type&quot;: &quot;MultiPoint&quot;,
+        &quot;coordinates&quot;: [[-61.5377, -38.7415], ...]
+    },
+    &quot;municipio&quot;: { // Municipio que contiene a la localidad
+        &quot;id&quot;: &quot;060189&quot;, // Puede ser nulo
+        &quot;nombre&quot;: &quot;Coronel Dorrego&quot; // Puede ser nulo
+    },
+    &quot;departamento&quot;: { // Departamento que contiene a la localidad
+        &quot;id&quot;: &quot;06189&quot;,
+        &quot;nombre&quot;: &quot;Coronel Dorrego&quot;
+    },
+    &quot;provincia&quot;: {  // Provincia que contiene a la localidad
+        &quot;id&quot;: &quot;06&quot;,
+        &quot;nombre&quot;: &quot;Buenos Aires&quot;
+    },
+    &quot;fuente&quot;: &quot;INDEC&quot; // Fuente del dato
 }
 </code></pre>
 

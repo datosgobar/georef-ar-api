@@ -13,7 +13,7 @@
         <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
       
       
-        <link rel="canonical" href="http://apis.datos.gob.ar/georef/etl/">
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/download/">
       
       
         <meta name="author" content="Datos Argentina">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Inicio - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+        <title>Descarga de base completa - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
       
     
     
@@ -104,7 +104,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#etl-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina" tabindex="1" class="md-skip">
+      <a href="#descarga-de-base-completa" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -130,7 +130,7 @@
                 API del Servicio de Normalización de Datos Geográficos de Argentina
               </span>
               <span class="md-header-nav__topic">
-                Inicio
+                Descarga de base completa
               </span>
             
           
@@ -288,10 +288,12 @@
             
             
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
     
     <label class="md-nav__link" for="nav-2">
       Usuarios
@@ -367,11 +369,20 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../download/" title="Descarga de base completa" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" title="Descarga de base completa" class="md-nav__link md-nav__link--active">
       Descarga de base completa
     </a>
+    
   </li>
 
         
@@ -458,12 +469,10 @@
             
             
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
     
     <label class="md-nav__link" for="nav-4">
       Desarrolladores
@@ -515,12 +524,10 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-4" type="checkbox" id="nav-4-4" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-4" type="checkbox" id="nav-4-4">
     
     <label class="md-nav__link" for="nav-4-4">
       ETL
@@ -536,20 +543,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-    <a href="./" title="Inicio" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../etl/" title="Inicio" class="md-nav__link">
       Inicio
     </a>
-    
   </li>
 
         
@@ -617,10 +615,14 @@
               
                 
                 
-                <h1 id="etl-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina">ETL del Servicio de Normalización de Datos Geográficos de Argentina<a class="headerlink" href="#etl-del-servicio-de-normalizacion-de-datos-geograficos-de-argentina" title="Permanent link">&para;</a></h1>
-<p>El ETL Georef es el proyecto encargado de generar los activos de datos indexados por la API. El producto final del ETL es una serie de archivos que contienen información sobre varias entidades geográficas de la República Argentina.</p>
-<p>Las siguientes secciones de la documentación detallan la estructura de los archivos mencionados, y los pasos a seguir para instalar y ejecutar el ETL en un entorno propio.</p>
-<p>El código que compone el ETL puede encontrarse en <a href="https://github.com/datosgobar/georef-ar-etl">GitHub</a>.</p>
+                <h1 id="descarga-de-base-completa">Descarga de base completa<a class="headerlink" href="#descarga-de-base-completa" title="Permanent link">&para;</a></h1>
+<p>Si se desea operar con la enteridad de los datos utilizados por la API, es recomendable descargarse la base completa de datos.</p>
+<p>Cada recurso (sin contar <code>/ubicacion</code>) de la API cuenta con variantes de descarga completa. Para acceder a las variantes, agregar <code>.json</code>, <code>.csv</code>, o <code>.geojson</code> al final de la ruta del recurso. Por ejemplo:</p>
+<ul>
+<li><a href="https://apis.datos.gob.ar/georef/api/calles.json">https://apis.datos.gob.ar/georef/api/calles.json</a></li>
+<li><a href="https://apis.datos.gob.ar/georef/api/provincias.csv">https://apis.datos.gob.ar/georef/api/provincias.csv</a></li>
+<li><a href="https://apis.datos.gob.ar/georef/api/provincias.geojson">https://apis.datos.gob.ar/georef/api/localidades.geojson</a></li>
+</ul>
                 
                   
                 
@@ -641,7 +643,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../python3.6/" title="Instalación de Python 3.6" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../shapefiles/" title="Descarga de geometrías" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -650,19 +652,19 @@
                 <span class="md-footer-nav__direction">
                   Anterior
                 </span>
-                Instalación de Python 3.6
+                Descarga de geometrías
               </span>
             </div>
           </a>
         
         
-          <a href="../etl-data/" title="Datos" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../spreadsheet-integration/" title="Usar en planillas de cálculo" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Datos
+                Usar en planillas de cálculo
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
