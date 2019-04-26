@@ -61,7 +61,7 @@ _MUNICIPALITIES_CSV_FIELDS = [
     (N.CATEGORY, [N.MUN, N.CATEGORY])
 ]
 
-_LOCALITIES_CSV_FIELDS = [
+_SETTLEMENTS_CSV_FIELDS = [
     (N.ID, [N.LOCALITY, N.ID]),
     (N.NAME, [N.LOCALITY, N.NAME]),
     (N.C_LAT, [N.LOCALITY, N.CENTROID, N.LAT]),
@@ -75,6 +75,8 @@ _LOCALITIES_CSV_FIELDS = [
     (N.SOURCE, [N.LOCALITY, N.SOURCE]),
     (N.CATEGORY, [N.LOCALITY, N.CATEGORY])
 ]
+
+_LOCALITIES_CSV_FIELDS = _SETTLEMENTS_CSV_FIELDS
 
 _STREETS_CSV_FIELDS = [
     (N.ID, [N.STREET, N.ID]),
@@ -120,6 +122,7 @@ _ENDPOINT_CSV_FIELDS = {
     N.STATES: _STATES_CSV_FIELDS,
     N.DEPARTMENTS: _DEPARTMENTS_CSV_FIELDS,
     N.MUNICIPALITIES: _MUNICIPALITIES_CSV_FIELDS,
+    N.SETTLEMENTS: _SETTLEMENTS_CSV_FIELDS,
     N.LOCALITIES: _LOCALITIES_CSV_FIELDS,
     N.STREETS: _STREETS_CSV_FIELDS,
     N.ADDRESSES: _ADDRESSES_CSV_FIELDS
@@ -422,6 +425,7 @@ def create_404_error_response():
                 '/api/provincias',
                 '/api/departamentos',
                 '/api/municipios',
+                '/api/asentamientos',
                 '/api/localidades',
                 '/api/calles',
                 '/api/direcciones',

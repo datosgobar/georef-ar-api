@@ -30,6 +30,8 @@ DEPARTMENTS = 'departamentos'
 DEPT = 'departamento'
 MUN = 'municipio'
 MUNICIPALITIES = 'municipios'
+SETTLEMENTS = 'asentamientos'
+SETTLEMENT = 'asentamiento'
 LOCALITIES = 'localidades'
 LOCALITY = 'localidad'
 STREET = 'calle'
@@ -134,6 +136,7 @@ _PLURALS = {
     STATE: STATES,
     DEPT: DEPARTMENTS,
     MUN: MUNICIPALITIES,
+    SETTLEMENT: SETTLEMENTS,
     LOCALITY: LOCALITIES,
     STREET: STREETS,
     ADDRESS: ADDRESSES,

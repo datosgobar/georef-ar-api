@@ -4,7 +4,9 @@ from . import GeorefMockTest
 class RoutesTest(GeorefMockTest):
     def test_v1_0_endpoints(self):
         """Los endpoints con prefijo /api/v1.0 deberían existir incluso si no
-        se cuenta con más de una versión de la API."""
+        se cuenta con más de una versión de la API. Esto se debe a que
+        versiones iniciales de la API fueron publicadas que utilizaban el
+        prefijo /v1.0"""
         urls = [
             '/api/v1.0/provincias',
             '/api/v1.0/departamentos',

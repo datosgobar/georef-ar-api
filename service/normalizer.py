@@ -254,6 +254,32 @@ def process_municipality(request):
         })
 
 
+def process_settlement(request):
+    """Procesa una request GET o POST para consultar datos de asentamientos
+    (base BAHRA). En caso de ocurrir un error de parseo, se retorna una
+    respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    return _process_entity(request, N.SETTLEMENTS, params.PARAMS_SETTLEMENTS, {
+        N.ID: 'ids',
+        N.NAME: 'name',
+        N.STATE: 'state',
+        N.DEPT: 'department',
+        N.MUN: 'municipality',
+        N.EXACT: 'exact',
+        N.ORDER: 'order',
+        N.FIELDS: 'fields',
+        N.OFFSET: 'offset',
+        N.MAX: 'size'
+    })
+
+
 def process_locality(request):
     """Procesa una request GET o POST para consultar datos de localidades.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.

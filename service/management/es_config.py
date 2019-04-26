@@ -306,7 +306,7 @@ class MunicipalityGeom(Entity):
     geometria = GeoShape()
 
 
-class Locality(Entity):
+class Settlement(Entity):
     nombre = NameField
     centroide = CentroidField
     geometria = GeoShape()
@@ -315,6 +315,11 @@ class Locality(Entity):
     municipio = MunicipalitySimpleField
     categoria = UnindexedTextField
     fuente = UnindexedTextField
+
+
+class Locality(Settlement):
+    # Las localidades tienen estructura idéntica a los asentamientos
+    pass
 
 
 class Street(Entity):
