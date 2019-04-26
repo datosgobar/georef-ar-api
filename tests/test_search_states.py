@@ -1,5 +1,4 @@
 import random
-import unittest
 from service import formatter
 from . import GeorefLiveTest, asciifold
 
@@ -505,7 +504,3 @@ class SearchStatesTest(GeorefLiveTest):
             'iso_nombre',
             'categoria'
         ])
-
-
-if __name__ == '__main__':
-    unittest.main()

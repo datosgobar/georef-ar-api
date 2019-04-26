@@ -48,14 +48,10 @@ test_mock:
 	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
 	python -m unittest discover -p test_mock_*
 
-# TEST_FILES: Variable de entorno definida por el usuario
-test_custom:
-	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
-	python -m unittest discover -p $(TEST_FILES)
-
+# TEST_FILES se puede definir opcionalmente
 test:
 	GEOREF_CONFIG=$(EXAMPLE_CFG_PATH) \
-	python -m unittest
+	python -m unittest $(TEST_FILES)
 
 code_checks:
 	flake8 tests/ service/

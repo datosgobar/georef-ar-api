@@ -1,4 +1,3 @@
-import unittest
 import random
 import itertools
 from service import formatter
@@ -645,7 +644,3 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         self.assert_valid_xml({
             'direccion': COMMON_ADDRESS
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

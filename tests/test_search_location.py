@@ -1,5 +1,4 @@
 import random
-import unittest
 from service import formatter
 from . import GeorefLiveTest
 
@@ -401,7 +400,3 @@ class SearchLocationTest(GeorefLiveTest):
             'lat': location[0],
             'lon': location[1]
         })
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -1,5 +1,4 @@
 import random
-import unittest
 from service import formatter
 from . import GeorefLiveTest, asciifold
 from .test_search_states import STATES
@@ -530,7 +529,3 @@ class SearchLocalityTest(GeorefLiveTest):
             'centr_lon',
             'fuente'
         ])
-
-
-if __name__ == '__main__':
-    unittest.main()

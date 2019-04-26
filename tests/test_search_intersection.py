@@ -1,4 +1,3 @@
-import unittest
 from . import GeorefLiveTest
 
 
@@ -187,7 +186,3 @@ class IntersectionsTest(GeorefLiveTest):
         matched_ids = [hit['id'] for hit in resp]
 
         self.assertTrue(all(i in matched_ids for i in ids))
-
-
-if __name__ == '__main__':
-    unittest.main()
