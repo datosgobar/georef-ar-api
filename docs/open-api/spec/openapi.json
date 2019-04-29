@@ -438,7 +438,9 @@
                         "enum": [
                             "Entidad (E)",
                             "Componente de localidad compuesta (LC)",
-                            "Localidad simple (LS)"
+                            "Localidad simple (LS)",
+			    "Localidad simple con entidad (LSE)",
+			    "Componente de localidad compuesta con entidad (LCE)"
                         ]
                     },
 		    "centroide": {
