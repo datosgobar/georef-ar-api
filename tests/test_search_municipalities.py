@@ -238,7 +238,6 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
             (['142623'], 'CAPILLA DE LOS REME'),
             (['142623'], 'CAPILLA DE LOS REM'),
             (['142623'], 'CAPILLA DE LOS RE'),
-            (['142623'], 'CAPILLA DE LOS R'),
             (['142091'], 'VILLA QUILLINZ'),
             (['142091'], 'VILLA QUILLIN'),
             (['142091'], 'VILLA QUILLI'),

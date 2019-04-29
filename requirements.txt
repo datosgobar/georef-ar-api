@@ -1,5 +1,4 @@
-elasticsearch==6.2.0
-elasticsearch-dsl==6.2.0
+elasticsearch-dsl==7.0.0
 Flask==1.0.2
 georef-ar-address==0.0.8
 geojson==2.3.0

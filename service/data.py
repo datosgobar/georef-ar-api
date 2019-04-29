@@ -891,7 +891,11 @@ class ElasticsearchResult:
 
     def __init__(self, response, offset):
         self._hits = [hit.to_dict() for hit in response.hits]
-        self._total = response.hits.total
+        # En Elasticsearch 7.0.0, response.hits.total dejó de ser un int y
+        # ahora es un objeto (dict). Si total.relation es 'gte', entonces el
+        # total es un estimado (lower bound). Solo se hacen estimados para
+        # queries que matcheen más de 10k documentos (por default).
+        self._total = response.hits.total.value
         self._offset = offset
 
     @property
@@ -1016,7 +1020,6 @@ def _build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path,
     options = {
         'indexed_shape': {
             'index': es_config.geom_index_for(index),
-            'type': es_config.DOC_TYPE,
             'id': entity_id,
             'path': entity_geom_path
         },

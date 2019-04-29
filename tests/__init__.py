@@ -363,12 +363,19 @@ class GeorefMockTest(GeorefLiveTest):
         """
         hits = [{'_source': copy.deepcopy(result)} for result in results]
 
+        class Total:
+            value = 0
+            relation = 'eq'
+
+        total = Total()
+        total.value = len(hits)
+
         self.es.return_value.msearch.return_value = {
             'responses': [
                 {
                     'hits': {
                         'hits': hits,
-                        'total': len(hits)
+                        'total': total
                     }
                 }
             ]

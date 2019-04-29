@@ -9,7 +9,8 @@ import shapely.geometry
 import shapely.ops
 from service import names as N
 
-_MEAN_EARTH_RADIUS_KM = 6371
+# Radio de la tierra promedio para WGS84
+_MEAN_EARTH_RADIUS_KM = 6371.0088
 
 
 def _street_block_extents(door_nums, number):
@@ -198,20 +199,44 @@ class Point:
         """Retorna una representación GeoJSON de un círculo centrado en la
         instancia de Point.
 
-        Nota: Los círculos 'GeoJSON' son usados exclusivamente en
-        Elasticsearch (no forman parte del estándar GeoJSON).
-
         Args:
             radius_meters (int): Radio del círculo en metros.
 
         Returns:
-            dict: Valor GeoJSON del círculo.
+            dict: Valor GeoJSON del círculo (tipo GeoJSON: "polygon").
 
         """
+        point = self.to_shapely_point()
+
+        # Queremos crear un círculo GeoJSON centrado en self, con un radio de
+        # 'radius_meters'.
+        #
+        # Para lograr esto, transformamos self a un punto Shapely. Luego,
+        # utilizamos el método .buffer() para crear una geometría
+        # cuasi-circular centrada en ese punto. El método requiere una variable
+        # 'distance' que representa el radio del círculo a crear, en grados.
+        #
+        # Para obtener los grados necesarios, imaginamos que el radio de
+        # nuestro círculo a crear es en realidad un arco sobre la superficie de
+        # la tierra. Conocemos la longitud de este arco en metros
+        # ('radius_meters'), y conocemos el radio de la tierra
+        # ('_MEAN_EARTH_RADIUS_KM'), por lo que podemos usar la ecuación:
+        #
+        #     ángulo de arco = largo del arco / radio
+        #
+        # para calcular el ángulo que el arco representa sobre la superficie de
+        # la tierra.
+
+        distance_angle = math.degrees(radius_meters /
+                                      (1000 * _MEAN_EARTH_RADIUS_KM))
+
+        # Con 'resolution=3', obtenemos un polígono de 13 vértices (3 vértices
+        # por cuarto de círculo, mas uno para cerrar) con forma cuasi-circular.
+        circle = point.buffer(distance_angle, resolution=3)
+
         return {
-            'type': 'circle',
-            'radius': '{}m'.format(radius_meters),
-            'coordinates': [self._lon, self._lat]
+            'type': 'polygon',
+            'coordinates': [list(circle.exterior.coords)]
         }
 
     def to_json_location(self):

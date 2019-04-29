@@ -38,14 +38,14 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
         debería utilizar la posición de la altura sobre la primera calle como
         posición final."""
         resp_simple = self.get_response({
-            'direccion': 'Miller 3500',
+            'direccion': 'Miller 3550',
             'departamento': 'capital',
             'provincia': 'Córdoba'
         })
         loc_simple = resp_simple[0]['ubicacion']
 
         resp_btwn = self.get_response({
-            'direccion': 'Miller nro. 3500 e/Niceto Vega y Villegas',
+            'direccion': 'Miller nro. 3550 e/Niceto Vega y Villegas',
             'departamento': 'capital',
             'provincia': 'Córdoba'
         })

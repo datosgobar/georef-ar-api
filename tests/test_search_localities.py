@@ -257,8 +257,7 @@ class SearchLocalityTest(GeorefLiveTest):
             (['86056070000'], 'PAMPA DE LOS GUANA'),
             (['86056070000'], 'PAMPA DE LOS GUAN'),
             (['86056070000'], 'PAMPA DE LOS GUA'),
-            (['86056070000'], 'PAMPA DE LOS GU'),
-            (['86056070000'], 'PAMPA DE LOS G')
+            (['86056070000'], 'PAMPA DE LOS GU')
         ]
 
         self.assert_name_search_id_matches(expected)

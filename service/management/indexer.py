@@ -749,7 +749,6 @@ class GeorefIndex:
 
             action = {
                 '_op_type': 'create',
-                '_type': es_config.DOC_TYPE,
                 '_id': doc['id'],
                 '_index': index,
                 '_source': doc
