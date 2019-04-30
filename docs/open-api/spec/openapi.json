@@ -542,6 +542,137 @@
 		"additionalProperties": false,
 		"required": ["localidades"]
 	    },
+            "asentamiento": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sub_entidad"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "82084000012"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "El Prado"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
+                    },
+		    "municipio": {
+			"$ref": "#/components/schemas/municipio_sub_entidad"
+		    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "Sitio edificado (ST)",
+                        "enum": [
+                            "Entidad (E)",
+                            "Componente de localidad compuesta (LC)",
+                            "Localidad simple (LS)",
+			    "Localidad simple con entidad (LSE)",
+			    "Componente de localidad compuesta con entidad (LCE)",
+			    "Sitio edificado (ST)"
+                        ]
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.861364
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.706216
+			    }
+			}
+		    }
+                }
+            },
+	    "asentamientos_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 13555
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "asentamientos": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/asentamiento"
+			}
+		    }
+		}
+	    },
+	    "asentamientos_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/asentamientos_single"
+			}
+		    }
+		}
+	    },
+	    "asentamientos_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "asentamientos": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"municipio": {
+				    "$ref": "#/components/schemas/param_municipio"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["asentamientos"]
+	    },
             "direccion": {
                 "type": "object",
                 "properties": {
@@ -1535,6 +1666,100 @@
 			    "application/json": {
 				"schema": {
 				    "$ref": "#/components/schemas/municipios_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/asentamientos": {
+	    "get": {
+		"summary": "Retorna un listado de asentamientos.",
+		"description": "Permite realizar búsquedas sobre el listado de asentamientos BAHRA.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/municipio"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de asentamientos.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/asentamientos_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de asentamientos.",
+		"description": "Permite realizar varias búsquedas sobre el listado de asentamientos BAHRA en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/asentamientos_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de asentamientos.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/asentamientos_bulk"
 				}
 			    }
 			}

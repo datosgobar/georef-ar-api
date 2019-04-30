@@ -51,3 +51,5 @@ $ npm install --global swagger-cli
 ```
 $ swagger-cli validate spec/openapi.json
 ```
+
+Otra opción es utilizar [Swagger Editor](https://editor.swagger.io/) (copiar y pegar el código JSON en el editor).
