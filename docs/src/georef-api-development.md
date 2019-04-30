@@ -4,7 +4,7 @@ En este documento se detallan los pasos a seguir si se desea configurar un servi
 
 ## Dependencias
 
-- [Elasticsearch >=6.4.2](https://www.elastic.co/guide/en/elasticsearch/reference/current/_installation.html)
+- [Elasticsearch >=7.0.0](https://www.elastic.co/downloads/elasticsearch)
 - [Python >=3.6.x](https://www.python.org/downloads/)
 - [Nginx](https://nginx.org/) *(para entornos productivos)*
 
@@ -14,19 +14,18 @@ En este documento se detallan los pasos a seguir si se desea configurar un servi
 
 Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más servidores (nodos).
 
-#### 1.1 Instalar el entorno de ejecución para Java:
-```bash
-$ sudo apt install default-jre
-```
+#### 1.1 Instalar Elasticsearch
 
-#### 1.2 Instalar Elasticsearch
+Instalar Elasticsearch siguiendo la [guía de instalación para Debian/Ubuntu](https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html).
 
-Instalar Elasticsearch e iniciar el servicio con `systemctl`:
+#### 1.2 Habiliar el servicio `elasticsearch`
+
+Asegurar que el servicio `elasticsearch` está habilitado utilizando `systemctl`:
 ```bash
-$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.4.2.deb
-$ sudo dpkg -i elasticsearch-6.4.2.deb
+$ sudo systemctl start elasticsearch
 $ sudo systemctl enable elasticsearch
 ```
+
 #### 1.3 Aplicar las configuraciones recomendadas
 
 Editar el archivo  `/etc/elasticsearch/elasticsearch.yml` (el valor de `node.name` debe ser único por nodo):
@@ -137,6 +136,7 @@ Los nombres de los índices disponibles son:
 - `calles`
 - `intersecciones`
 - `cuadras`
+- `asentamientos`
 
 ### 5. Correr API 
 #### Entornos de desarrollo
