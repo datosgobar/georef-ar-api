@@ -1,6 +1,6 @@
 # Modelo de datos para Georef
 
-**Versión**: 11.0.0
+**Versión**: 12.0.0
 
 El fin del proceso ETL de Georef es producir archivos con datos de entidades geográficas. El ETL genera varios archivos: unos de ellos son utilizados para ser indexados por la API, y otros sirven para facilitar a usuarios de la API descargarse la totalidad de los datos en distintos formatos.
 
@@ -16,17 +16,7 @@ Los archivos generados para ser indexados en la API tienen formato [NDJSON](http
 - `localidades-censales.ndjson`
 - `asentamientos.ndjson`
 
-Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. Los archivos son:
-
-- `provincias.json`, `provincias.csv`, `provincias.geojson`
-- `departamentos.json`, `departamentos.csv`, `departamentos.geojson`
-- `municipios.json`, `municipios.csv`, `municipios.geojson`
-- `localidades.json`, `localidades.csv`, `localidades.geojson`
-- `calles.json`, `calles.csv`
-- `localidades-censales.json`, `localidades-censales.csv`, `localidades-censales.geojson`
-- `asentamientos.json`, `asentamientos.csv`, `asentamientos.geojson`
-
-**Se recomienda el uso de los archivos NDJSON si se desea procesar todos los datos de entidades geográficas.** Esto se debe a que el formato se presta a ser leído por partes (líneas), lo cual facilita el procesamiento de los archivos de gran tamaño. Notar que los archivos en formato CSV **no** contienen las geometrías de las entidades.
+Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. La tabla completa de los archivos generados se encuentra detallada en la sección de [instalación y ejecución del ETL](etl-install.md#3-resultados). **Se recomienda el uso de los archivos NDJSON si se desea procesar todos los datos de entidades geográficas.** Esto se debe a que el formato se presta a ser leído por partes (líneas), lo cual facilita el procesamiento de los archivos de gran tamaño. Notar que el único formato que incluye las geometrías de las entidades geográficas es NDJSON.
 
 ## Fuentes
 Los orígenes de los datos procesados en el ETL son:

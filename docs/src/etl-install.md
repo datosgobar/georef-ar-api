@@ -92,6 +92,13 @@ Una vez finalizado el proceso de instalación, utilizar la receta `run` para eje
 (env) $ make run
 ```
 
+Para ejecutar el ETL de una o más entidades geográficas en particular, utilizar la opción `-p`:
+```bash
+(env) $ python -m georef_ar_etl -p provincias -p departamentos
+```
+
+## 3. Resultados
+
 Por defecto, los productos del ETL serán:
 
 Las tablas:
@@ -99,17 +106,29 @@ Las tablas:
  - `georef_provincias`
  - `georef_departamentos`
  - `georef_municipios`
+ - `georef_localidades_censales`
+ - `georef_asentamientos`
  - `georef_localidades`
  - `georef_calles`
  - `georef_intersecciones`
  - `georef_cuadras`
  
  Y los archivos (bajo `/files/latest/`):
- 
- - `provincias.json`
- - `departamentos.json`
- - `municipios.json`
- - `localidades.json`
- - `calles.json`
- - `intersecciones.json`
- - `cuadras.json`
+
+<table>
+    <tr><th>Entidad</th><th>NDJSON</th><th>JSON</th><th>CSV</th><th>GeoJSON</th></tr>
+    <tr><td>Provincias</td><td><code>provincias.ndjson</code></td><td><code>provincias.json</code></td><td><code>provincias.csv</code></td><td><code>provincias.geojson</code></td></tr>
+    <tr><td>Departamentos</td><td><code>departamentos.ndjson</code></td><td><code>departamentos.json</code></td><td><code>departamentos.csv</code></td><td><code>departamentos.geojson</code></td></tr>
+    <tr><td>Municipios</td><td><code>municipios.ndjson</code></td><td><code>municipios.json</code></td><td><code>municipios.csv</code></td><td><code>municipios.geojson</code></td></tr>
+    <tr><td>Localidades Censales</td><td><code>localidades-censales.ndjson</code></td><td><code>localidades-censales.json</code></td><td><code>localidades-censales.csv</code></td><td><code>localidades-censales.geojson</code></td></tr>
+    <tr><td>Asentamientos</td><td><code>asentamientos.ndjson</code></td><td><code>asentamientos.json</code></td><td><code>asentamientos.csv</code></td><td><code>asentamientos.geojson</code></td></tr>
+    <tr><td>Localidades</td><td><code>localidades.ndjson</code></td><td><code>localidades.json</code></td><td><code>localidades.csv</code></td><td><code>localidades.geojson</code></td></tr>
+    <tr><td>Calles</td><td><code>calles.ndjson</code></td><td><code>calles.json</code></td><td><code>calles.csv</code></td><td>-</td></tr>
+    <tr><td>Cuadras</td><td><code>cuadras.ndjson</code></td><td>-</td><td>-</td><td>-</td></tr>
+    <tr><td>Intersecciones</td><td><code>intersecciones.ndjson</code></td><td>-</td><td>-</td><td>-</td></tr>
+</table>
+
+Y adicionalmente, los siguientes archivos:
+
+- `sinonimos-nombres.txt`
+- `terminos-excluyentes-nombres.txt`
