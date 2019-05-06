@@ -61,6 +61,22 @@ _MUNICIPALITIES_CSV_FIELDS = [
     (N.CATEGORY, [N.MUN, N.CATEGORY])
 ]
 
+_CENSUS_LOCALITIES_CSV_FIELDS = [
+    (N.ID, [N.LOCALITY, N.ID]),
+    (N.NAME, [N.LOCALITY, N.NAME]),
+    (N.C_LAT, [N.LOCALITY, N.CENTROID, N.LAT]),
+    (N.C_LON, [N.LOCALITY, N.CENTROID, N.LON]),
+    (N.STATE_ID, [N.STATE, N.ID]),
+    (N.STATE_NAME, [N.STATE, N.NAME]),
+    (N.DEPT_ID, [N.DEPT, N.ID]),
+    (N.DEPT_NAME, [N.DEPT, N.NAME]),
+    (N.MUN_ID, [N.MUN, N.ID]),
+    (N.MUN_NAME, [N.MUN, N.NAME]),
+    (N.SOURCE, [N.LOCALITY, N.SOURCE]),
+    (N.FUNCTION, [N.LOCALITY, N.FUNCTION]),
+    (N.CATEGORY, [N.LOCALITY, N.CATEGORY])
+]
+
 _SETTLEMENTS_CSV_FIELDS = [
     (N.ID, [N.LOCALITY, N.ID]),
     (N.NAME, [N.LOCALITY, N.NAME]),
@@ -122,6 +138,7 @@ _ENDPOINT_CSV_FIELDS = {
     N.STATES: _STATES_CSV_FIELDS,
     N.DEPARTMENTS: _DEPARTMENTS_CSV_FIELDS,
     N.MUNICIPALITIES: _MUNICIPALITIES_CSV_FIELDS,
+    N.CENSUS_LOCALITIES: _CENSUS_LOCALITIES_CSV_FIELDS,
     N.SETTLEMENTS: _SETTLEMENTS_CSV_FIELDS,
     N.LOCALITIES: _LOCALITIES_CSV_FIELDS,
     N.STREETS: _STREETS_CSV_FIELDS,
@@ -425,6 +442,7 @@ def create_404_error_response():
                 '/api/provincias',
                 '/api/departamentos',
                 '/api/municipios',
+                '/api/localidades-censales',
                 '/api/asentamientos',
                 '/api/localidades',
                 '/api/calles',

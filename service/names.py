@@ -30,6 +30,8 @@ DEPARTMENTS = 'departamentos'
 DEPT = 'departamento'
 MUN = 'municipio'
 MUNICIPALITIES = 'municipios'
+CENSUS_LOCALITIES = 'localidades_censales'
+CENSUS_LOCALITY = 'localidad_censal'
 SETTLEMENTS = 'asentamientos'
 SETTLEMENT = 'asentamiento'
 LOCALITIES = 'localidades'
@@ -66,6 +68,7 @@ ERRORS = 'errores'
 FLATTEN = 'aplanar'
 FLOOR = 'piso'
 FORMAT = 'formato'
+FUNCTION = 'funcion'
 FULL_NAME = 'nomenclatura'
 GEOM = 'geometria'
 HELP = 'ayuda'
@@ -136,6 +139,7 @@ _PLURALS = {
     STATE: STATES,
     DEPT: DEPARTMENTS,
     MUN: MUNICIPALITIES,
+    CENSUS_LOCALITY: CENSUS_LOCALITIES,
     SETTLEMENT: SETTLEMENTS,
     LOCALITY: LOCALITIES,
     STREET: STREETS,

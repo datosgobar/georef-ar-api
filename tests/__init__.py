@@ -216,7 +216,7 @@ class GeorefLiveTest(TestCase):
         if not params:
             params = {}
 
-        entity_plural = self.endpoint.split('/')[-1]
+        entity_plural = self.endpoint.split('/')[-1].replace('-', '_')
 
         json_resp = self.get_response(params=params, return_value='full')
         json_as_xml = formatter.value_to_xml(entity_plural,

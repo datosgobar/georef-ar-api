@@ -132,11 +132,12 @@ Los nombres de los índices disponibles son:
 - `departamentos-geometria`
 - `municipios`
 - `municipios-geometria`
+- `localidades-censales`
+- `asentamientos`
 - `localidades`
 - `calles`
 - `intersecciones`
 - `cuadras`
-- `asentamientos`
 
 ### 5. Correr API 
 #### Entornos de desarrollo

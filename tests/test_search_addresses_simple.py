@@ -251,10 +251,10 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_address_exact_search_ignores_case(self):
         """La búsqueda exacta debe ignorar mayúsculas y minúsculas."""
         expected = [
-            (['0200801006685'], 'JOSE BARROS PAZOS 5500'),
-            (['0200801006685'], 'jose barros pazos 5500'),
-            (['0200801006685'], 'Jose Barros Pazos 5500'),
-            (['0200801006685'], 'JoSe BaRrOs PaZoS 5500')
+            (['0205601006685'], 'JOSE BARROS PAZOS 5500'),
+            (['0205601006685'], 'jose barros pazos 5500'),
+            (['0205601006685'], 'Jose Barros Pazos 5500'),
+            (['0205601006685'], 'JoSe BaRrOs PaZoS 5500')
         ]
 
         self.assert_address_search_id_matches(expected, exact=True)
@@ -306,8 +306,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['0676305002780'], 'ARACONDEGUI 301'),     # -1 caracteres (de 8+)
             (['0676305002780'], 'zZARACONDEGUI 301'),   # +1 caracteres (de 8+)
             (['0676305002780'], 'zZARACONDEGUIi 301'),  # +2 caracteres (de 8+)
-            (['0200401006430'], 'NCLAN 3000'),         # -1 caracteres (de 4-7)
-            (['0200401006430'], 'iINCLAN 3000')        # +1 caracteres (de 4-7)
+            (['0202801006430'], 'NCLAN 3000'),         # -1 caracteres (de 4-7)
+            (['0202801006430'], 'iINCLAN 3000')        # +1 caracteres (de 4-7)
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -326,15 +326,15 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """La búsqueda aproximada debe también actuar como autocompletar cuando
         la longitud de la query es >= 4."""
         expected = [
-            (['0201101007975'], 'MARCOS SASTRE 2600'),
-            (['0201101007975'], 'MARCOS SASTR 2600'),
-            (['0201101007975'], 'MARCOS SAST 2600'),
-            (['0201101007975'], 'MARCOS SAS 2600'),
-            (['0201301004195'], 'CAP GRL RAMON FREIRE 2201'),
-            (['0201301004195'], 'CAP GRL RAMON FREIR 2201'),
-            (['0201301004195'], 'CAP GRL RAMON FREI 2201'),
-            (['0201301004195'], 'CAP GRL RAMON FRE 2201'),
-            (['0201301004195'], 'CAP GRL RAMON FR 2201')
+            (['0207701007975'], 'MARCOS SASTRE 2600'),
+            (['0207701007975'], 'MARCOS SASTR 2600'),
+            (['0207701007975'], 'MARCOS SAST 2600'),
+            (['0207701007975'], 'MARCOS SAS 2600'),
+            (['0209101004195'], 'CAP GRL RAMON FREIRE 2201'),
+            (['0209101004195'], 'CAP GRL RAMON FREIR 2201'),
+            (['0209101004195'], 'CAP GRL RAMON FREI 2201'),
+            (['0209101004195'], 'CAP GRL RAMON FRE 2201'),
+            (['0209101004195'], 'CAP GRL RAMON FR 2201')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -362,8 +362,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['5804201000085'], 'avenida estanislao flore 1000'),
             (['5804201000085'], 'av estanislao flore 1000'),
             (['5804201000085'], 'AV ESTANISLAOOO FLORES 1000'),
-            (['0200501005600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
-            (['0200501005600'], 'fransisco acuna figeroa 1000')
+            (['0203501005600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
+            (['0203501005600'], 'fransisco acuna figeroa 1000')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -417,7 +417,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """Se debe poder filtrar los resultados por nombre de departamento."""
         validations = []
         departments = [
-            ('02001', 'COMUNA 1'),
+            ('02007', 'COMUNA 1'),
             ('02015', 'COMUNA 15'),
             ('66147', 'ROSARIO DE LERMA')
         ]
@@ -439,7 +439,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """Se debe poder filtrar los resultados por ID de departamento."""
         validations = []
         departments = [
-            ('02007', 'Comuna 1'),
+            ('02049', 'Comuna 1'),
             ('02105', 'Comuna 15'),
             ('66147', 'Rosario de Lerma')
         ]

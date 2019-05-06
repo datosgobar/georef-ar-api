@@ -1084,6 +1084,36 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
+PARAMS_CENSUS_LOCALITIES = EndpointParameters(shared_params={
+    N.ID: IdsParameter(id_length=constants.CENSUS_LOCALITY_ID_LEN),
+    N.NAME: StrParameter(),
+    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
+    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
+    N.MUN: StrOrIdsParameter(id_length=constants.MUNI_ID_LEN),
+    N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
+    N.FLATTEN: BoolParameter(),
+    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
+                                 standard=[N.C_LAT, N.C_LON, N.STATE_ID,
+                                           N.STATE_NAME, N.DEPT_ID,
+                                           N.DEPT_NAME, N.MUN_ID, N.MUN_NAME,
+                                           N.CATEGORY, N.FUNCTION],
+                                 complete=[N.SOURCE]),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json',
+                           choices=['json', 'csv', 'geojson', 'xml', 'shp'])
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+)
+
 PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.SETTLEMENT_ID_LEN),
     N.NAME: StrParameter(),

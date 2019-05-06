@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 # Versión de archivos del ETL compatibles con ésta versión de API.
 # Modificar su valor cuando se haya actualizado el código para tomar
 # nuevas versiones de los archivos.
-ETL_FILE_VERSION = '11.0.0'
+ETL_FILE_VERSION = '12.0.0'
 
 LOGS_DIR = 'logs'
 CACHE_DIR = 'cache'
@@ -55,6 +55,7 @@ INDEX_NAMES = [
     es_config.geom_index_for(N.DEPARTMENTS),
     N.MUNICIPALITIES,
     es_config.geom_index_for(N.MUNICIPALITIES),
+    N.CENSUS_LOCALITIES,
     N.SETTLEMENTS,
     N.LOCALITIES,
     N.STREETS,
@@ -446,8 +447,9 @@ class GeorefIndex:
 
         if not self._backup_filepath:
             if not ok:
-                logger.error('No se pudo indexar utilizando fuente primaria.')
-                logger.error('')
+                log_fn = logger.error if forced else logger.warning
+                log_fn('No se pudo indexar utilizando fuente primaria.')
+                log_fn('')
 
             return
 
@@ -854,6 +856,14 @@ def run_index(es, forced, name='all', verbose=False):
                     doc_class=es_config.MunicipalityGeom,
                     filepath=app.config['MUNICIPALITIES_FILE'],
                     includes=[N.ID, N.GEOM]),
+        GeorefIndex(alias=N.CENSUS_LOCALITIES,
+                    doc_class=es_config.CensusLocality,
+                    filepath=app.config['CENSUS_LOCALITIES_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
+                    backup_filepath=os.path.join(
+                        backups_dir, 'localidades-censales.ndjson')),
         GeorefIndex(alias=N.SETTLEMENTS,
                     doc_class=es_config.Settlement,
                     filepath=app.config['SETTLEMENTS_FILE'],

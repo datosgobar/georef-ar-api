@@ -91,6 +91,11 @@ def get_municipalities():
     return normalizer.process_municipality(request)
 
 
+@bp_v1_0.route('/localidades-censales', methods=['GET', 'POST'])
+def get_census_localities():
+    return normalizer.process_census_locality(request)
+
+
 @bp_v1_0.route('/asentamientos', methods=['GET', 'POST'])
 def get_settlements():
     return normalizer.process_settlement(request)

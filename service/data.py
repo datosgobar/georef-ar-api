@@ -822,6 +822,17 @@ class MunicipalitiesSearch(TerritoriesSearch):
                          geom_search_class=MunicipalitiesGeometrySearch)
 
 
+class CensusLocalitiesSearch(TerritoriesSearch):
+    """Representa una búsqueda de localidades censales.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(N.CENSUS_LOCALITIES, query)
+
+
 class SettlementsSearch(TerritoriesSearch):
     """Representa una búsqueda de asentamientos.
 
@@ -848,10 +859,13 @@ _ENTITY_SEARCH_CLASSES = {
     N.STATES: StatesSearch,
     N.DEPARTMENTS: DepartmentsSearch,
     N.MUNICIPALITIES: MunicipalitiesSearch,
+    N.CENSUS_LOCALITIES: CensusLocalitiesSearch,
     N.SETTLEMENTS: SettlementsSearch,
     N.LOCALITIES: LocalitiesSearch,
     N.STREETS: StreetsSearch
 }
+"""dict: Mantiene un registro de nombres de índices vs. clase a utilizar para
+buscar en los mismos."""
 
 
 def entity_search_class(entity):

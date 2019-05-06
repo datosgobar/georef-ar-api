@@ -187,7 +187,7 @@ NameField = Text(
     }
 )
 
-StateSimpleField = Object(
+StateSubField = Object(
     properties={
         'id': Keyword(),
         'nombre': NameField,
@@ -196,7 +196,7 @@ StateSimpleField = Object(
     dynamic='strict'
 )
 
-DepartmentSimpleField = Object(
+DepartmentSubField = Object(
     properties={
         'id': Keyword(),
         'nombre': NameField
@@ -204,7 +204,7 @@ DepartmentSimpleField = Object(
     dynamic='strict'
 )
 
-MunicipalitySimpleField = Object(
+MunicipalitySubField = Object(
     properties={
         'id': Keyword(),
         'nombre': NameField
@@ -212,12 +212,21 @@ MunicipalitySimpleField = Object(
     dynamic='strict'
 )
 
-StreetSimpleField = Object(
+CensusLocalitySubField = Object(
+    properties={
+        'id': Keyword(),
+        'nombre': NameField
+    },
+    dynamic='strict'
+)
+
+StreetSubField = Object(
     properties={
         'id': Keyword(),
         'nombre': NameField,
-        'provincia': StateSimpleField,
-        'departamento': DepartmentSimpleField,
+        'provincia': StateSubField,
+        'departamento': DepartmentSubField,
+        'localidad_censal': CensusLocalitySubField,
         'categoria': UnindexedTextField,
         'fuente': UnindexedTextField
     },
@@ -248,8 +257,10 @@ StreetNumbersField = Object(
 
 class Entity(Document):
     """Clase base para todos los documentos que representan entidades
-    geograficas.
+    geográficas.
+
     """
+
     id = IdField
 
 
@@ -276,7 +287,7 @@ class Department(Entity):
     nombre_completo = Text(index=False)
     centroide = CentroidField
     geometria = GeoShape()
-    provincia = StateSimpleField
+    provincia = StateSubField
     categoria = UnindexedTextField
     fuente = UnindexedTextField
 
@@ -293,7 +304,7 @@ class Municipality(Entity):
     nombre_completo = UnindexedTextField
     centroide = CentroidField
     geometria = GeoShape()
-    provincia = StateSimpleField
+    provincia = StateSubField
     categoria = UnindexedTextField
     fuente = UnindexedTextField
 
@@ -305,13 +316,26 @@ class MunicipalityGeom(Entity):
     geometria = GeoShape()
 
 
+class CensusLocality(Entity):
+    nombre = NameField
+    centroide = CentroidField
+    geometria = GeoShape()
+    provincia = StateSubField
+    departamento = DepartmentSubField
+    municipio = MunicipalitySubField
+    categoria = UnindexedTextField
+    funcion = UnindexedTextField
+    fuente = UnindexedTextField
+
+
 class Settlement(Entity):
     nombre = NameField
     centroide = CentroidField
     geometria = GeoShape()
-    provincia = StateSimpleField
-    departamento = DepartmentSimpleField
-    municipio = MunicipalitySimpleField
+    provincia = StateSubField
+    departamento = DepartmentSubField
+    municipio = MunicipalitySubField
+    localidad_censal = CensusLocalitySubField
     categoria = UnindexedTextField
     fuente = UnindexedTextField
 
@@ -325,8 +349,9 @@ class Street(Entity):
     nombre = NameField
     altura = StreetNumbersField
     geometria = GeoShape()
-    provincia = StateSimpleField
-    departamento = DepartmentSimpleField
+    provincia = StateSubField
+    departamento = DepartmentSubField
+    localidad_censal = CensusLocalitySubField
     # Indexar las categorías de calles ya que se puede filtrar por las mismas
     categoria = Text(
         analyzer=name_analyzer_synonyms,
@@ -336,13 +361,13 @@ class Street(Entity):
 
 
 class Intersection(Entity):
-    calle_a = StreetSimpleField
-    calle_b = StreetSimpleField
+    calle_a = StreetSubField
+    calle_b = StreetSubField
     geometria = GeoShape()
 
 
 class StreetBlock(Entity):
-    calle = StreetSimpleField
+    calle = StreetSubField
     altura = StreetNumbersField
     geometria = GeoShape()
 
