@@ -42,7 +42,8 @@ def add_complete_downloads(bp, urls):
             georef.example.cfg para más detalles.
 
     """
-    entities = [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES, N.SETTLEMENTS,
+    entities = [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES,
+                N.CENSUS_LOCALITIES.replace('_', '-'), N.SETTLEMENTS,
                 N.LOCALITIES, N.STREETS]
     formats = ['json', 'csv', 'geojson']
 
@@ -50,8 +51,8 @@ def add_complete_downloads(bp, urls):
         entity_urls = urls[entity]
 
         for fmt in formats:
-            if entity_urls.get(fmt):
-                url = entity_urls[fmt]
+            url = entity_urls.get(fmt)
+            if url:
                 # e.g: /provincias.csv
                 endpoint = '{}-{}'.format(entity, fmt)
                 rule = '/{}.{}'.format(entity, fmt)
