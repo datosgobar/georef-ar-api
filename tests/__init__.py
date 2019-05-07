@@ -10,7 +10,6 @@ import json
 import urllib
 import zipfile
 from flask import current_app
-import geojson
 import shapefile
 from service import app, formatter
 
