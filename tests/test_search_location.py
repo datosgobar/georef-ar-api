@@ -157,12 +157,6 @@ class SearchLocationTest(GeorefLiveTest):
         muni = data['municipio']
         self.assertTrue(muni['id'] is None and muni['nombre'] is None)
 
-    def test_empty_params(self):
-        """Los parámetros que esperan valores no pueden tener valores
-        vacíos."""
-        params = ['lat', 'lon']
-        self.assert_empty_params_return_400(params)
-
     def test_infinity(self):
         """Cuando se especifica Infinity como valor numérico, se debe responder
         con una respuesta 400."""
@@ -178,10 +172,6 @@ class SearchLocationTest(GeorefLiveTest):
                                    return_value='status',
                                    expect_status=[400])
         self.assertEqual(status, 400)
-
-    def test_unknown_param_returns_400(self):
-        """El endpoint no debe aceptar parámetros desconocidos."""
-        self.assert_unknown_param_returns_400()
 
     def test_flat_results(self):
         """El parametro aplanar deberia aplanar los resultados devueltos."""
@@ -302,12 +292,6 @@ class SearchLocationTest(GeorefLiveTest):
 
         location = self.get_response({'lat': lat, 'lon': lon})
         self.assertEqual(location['provincia']['id'], state_id)
-
-    def test_bulk_empty_400(self):
-        """La búsqueda bulk vacía debería retornar un error 400."""
-        status = self.get_response(method='POST', body={},
-                                   return_value='status', expect_status=[400])
-        self.assertEqual(status, 400)
 
     def test_bulk_response_len(self):
         """La longitud de la respuesta bulk debería ser igual a la cantidad

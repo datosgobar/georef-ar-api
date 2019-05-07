@@ -105,12 +105,6 @@ class SearchStatesTest(GeorefLiveTest):
             'Salta'
         ])
 
-    def test_default_results_fields(self):
-        """Las entidades devueltas deben tener los campos default."""
-        data = self.get_response({'max': 1})[0]
-        fields = sorted(['id', 'centroide', 'nombre'])
-        self.assertListEqual(fields, sorted(data.keys()))
-
     def test_filter_results_fields(self):
         """Los campos de las provincias devueltas deben ser filtrables."""
         fields_lists = [
@@ -310,22 +304,6 @@ class SearchStatesTest(GeorefLiveTest):
         ]
 
         self.assert_name_search_id_matches(expected)
-
-    def test_empty_params(self):
-        """Los parámetros que esperan valores no pueden tener valores
-        vacíos."""
-        params = ['id', 'nombre', 'orden', 'campos', 'max', 'formato']
-        self.assert_empty_params_return_400(params)
-
-    def test_unknown_param_returns_400(self):
-        """El endpoint no debe aceptar parámetros desconocidos."""
-        self.assert_unknown_param_returns_400()
-
-    def test_bulk_empty_400(self):
-        """La búsqueda bulk vacía debería retornar un error 400."""
-        status = self.get_response(method='POST', body={},
-                                   return_value='status', expect_status=[400])
-        self.assertEqual(status, 400)
 
     def test_bulk_response_len(self):
         """La longitud de la respuesta bulk debería ser igual a la cantidad

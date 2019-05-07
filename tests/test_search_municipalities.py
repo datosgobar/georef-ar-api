@@ -285,26 +285,9 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         results = [mun['id'].startswith(state_id) for mun in data]
         self.assertTrue(all(results) and results)
 
-    def test_empty_params(self):
-        """Los parámetros que esperan valores no pueden tener valores
-        vacíos."""
-        params = ['id', 'nombre', 'orden', 'campos', 'max', 'formato',
-                  'provincia', 'departamento']
-        self.assert_empty_params_return_400(params)
-
-    def test_unknown_param_returns_400(self):
-        """El endpoint no debe aceptar parámetros desconocidos."""
-        self.assert_unknown_param_returns_400()
-
     def test_flat_results(self):
         """El parametro aplanar deberia aplanar los resultados devueltos."""
         self.assert_flat_results()
-
-    def test_bulk_empty_400(self):
-        """La búsqueda bulk vacía debería retornar un error 400."""
-        status = self.get_response(method='POST', body={},
-                                   return_value='status', expect_status=[400])
-        self.assertEqual(status, 400)
 
     def test_bulk_response_len(self):
         """La longitud de la respuesta bulk debería ser igual a la cantidad

@@ -288,17 +288,6 @@ class SearchDepartmentsTest(GeorefLiveTest):
 
         self.assertListEqual(ids, sorted(id_prefixes))
 
-    def test_empty_params(self):
-        """Los parámetros que esperan valores no pueden tener valores
-        vacíos."""
-        params = ['id', 'nombre', 'orden', 'campos', 'max', 'formato',
-                  'provincia']
-        self.assert_empty_params_return_400(params)
-
-    def test_unknown_param_returns_400(self):
-        """El endpoint no debe aceptar parámetros desconocidos."""
-        self.assert_unknown_param_returns_400()
-
     def test_flat_results(self):
         """El parametro aplanar deberia aplanar los resultados devueltos."""
         self.assert_flat_results()
@@ -327,12 +316,6 @@ class SearchDepartmentsTest(GeorefLiveTest):
         resultados apropiados."""
         resp = self.get_response(return_value='full')
         self.assertTrue(resp['cantidad'] == 10 and resp['inicio'] == 0)
-
-    def test_bulk_empty_400(self):
-        """La búsqueda bulk vacía debería retornar un error 400."""
-        status = self.get_response(method='POST', body={},
-                                   return_value='status', expect_status=[400])
-        self.assertEqual(status, 400)
 
     def test_bulk_response_len(self):
         """La longitud de la respuesta bulk debería ser igual a la cantidad
@@ -440,7 +423,8 @@ class SearchDepartmentsTest(GeorefLiveTest):
 
     def test_geojson_format_flat(self):
         """Se deberían poder aplanar los resultados GeoJSON."""
-        resp = self.get_geojson({'aplanar': True, 'max': 1})
+        resp = self.get_response({'aplanar': True, 'max': 1,
+                                  'formato': 'geojson'})
         self.assertTrue(all([
             not isinstance(v, dict) for v
             in resp['features'][0]['properties'].values()

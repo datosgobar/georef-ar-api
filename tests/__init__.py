@@ -156,6 +156,9 @@ class GeorefLiveTest(TestCase):
                     key = entity if method == 'GET' else 'resultados'
                     return json.loads(response.data)[key]
 
+                if fmt == 'geojson':
+                    return json.loads(response.data)
+
                 if fmt == 'csv':
                     return csv.reader(response.data.decode().splitlines(),
                                       delimiter=formatter.CSV_SEP,
@@ -178,10 +181,6 @@ class GeorefLiveTest(TestCase):
 
         raise ValueError('Unknown return type')
 
-    def assert_unknown_param_returns_400(self):
-        response = self.app.get(self.endpoint + '?foo=bar')
-        self.assertEqual(response.status_code, 400)
-
     def assert_valid_csv(self, params=None):
         if not params:
             params = {}
@@ -200,16 +199,12 @@ class GeorefLiveTest(TestCase):
                              has_header,
                              row_count > 0]))
 
-    def get_geojson(self, params=None):
+    def assert_valid_geojson(self, params=None):
         if not params:
             params = {}
         params['formato'] = 'geojson'
 
-        resp = self.get_response(params=params, return_value='raw')
-        return geojson.loads(resp.decode())
-
-    def assert_valid_geojson(self, params=None):
-        geodata = self.get_geojson(params)
+        geodata = self.get_response(params)
         self.assertTrue(len(geodata['features']) > 0)
 
     def assert_valid_xml(self, params=None):
@@ -315,14 +310,6 @@ class GeorefLiveTest(TestCase):
             results.append(sorted([p['id'] for p in res]))
 
         self.assertListEqual([sorted(ids) for ids, _ in term_matches], results)
-
-    def assert_empty_params_return_400(self, params):
-        statuses = []
-        for param in params:
-            response = self.app.get(self.endpoint + '?' + param + '=')
-            statuses.append(response.status_code)
-
-        self.assertListEqual([400] * len(params), statuses)
 
 
 class GeorefMockTest(GeorefLiveTest):
