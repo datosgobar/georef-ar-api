@@ -317,6 +317,15 @@ class SearchLocalityTest(GeorefLiveTest):
         results = [loc['municipio']['id'] == mun_id for loc in data]
         self.assertTrue(all(results) and results)
 
+    def test_search_by_census_locality(self):
+        """Se debe poder buscar entidades por localidad censal."""
+        # Tomar una localidad censal que tiene localidades
+        cloc_id = '06638040'
+        data = self.get_response({'localidad_censal': cloc_id})
+        self.assertTrue(data and all([
+            loc['localidad_censal']['nombre'] == 'Pilar' for loc in data
+        ]))
+
     def test_empty_params(self):
         """Los parámetros que esperan valores no pueden tener valores
         vacíos."""
@@ -387,6 +396,9 @@ class SearchLocalityTest(GeorefLiveTest):
             },
             {
                 'municipio': '620133'
+            },
+            {
+                'localidad_censal': 'Villa'
             },
             {
                 'orden': 'nombre'

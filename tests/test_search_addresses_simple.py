@@ -397,46 +397,46 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
 
         self.assertTrue(validations and all(validations))
 
-    def test_filter_by_department_name(self):
-        """Se debe poder filtrar los resultados por nombre de departamento."""
-        validations = []
-        departments = [
-            ('02007', 'COMUNA 1'),
-            ('02015', 'COMUNA 15'),
-            ('66147', 'ROSARIO DE LERMA')
-        ]
-
-        for dept_code, dept_name in departments:
-            res = self.get_response({
-                'direccion': 'AV CORRIENTES 1000',
-                'departamento': dept_name,
-                'exacto': True
-            })
-
-            validations.append(all(
-                street['departamento']['id'] == dept_code for street in res
-            ))
-
-        self.assertTrue(validations and all(validations))
-
     def test_filter_by_department_id(self):
         """Se debe poder filtrar los resultados por ID de departamento."""
         validations = []
         departments = [
-            ('02049', 'Comuna 1'),
-            ('02105', 'Comuna 15'),
-            ('66147', 'Rosario de Lerma')
+            ('06252', 'Escobar'),
+            ('50007', 'Capital'),
+            ('82084', 'Rosario')
         ]
 
         for dept_code, dept_name in departments:
             res = self.get_response({
-                'direccion': 'AV CORRIENTES 1000',
+                'direccion': 'Santa fe 1000',
                 'departamento': dept_code
             })
 
             validations.append(all(
                 street['departamento']['nombre'] == dept_name for street in res
-            ))
+            ) and res)
+
+        self.assertTrue(validations and all(validations))
+
+    def test_filter_by_census_locality(self):
+        """Se debe poder filtrar los resultados por ID de localidad censal."""
+        validations = []
+        census_localities = [
+            ('06056010', 'Bahía Blanca'),
+            ('14098230', 'Río Cuarto'),
+            ('66126070', 'San Ramón de la Nueva Orán')
+        ]
+
+        for cloc_code, cloc_name in census_localities:
+            res = self.get_response({
+                'direccion': 'CORRIENTES 1000',
+                'localidad_censal': cloc_code
+            })
+
+            validations.append(all(
+                street['localidad_censal']['nombre'] == cloc_name
+                for street in res
+            ) and res)
 
         self.assertTrue(validations and all(validations))
 
