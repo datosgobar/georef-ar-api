@@ -368,9 +368,9 @@ class TerritoriesSearch(ElasticsearchSearch):
 
         super().__init__(index, query)
 
-    def _read_query(self, ids=None, name=None, municipality=None,
-                    department=None, state=None, exact=False,
-                    geo_shape_geoms=None, order=None, **kwargs):
+    def _read_query(self, ids=None, name=None, census_locality=None,
+                    municipality=None, department=None, state=None,
+                    exact=False, geo_shape_geoms=None, order=None, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
         'self._search'. Luego, invoca al método '_read_query' de la superclase
         con los parámetros que no fueron procesados.
@@ -378,6 +378,8 @@ class TerritoriesSearch(ElasticsearchSearch):
         Args:
             ids (list): Filtrar por IDs de entidades.
             name (str): Filtrar por nombre de entidades.
+            census_locality (list, str): Filtrar por nombre o IDs de
+                localidades censales.
             municipality (list, str): Filtrar por nombre o IDs de municipios.
             department (list, str): Filtrar por nombre o IDs de departamentos.
             state (list, str): Filtrar por nombre o IDs de provincias.
@@ -403,6 +405,14 @@ class TerritoriesSearch(ElasticsearchSearch):
             self._search = self._search.query(_build_geo_query(
                 N.GEOM,
                 geoms=geo_shape_geoms
+            ))
+
+        if census_locality:
+            self._search = self._search.query(_build_subentity_query(
+                N.CENSUS_LOCALITY_ID,
+                N.CENSUS_LOCALITY_NAME,
+                census_locality,
+                exact
             ))
 
         if municipality:
@@ -479,8 +489,9 @@ class StreetsSearch(ElasticsearchSearch):
         self._geo_shape_ids = query.pop('geo_shape_ids', None)
         super().__init__(N.STREETS, query)
 
-    def _read_query(self, ids=None, name=None, department=None, state=None,
-                    category=None, order=None, exact=False, **kwargs):
+    def _read_query(self, ids=None, name=None, census_locality=None,
+                    department=None, state=None, category=None, order=None,
+                    exact=False, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
         'self._search'. Luego, invoca al método '_read_query' de la superclase
         con los parámetros que no fueron procesados.
@@ -488,6 +499,8 @@ class StreetsSearch(ElasticsearchSearch):
         Args:
             ids (list): Filtrar por IDs de calles.
             name (str): Filtrar por nombre de calles.
+            census_locality (list, str): Filtrar por nombre o IDs de
+                localidades censales.
             department (list, str): Filtrar por nombre o IDs de departamentos.
             state (list, str): Filtrar por nombre o IDs de provincias.
             category (str): Filtrar por tipo de calle.
@@ -518,6 +531,14 @@ class StreetsSearch(ElasticsearchSearch):
                 N.CATEGORY,
                 category,
                 fuzzy=True
+            ))
+
+        if census_locality:
+            self._search = self._search.query(_build_subentity_query(
+                N.CENSUS_LOCALITY_ID,
+                N.CENSUS_LOCALITY_NAME,
+                census_locality,
+                exact
             ))
 
         if department:
@@ -573,8 +594,8 @@ class IntersectionsSearch(ElasticsearchSearch):
         """
         super().__init__(N.INTERSECTIONS, query)
 
-    def _read_query(self, ids=None, geo_shape_geoms=None, department=None,
-                    state=None, exact=False, **kwargs):
+    def _read_query(self, ids=None, geo_shape_geoms=None, census_locality=None,
+                    department=None, state=None, exact=False, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
         'self._search'. Luego, invoca al método '_read_query' de la superclase
         con los parámetros que no fueron procesados.
@@ -586,6 +607,8 @@ class IntersectionsSearch(ElasticsearchSearch):
                 y donde la calle B pertenezca a la segunda (o vice versa).
             geo_shape_geoms (list): Lista de geometrías GeoJSON a utilizar para
                 filtrar por intersección con geometrías.
+            census_locality (list, str): Filtrar por nombre o IDs de
+                localidades censales.
             department (list, str): Filtrar por nombre o IDs de departamentos.
             state (list, str): Filtrar por nombre o IDs de provincias.
             exact (bool): Si es verdadero, desactivar la búsqueda fuzzy para
@@ -614,6 +637,15 @@ class IntersectionsSearch(ElasticsearchSearch):
                 N.GEOM,
                 geoms=geo_shape_geoms
             ))
+
+        if census_locality:
+            for side in [N.STREET_A, N.STREET_B]:
+                self._search = self._search.query(_build_subentity_query(
+                    N.join(side, N.CENSUS_LOCALITY_ID),
+                    N.join(side, N.CENSUS_LOCALITY_NAME),
+                    census_locality,
+                    exact
+                ))
 
         if department:
             for side in [N.STREET_A, N.STREET_B]:
@@ -661,9 +693,9 @@ class StreetBlocksSearch(ElasticsearchSearch):
         """
         super().__init__(N.STREET_BLOCKS, query)
 
-    def _read_query(self, name=None, category=None, department=None,
-                    state=None, number=None, exact=False, order=None,
-                    **kwargs):
+    def _read_query(self, name=None, category=None, census_locality=None,
+                    department=None, state=None, number=None, exact=False,
+                    order=None, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
         'self._search'. Luego, invoca al método '_read_query' de la superclase
         con los parámetros que no fueron procesados.
@@ -671,6 +703,8 @@ class StreetBlocksSearch(ElasticsearchSearch):
         Args:
             name (str): Filtrar por nombre de calles.
             category (str): Filtrar por tipo de calle.
+            census_locality (list, str): Filtrar por nombre o IDs de
+                localidades censales.
             department (list, str): Filtrar por nombre o IDs de departamentos.
             state (list, str): Filtrar por nombre o IDs de provincias.
             number (int): Filtrar por altura de calle. El valor debe estar
@@ -696,6 +730,14 @@ class StreetBlocksSearch(ElasticsearchSearch):
                 N.join(N.STREET, N.CATEGORY),
                 category,
                 fuzzy=True
+            ))
+
+        if census_locality:
+            self._search = self._search.query(_build_subentity_query(
+                N.join(N.STREET, N.CENSUS_LOCALITY_ID),
+                N.join(N.STREET, N.CENSUS_LOCALITY_NAME),
+                census_locality,
+                exact
             ))
 
         if department:

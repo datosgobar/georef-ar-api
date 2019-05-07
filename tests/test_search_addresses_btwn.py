@@ -120,10 +120,6 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
 
         self.assertTrue(resp_btwn_1 and not resp_btwn_2)
 
-    def test_default_results_fields(self):
-        """Las entidades devueltas deben tener los campos default."""
-        self.assert_default_results_fields(COMMON_BTWN)
-
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""

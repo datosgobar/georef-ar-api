@@ -8,22 +8,6 @@ COMMON_ADDRESS = 'Corrientes 1000'
 
 
 class SearchAddressesBaseTest(GeorefLiveTest):
-    def assert_default_results_fields(self, address):
-        """Las entidades devueltas deben tener los campos default."""
-        data = self.get_response({'direccion': address, 'max': 1})[0]
-        fields = sorted([
-            'altura',
-            'piso',
-            'calle',
-            'calle_cruce_1',
-            'calle_cruce_2',
-            'departamento',
-            'nomenclatura',
-            'provincia',
-            'ubicacion'
-        ])
-        self.assertListEqual(fields, sorted(data.keys()))
-
     def assert_basic_fields_set(self, address):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""
@@ -52,6 +36,8 @@ class SearchAddressesBaseTest(GeorefLiveTest):
                                        'calle_cruce_2.categoria',
                                        'departamento.id',
                                        'departamento.nombre',
+                                       'localidad_censal.id',
+                                       'localidad_censal.nombre',
                                        'nomenclatura',
                                        'provincia.id', 'provincia.nombre',
                                        'ubicacion.lat', 'ubicacion.lon'],
@@ -73,6 +59,8 @@ class SearchAddressesBaseTest(GeorefLiveTest):
                                        'calle_cruce_2.categoria',
                                        'departamento.id',
                                        'departamento.nombre',
+                                       'localidad_censal.id',
+                                       'localidad_censal.nombre',
                                        'nomenclatura',
                                        'provincia.id', 'provincia.nombre',
                                        'ubicacion.lat', 'ubicacion.lon',
@@ -140,10 +128,6 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         self.assertTrue(all([
             not isinstance(v, dict) for v in data.values()
         ]) and data)
-
-    def test_default_results_fields(self):
-        """Las entidades devueltas deben tener los campos default."""
-        self.assert_default_results_fields(COMMON_ADDRESS)
 
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
@@ -629,6 +613,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
                                        'provincia_nombre',
                                        'departamento_id',
                                        'departamento_nombre',
+                                       'localidad_censal_id',
+                                       'localidad_censal_nombre',
                                        'direccion_lat',
                                        'direccion_lon',
                                        'direccion_fuente'])

@@ -75,20 +75,6 @@ class SearchSettlementTest(GeorefLiveTest):
         resp = self.get_response(return_value='full')
         self.assertTrue(resp['cantidad'] == 10 and resp['inicio'] == 0)
 
-    def test_default_results_fields(self):
-        """Las entidades devueltas deben tener los campos default."""
-        data = self.get_response({'max': 1})[0]
-        fields = sorted([
-            'id',
-            'centroide',
-            'nombre',
-            'provincia',
-            'departamento',
-            'municipio',
-            'categoria'
-        ])
-        self.assertListEqual(fields, sorted(data.keys()))
-
     def test_filter_results_fields(self):
         """Los campos de los asentamientos devueltos deben ser filtrables."""
         fields_lists = [
@@ -123,6 +109,8 @@ class SearchSettlementTest(GeorefLiveTest):
                                        'provincia.nombre', 'departamento.id',
                                        'departamento.nombre',
                                        'municipio.id', 'municipio.nombre',
+                                       'localidad_censal.id',
+                                       'localidad_censal.nombre',
                                        'categoria'])
 
     def test_complete_fields_set(self):
@@ -135,6 +123,8 @@ class SearchSettlementTest(GeorefLiveTest):
                                        'departamento.id',
                                        'departamento.nombre',
                                        'municipio.id', 'municipio.nombre',
+                                       'localidad_censal.id',
+                                       'localidad_censal.nombre',
                                        'categoria'])
 
     def test_field_prefixes(self):
@@ -388,6 +378,8 @@ class SearchSettlementTest(GeorefLiveTest):
                                        'departamento_nombre',
                                        'municipio_id',
                                        'municipio_nombre',
+                                       'localidad_censal_id',
+                                       'localidad_censal_nombre',
                                        'localidad_fuente',
                                        'localidad_categoria'])
 
@@ -448,5 +440,7 @@ class SearchSettlementTest(GeorefLiveTest):
             'categoria',
             'centr_lat',
             'centr_lon',
-            'fuente'
+            'fuente',
+            'lcen_id',
+            'lcen_nombre'
         ])

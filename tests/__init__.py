@@ -269,7 +269,7 @@ class GeorefLiveTest(TestCase):
             'formato': 'shp',
             'max': 1
         }
-        fields.sort()
+        fields = sorted(fields)
 
         shape = self.get_response(params)
         shp_fields = sorted([field[0] for field in shape.fields[1:]])

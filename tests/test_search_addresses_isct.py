@@ -13,10 +13,6 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         self.entity = 'direcciones'
         super().setUp()
 
-    def test_default_results_fields(self):
-        """Las entidades devueltas deben tener los campos default."""
-        self.assert_default_results_fields(COMMON_ISCT)
-
     def test_basic_fields_set(self):
         """Se debería poder especificar un conjunto de parámetros
         preseleccionados llamado 'basico'."""

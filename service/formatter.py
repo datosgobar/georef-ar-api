@@ -88,6 +88,8 @@ _SETTLEMENTS_CSV_FIELDS = [
     (N.DEPT_NAME, [N.DEPT, N.NAME]),
     (N.MUN_ID, [N.MUN, N.ID]),
     (N.MUN_NAME, [N.MUN, N.NAME]),
+    (N.CENSUS_LOCALITY_ID, [N.CENSUS_LOCALITY, N.ID]),
+    (N.CENSUS_LOCALITY_NAME, [N.CENSUS_LOCALITY, N.NAME]),
     (N.SOURCE, [N.LOCALITY, N.SOURCE]),
     (N.CATEGORY, [N.LOCALITY, N.CATEGORY])
 ]
@@ -107,6 +109,8 @@ _STREETS_CSV_FIELDS = [
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.DEPT_ID, [N.DEPT, N.ID]),
     (N.DEPT_NAME, [N.DEPT, N.NAME]),
+    (N.CENSUS_LOCALITY_ID, [N.CENSUS_LOCALITY, N.ID]),
+    (N.CENSUS_LOCALITY_NAME, [N.CENSUS_LOCALITY, N.NAME]),
     (N.SOURCE, [N.STREET, N.SOURCE])
 ]
 
@@ -128,6 +132,8 @@ _ADDRESSES_CSV_FIELDS = [
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.DEPT_ID, [N.DEPT, N.ID]),
     (N.DEPT_NAME, [N.DEPT, N.NAME]),
+    (N.CENSUS_LOCALITY_ID, [N.CENSUS_LOCALITY, N.ID]),
+    (N.CENSUS_LOCALITY_NAME, [N.CENSUS_LOCALITY, N.NAME]),
     (N.LOCATION_LAT, [N.ADDRESS, N.LAT]),
     (N.LOCATION_LON, [N.ADDRESS, N.LON]),
     (N.SOURCE, [N.ADDRESS, N.SOURCE])
@@ -155,6 +161,8 @@ _SHP_SHORT_FIELD_NAMES = {
         N.STATE_INTERSECTION: 'prov_intscn',
         N.DEPT_NAME: 'dpto_nombre',
         N.DEPT_ID: 'dpto_id',
+        N.CENSUS_LOCALITY_ID: 'lcen_id',
+        N.CENSUS_LOCALITY_NAME: 'lcen_nombre',
         N.MUN_NAME: 'muni_nombre',
         N.MUN_ID: 'muni_id',
         N.C_LAT: 'centr_lat',
@@ -167,6 +175,9 @@ _SHP_SHORT_FIELD_NAMES = {
         N.END_L: 'alt_fin_izq'
     }.items()
 }
+"""dict: El formato Shapefile no permite campos cuyos nombres tengan más de 11
+caracteres, por lo que es necesario especificar abreviaciones para campos que
+maneje la API que sean demasiado largos."""
 
 
 class CSVLineWriter:

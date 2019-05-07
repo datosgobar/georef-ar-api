@@ -155,12 +155,15 @@ class AddressQueryPlanner(ABC):
         template += ', {dept}, {state}'
         return template.format(**fmt)
 
-    def _build_base_address_hit(self, state=None, dept=None):
+    def _build_base_address_hit(self, state=None, dept=None,
+                                census_locality=None):
         """Construye la base de un resultado de búsqueda de direcciones.
 
         Args:
-            state (dict): Valor a utilizar como provincia (documento).
-            dept (dict): Valor a utilizar como departamento (documento).
+            state (dict): Valor a utilizar como provincia (id y nombre).
+            dept (dict): Valor a utilizar como departamento (id y nomnbre).
+            census_locality (dict): Valor a utilizar como localidad censal
+                (id y nombre).
 
         Returns:
             dict: Resultado a ser completado con datos de calles, ubicación,
@@ -173,6 +176,9 @@ class AddressQueryPlanner(ABC):
 
         if dept:
             address_hit[N.DEPT] = dept
+
+        if census_locality:
+            address_hit[N.CENSUS_LOCALITY] = census_locality
 
         address_hit[N.DOOR_NUM] = {
             N.VALUE: self._address_data.door_number_value,
@@ -290,8 +296,9 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
         for street_block in self._elasticsearch_result.hits:
             street = street_block[N.STREET]
-            address_hit = self._build_base_address_hit(street.get(N.STATE),
-                                                       street.get(N.DEPT))
+            address_hit = self._build_base_address_hit(
+                street.get(N.STATE), street.get(N.DEPT),
+                street.get(N.CENSUS_LOCALITY))
 
             address_hit[N.STREET] = self._build_street_entity(street)
             address_hit[N.STREET_X1] = self._build_street_entity()
@@ -568,8 +575,9 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         fields = self._format[N.FIELDS]
 
         for street_1, street_2, point in intersections:
-            address_hit = self._build_base_address_hit(street_1.get(N.STATE),
-                                                       street_1.get(N.DEPT))
+            address_hit = self._build_base_address_hit(
+                street_1.get(N.STATE), street_1.get(N.DEPT),
+                street_1.get(N.CENSUS_LOCALITY))
 
             address_hit[N.STREET] = self._build_street_entity(street_1)
             address_hit[N.STREET_X1] = self._build_street_entity(street_2)
@@ -857,7 +865,8 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
 
         for entry in entries:
             address_hit = self._build_base_address_hit(
-                entry.street_1.get(N.STATE), entry.street_1.get(N.DEPT))
+                entry.street_1.get(N.STATE), entry.street_1.get(N.DEPT),
+                entry.street_1.get(N.CENSUS_LOCALITY))
 
             address_hit[N.STREET] = self._build_street_entity(entry.street_1)
             address_hit[N.STREET_X1] = self._build_street_entity(

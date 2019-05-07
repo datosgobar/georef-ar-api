@@ -31,20 +31,6 @@ class SearchStreetsTest(GeorefLiveTest):
         data = self.get_response({'max': 1})[0]
         self.assertTrue(len(data['id']) == 13)
 
-    def test_default_results_fields(self):
-        """Las entidades devueltas deben tener los campos default."""
-        data = self.get_response({'max': 1})[0]
-        fields = sorted([
-            'departamento',
-            'id',
-            'altura',
-            'nombre',
-            'nomenclatura',
-            'provincia',
-            'categoria'
-        ])
-        self.assertListEqual(fields, sorted(data.keys()))
-
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
         resp = self.get_response({
@@ -130,6 +116,8 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'altura.inicio.izquierda',
                                        'departamento.id',
                                        'departamento.nombre',
+                                       'localidad_censal.id',
+                                       'localidad_censal.nombre',
                                        'nomenclatura',
                                        'provincia.id', 'provincia.nombre',
                                        'categoria'])
@@ -145,6 +133,8 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'altura.inicio.izquierda',
                                        'departamento.id',
                                        'departamento.nombre',
+                                       'localidad_censal.id',
+                                       'localidad_censal.nombre',
                                        'nomenclatura',
                                        'provincia.id', 'provincia.nombre',
                                        'categoria'])
@@ -335,6 +325,8 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'provincia_nombre',
                                        'departamento_id',
                                        'departamento_nombre',
+                                       'localidad_censal_id',
+                                       'localidad_censal_nombre',
                                        'calle_fuente'])
 
     def test_xml_format(self):
@@ -384,5 +376,7 @@ class SearchStreetsTest(GeorefLiveTest):
             'alt_ini_izq',
             'alt_fin_der',
             'alt_fin_izq',
-            'fuente'
+            'fuente',
+            'lcen_id',
+            'lcen_nombre'
         ])

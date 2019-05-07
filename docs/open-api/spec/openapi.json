@@ -515,6 +515,9 @@
 				"municipio": {
 				    "$ref": "#/components/schemas/param_municipio"
 				},
+				"localidad_censal": {
+				    "$ref": "#/components/schemas/param_localidad_censal"
+				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
 				},
@@ -593,6 +596,19 @@
 			    }
 			}
 		    }
+                }
+            },
+            "localidad_censal_sub_entidad": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "82084160"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Granadero Baigorria"
+                    }
                 }
             },
 	    "localidades_censales_single": {
@@ -783,6 +799,9 @@
 				"municipio": {
 				    "$ref": "#/components/schemas/param_municipio"
 				},
+				"localidad_censal": {
+				    "$ref": "#/components/schemas/param_localidad_censal"
+				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
 				},
@@ -953,6 +972,9 @@
 				"departamento": {
 				    "$ref": "#/components/schemas/param_departamento"
 				},
+				"localidad_censal": {
+				    "$ref": "#/components/schemas/param_localidad_censal"
+				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
 				},
@@ -1105,6 +1127,9 @@
 				"departamento": {
 				    "$ref": "#/components/schemas/param_departamento"
 				},
+				"localidad_censal": {
+				    "$ref": "#/components/schemas/param_localidad_censal"
+				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
 				},
@@ -1211,6 +1236,11 @@
 		"type": "string",
 		"minLength": 1,
 		"example": "Rosario"
+	    },
+	    "param_localidad_censal": {
+		"type": "string",
+		"minLength": 1,
+		"example": "Granadero Baigorria"
 	    },
 	    "param_municipio": {
 		"type": "string",
@@ -1355,7 +1385,7 @@
         "parameters": {
 	    "direccion": {
 		"name": "direccion",
-                "description": "Dirección a normalizar.",
+                "description": "Dirección a normalizar. No debe incluir datos de localidad.",
                 "in": "query",
                 "required": true,
                 "schema": {
@@ -1384,6 +1414,14 @@
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_municipio"
+                }
+            },
+            "localidad_censal": {
+                "name": "localidad_censal",
+                "description": "Filtrar por nombre o ID de localidad censal. Se pueden especificar varios IDs separados por comas.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_localidad_censal"
                 }
             },
             "max": {
@@ -1931,6 +1969,9 @@
 			"$ref": "#/components/parameters/municipio"
 		    },
 		    {
+			"$ref": "#/components/parameters/localidad_censal"
+		    },
+		    {
 			"$ref": "#/components/parameters/orden"
 		    },
 		    {
@@ -2023,6 +2064,9 @@
 		    },
 		    {
 			"$ref": "#/components/parameters/municipio"
+		    },
+		    {
+			"$ref": "#/components/parameters/localidad_censal"
 		    },
 		    {
 			"$ref": "#/components/parameters/orden"
@@ -2118,6 +2162,9 @@
 		    {
 			"$ref": "#/components/parameters/departamento"
 		    },
+		    {
+			"$ref": "#/components/parameters/localidad_censal"
+		    },
                     {
                         "$ref": "#/components/parameters/orden"
                     },
@@ -2205,6 +2252,9 @@
 		    },
 		    {
 			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/localidad_censal"
 		    },
                     {
                         "$ref": "#/components/parameters/orden"
