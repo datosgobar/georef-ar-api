@@ -1,5 +1,14 @@
 # Historial de versiones
 
+## **0.5.0** - 2019/05/09
+- Agrega recurso `/localidades-censales`. El nuevo recurso ofrece un listado de localidades censales definidas por INDEC.
+- Agrega recurso `/asentamientos`. El nuevo recurso contiene la enteridad de la base [BAHRA](http://www.bahra.gob.ar/), y sus parámetros y formatos de respuesta son idénticos a los de `/localidades`.
+- Agrega campo `localidad_censal` a respuestas de recursos `/localidades`, `/calles`, y `/direcciones`. El campo permite acceder al nombre y ID de la localidad censal de la localidad o calle correspondiente.
+- Agrega nuevo parámetro `localidad_censal` a `/localidades`, `/calles` y `/direcciones`. El parámetro permite filtrar direcciones, calles y localidades por localidad censal, lo cual en algunos casos ofrece un mayor grado de precisión que utilizar `departamento`.
+- Mejora la precisión de la georreferenciación inversa (`/ubicacion`) como resultado de haber actualizado la versión de Elasticsearch.
+- Actualiza versión de datos de ETL a `12.0.0`.
+- Mejora interpretación de direcciones (`georef-ar-address` versión `0.0.9`).
+
 ## **0.4.1** - 2019/04/25
 - Agrega localidades de tipo `LCE` y `LSE` a recurso `/localidades`.
 - Actualiza versión de datos de ETL a `11.0.0`.
