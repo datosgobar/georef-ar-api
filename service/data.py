@@ -53,8 +53,8 @@ def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
             options['sniffer_timeout'] = sniffer_timeout
 
         return elasticsearch.Elasticsearch(**options)
-    except elasticsearch.ElasticsearchException:
-        raise DataConnectionException()
+    except elasticsearch.ElasticsearchException as e:
+        raise DataConnectionException from e
 
 
 def _run_multisearch(es, searches):
@@ -86,8 +86,8 @@ def _run_multisearch(es, searches):
 
         try:
             responses.extend(ms.execute(raise_on_error=True))
-        except elasticsearch.ElasticsearchException:
-            raise DataConnectionException()
+        except elasticsearch.ElasticsearchException as e:
+            raise DataConnectionException() from e
 
     return responses
 
