@@ -5,7 +5,7 @@ En este documento se detallan los pasos a seguir si se desea configurar un servi
 ## Dependencias
 
 - [Elasticsearch >=7.0.0](https://www.elastic.co/downloads/elasticsearch)
-- [Python >=3.6.x](https://www.python.org/downloads/)
+- [Python >=3.6.0](https://www.python.org/downloads/)
 - [Nginx](https://nginx.org/) *(para entornos productivos)*
 
 ## Instalación
@@ -28,11 +28,11 @@ $ sudo systemctl enable elasticsearch
 
 #### 1.3 Aplicar las configuraciones recomendadas
 
-Editar el archivo  `/etc/elasticsearch/elasticsearch.yml` (el valor de `node.name` debe ser único por nodo):
+Editar el archivo  `/etc/elasticsearch/elasticsearch.yml`. El valor de `node.name` debe ser único por nodo, y todos los nodos deben tener el mismo valor de `cluster.name`:
 
 ```text
+cluster.name: georef-ar-api
 node.name: node-1
-http.max_content_length: 100mb
 ```
 
 Editar el archivo `/etc/elasticsearch/jvm.options` (siguiendo las [recomendaciones de Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html)):
@@ -96,7 +96,7 @@ Listar los índices creados, y otros datos adicionales:
 Si se modifican los archivos de datos NDJSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:
 
 #### Indexar datos nuevos
-Si se desea actualizar los índices con los nuevos datos, solo si los datos entrantes son más recientes, se puede utilizar nuevamente:
+Si se desea actualizar los índices con los nuevos datos, **pero solo si los datos entrantes son más recientes que los ya indexados**, se puede utilizar nuevamente la receta `index`:
   
 ```bash
 (venv) $ make index
@@ -109,7 +109,7 @@ Si se desea forzar un re-indexado, es decir, si se desea indexar los datos nueva
 (venv) $ make index_forced
 ```
 
-La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en `config/georef.cfg`. El uso de la receta es recomendado cuando se requiere re-indexar los datos incondicionalmente, algunas situaciones donde esto es necesario son:
+La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en `config/georef.cfg`. El uso de la receta es recomendado cuando se requiere re-indexar los datos incondicionalmente. Algunas de las situaciones donde esto es necesario son:
 
 - Modificación de la estructura de los archivos de datos
 - Modificación de *mappeos* de tipos de Elasticsearch

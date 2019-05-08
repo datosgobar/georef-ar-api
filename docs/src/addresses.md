@@ -14,7 +14,7 @@ El único parámetro obligatorio del recurso `/direcciones` es `direccion`. El m
 
 En todos los casos, el valor [altura] es opcional, y de estar presente puede ser seguido de un piso/número de departamento.
 
-El resto de los parámetros aceptados por el recurso `/direccion` están listados en la [referencia completa de la API](https://datosgobar.github.io/georef-ar-api/open-api). Se recomienda utilizar los parámetros `provincia` y/o `departamento` para obtener resultados más precisos.
+El resto de los parámetros aceptados por el recurso `/direccion` están listados en la [referencia completa de la API](https://datosgobar.github.io/georef-ar-api/open-api). Se recomienda utilizar los parámetros `provincia`, `departamento` y/o `localidad_censal` para obtener resultados más precisos.
 
 ## Campos de respuesta
 

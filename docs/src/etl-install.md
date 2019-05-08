@@ -82,7 +82,7 @@ Para crear las tablas utilizadas en el proceso de ETL, utilizar la receta `migra
 (env) $ make migrate
 ```
 
-El comando debe volver a ejecutarse si se actualiza el proyecto y existen nuevas migraciones.
+El comando debe volver a ejecutarse si se actualiza el proyecto y existen nuevas migraciones. Se recomienda ejecutar el comando incondicionalmente cuando se actualiza el proyecto, ya que si no existen migraciones nuevas no se realizará ningún cambio.
 
 ## 2. Ejecución
 
@@ -113,7 +113,7 @@ Las tablas:
  - `georef_intersecciones`
  - `georef_cuadras`
  
- Y los archivos (bajo `/files/latest/`):
+ Y los archivos (bajo `/files/latest/` y `/files/X.0.0`):
 
 <table>
     <tr><th>Entidad</th><th>NDJSON</th><th>JSON</th><th>CSV</th><th>GeoJSON</th></tr>
