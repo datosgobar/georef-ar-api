@@ -520,6 +520,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#050-20190509" title="0.5.0 - 2019/05/09" class="md-nav__link">
+    0.5.0 - 2019/05/09
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#041-20190425" title="0.4.1 - 2019/04/25" class="md-nav__link">
     0.4.1 - 2019/04/25
   </a>
@@ -749,6 +756,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#050-20190509" title="0.5.0 - 2019/05/09" class="md-nav__link">
+    0.5.0 - 2019/05/09
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#041-20190425" title="0.4.1 - 2019/04/25" class="md-nav__link">
     0.4.1 - 2019/04/25
   </a>
@@ -885,6 +899,16 @@
                 
                 
                 <h1 id="historial-de-versiones">Historial de versiones<a class="headerlink" href="#historial-de-versiones" title="Permanent link">&para;</a></h1>
+<h2 id="050-20190509"><strong>0.5.0</strong> - 2019/05/09<a class="headerlink" href="#050-20190509" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Agrega recurso <code>/localidades-censales</code>. El nuevo recurso ofrece un listado de localidades censales definidas por INDEC.</li>
+<li>Agrega recurso <code>/asentamientos</code>. El nuevo recurso contiene la enteridad de la base <a href="http://www.bahra.gob.ar/">BAHRA</a>, y sus parámetros y formatos de respuesta son idénticos a los de <code>/localidades</code>.</li>
+<li>Agrega campo <code>localidad_censal</code> a respuestas de recursos <code>/localidades</code>, <code>/calles</code>, y <code>/direcciones</code>. El campo permite acceder al nombre y ID de la localidad censal de la localidad o calle correspondiente.</li>
+<li>Agrega nuevo parámetro <code>localidad_censal</code> a <code>/localidades</code>, <code>/calles</code> y <code>/direcciones</code>. El parámetro permite filtrar direcciones, calles y localidades por localidad censal, lo cual en algunos casos ofrece un mayor grado de precisión que utilizar <code>departamento</code>.</li>
+<li>Mejora la precisión de la georreferenciación inversa (<code>/ubicacion</code>) como resultado de haber actualizado la versión de Elasticsearch.</li>
+<li>Actualiza versión de datos de ETL a <code>12.0.0</code>.</li>
+<li>Mejora interpretación de direcciones (<code>georef-ar-address</code> versión <code>0.0.9</code>).</li>
+</ul>
 <h2 id="041-20190425"><strong>0.4.1</strong> - 2019/04/25<a class="headerlink" href="#041-20190425" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Agrega localidades de tipo <code>LCE</code> y <code>LSE</code> a recurso <code>/localidades</code>.</li>

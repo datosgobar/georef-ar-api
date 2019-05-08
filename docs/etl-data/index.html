@@ -925,7 +925,7 @@
                 
                 
                 <h1 id="modelo-de-datos-para-georef">Modelo de datos para Georef<a class="headerlink" href="#modelo-de-datos-para-georef" title="Permanent link">&para;</a></h1>
-<p><strong>Versión</strong>: 11.0.0</p>
+<p><strong>Versión</strong>: 12.0.0</p>
 <p>El fin del proceso ETL de Georef es producir archivos con datos de entidades geográficas. El ETL genera varios archivos: unos de ellos son utilizados para ser indexados por la API, y otros sirven para facilitar a usuarios de la API descargarse la totalidad de los datos en distintos formatos.</p>
 <p>Los archivos generados para ser indexados en la API tienen formato <a href="http://ndjson.org/">NDJSON</a>. El formato NDJSON consiste en un archivo de texto donde cada línea (separadas por <code>\n</code>) es un objeto JSON válido. Los archivos generados son:</p>
 <ul>
@@ -939,17 +939,7 @@
 <li><code>localidades-censales.ndjson</code></li>
 <li><code>asentamientos.ndjson</code></li>
 </ul>
-<p>Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. Los archivos son:</p>
-<ul>
-<li><code>provincias.json</code>, <code>provincias.csv</code>, <code>provincias.geojson</code></li>
-<li><code>departamentos.json</code>, <code>departamentos.csv</code>, <code>departamentos.geojson</code></li>
-<li><code>municipios.json</code>, <code>municipios.csv</code>, <code>municipios.geojson</code></li>
-<li><code>localidades.json</code>, <code>localidades.csv</code>, <code>localidades.geojson</code></li>
-<li><code>calles.json</code>, <code>calles.csv</code></li>
-<li><code>localidades-censales.json</code>, <code>localidades-censales.csv</code>, <code>localidades-censales.geojson</code></li>
-<li><code>asentamientos.json</code>, <code>asentamientos.csv</code>, <code>asentamientos.geojson</code></li>
-</ul>
-<p><strong>Se recomienda el uso de los archivos NDJSON si se desea procesar todos los datos de entidades geográficas.</strong> Esto se debe a que el formato se presta a ser leído por partes (líneas), lo cual facilita el procesamiento de los archivos de gran tamaño. Notar que los archivos en formato CSV <strong>no</strong> contienen las geometrías de las entidades.</p>
+<p>Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. La tabla completa de los archivos generados se encuentra detallada en la sección de <a href="../etl-install/#3-resultados">instalación y ejecución del ETL</a>. <strong>Se recomienda el uso de los archivos NDJSON si se desea procesar todos los datos de entidades geográficas.</strong> Esto se debe a que el formato se presta a ser leído por partes (líneas), lo cual facilita el procesamiento de los archivos de gran tamaño. Notar que el único formato que incluye las geometrías de las entidades geográficas es NDJSON.</p>
 <h2 id="fuentes">Fuentes<a class="headerlink" href="#fuentes" title="Permanent link">&para;</a></h2>
 <p>Los orígenes de los datos procesados en el ETL son:</p>
 <h3 id="unidades-territoriales">Unidades Territoriales<a class="headerlink" href="#unidades-territoriales" title="Permanent link">&para;</a></h3>

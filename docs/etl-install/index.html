@@ -650,6 +650,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#3-resultados" title="3. Resultados" class="md-nav__link">
+    3. Resultados
+  </a>
+  
+</li>
+      
       
       
       
@@ -755,6 +762,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#3-resultados" title="3. Resultados" class="md-nav__link">
+    3. Resultados
+  </a>
+  
+</li>
+      
       
       
       
@@ -836,32 +850,48 @@ $ source env/bin/activate
 <pre><code class="bash">(env) $ make migrate
 </code></pre>
 
-<p>El comando debe volver a ejecutarse si se actualiza el proyecto y existen nuevas migraciones.</p>
+<p>El comando debe volver a ejecutarse si se actualiza el proyecto y existen nuevas migraciones. Se recomienda ejecutar el comando incondicionalmente cuando se actualiza el proyecto, ya que si no existen migraciones nuevas no se realizará ningún cambio.</p>
 <h2 id="2-ejecucion">2. Ejecución<a class="headerlink" href="#2-ejecucion" title="Permanent link">&para;</a></h2>
 <p>Una vez finalizado el proceso de instalación, utilizar la receta <code>run</code> para ejecutar todas las tareas del ETL. <strong>El entorno virtual de Python debe estar activado</strong>.</p>
 <pre><code class="bash">(env) $ make run
 </code></pre>
 
+<p>Para ejecutar el ETL de una o más entidades geográficas en particular, utilizar la opción <code>-p</code>:</p>
+<pre><code class="bash">(env) $ python -m georef_ar_etl -p provincias -p departamentos
+</code></pre>
+
+<h2 id="3-resultados">3. Resultados<a class="headerlink" href="#3-resultados" title="Permanent link">&para;</a></h2>
 <p>Por defecto, los productos del ETL serán:</p>
 <p>Las tablas:</p>
 <ul>
 <li><code>georef_provincias</code></li>
 <li><code>georef_departamentos</code></li>
 <li><code>georef_municipios</code></li>
+<li><code>georef_localidades_censales</code></li>
+<li><code>georef_asentamientos</code></li>
 <li><code>georef_localidades</code></li>
 <li><code>georef_calles</code></li>
 <li><code>georef_intersecciones</code></li>
 <li><code>georef_cuadras</code></li>
 </ul>
-<p>Y los archivos (bajo <code>/files/latest/</code>):</p>
+<p>Y los archivos (bajo <code>/files/latest/</code> y <code>/files/X.0.0</code>):</p>
+<table>
+    <tr><th>Entidad</th><th>NDJSON</th><th>JSON</th><th>CSV</th><th>GeoJSON</th></tr>
+    <tr><td>Provincias</td><td><code>provincias.ndjson</code></td><td><code>provincias.json</code></td><td><code>provincias.csv</code></td><td><code>provincias.geojson</code></td></tr>
+    <tr><td>Departamentos</td><td><code>departamentos.ndjson</code></td><td><code>departamentos.json</code></td><td><code>departamentos.csv</code></td><td><code>departamentos.geojson</code></td></tr>
+    <tr><td>Municipios</td><td><code>municipios.ndjson</code></td><td><code>municipios.json</code></td><td><code>municipios.csv</code></td><td><code>municipios.geojson</code></td></tr>
+    <tr><td>Localidades Censales</td><td><code>localidades-censales.ndjson</code></td><td><code>localidades-censales.json</code></td><td><code>localidades-censales.csv</code></td><td><code>localidades-censales.geojson</code></td></tr>
+    <tr><td>Asentamientos</td><td><code>asentamientos.ndjson</code></td><td><code>asentamientos.json</code></td><td><code>asentamientos.csv</code></td><td><code>asentamientos.geojson</code></td></tr>
+    <tr><td>Localidades</td><td><code>localidades.ndjson</code></td><td><code>localidades.json</code></td><td><code>localidades.csv</code></td><td><code>localidades.geojson</code></td></tr>
+    <tr><td>Calles</td><td><code>calles.ndjson</code></td><td><code>calles.json</code></td><td><code>calles.csv</code></td><td>-</td></tr>
+    <tr><td>Cuadras</td><td><code>cuadras.ndjson</code></td><td>-</td><td>-</td><td>-</td></tr>
+    <tr><td>Intersecciones</td><td><code>intersecciones.ndjson</code></td><td>-</td><td>-</td><td>-</td></tr>
+</table>
+
+<p>Y adicionalmente, los siguientes archivos:</p>
 <ul>
-<li><code>provincias.json</code></li>
-<li><code>departamentos.json</code></li>
-<li><code>municipios.json</code></li>
-<li><code>localidades.json</code></li>
-<li><code>calles.json</code></li>
-<li><code>intersecciones.json</code></li>
-<li><code>cuadras.json</code></li>
+<li><code>sinonimos-nombres.txt</code></li>
+<li><code>terminos-excluyentes-nombres.txt</code></li>
 </ul>
                 
                   
