@@ -18,7 +18,7 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
     <tr><td>Sgo. del Estero</td></tr>
 </table>
 
-`GET`[`https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero`](https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
+`GET`[`https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo. del Estero`](https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
 
 ```json
 {

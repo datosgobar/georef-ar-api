@@ -87,18 +87,18 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 ```
 
 ### Normalización de direcciones
-`GET` [`https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&direccion=Florida al 1801`](https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&direccion=Florida%20al%201801)
+`GET` [`https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&direccion=Florida al 2950`](https://apis.datos.gob.ar/georef/api/direcciones?departamento=merlo&direccion=Florida%20al%202950)
 ```
 {
     "direcciones": [
 		{
 			"altura": {
 				"unidad": null,
-				"valor": "1801"
+				"valor": "2950"
 			},
 			"calle": {
 				"categoria": "CALLE",
-				"id": "0653901003005",
+				"id": "0653901002985",
 				"nombre": "FLORIDA"
 			},
 			"calle_cruce_1": {
@@ -115,15 +115,15 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 				"id": "06539",
 				"nombre": "Merlo"
 			},
-			"nomenclatura": "FLORIDA 1801, Merlo, Buenos Aires",
+			"nomenclatura": "FLORIDA 2950, Merlo, Buenos Aires",
 			"piso": null,
 			"provincia": {
 				"id": "06",
 				"nombre": "Buenos Aires"
 			},
 			"ubicacion": {
-				"lat": null,
-				"lon": null
+				"lat": -34.71409079053823,
+				"lon": -58.73469942899891
 			}
 		}
     ],
