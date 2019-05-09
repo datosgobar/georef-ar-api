@@ -64,6 +64,8 @@ INDEX_NAMES = [
     'all'
 ]
 ES_TIMEOUT = 720
+DEFAULT_SHARDS = 1
+DEFAULT_REPLICAS = 2
 
 
 def setup_logger(l, stream):
@@ -596,8 +598,8 @@ class GeorefIndex:
         logger.info('Creando nuevo índice: {}...'.format(index))
         logger.info('')
 
-        es_config.create_index(es, index, self._doc_class, synonyms,
-                               excluding_terms)
+        es_config.create_index(es, index, self._doc_class, DEFAULT_SHARDS,
+                               DEFAULT_REPLICAS, synonyms, excluding_terms)
 
     def _insert_documents(self, es, index, docs, count, verbose=False):
         """Inserta documentos dentro de un índice.

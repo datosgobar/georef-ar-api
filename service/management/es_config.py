@@ -372,7 +372,8 @@ class StreetBlock(Entity):
     geometria = GeoShape()
 
 
-def create_index(es, name, doc_class, synonyms=None, excluding_terms=None):
+def create_index(es, name, doc_class, shards, replicas, synonyms=None,
+                 excluding_terms=None):
     """Crea un índice Elasticsearch utilizando un nombre y una clase de
     documento.
 
@@ -380,6 +381,8 @@ def create_index(es, name, doc_class, synonyms=None, excluding_terms=None):
         es (elasticsearch.Elasticsearch): Cliente Elasticsearch.
         name (str): Nombre del índice a crear.
         doc_class (type): Clase del documento (debe heredar de Document).
+        shards (int): Cantidad de "shards" a utilizar para el índice.
+        replicas (int): Cantidad de réplicas por "shard".
         synonyms (list): Lista de sinónimos a utilizar en caso de necesitar el
             analizador 'name_analyzer_synonyms'.
         excluding_terms (list): Lista de términos excluyentes a utilizar en
@@ -399,6 +402,7 @@ def create_index(es, name, doc_class, synonyms=None, excluding_terms=None):
         index.analyzer(gen_name_analyzer_excluding_terms(excluding_terms))
 
     index.document(doc_class)
+    index.settings(number_of_shards=shards, number_of_replicas=replicas)
     index.create(using=es)
 
 
