@@ -356,19 +356,19 @@ class SearchCensusLocalityTest(GeorefLiveTest):
         forma específica."""
         resp = self.get_response({'formato': 'csv', 'campos': 'completo'})
         headers = next(resp)
-        self.assertListEqual(headers, ['localidad_id',
-                                       'localidad_nombre',
-                                       'localidad_centroide_lat',
-                                       'localidad_centroide_lon',
+        self.assertListEqual(headers, ['localidad_censal_id',
+                                       'localidad_censal_nombre',
+                                       'localidad_censal_centroide_lat',
+                                       'localidad_censal_centroide_lon',
                                        'provincia_id',
                                        'provincia_nombre',
                                        'departamento_id',
                                        'departamento_nombre',
                                        'municipio_id',
                                        'municipio_nombre',
-                                       'localidad_fuente',
-                                       'localidad_funcion',
-                                       'localidad_categoria'])
+                                       'localidad_censal_fuente',
+                                       'localidad_censal_funcion',
+                                       'localidad_censal_categoria'])
 
     def test_csv_empty_value(self):
         """Un valor vacío (None) debería estar representado como '' en CSV."""
