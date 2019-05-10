@@ -1,5 +1,9 @@
 # Historial de versiones
 
+## **0.5.1** - 2019/05/10
+- Corrige campos CSV del recurso `/localidades-censales`.
+- Corrige valor de `cantidad` para consultas al recurso `/asentamientos`.
+
 ## **0.5.0** - 2019/05/09
 - Agrega recurso `/localidades-censales`. El nuevo recurso ofrece un listado de localidades censales definidas por INDEC.
 - Agrega recurso `/asentamientos`. El nuevo recurso contiene la enteridad de la base [BAHRA](http://www.bahra.gob.ar/), y sus parámetros y formatos de respuesta son idénticos a los de `/localidades`.

@@ -1,6 +1,6 @@
 # API del Servicio de Normalización de Datos Geográficos de Argentina
 
-**Versión**: 0.5.0
+**Versión**: 0.5.1
 
 La API del Servicio de Normalización de Datos Geográficos, permite normalizar y codificar los nombres de unidades territoriales de la Argentina (provincias, departamentos, municipios y localidades) y de sus calles, así como ubicar coordenadas dentro de ellas.
 
