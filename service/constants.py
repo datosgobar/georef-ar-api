@@ -12,6 +12,7 @@ MAX_RESULT_WINDOW = current_app.config['MAX_RESULT_WINDOW']
 MAX_BULK_LEN = current_app.config['MAX_BULK_LEN']
 ES_MULTISEARCH_MAX_LEN = current_app.config.get('ES_MULTISEARCH_MAX_LEN',
                                                 MAX_RESULT_LEN)
+ES_TRACK_TOTAL_HITS = current_app.config.get('ES_TRACK_TOTAL_HITS')
 ADDRESS_PARSER_CACHE_SIZE = current_app.config['ADDRESS_PARSER_CACHE_SIZE']
 
 ISCT_DOOR_NUM_TOLERANCE_M = 50

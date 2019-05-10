@@ -119,6 +119,12 @@ class ElasticsearchSearch(ABC):
 
         """
         self._search = Search(index=index)
+        if constants.ES_TRACK_TOTAL_HITS:
+            # Configurar la cantidad máxima de hits con los que se pueden
+            # calcular total de hits precisos (nuevo en Elasticsearch 7.0.0).
+            self._search = self._search.extra(
+                track_total_hits=constants.ES_TRACK_TOTAL_HITS)
+
         self._index = index
         self._offset = query.get('offset', 0)
         self._result = None
