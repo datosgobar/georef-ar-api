@@ -440,6 +440,59 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
 
         self.assertTrue(validations and all(validations))
 
+    def test_filter_by_locality(self):
+        """Se debería poder filtrar direcciones por localidad."""
+        self.assert_locality_search(
+            '0207701011160', 'Vallejos 4500', 'Villa Devoto'
+        )
+
+        self.assert_locality_search(
+            '0207701011160', 'Vallejos 4500', '02077010002'
+        )
+
+        self.assert_locality_search(
+            '0207701011160', 'Vallejos 4500', '02077010002'
+        )
+
+    def test_filter_by_locality_and_census_locality(self):
+        """Se debería poder filtrar direcciones por localidad y localidad
+        censal a la vez."""
+        self.assert_locality_search(
+            '8208431000190', 'Balcarce 2000', 'Gobernador Galvez',
+            'Villa Gobernador Gálvez'
+        )
+
+        self.assert_locality_search(
+            '8208431000190', 'Balcarce 2000', '82084310000',
+            'Villa Gobernador Gálvez'
+        )
+
+        self.assert_locality_search(
+            '8208431000190', 'Balcarce 2000', 'Gobernador Galvez',
+            '82084310'
+        )
+
+        self.assert_locality_search(
+            '8208431000190', 'Balcarce 2000', '82084310000',
+            '82084310'
+        )
+
+    def assert_locality_search(self, street_id, address, locality=None,
+                               census_locality=None):
+        params = {
+            'direccion': address,
+            'max': 1
+        }
+
+        if locality:
+            params['localidad'] = locality
+
+        if census_locality:
+            params['localidad_censal'] = census_locality
+
+        resp = self.get_response(params)
+        self.assertEqual(resp[0]['calle']['id'], street_id)
+
     def test_position(self):
         """Cuando sea posible, se debería georreferenciar la dirección
         utilizando los datos de la calle y la altura."""
@@ -531,6 +584,10 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             {
                 'direccion': COMMON_ADDRESS,
                 'aplanar': True
+            },
+            {
+                'direccion': COMMON_ADDRESS,
+                'localidad': 'San Nicolás'
             }
         ]
 

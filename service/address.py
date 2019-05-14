@@ -45,6 +45,7 @@ class AddressQueryPlanner(ABC):
         self._query = query.copy()
         self._format = fmt
         self._address_data = self._query.pop(N.ADDRESS)
+        self._locality = self._query.pop(N.LOCALITY, None)
 
         if self._address_data:
             self._numerical_door_number = \
@@ -216,6 +217,79 @@ class AddressQueryPlanner(ABC):
 
         return street_entity
 
+    def _expand_locality_search(self):
+        """Prepara los datos necesarios para poder buscar direcciones por
+        localidad. Recordar que:
+        - localidad != localidad censal
+        - Las localidades censales contienen varias localidades.
+        - Las cuadras e intersecciones solo tienen asociados datos de
+          localidades censales.
+        - Las direcciones se contruyen buscando cuadras e interseciones.
+
+        Es decir:
+
+                  +------------------+
+                  | localidad_censal |
+                  +------------------+
+                    ^              ^
+                   /                \
+                  /                  \
+                 /                    \
+                /                      \
+               /                        \
+         +-----------+         +---------------------+
+         | localidad |         | cuadra/interseccion |
+         +-----------+         +---------------------+
+
+        El método realiza una búsqueda de localidades, luego toma el ID de la
+        localidad censal de cada resultado, y los agrega al atributo
+        _query['census_locality'], de forma tal que todas las búsquedas de
+        cuadras o intersecciones se ejecuten filtrando por esas localidades
+        censales. Esto nos permite 'filtrar' cuadras por localidad, aunque las
+        mismas no tengan ese atributo.
+
+        Yields:
+            data.LocalitiesSearch: Búsqueda de localidades.
+
+        Returns:
+            bool: Verdadero si se encontraron localidades.
+
+        """
+        localities_query = {
+            'size': constants.MAX_RESULT_LEN,
+            'fields': [N.CENSUS_LOCALITY_ID],
+            'exact': self._query.get('exact'),
+            'state': self._query.get('state'),
+            'department': self._query.get('department'),
+            'census_locality': self._query.get('census_locality')
+        }
+
+        if isinstance(self._locality, list):
+            localities_query['ids'] = self._locality
+        else:
+            localities_query['name'] = self._locality
+
+        result = yield data.LocalitiesSearch(localities_query)
+
+        if not result:
+            return False
+
+        ids = set()
+        for hit in result.hits:
+            ids.add(hit[N.CENSUS_LOCALITY][N.ID])
+
+        # Combinar las localidades censales encontradas con el valor previo de
+        # 'census_locality' en _query (si lo hay)
+        prev_census_locality = self._query['census_locality'] or []
+        if isinstance(prev_census_locality, list):
+            # Buscar con lista de IDs
+            self._query['census_locality'] = prev_census_locality + list(ids)
+        else:
+            # Buscar con tupla de (lista de IDs, nombre)
+            self._query['census_locality'] = (list(ids), prev_census_locality)
+
+        return True
+
 
 class AddressNoneQueryPlanner(AddressQueryPlanner):
     """AddressQueryPlanner simbólico para direcciones inválidas. Se implementa
@@ -272,13 +346,19 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         requeridos para completar la búsqueda de los datos la dirección.
 
         Pasos requeridos:
-            1) Búsqueda de la calle principal.
+            1) Expandir búsqueda de localidad, si la hay.
+            2) Búsqueda de la calle principal.
 
         Yields:
             ElasticsearchSearch: Búsqueda que debe ser ejecutada por el
                 invocador de 'next()'.
 
         """
+        if self._locality:
+            found = yield from self._expand_locality_search()
+            if not found:
+                return
+
         name = self._address_data.street_names[0]
         self._elasticsearch_result = yield self._build_street_blocks_search(
             name, add_number=True)
@@ -331,6 +411,9 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             QueryResult: Resultados de la búsqueda de direcciones.
 
         """
+        if not self._elasticsearch_result:
+            return QueryResult.empty()
+
         address_hits = self._build_address_hits()
         return QueryResult.from_entity_list(address_hits,
                                             self._elasticsearch_result.total,
@@ -452,9 +535,10 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         requeridos para completar la búsqueda de los datos la dirección.
 
         Pasos requeridos:
-            1) Búsqueda de la calle principal (calle 1).
-            2) Búsqueda de la calle 2.
-            3) Búsqueda de intersecciones entre las calles 1 y 2.
+            1) Expandir búsqueda de localidad, si la hay.
+            2) Búsqueda de la calle principal (calle 1).
+            3) Búsqueda de la calle 2.
+            4) Búsqueda de intersecciones entre las calles 1 y 2.
 
         Explicación: Primero, se buscan las calles 1 y 2, obteniendo todos los
         IDs de las mismas. Luego, se buscan intersecciones de calles que
@@ -468,6 +552,11 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
                 invocador de 'next()'.
 
         """
+        if self._locality:
+            found = yield from self._expand_locality_search()
+            if not found:
+                return
+
         # Buscar la primera calle, incluyendo la altura si está presente
         result = yield self._build_street_blocks_search(
             self._address_data.street_names[0],
@@ -775,10 +864,11 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         requeridos para completar la búsqueda de los datos la dirección.
 
         Pasos requeridos:
-            1) Búsqueda de la calle principal (calle 1).
-            2) Búsqueda de la calle 2.
-            3) Búsqueda de la calle 3.
-            4) Búsqueda de intersecciones entre las calles 1 y 2, y las calles
+            1) Expandir búsqueda de localidad, si la hay.
+            2) Búsqueda de la calle principal (calle 1).
+            3) Búsqueda de la calle 2.
+            4) Búsqueda de la calle 3.
+            5) Búsqueda de intersecciones entre las calles 1 y 2, y las calles
                1 y 3 (en simultáneo).
 
         Explicación: Primero, se buscan las calles 1, 2 y 3, obteniendo todos
@@ -793,6 +883,11 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
                 invocador de 'next()'.
 
         """
+        if self._locality:
+            found = yield from self._expand_locality_search()
+            if not found:
+                return
+
         # Buscar la primera calle, incluyendo la altura si está presente
         result = yield self._build_street_blocks_search(
             self._address_data.street_names[0],

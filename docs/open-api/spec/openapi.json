@@ -975,6 +975,9 @@
 				"localidad_censal": {
 				    "$ref": "#/components/schemas/param_localidad_censal"
 				},
+				"localidad": {
+				    "$ref": "#/components/schemas/param_localidad_censal"
+				},
 				"orden": {
 				    "$ref": "#/components/schemas/param_orden"
 				},
@@ -1242,6 +1245,11 @@
 		"minLength": 1,
 		"example": "Granadero Baigorria"
 	    },
+	    "param_localidad": {
+		"type": "string",
+		"minLength": 1,
+		"example": "Granadero Baigorria"
+	    },
 	    "param_municipio": {
 		"type": "string",
 		"minLength": 1,
@@ -1422,6 +1430,14 @@
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_localidad_censal"
+                }
+            },
+            "localidad": {
+                "name": "localidad",
+                "description": "Filtrar por nombre o ID de localidad. Se pueden especificar varios IDs separados por comas.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_localidad"
                 }
             },
             "max": {
@@ -2255,6 +2271,9 @@
 		    },
 		    {
 			"$ref": "#/components/parameters/localidad_censal"
+		    },
+		    {
+			"$ref": "#/components/parameters/localidad"
 		    },
                     {
                         "$ref": "#/components/parameters/orden"

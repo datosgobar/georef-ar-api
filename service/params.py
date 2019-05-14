@@ -1212,6 +1212,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
     N.CENSUS_LOCALITY: StrOrIdsParameter(
         id_length=constants.CENSUS_LOCALITY_ID_LEN),
+    N.LOCALITY: StrOrIdsParameter(id_length=constants.LOCALITY_ID_LEN),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=_ADDRESSES_BASIC_FIELDS,

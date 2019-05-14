@@ -613,7 +613,7 @@ class IntersectionsSearch(ElasticsearchSearch):
                 y donde la calle B pertenezca a la segunda (o vice versa).
             geo_shape_geoms (list): Lista de geometrías GeoJSON a utilizar para
                 filtrar por intersección con geometrías.
-            census_locality (list, str): Filtrar por nombre o IDs de
+            census_locality (list, str, tuple): Filtrar por nombre o IDs de
                 localidades censales.
             department (list, str): Filtrar por nombre o IDs de departamentos.
             state (list, str): Filtrar por nombre o IDs de provincias.
@@ -709,7 +709,7 @@ class StreetBlocksSearch(ElasticsearchSearch):
         Args:
             name (str): Filtrar por nombre de calles.
             category (str): Filtrar por tipo de calle.
-            census_locality (list, str): Filtrar por nombre o IDs de
+            census_locality (list, str, tuple): Filtrar por nombre o IDs de
                 localidades censales.
             department (list, str): Filtrar por nombre o IDs de departamentos.
             state (list, str): Filtrar por nombre o IDs de provincias.
@@ -986,7 +986,10 @@ def _build_subentity_query(id_field, name_field, value, exact):
     Args:
         id_field (str): Nombre del campo de ID de la subentidad.
         name_field (str): Nombre del campo de nombre de la subentidad.
-        value (list, str): Lista de IDs o nombre a utilizar para filtrar.
+        value (list, str, tuple): Valor a buscar. En caso de ser una lista,
+            representa una lista de IDs. En caso de ser un string, representa
+            un nombre. En caso de ser una tupla, representa una lista de IDs y
+            un nombre (buscar ambos unidos por OR).
         exact (bool): Activa la búsqueda por nombres exactos (en caso de que
             'value' sea de tipo str).
 
@@ -996,6 +999,12 @@ def _build_subentity_query(id_field, name_field, value, exact):
     """
     if isinstance(value, list):
         return Bool(filter=[_build_terms_query(id_field, value)])
+    if isinstance(value, tuple):
+        ids, name = value
+        return (
+            _build_name_query(name_field, name, exact) |
+            Bool(filter=[_build_terms_query(id_field, ids)])
+        )
 
     return _build_name_query(name_field, value, exact)
 
