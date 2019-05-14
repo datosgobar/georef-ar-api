@@ -700,7 +700,7 @@
 <li><strong>calle 1</strong> <em>entre</em> <strong>calle 2</strong> y <strong>calle 3</strong> [altura]</li>
 </ul>
 <p>En todos los casos, el valor [altura] es opcional, y de estar presente puede ser seguido de un piso/número de departamento.</p>
-<p>El resto de los parámetros aceptados por el recurso <code>/direccion</code> están listados en la <a href="https://datosgobar.github.io/georef-ar-api/open-api">referencia completa de la API</a>. Se recomienda utilizar los parámetros <code>provincia</code>, <code>departamento</code> y/o <code>localidad_censal</code> para obtener resultados más precisos.</p>
+<p>El resto de los parámetros aceptados por el recurso <code>/direccion</code> están listados en la <a href="https://datosgobar.github.io/georef-ar-api/open-api">referencia completa de la API</a>. Se recomienda utilizar los parámetros <code>provincia</code>, <code>departamento</code>, <code>localidad_censal</code> y/o <code>localidad</code> para obtener resultados más precisos.</p>
 <h2 id="campos-de-respuesta">Campos de respuesta<a class="headerlink" href="#campos-de-respuesta" title="Permanent link">&para;</a></h2>
 <p>Al normalizar una dirección, la API devuelve varios campos de datos. Para entender el significado de cada uno, es conveniente utilizar un ejemplo de uso:</p>
 <p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/direcciones?direccion=Av.%20Santa%20Fe%20nro%20260%202ndo%20C,%20entre%20Santa%20Rosa%20y%20Col%C3%B3n&amp;departamento=capital&amp;provincia=cordoba">https://apis.datos.gob.ar/georef/api/direcciones?direccion=Av. Santa Fe nro 260 2ndo C, entre Santa Rosa y Colón&amp;departamento=capital&amp;provincia=cordoba</a></p>

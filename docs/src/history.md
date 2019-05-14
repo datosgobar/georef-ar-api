@@ -1,5 +1,8 @@
 # Historial de versiones
 
+## **0.5.2** - 2019/05/14
+- Agrega parámetro `localidad` a recurso `/direcciones`.
+
 ## **0.5.1** - 2019/05/10
 - Corrige campos CSV del recurso `/localidades-censales`.
 - Corrige valor de `cantidad` para consultas al recurso `/asentamientos`.
