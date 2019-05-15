@@ -19,6 +19,9 @@ nav:
     - Usar en Python: python-usage.md
     - Autenticarse con JWT: jwt-token.md
     - Referencia API: https://datosgobar.github.io/georef-ar-api/open-api
+    # - Referencia metodológica:
+    #   - Localidades y asentamientos:
+    #   - Gobiernos locales y municipios:
     - Condiciones de uso: terms.md
   - Aplicaciones: applications.md
   - Desarrolladores:
