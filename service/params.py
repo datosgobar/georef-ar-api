@@ -14,12 +14,18 @@ import service.names as N
 from service import strings, constants, utils
 
 
-class ParameterParsingException(Exception):
+class ParametersParseException(Exception):
     """Excepción lanzada al finalizar la recolección de errores para todos los
     parámetros.
 
     La variable 'self._errors' puede contener un diccionario de error por
     parámetro (GET) o una lista de diccionarios de error por parámetro (POST).
+
+    Attributes:
+        _errors (list, dict): Diccionario de errores (nombre-ParamError) para
+            un conjunto de parámetros (GET), o una lista de diccionarios de
+            errores (POST).
+        _fmt (str): Formato a utilizar para presentar los errores.
 
     """
 
@@ -689,7 +695,63 @@ class IntSetSumValidator(ParamValidator):
                 strings.INT_VAL_BIG_GLOBAL.format(names, self._upper_limit))
 
 
-class EndpointParameters():
+class ParametersParseResult:
+    """Representa el resultado de parsear un conjunto de parámetros (de un
+    endpoint).
+
+    Attributes:
+        _values (dict): Valor parseado por cada parámetro.
+        _received (set): Conjunto de parámetros que fueron recibidos. Los
+            parámetros no incluidos en este conjunto tomaron obligatoriamente
+            su valor default. Se usta este atributo para determinar cuáles
+            parámetros deben mostrarse al usuario bajo el campo 'params'.
+
+    """
+
+    __slots__ = ['_values', '_received']
+
+    def __init__(self):
+        """Inicializa un objeto de tipo 'ParametersParseResult'.
+
+        """
+        self._values = {}
+        self._received = set()
+
+    def add_value(self, param_name, value):
+        """Agrega el valor de un parámetro parseado.
+
+        Args:
+            param_name (str): Nombre del parámetro.
+            value (object): Valor parseado (no el string recibido).
+
+        """
+        self._values[param_name] = value
+
+    def mark_received(self, param_name):
+        """Marca un parámetro como recibido externamente.
+
+        Args:
+            param_name (str): Nombre del parámetro recibido.
+
+        """
+        self._received.add(param_name)
+
+    @property
+    def values(self):
+        return self._values
+
+    def received_values(self):
+        """Retorna un diccionario conteniendo solo los parámetros recibidos.
+
+        Returns:
+            dict: Diccionario de nombre de parámetro-valor, solo conteniendo
+                parámetros recibidos externamente (no defaults).
+
+        """
+        return {name: self._values[name] for name in self._received}
+
+
+class EndpointParameters:
     """Representa un conjunto de parámetros para un endpoint HTTP.
 
     Attributes:
@@ -771,16 +833,16 @@ class EndpointParameters():
                 recibidos los parámetros.
 
         Returns:
-            list: Lista de resultados. Los resultados consisten de un
-                diccionario conteniendo como clave el nombre del parámetro, y
-                como valor el valor parseado y validado, con su tipo apropiado.
+            ParametersParseResult: Objeto con la información de todos los
+                parámetros recibidos, con sus valores.
 
         Raises:
-            ParameterParsingException: Excepción con errores de parseo
+            ParametersParseException: Excepción con errores de parseo
                 de parámetros.
 
         """
-        parsed, errors = {}, {}
+        results = ParametersParseResult()
+        errors = {}
         # Cuando ser reciben parámetros vía querystring, se pueden llegar a
         # tener varios valores bajo una misma key (ver clase
         # werkzeug.MultiDict).
@@ -796,7 +858,8 @@ class EndpointParameters():
                 continue
 
             try:
-                parsed[param_name] = param.get_value(received_val)
+                parsed = param.get_value(received_val)
+                results.add_value(param_name, parsed)
             except ParameterRequiredException:
                 errors[param_name] = ParamError(ParamErrorType.PARAM_REQUIRED,
                                                 strings.MISSING_ERROR.format(
@@ -819,15 +882,17 @@ class EndpointParameters():
                                                 strings.UNKNOWN_ERROR,
                                                 from_source,
                                                 list(params.keys()))
+            else:
+                results.mark_received(param_name)
 
         if errors:
             # Si no se especificó un formato válido, utilizar JSON para mostrar
             # los errores.
-            fmt = parsed.get(N.FORMAT, 'json')
-            raise ParameterParsingException(errors, fmt)
+            fmt = results.values.get(N.FORMAT, 'json')
+            raise ParametersParseException(errors, fmt)
 
-        self._cross_validate_params(parsed, from_source)
-        return parsed
+        self._cross_validate_params(results, from_source)
+        return results
 
     def _cross_validate_params(self, parsed, from_source):
         """Ejecuta las validaciones de conjuntos de parámetros distintos. Por
@@ -835,20 +900,20 @@ class EndpointParameters():
         'max' e 'inicio' no superen un cierto valor.
 
         Args:
-            parsed (dict): Diccionario parámetro-valor donde se almacenan los
+            parsed (ParametersParseResult): Objeto donde se almacenan los
                 resultados del parseo de argumentos para una consulta.
             from_source (str): Ubicación dentro de la request HTTP donde fueron
                 recibidos los parámetros.
 
         Raises:
-            ParameterParsingException: Se lanza la excepción si no se pasó una
+            ParametersParseException: Se lanza la excepción si no se pasó una
                 validación instalada para conjuntos de parámetros.
 
         """
         errors = {}
 
         for validator, param_names in self._cross_validators:
-            values = [parsed[name] for name in param_names]
+            values = [parsed.values[name] for name in param_names]
             try:
                 validator.validate_values(param_names, values)
             except ValueError as e:
@@ -861,7 +926,7 @@ class EndpointParameters():
                 break
 
         if errors:
-            raise ParameterParsingException(errors)
+            raise ParametersParseException(errors)
 
     def _validate_param_sets(self, results):
         """Ejecuta las validaciones de conjuntos de valores para un parámetro.
@@ -872,11 +937,11 @@ class EndpointParameters():
         (ya que se repiten parámetros entre consultas recibidas).
 
         Args:
-            results (list): Lista de diccionarios, cada diccionario contiene
+            results (list): Lista de ParametersParseResult, cada uno contiene
                 los resultados de parsear los parámetros de una consulta.
 
         Raises:
-            ParameterParsingException: Se lanza la excepción si no se pasó una
+            ParametersParseException: Se lanza la excepción si no se pasó una
                 validación instalada para conjuntos de valores.
 
         """
@@ -891,7 +956,7 @@ class EndpointParameters():
                     # Validar conjuntos de valores de parámetros bajo el
                     # mismo nombre
                     validator.validate_values([name],
-                                              (result[name]
+                                              (result.values[name]
                                                for result in results))
                 except ValueError as e:
                     error = ParamError(ParamErrorType.INVALID_SET, str(e),
@@ -910,7 +975,7 @@ class EndpointParameters():
         # Luego de validar conjuntos, lanzar una excepción si se generaron
         # errores nuevos
         if any(errors_list):
-            raise ParameterParsingException(errors_list)
+            raise ParametersParseException(errors_list)
 
     def parse_post_params(self, qs_params, body, body_key):
         """Parsea parámetros (clave-valor) recibidos en una request HTTP
@@ -924,17 +989,16 @@ class EndpointParameters():
                 de consultas recibias vía POST, en 'body_params'.
 
         Returns:
-            list: lista de conjuntos de parámetros parseados provienentes
-                de 'parse_param_dict'.
+            list: lista de ParametersParseResult.
 
         Raises:
-            ParameterParsingException: Excepción con errores de parseo
+            ParametersParseException: Excepción con errores de parseo
                 de parámetros.
 
         """
         if qs_params:
             # No aceptar parámetros de querystring en bulk
-            raise ParameterParsingException([
+            raise ParametersParseException([
                 {'querystring': ParamError(ParamErrorType.INVALID_LOCATION,
                                            strings.BULK_QS_INVALID,
                                            'querystring')}
@@ -945,14 +1009,14 @@ class EndpointParameters():
         if not body_params or not isinstance(body_params, list):
             # No aceptar operaciones bulk que no sean listas, y no
             # aceptar listas vacías.
-            raise ParameterParsingException([
+            raise ParametersParseException([
                 {body_key: ParamError(ParamErrorType.INVALID_BULK,
                                       strings.INVALID_BULK.format(body_key),
                                       'body')}
             ])
 
         if len(body_params) > constants.MAX_BULK_LEN:
-            raise ParameterParsingException([
+            raise ParametersParseException([
                 {body_key: ParamError(
                     ParamErrorType.INVALID_BULK_LEN,
                     strings.BULK_LEN_ERROR.format(constants.MAX_BULK_LEN),
@@ -961,12 +1025,13 @@ class EndpointParameters():
 
         results, errors_list = [], []
         for param_dict in body_params:
-            parsed, errors = {}, {}
+            parsed = None
+            errors = {}
             if hasattr(param_dict, 'get'):
                 try:
                     parsed = self._parse_params_dict(self._post_body_params,
                                                      param_dict, 'body')
-                except ParameterParsingException as e:
+                except ParametersParseException as e:
                     errors = e.errors
             else:
                 errors[body_key] = ParamError(
@@ -977,7 +1042,7 @@ class EndpointParameters():
             errors_list.append(errors)
 
         if any(errors_list):
-            raise ParameterParsingException(errors_list)
+            raise ParametersParseException(errors_list)
 
         self._validate_param_sets(results)
         return results
@@ -990,10 +1055,10 @@ class EndpointParameters():
             qs_params (dict): Parámetros recibidos en el query string.
 
         Returns:
-            list: Valor de retorno de 'parse_dict_params'.
+            ParametersParseResult: Valor de retorno de 'parse_dict_params'.
 
         Raises:
-            ParameterParsingException: Excepción con errores de parseo
+            ParametersParseException: Excepción con errores de parseo
                 de parámetros.
 
         """

@@ -58,18 +58,18 @@ def _process_entity_single(request, name, param_parser, key_translations):
     """
     try:
         qs_params = param_parser.parse_get_params(request.args)
-    except params.ParameterParsingException as e:
+    except params.ParametersParseException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     # Construir query a partir de parámetros
-    query = utils.translate_keys(qs_params, key_translations,
+    query = utils.translate_keys(qs_params.values, key_translations,
                                  ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
     fmt = {
-        key: qs_params[key]
+        key: qs_params.values[key]
         for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
-        if key in qs_params
+        if key in qs_params.values
     }
 
     if fmt[N.FORMAT] == 'shp':
@@ -82,6 +82,7 @@ def _process_entity_single(request, name, param_parser, key_translations):
     data.ElasticsearchSearch.run_searches(es, [search])
 
     query_result = QueryResult.from_entity_list(search.result.hits,
+                                                qs_params.received_values(),
                                                 search.result.total,
                                                 search.result.offset)
 
@@ -112,21 +113,21 @@ def _process_entity_bulk(request, name, param_parser, key_translations):
     try:
         body_params = param_parser.parse_post_params(
             request.args, request.json, name)
-    except params.ParameterParsingException as e:
+    except params.ParametersParseException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
     queries = []
     formats = []
     for parsed_params in body_params:
         # Construir query a partir de parámetros
-        query = utils.translate_keys(parsed_params, key_translations,
+        query = utils.translate_keys(parsed_params.values, key_translations,
                                      ignore=[N.FLATTEN, N.FORMAT])
 
         # Construir reglas de formato a partir de parámetros
         fmt = {
-            key: parsed_params[key]
+            key: parsed_params.values[key]
             for key in [N.FLATTEN, N.FIELDS]
-            if key in parsed_params
+            if key in parsed_params.values
         }
 
         queries.append(query)
@@ -140,9 +141,10 @@ def _process_entity_bulk(request, name, param_parser, key_translations):
 
     query_results = [
         QueryResult.from_entity_list(search.result.hits,
+                                     params.received_values(),
                                      search.result.total,
                                      search.result.offset)
-        for search in searches
+        for search, params in zip(searches, body_params)
     ]
 
     return formatter.create_ok_response_bulk(name, query_results, formats)
@@ -342,7 +344,7 @@ def _build_street_query_format(parsed_params):
     (presentación) que se le debe dar a los datos obtenidos de la misma.
 
     Args:
-        parsed_params (dict): Parámetros de una consulta para el índice de
+        parsed_params (dict): Parámetros de una consulta para el recurso de
             calles.
 
     Returns:
@@ -380,8 +382,9 @@ def _process_street_queries(params_list):
     recibidos del usuario.
 
     Args:
-        params_list (list): Lista de dict, cada dict conteniendo los parámetros
-            de una consulta al recurso de calles de la API.
+        params_list (list): Lista de ParametersParseResult, cada uno
+            conteniendo los parámetros de una consulta al recurso de calles de
+            la API.
 
     Returns:
         tuple: Tupla de (list, list), donde la primera lista contiene una
@@ -393,7 +396,7 @@ def _process_street_queries(params_list):
     queries = []
     formats = []
     for parsed_params in params_list:
-        query, fmt = _build_street_query_format(parsed_params)
+        query, fmt = _build_street_query_format(parsed_params.values)
         if fmt.get(N.FORMAT) == 'shp':
             query['fields'] += (N.GEOM,)
 
@@ -401,7 +404,8 @@ def _process_street_queries(params_list):
         formats.append(fmt)
 
     es = get_elasticsearch()
-    query_results = street.run_street_queries(es, queries, formats)
+    query_results = street.run_street_queries(es, params_list, queries,
+                                              formats)
 
     return query_results, formats
 
@@ -423,7 +427,7 @@ def _process_street_single(request):
     """
     try:
         qs_params = params.PARAMS_STREETS.parse_get_params(request.args)
-    except params.ParameterParsingException as e:
+    except params.ParametersParseException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     query_results, formats = _process_street_queries([qs_params])
@@ -449,7 +453,7 @@ def _process_street_bulk(request):
     try:
         body_params = params.PARAMS_STREETS.parse_post_params(
             request.args, request.json, N.STREETS)
-    except params.ParameterParsingException as e:
+    except params.ParametersParseException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
     query_results, formats = _process_street_queries(body_params)
@@ -519,8 +523,9 @@ def _process_address_queries(params_list):
     parámetros recibidos del usuario.
 
     Args:
-        params_list (list): Lista de dict, cada dict conteniendo los parámetros
-            de una consulta al recurso de direcciones de la API.
+        params_list (list): Lista de ParametersParseResult, cada uno
+            conteniendo los parámetros de una consulta al recurso de
+            direcciones de la API.
 
     Returns:
         tuple: Tupla de (list, list), donde la primera lista contiene una
@@ -532,12 +537,13 @@ def _process_address_queries(params_list):
     queries = []
     formats = []
     for parsed_params in params_list:
-        query, fmt = _build_address_query_format(parsed_params)
+        query, fmt = _build_address_query_format(parsed_params.values)
         queries.append(query)
         formats.append(fmt)
 
     es = get_elasticsearch()
-    query_results = address.run_address_queries(es, queries, formats)
+    query_results = address.run_address_queries(es, params_list, queries,
+                                                formats)
 
     return query_results, formats
 
@@ -559,7 +565,7 @@ def _process_address_single(request):
     """
     try:
         qs_params = params.PARAMS_ADDRESSES.parse_get_params(request.args)
-    except params.ParameterParsingException as e:
+    except params.ParametersParseException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     query_results, formats = _process_address_queries([qs_params])
@@ -586,7 +592,7 @@ def _process_address_bulk(request):
     try:
         body_params = params.PARAMS_ADDRESSES.parse_post_params(
             request.args, request.json, N.ADDRESSES)
-    except params.ParameterParsingException as e:
+    except params.ParametersParseException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
     query_results, formats = _process_address_queries(body_params)
@@ -662,13 +668,13 @@ def _process_location_single(request):
     """
     try:
         qs_params = params.PARAMS_LOCATION.parse_get_params(request.args)
-    except params.ParameterParsingException as e:
+    except params.ParametersParseException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
-    query, fmt = _build_location_query_format(qs_params)
+    query, fmt = _build_location_query_format(qs_params.values)
 
     es = get_elasticsearch()
-    result = location.run_location_queries(es, [query])[0]
+    result = location.run_location_queries(es, [qs_params], [query])[0]
 
     return formatter.create_ok_response(N.LOCATION, result, fmt)
 
@@ -691,18 +697,18 @@ def _process_location_bulk(request):
     try:
         body_params = params.PARAMS_LOCATION.parse_post_params(
             request.args, request.json, N.LOCATIONS)
-    except params.ParameterParsingException as e:
+    except params.ParametersParseException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 
     queries = []
     formats = []
     for parsed_params in body_params:
-        query, fmt = _build_location_query_format(parsed_params)
+        query, fmt = _build_location_query_format(parsed_params.values)
         queries.append(query)
         formats.append(fmt)
 
     es = get_elasticsearch()
-    results = location.run_location_queries(es, queries)
+    results = location.run_location_queries(es, body_params, queries)
 
     return formatter.create_ok_response_bulk(N.LOCATION, results, formats)
 

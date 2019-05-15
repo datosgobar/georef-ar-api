@@ -65,10 +65,13 @@ class AddressQueryPlanner(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_query_result(self):
+    def get_query_result(self, params):
         """Retorna los resultados de la búsqueda de direcciones. Este método
         debe ser invocado luego de haber recorrido todo el iterador obtenido
         con 'planner_steps'.
+
+        Args:
+            params (dict): Parámetros recibidos que generaron la consulta.
 
         Returns:
             QueryResult: Resultados de la búsqueda de direcciones.
@@ -311,15 +314,18 @@ class AddressNoneQueryPlanner(AddressQueryPlanner):
         """
         return iter(())  # Iterador vacío
 
-    def get_query_result(self):
+    def get_query_result(self, params):
         """Retorna los resultados de la búsqueda de direcciones. En el caso de
         'AddressNoneQueryPlanner', siempre se retornan resultados vacíos.
+
+        Args:
+            params (dict): Parámetros recibidos que generaron la consulta.
 
         Returns:
             QueryResult: Resultados de la búsqueda de direcciones.
 
         """
-        return QueryResult.empty()
+        return QueryResult.empty(params)
 
 
 class AddressSimpleQueryPlanner(AddressQueryPlanner):
@@ -402,20 +408,24 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
         return address_hits
 
-    def get_query_result(self):
+    def get_query_result(self, params):
         """Retorna los resultados de la búsqueda de direcciones. Este método
         debe ser invocado luego de haber recorrido todo el iterador obtenido
         con 'planner_steps'.
+
+        Args:
+            params (dict): Parámetros recibidos que generaron la consulta.
 
         Returns:
             QueryResult: Resultados de la búsqueda de direcciones.
 
         """
         if not self._elasticsearch_result:
-            return QueryResult.empty()
+            return QueryResult.empty(params)
 
         address_hits = self._build_address_hits()
         return QueryResult.from_entity_list(address_hits,
+                                            params,
                                             self._elasticsearch_result.total,
                                             self._elasticsearch_result.offset)
 
@@ -683,7 +693,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         self._apply_sort(intersection_hits)
         return intersection_hits
 
-    def get_query_result(self):
+    def get_query_result(self, params):
         """Retorna los resultados de la búsqueda de direcciones. Este método
         debe ser invocado luego de haber recorrido todo el iterador obtenido
         con 'planner_steps'.
@@ -691,14 +701,18 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         Se utiliza el 'total' y 'offset' de la búsqueda #3 (intersecciones)
         como metadatos de los resultados.
 
+        Args:
+            params (dict): Parámetros recibidos que generaron la consulta.
+
         Returns:
             QueryResult: Resultados de la búsqueda de direcciones.
 
         """
         if not self._intersection_hits:
-            return QueryResult.empty()
+            return QueryResult.empty(params)
 
         return QueryResult.from_entity_list(self._intersection_hits,
+                                            params,
                                             self._intersections_result.total,
                                             self._intersections_result.offset)
 
@@ -986,7 +1000,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         self._apply_sort(between_hits)
         return between_hits
 
-    def get_query_result(self):
+    def get_query_result(self, params):
         """Retorna los resultados de la búsqueda de direcciones. Este método
         debe ser invocado luego de haber recorrido todo el iterador obtenido
         con 'planner_steps'.
@@ -997,15 +1011,19 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         ya que gran parte del procesamiento se hace localmente, combinando
         resultados de las mismas).
 
+        Args:
+            params (dict): Parámetros recibidos que generaron la consulta.
+
         Returns:
             QueryResult: Resultados de la búsqueda de direcciones.
 
         """
         if not self._between_hits:
-            return QueryResult.empty()
+            return QueryResult.empty(params)
 
         # TODO: Revisar total y offset
         return QueryResult.from_entity_list(self._between_hits,
+                                            params,
                                             len(self._between_hits),
                                             0)
 
@@ -1055,16 +1073,19 @@ def _run_query_planners(es, query_planners):
                 iteration_data.append((iterator, search))
 
 
-def run_address_queries(es, queries, formats):
+def run_address_queries(es, params_list, queries, formats):
     """Punto de entrada del módulo 'address.py'. Toma una lista de consultas de
     direcciones y las ejecuta, devolviendo los resultados QueryResult.
 
     Args:
         es (Elasticsearch): Conexión a Elasticsearch.
-        queries (list): Lista de búsquedas en forma de diccionarios de
-            parámetros.
-        formats (list): Lista de parámetros de formato de cada búsqueda, en
-            forma de diccionario.
+        params_list (list): Lista de ParametersParseResult, cada uno
+            conteniendo los parámetros de una consulta al recurso de
+            direcciones de la API.
+        queries (list): Lista de parámetros de búsqueda en forma de
+            diccionarios de parámetros (extraídos de params_list).
+        formats (list): Lista de parámetros de formato de cada consulta, en
+            forma de diccionario (extraídos de params_list).
 
     Returns:
         list: Lista de QueryResult, una por cada búsqueda.
@@ -1091,6 +1112,6 @@ def run_address_queries(es, queries, formats):
     _run_query_planners(es, query_planners)
 
     return [
-        query_planner.get_query_result()
-        for query_planner in query_planners
+        query_planner.get_query_result(params.received_values())
+        for query_planner, params in zip(query_planners, params_list)
     ]

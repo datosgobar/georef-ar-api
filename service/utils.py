@@ -3,6 +3,16 @@
 Contiene funciones y clases de varias utilidades.
 """
 
+from flask.json import JSONEncoder
+from georef_ar_address.address_data import AddressData
+from service import names as N
+
+_ADDRESS_TYPES = {
+    'simple': 'simple',
+    'intersection': 'interseccion',
+    'between': 'entre_calles'
+}
+
 
 class LFUDict:
     """Diccionario LFU ("Least Frequently Used").
@@ -146,6 +156,55 @@ class LFUDict:
 
         """
         return 'LFUDict({})'.format(self._dict)
+
+
+def address_data_spanish(address_data):
+    return {
+        N.DOOR_NUM: {
+            N.UNIT: address_data['door_number']['unit'],
+            N.VALUE: address_data['door_number']['value']
+        },
+        N.FLOOR: address_data['floor'],
+        N.STREETS: address_data['street_names'],
+        N.TYPE: _ADDRESS_TYPES[address_data['type']]
+    }
+
+
+class GeorefJSONEncoder(JSONEncoder):
+    """Codificador JSON para Georef. Extiende 'JSONEncoder' para poder
+    codificar valores de tipo 'set' y 'AddressData'.
+
+    """
+
+    # pylint: disable=method-hidden
+    def default(self, o):
+        """Retorna un objeto a codificar, dado un objeto recibido por el
+        codificador.
+
+        Args:
+            o (object): Objeto recibido por el codificador.
+
+        Returns:
+            object: Objeto final a codificar.
+
+        """
+        if isinstance(o, set):
+            return list(o)
+
+        if isinstance(o, AddressData):
+            return address_data_spanish(o.to_dict())
+
+        return super().default(o)
+
+
+def patch_json_encoder(app):
+    """Modifica un app Flask para utilizar 'GeorefJSONEncoder'.
+
+    Args:
+        app (flask.app.Flask): App de Flask.
+
+    """
+    app.json_encoder = GeorefJSONEncoder
 
 
 def step_iterator(iterator, input_data=None):

@@ -19,6 +19,8 @@ class QueryResult:
     Attributes:
         _entities (list): Lista de entidades (provincias, municipios,
             ubicaciones, calles, etc.).
+        _params (dict): Parámetros de consulta que generaron este objeto
+            'QueryResult'.
         _iterable (bool): Falso si el resultado representa una entidad
             singular (como en el caso de una ubicación). Verdadero cuando se
             representa una lista de entidades (como en el caso de, por ejemplo,
@@ -34,51 +36,79 @@ class QueryResult:
 
     """
 
-    __slots__ = ['_entities', '_iterable', '_total', '_offset']
+    __slots__ = ['_entities', '_params', '_iterable', '_total', '_offset']
 
-    def __init__(self, entities, iterable=False, total=1, offset=0):
+    def __init__(self, entities, params, iterable=False, total=1, offset=0):
         """Inicializar una QueryResult. Se recomienda utilizar
         'from_single_entity' y 'from_entity_list' en vez de utilizar este
         método.
 
+        Args:
+            entities (list): Ver atributo '_entities'.
+            params (dict): Ver atributo '_params'.
+            iterable (bool): Ver atributo '_iterable'.
+            total (int): Ver atributo '_total'.
+            offset (int): Ver atributo '_offset'.
+
         """
         self._entities = entities
+        self._params = params
         self._iterable = iterable
         self._total = total
         self._offset = offset
 
     @classmethod
-    def from_single_entity(cls, entity):
+    def from_single_entity(cls, entity, params):
         """Construir una QueryResult a partir de una entidad singular.
 
         Args:
             entity (dict): Entidad encontrada.
+            params (dict): Parámetros de consulta.
+
+        Returns:
+            QueryResult: objeto construido.
 
         """
-        return cls([entity])
+        return cls([entity], params)
 
     @classmethod
-    def from_entity_list(cls, entities, total, offset=0):
+    def from_entity_list(cls, entities, params, total, offset=0):
         """Construir una QueryResult a partir de una lista de entidades de
         cualquier longitud.
 
         Args:
             entities (list): Lista de entidades.
+            params (dict): Parámetros de consulta.
             total (int): Total de entidades encontradas, no necesariamente
                 incluidas.
             offset (int): Cantidad de resultados salteados.
 
+        Returns:
+            QueryResult: objeto construido.
+
         """
-        return cls(entities, iterable=True, total=total, offset=offset)
+        return cls(entities, params, iterable=True, total=total, offset=offset)
 
     @classmethod
-    def empty(cls):
-        """Construir una QueryResult vacía."""
-        return cls.from_entity_list([], total=0)
+    def empty(cls, params):
+        """Construir una QueryResult vacía.
+
+        Args:
+            params (dict): Parámetros de consulta.
+
+        Returns:
+            QueryResult: objeto construido.
+
+        """
+        return cls.from_entity_list([], params, total=0)
 
     @property
     def entities(self):
         return self._entities
+
+    @property
+    def params(self):
+        return self._params
 
     def first_entity(self):
         return self._entities[0]

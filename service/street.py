@@ -16,14 +16,15 @@ from service.query_result import QueryResult
 from service import names as N
 
 
-def run_street_queries(es, queries, formats):
+def run_street_queries(es, params_list, queries, formats):
     """Punto de entrada del módulo 'street.py'. Toma una lista de consultas de
     calles y las ejecuta, devolviendo los resultados QueryResult.
 
     Args:
         es (Elasticsearch): Conexión a Elasticsearch.
-        queries (list): Lista de búsquedas en forma de diccionarios de
-            parámetros.
+        params_list (list): Lista de ParametersParseResult.
+        queries (list): Lista de búsquedas, generadas a partir de
+            'params_list'.
         formats (list): Lista de parámetros de formato de cada búsqueda, en
             forma de diccionario.
 
@@ -57,7 +58,8 @@ def run_street_queries(es, queries, formats):
 
     return [
         QueryResult.from_entity_list(search.result.hits,
+                                     params.received_values(),
                                      search.result.total,
                                      search.result.offset)
-        for search in searches
+        for search, params in zip(searches, params_list)
     ]

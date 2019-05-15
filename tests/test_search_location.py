@@ -339,15 +339,14 @@ class SearchLocationTest(GeorefLiveTest):
 
         individual_results = []
         for query in queries:
-            individual_results.append({
-                'ubicacion': self.get_response(params=query)
-            })
+            individual_results.append(self.get_response(params=query,
+                                                        return_value='full'))
 
         bulk_results = self.get_response(method='POST', body={
             'ubicaciones': queries
         })
 
-        self.assertEqual(individual_results, bulk_results)
+        self.assertListEqual(individual_results, bulk_results)
 
     def test_json_format(self):
         """Por default, los resultados de una query deberían estar en

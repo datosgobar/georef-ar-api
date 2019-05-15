@@ -727,10 +727,14 @@ def _format_result_json(name, result, fmt):
             name: result.entities,
             N.QUANTITY: len(result.entities),
             N.TOTAL: result.total,
-            N.OFFSET: result.offset
+            N.OFFSET: result.offset,
+            N.PARAMETERS: result.params
         }
 
-    return {name: result.first_entity()}
+    return {
+        name: result.first_entity(),
+        N.PARAMETERS: result.params
+    }
 
 
 def _create_json_response_single(name, result, fmt):
@@ -747,7 +751,7 @@ def _create_json_response_single(name, result, fmt):
 
     """
     json_response = _format_result_json(name, result, fmt)
-    return make_response(jsonify(json_response))
+    return jsonify(json_response)
 
 
 def _create_json_response_bulk(name, results, formats):
@@ -768,9 +772,9 @@ def _create_json_response_bulk(name, results, formats):
         for result, fmt in zip(results, formats)
     ]
 
-    return make_response(jsonify({
+    return jsonify({
         N.RESULTS: json_results
-    }))
+    })
 
 
 def filter_result_fields(result, fields_dict, max_depth=3):

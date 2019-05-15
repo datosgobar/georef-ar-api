@@ -11,11 +11,13 @@ from service.geometry import Point
 from service.query_result import QueryResult
 
 
-def _build_location_result(query, state, dept, muni):
+def _build_location_result(params, query, state, dept, muni):
     """Construye un resultado para una consulta al endpoint de ubicación.
 
     Args:
-        query (dict): Query utilizada para obtener los resultados.
+        params (dict): Parámetros recibidos.
+        query (dict): Query utilizada para obtener los resultados (generada a
+            partir de 'params').
         state (dict): Provincia encontrada en la ubicación especificada.
             Puede ser None.
         dept (dict): Departamento encontrado en la ubicación especificada.
@@ -48,17 +50,19 @@ def _build_location_result(query, state, dept, muni):
         N.MUN: muni,
         N.LAT: query['lat'],
         N.LON: query['lon']
-    })
+    }, params)
 
 
-def run_location_queries(es, queries):
+def run_location_queries(es, params_list, queries):
     """Dada una lista de queries de ubicación, construye las queries apropiadas
     a índices de departamentos y municipios, y las ejecuta utilizando
     Elasticsearch.
 
     Args:
         es (Elasticsearch): Conexión a Elasticsearch.
-        queries (list): Lista de queries de ubicación
+        params_list (list): Lista de ParametersParseResult.
+        queries (list): Lista de queries de ubicación, generadas a partir de
+            'params_list'.
 
     Returns:
         list: Resultados de ubicaciones (QueryResult).
@@ -114,15 +118,19 @@ def run_location_queries(es, queries):
     ElasticsearchSearch.run_searches(es, all_searches)
 
     locations = []
-    iterator = zip(queries, state_searches, dept_searches, muni_searches)
+    iterator = zip(params_list, queries, state_searches, dept_searches,
+                   muni_searches)
 
-    for query, state_search, dept_search, muni_search in iterator:
+    for params, query, state_search, dept_search, muni_search in iterator:
         # Ya que la query de tipo location retorna una o cero entidades,
         # extraer la primera entidad de los resultados, o tomar None si
         # no hay resultados.
         state = state_search.result.hits[0] if state_search.result else None
         dept = dept_search.result.hits[0] if dept_search.result else None
         muni = muni_search.result.hits[0] if muni_search.result else None
-        locations.append(_build_location_result(query, state, dept, muni))
+
+        result = _build_location_result(params.received_values(), query, state,
+                                        dept, muni)
+        locations.append(result)
 
     return locations
