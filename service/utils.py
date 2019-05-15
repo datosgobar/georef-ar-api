@@ -159,6 +159,12 @@ class LFUDict:
 
 
 def address_data_spanish(address_data):
+    """Traduce al castellano los campos de un objeto 'AddressData'.
+
+    Returns:
+        dict: Datos de un 'AddressData' con campos en castellano.
+
+    """
     return {
         N.DOOR_NUM: {
             N.UNIT: address_data['door_number']['unit'],
