@@ -302,7 +302,8 @@ def _xml_flask_response(element, status=200):
                     status=status)
 
 
-def value_to_xml(tag, val, list_item_names=None, max_depth=5):
+def value_to_xml(tag, val, *, list_item_names=None, list_item_default=None,
+                 max_depth=5):
     """Dado un valor dict, list, str, None o numérico, lo convierte
     recursivamentea su equivalente en XML y retorna el nodo raíz resultante.
 
@@ -321,8 +322,11 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
             en las llamadas recursivas a 'value_to_xml', por lo que se pueden
             especificar los tags de elementos de listas para cualquier nivel de
             profundidad del valor a convertir. En caso de no encontrar un valor
-            plural en el diccionario, se intenta utilizar la función
-            'names.singular()' para buscar el singular de la palabra.
+            plural en el diccionario, se intenta utilizar el valor en
+            'list_item_default'. Si su valor es None, se utiliza en cambio la
+            función 'names.singular()' para buscar el singular de la palabra.
+        list_item_default (str): Ver explicación bajo parámetro
+            'list_item_names'.
         max_depth (int): Profundidad máxima a alcanzar.
 
     Raises:
@@ -341,9 +345,11 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
 
     if isinstance(val, dict):
         for key in sorted(val):
-            elem = value_to_xml(key, val[key], list_item_names, max_depth - 1)
+            elem = value_to_xml(key, val[key], list_item_names=list_item_names,
+                                list_item_default=list_item_default,
+                                max_depth=max_depth - 1)
             root.append(elem)
-    elif isinstance(val, list):
+    elif isinstance(val, (list, set)):
         for value in val:
             list_item_name = None
 
@@ -352,11 +358,17 @@ def value_to_xml(tag, val, list_item_names=None, max_depth=5):
                 list_item_name = list_item_names.get(tag)
 
             if not list_item_name:
-                # Utilizar names.singular() si el singular no fue especificado
-                list_item_name = N.singular(tag)
+                # Utilizar list_item_default o names.singular() si el singular
+                # no fue especificado
+                if list_item_default:
+                    list_item_name = list_item_default
+                else:
+                    list_item_name = N.singular(tag)
 
-            elem = value_to_xml(list_item_name, value, list_item_names,
-                                max_depth - 1)
+            elem = value_to_xml(list_item_name, value,
+                                list_item_names=list_item_names,
+                                list_item_default=list_item_default,
+                                max_depth=max_depth - 1)
             root.append(elem)
     elif val is not None:
         root.text = str(val)
@@ -408,7 +420,8 @@ def create_param_error_response_single(errors, fmt):
     errors_fmt = _format_params_error_dict(errors)
 
     if fmt == 'xml':
-        root = value_to_xml('errores', errors_fmt, {N.HELP: N.ITEM})
+        root = value_to_xml('errores', errors_fmt,
+                            list_item_names={N.HELP: N.ITEM})
         return _xml_flask_response(root, status=400)
 
     # Para cualquier formato que no sea XML, utilizar JSON para devolver
@@ -531,6 +544,9 @@ def _format_result_xml(name, result, fmt):
     _format_result_fields(result, fmt)
 
     root = _create_xml_element(N.RESULT)
+    root.append(value_to_xml(N.PARAMETERS, result.params,
+                             list_item_default=N.ITEM))
+
     if result.iterable:
         root.append(value_to_xml(name, result.entities))
         root.append(_create_xml_element(N.QUANTITY, len(result.entities)))
