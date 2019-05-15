@@ -45,7 +45,8 @@ Que resultaría en la siguiente respuesta JSON:
                     "nombre": "Córdoba"
                 }
             ],
-            "total": 1
+            "total": 1,
+            "parametros": { ... }
         },
         {
             "cantidad": 1,
@@ -56,7 +57,8 @@ Que resultaría en la siguiente respuesta JSON:
                     "nombre": "Chaco"
                 }
             ],
-            "total": 1
+            "total": 1,
+            "parametros": { ... }
         },
         {
             "cantidad": 1,
@@ -67,7 +69,8 @@ Que resultaría en la siguiente respuesta JSON:
                     "nombre": "San Luis"
                 }
             ],
-            "total": 1
+            "total": 1,
+            "parametros": { ... }
         }
     ]
 }
@@ -123,7 +126,8 @@ Resultados:
             ],
             "cantidad": 1,
             "total": 8,
-            "inicio": 0
+            "inicio": 0,
+            "parametros": { ... }
         },
         {
             "municipios": [
@@ -138,7 +142,8 @@ Resultados:
             ],
             "cantidad": 1,
             "total": 2,
-            "inicio": 0
+            "inicio": 0,
+            "parametros": { ... }
         }
     ]
 }
@@ -192,7 +197,8 @@ Resultados:
                 }
             ],
             "inicio": 0,
-            "total": 29
+            "total": 29,
+            "parametros": { ... }
         },
         {
             "cantidad": 1,
@@ -217,7 +223,8 @@ Resultados:
                 }
             ],
             "inicio": 0,
-            "total": 1
+            "total": 1,
+            "parametros": { ... }
         }
     ]
 }
@@ -247,43 +254,45 @@ curl -X POST "https://apis.datos.gob.ar/georef/api/ubicacion" \
 Resultados:
 ```json
 {
-  "resultados": [
-    {
-      "ubicacion": {
-        "departamento": {
-          "fuente": "Adm. Grl. de Catastro",
-          "id": "10035",
-          "nombre": "Belén"
+    "resultados":  [
+        {
+            "ubicacion":  {
+                "departamento":  {
+                    "fuente":  "Adm.  Grl.  de  Catastro",
+                    "id":  "10035",
+                    "nombre":  "Belén"
+                },
+                "lat":  -27.274161,
+                "lon":  -66.752929,
+                "municipio":  {
+                    "fuente":  "Adm.  Grl.  de  Catastro",
+                    "id":  "100077",
+                    "nombre":  "Hualfín"
+                },
+                "provincia":  {
+                    "fuente":  "IGN",
+                    "id":  "10",
+                    "nombre":  "Catamarca"
+                }
+            },
+            "parametros":  {  ...  }
         },
-        "lat": -27.274161,
-        "lon": -66.752929,
-        "municipio": {
-          "fuente": "Adm. Grl. de Catastro",
-          "id": "100077",
-          "nombre": "Hualfín"
-        },
-        "provincia": {
-          "fuente": "IGN",
-          "id": "10",
-          "nombre": "Catamarca"
+        {
+            "ubicacion":  {
+                "departamento_fuente":  "ATER  -  Direc.  de  Catastro",
+                "departamento_id":  "30113",
+                "departamento_nombre":  "Villaguay",
+                "lat":  -31.480693,
+                "lon":  -59.092813,
+                "municipio_fuente":  null,
+                "municipio_id":  null,
+                "municipio_nombre":  null,
+                "provincia_fuente":  "IGN",
+                "provincia_id":  "30",
+                "provincia_nombre":  "Entre  Ríos"
+            }
+            "parametros":  {  ...  }
         }
-      }
-    },
-    {
-      "ubicacion": {
-        "departamento_fuente": "ATER - Direc. de Catastro",
-        "departamento_id": "30113",
-        "departamento_nombre": "Villaguay",
-        "lat": -31.480693,
-        "lon": -59.092813,
-        "municipio_fuente": null,
-        "municipio_id": null,
-        "municipio_nombre": null,
-        "provincia_fuente": "IGN",
-        "provincia_id": "30",
-        "provincia_nombre": "Entre Ríos"
-      }
-    }
-  ]
+    ]
 }
 ```

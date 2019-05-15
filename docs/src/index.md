@@ -34,7 +34,8 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
     ],
     "cantidad": 1,
     "total": 1,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 
@@ -66,7 +67,8 @@ Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, pue
             "id": "10",
             "nombre": "Catamarca"
         }
-    }
+    },
+    "parametros": { ... }
 }
 ```
 
@@ -88,7 +90,8 @@ Listar las provincias de la República Argentina:
     ],
     "cantidad": 24,
     "total": 24,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 
@@ -106,7 +109,8 @@ Asumiendo que el usuario selecciona **Chaco** (ID: **22**), se ejecutaría la si
     ],
     "cantidad": 68,
     "total": 68,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 

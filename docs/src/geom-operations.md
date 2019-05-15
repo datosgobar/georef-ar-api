@@ -35,7 +35,8 @@ Ejemplo completo de llamado a la API:
     ],
     "cantidad": 10,
     "total": 13,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 
@@ -70,7 +71,8 @@ Con municipio:
             "id": "10",
             "nombre": "Catamarca"
         }
-    }
+    },
+    "parametros": { ... }
 }
 ```
 
@@ -94,6 +96,7 @@ Sin municipio:
             "id": "86",
             "nombre": "Santiago del Estero"
         }
-    }
+    },
+    "parametros": { ... }
 }
 ```

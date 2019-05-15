@@ -19,7 +19,8 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
     ],
     "cantidad": 1,
     "total": 1,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 
@@ -44,7 +45,8 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
     ],
     "cantidad": 16,
     "total": 16,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 
@@ -65,7 +67,8 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
     ],
     "cantidad": 10,
     "total": 112,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 
@@ -82,7 +85,8 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
     ],
     "cantidad": 10,
     "total": 90,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 
@@ -129,7 +133,8 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
     ],
     "cantidad": 1,
     "total": 1,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```
 
@@ -166,6 +171,7 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
     ],
     "cantidad": 3,
     "total": 3,
-    "inicio": 0
+    "inicio": 0,
+    "parametros": { ... }
 }
 ```

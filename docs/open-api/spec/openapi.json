@@ -87,6 +87,10 @@
 			"type": "integer",
 			"example": 0
 		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
 		    "provincias": {
 			"type": "array",
 			"items": {
@@ -214,6 +218,10 @@
 		    "inicio": {
 			"type": "integer",
 			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
 		    },
 		    "departamentos": {
 			"type": "array",
@@ -346,6 +354,10 @@
 			"type": "integer",
 			"example": 0
 		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
 		    "municipios": {
 			"type": "array",
 			"items": {
@@ -472,6 +484,10 @@
 		    "inicio": {
 			"type": "integer",
 			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
 		    },
 		    "localidades": {
 			"type": "array",
@@ -626,6 +642,10 @@
 			"type": "integer",
 			"example": 0
 		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
 		    "localidades_censales": {
 			"type": "array",
 			"items": {
@@ -756,6 +776,10 @@
 		    "inicio": {
 			"type": "integer",
 			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
 		    },
 		    "asentamientos": {
 			"type": "array",
@@ -936,6 +960,10 @@
 			"type": "integer",
 			"example": 0
 		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
 		    "direcciones": {
 			"type": "array",
 			"items": {
@@ -1088,6 +1116,10 @@
 			"type": "integer",
 			"example": 0
 		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
 		    "calles": {
 			"type": "array",
 			"items": {
@@ -1187,6 +1219,10 @@
 		"properties": {
 		    "ubicacion": {
 			"$ref": "#/components/schemas/ubicacion"
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
 		    }
 		}
 	    },

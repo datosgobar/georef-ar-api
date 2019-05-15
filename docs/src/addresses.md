@@ -62,7 +62,8 @@ Al normalizar una dirección, la API devuelve varios campos de datos. Para enten
         }
     ],
     "inicio": 0,
-    "total": 1
+    "total": 1,
+    "parametros": { ... }
 }
 ```
 
