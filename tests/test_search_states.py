@@ -482,3 +482,7 @@ class SearchStatesTest(GeorefLiveTest):
             'iso_nombre',
             'categoria'
         ])
+
+    def test_shp_projection_present(self):
+        """El archivo .prj debería estar presente en el Shapefile."""
+        self.assert_shp_projection_present()

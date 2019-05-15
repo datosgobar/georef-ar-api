@@ -22,6 +22,9 @@ CSV_NEWLINE = '\n'
 FLAT_SEP = '_'
 _SHP_MAX_FIELD_CONTENT_LEN = 128
 _SHP_MAX_FIELD_NAME_LEN = 11
+_SHP_PRJ = ('GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378'
+            '137,298.257223563]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532'
+            '92519943295]]')
 
 _STATES_CSV_FIELDS = [
     (N.ID, [N.STATE, N.ID]),
@@ -598,6 +601,8 @@ def _create_shp_response_single(name, result, fmt):
     shp = io.BytesIO()
     shx = io.BytesIO()
     dbf = io.BytesIO()
+    # Y opcionalmente:
+    prj = io.BytesIO(_SHP_PRJ.encode('utf-8'))
 
     writer = shapefile.Writer(shp=shp, shx=shx, dbf=dbf)
     keys = [field.replace(N.FIELDS_SEP, FLAT_SEP) for field in fmt[N.FIELDS]]
@@ -623,9 +628,10 @@ def _create_shp_response_single(name, result, fmt):
 
     writer.close()
 
-    for fp, extension in [(shp, 'shp'), (shx, 'shx'), (dbf, 'dbf')]:
+    files = [(shp, 'shp'), (shx, 'shx'), (dbf, 'dbf'), (prj, 'prj')]
+    for fp, extension in files:
         with zip_file.open('{}.{}'.format(name, extension), mode='w') as f:
-            # Escribir cada archivo (shp, shx y dbf) al comprimido ZIP.
+            # Escribir cada archivo al comprimido ZIP.
             fp.seek(0)
             shutil.copyfileobj(fp, f)
 

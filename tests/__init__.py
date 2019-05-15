@@ -210,21 +210,32 @@ class GeorefLiveTest(TestCase):
         if not params:
             params = {}
 
-        entity_plural = self.endpoint.split('/')[-1].replace('-', '_')
-
         json_resp = self.get_response(params=params, return_value='full')
-        json_as_xml = formatter.value_to_xml(entity_plural,
-                                             json_resp[entity_plural])
+        json_as_xml = formatter.value_to_xml(self.entity,
+                                             json_resp[self.entity])
 
         params['formato'] = 'xml'
         xml_resp = self.get_response(params=params)
-        xml_entities = xml_resp.find('resultado').find(entity_plural)
+        xml_entities = xml_resp.find('resultado').find(self.entity)
 
         self.assert_xml_equal(json_as_xml, xml_entities)
 
     def assert_xml_equal(self, element_a, element_b):
         self.assertEqual(ElementTree.tostring(element_a, encoding='unicode'),
                          ElementTree.tostring(element_b, encoding='unicode'))
+
+    def assert_shp_projection_present(self):
+        data = self.get_response({'formato': 'shp'}, return_value='raw')
+        contents = io.BytesIO(data)
+        zip_file = zipfile.ZipFile(contents)
+
+        buf = io.BytesIO()
+        with zip_file.open(self.entity + '.prj') as f:
+            shutil.copyfileobj(f, buf)
+            buf.seek(0)
+
+        # pylint: disable=protected-access
+        self.assertEqual(formatter._SHP_PRJ, buf.getvalue().decode('utf-8'))
 
     def assert_valid_shp_type(self, shape_type, params=None):
         if not params:
