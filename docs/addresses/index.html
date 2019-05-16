@@ -710,7 +710,7 @@
         {
             &quot;altura&quot;: {
                 &quot;unidad&quot;: &quot;nro&quot;,
-                &quot;valor&quot;: &quot;260&quot;
+                &quot;valor&quot;: 260
             },
             &quot;calle&quot;: {
                 &quot;categoria&quot;: &quot;AV&quot;,
@@ -744,7 +744,8 @@
         }
     ],
     &quot;inicio&quot;: 0,
-    &quot;total&quot;: 1
+    &quot;total&quot;: 1,
+    &quot;parametros&quot;: { ... }
 }
 </code></pre>
 
@@ -752,7 +753,7 @@
 <ul>
 <li><code>altura</code><ul>
 <li><code>unidad</code>: Unidad de la altura, o prefijo del valor numérico de la misma.</li>
-<li><code>valor</code>: Valor numérico de la altura.</li>
+<li><code>valor</code>: Valor numérico de la altura, o <code>null</code> si la altura ingresada no fue numérica.</li>
 </ul>
 </li>
 <li><code>calle</code>: Propiedades de la primera calle presente en la dirección.<ul>

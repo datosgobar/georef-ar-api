@@ -752,7 +752,8 @@
                     &quot;nombre&quot;: &quot;Córdoba&quot;
                 }
             ],
-            &quot;total&quot;: 1
+            &quot;total&quot;: 1,
+            &quot;parametros&quot;: { ... }
         },
         {
             &quot;cantidad&quot;: 1,
@@ -763,7 +764,8 @@
                     &quot;nombre&quot;: &quot;Chaco&quot;
                 }
             ],
-            &quot;total&quot;: 1
+            &quot;total&quot;: 1,
+            &quot;parametros&quot;: { ... }
         },
         {
             &quot;cantidad&quot;: 1,
@@ -774,7 +776,8 @@
                     &quot;nombre&quot;: &quot;San Luis&quot;
                 }
             ],
-            &quot;total&quot;: 1
+            &quot;total&quot;: 1,
+            &quot;parametros&quot;: { ... }
         }
     ]
 }
@@ -823,7 +826,8 @@ Por ejemplo, se permite enviar 1000 consultas con <code>max=5</code>, o 100 cons
             ],
             &quot;cantidad&quot;: 1,
             &quot;total&quot;: 8,
-            &quot;inicio&quot;: 0
+            &quot;inicio&quot;: 0,
+            &quot;parametros&quot;: { ... }
         },
         {
             &quot;municipios&quot;: [
@@ -838,7 +842,8 @@ Por ejemplo, se permite enviar 1000 consultas con <code>max=5</code>, o 100 cons
             ],
             &quot;cantidad&quot;: 1,
             &quot;total&quot;: 2,
-            &quot;inicio&quot;: 0
+            &quot;inicio&quot;: 0,
+            &quot;parametros&quot;: { ... }
         }
     ]
 }
@@ -873,7 +878,7 @@ Por ejemplo, se permite enviar 1000 consultas con <code>max=5</code>, o 100 cons
             &quot;direcciones&quot;: [
                 {
                     &quot;altura&quot;: {
-                        &quot;valor&quot;: &quot;3100&quot;
+                        &quot;valor&quot;: 3100
                     },
                     &quot;calle&quot;: {
                         &quot;id&quot;: &quot;0642701011435&quot;,
@@ -891,14 +896,15 @@ Por ejemplo, se permite enviar 1000 consultas con <code>max=5</code>, o 100 cons
                 }
             ],
             &quot;inicio&quot;: 0,
-            &quot;total&quot;: 29
+            &quot;total&quot;: 29,
+            &quot;parametros&quot;: { ... }
         },
         {
             &quot;cantidad&quot;: 1,
             &quot;direcciones&quot;: [
                 {
                     &quot;altura&quot;: {
-                        &quot;valor&quot;: &quot;4010&quot;
+                        &quot;valor&quot;: 4010
                     },
                     &quot;calle&quot;: {
                         &quot;id&quot;: &quot;8204229000610&quot;,
@@ -916,7 +922,8 @@ Por ejemplo, se permite enviar 1000 consultas con <code>max=5</code>, o 100 cons
                 }
             ],
             &quot;inicio&quot;: 0,
-            &quot;total&quot;: 1
+            &quot;total&quot;: 1,
+            &quot;parametros&quot;: { ... }
         }
     ]
 }
@@ -945,44 +952,46 @@ Por ejemplo, se permite enviar 1000 consultas con <code>max=5</code>, o 100 cons
 
 <p>Resultados:</p>
 <pre><code class="json">{
-  &quot;resultados&quot;: [
-    {
-      &quot;ubicacion&quot;: {
-        &quot;departamento&quot;: {
-          &quot;fuente&quot;: &quot;Adm. Grl. de Catastro&quot;,
-          &quot;id&quot;: &quot;10035&quot;,
-          &quot;nombre&quot;: &quot;Belén&quot;
+    &quot;resultados&quot;:  [
+        {
+            &quot;ubicacion&quot;:  {
+                &quot;departamento&quot;:  {
+                    &quot;fuente&quot;:  &quot;Adm.  Grl.  de  Catastro&quot;,
+                    &quot;id&quot;:  &quot;10035&quot;,
+                    &quot;nombre&quot;:  &quot;Belén&quot;
+                },
+                &quot;lat&quot;:  -27.274161,
+                &quot;lon&quot;:  -66.752929,
+                &quot;municipio&quot;:  {
+                    &quot;fuente&quot;:  &quot;Adm.  Grl.  de  Catastro&quot;,
+                    &quot;id&quot;:  &quot;100077&quot;,
+                    &quot;nombre&quot;:  &quot;Hualfín&quot;
+                },
+                &quot;provincia&quot;:  {
+                    &quot;fuente&quot;:  &quot;IGN&quot;,
+                    &quot;id&quot;:  &quot;10&quot;,
+                    &quot;nombre&quot;:  &quot;Catamarca&quot;
+                }
+            },
+            &quot;parametros&quot;:  {  ...  }
         },
-        &quot;lat&quot;: -27.274161,
-        &quot;lon&quot;: -66.752929,
-        &quot;municipio&quot;: {
-          &quot;fuente&quot;: &quot;Adm. Grl. de Catastro&quot;,
-          &quot;id&quot;: &quot;100077&quot;,
-          &quot;nombre&quot;: &quot;Hualfín&quot;
-        },
-        &quot;provincia&quot;: {
-          &quot;fuente&quot;: &quot;IGN&quot;,
-          &quot;id&quot;: &quot;10&quot;,
-          &quot;nombre&quot;: &quot;Catamarca&quot;
+        {
+            &quot;ubicacion&quot;:  {
+                &quot;departamento_fuente&quot;:  &quot;ATER  -  Direc.  de  Catastro&quot;,
+                &quot;departamento_id&quot;:  &quot;30113&quot;,
+                &quot;departamento_nombre&quot;:  &quot;Villaguay&quot;,
+                &quot;lat&quot;:  -31.480693,
+                &quot;lon&quot;:  -59.092813,
+                &quot;municipio_fuente&quot;:  null,
+                &quot;municipio_id&quot;:  null,
+                &quot;municipio_nombre&quot;:  null,
+                &quot;provincia_fuente&quot;:  &quot;IGN&quot;,
+                &quot;provincia_id&quot;:  &quot;30&quot;,
+                &quot;provincia_nombre&quot;:  &quot;Entre  Ríos&quot;
+            }
+            &quot;parametros&quot;:  {  ...  }
         }
-      }
-    },
-    {
-      &quot;ubicacion&quot;: {
-        &quot;departamento_fuente&quot;: &quot;ATER - Direc. de Catastro&quot;,
-        &quot;departamento_id&quot;: &quot;30113&quot;,
-        &quot;departamento_nombre&quot;: &quot;Villaguay&quot;,
-        &quot;lat&quot;: -31.480693,
-        &quot;lon&quot;: -59.092813,
-        &quot;municipio_fuente&quot;: null,
-        &quot;municipio_id&quot;: null,
-        &quot;municipio_nombre&quot;: null,
-        &quot;provincia_fuente&quot;: &quot;IGN&quot;,
-        &quot;provincia_id&quot;: &quot;30&quot;,
-        &quot;provincia_nombre&quot;: &quot;Entre Ríos&quot;
-      }
-    }
-  ]
+    ]
 }
 </code></pre>
                 
