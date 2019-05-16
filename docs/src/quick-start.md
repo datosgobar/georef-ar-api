@@ -119,6 +119,10 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 				"id": "06539",
 				"nombre": "Merlo"
 			},
+            "localidad_censal": {
+                "id": "06539010",
+                "nombre": "Merlo"
+            },
 			"nomenclatura": "FLORIDA 2950, Merlo, Buenos Aires",
 			"piso": null,
 			"provincia": {
@@ -157,6 +161,10 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
             "departamento": {
                 "id": "90077",
                 "nombre": "Río Chico"
+            },
+            "localidad_censal": {
+                "id": "90077010",
+                "nombre": "Aguilares"
             },
             "id": "9007701000050",
             "nombre": "AV GRL SAVIO",

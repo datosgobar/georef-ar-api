@@ -49,6 +49,10 @@ Al normalizar una dirección, la API devuelve varios campos de datos. Para enten
                 "id": "14014",
                 "nombre": "Capital"
             },
+            "localidad_censal": {
+                "id": "14014010",
+                "nombre": "Córdoba"
+            },
             "nomenclatura": "AV SANTA FE 260 (ENTRE SANTA ROSA Y AV COLON), Capital, Córdoba",
             "piso": null,
             "provincia": {
@@ -85,6 +89,7 @@ Como se puede observar, campos de respuesta estándar son:
 	- `id`: ID de la **calle 3**.
 	- `categoria`: Tipo de la **calle 3**.
 - `departamento`: Departamento de la **calle 1**.
+- `localidad_censal`: Localidad censal de la **calle 1**.
 - `provincia`: Provincia de la **calle 1**.
 - `piso`: Piso extraído de la dirección.
 - `nomenclatura`: Versión normalizada de la dirección.
