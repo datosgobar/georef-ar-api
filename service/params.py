@@ -313,30 +313,33 @@ class IdsParameter(Parameter):
         return list(ids)
 
 
-class StrOrIdsParameter(Parameter):
-    """Representa un parámetro de tipo string no vacío, o lista de IDs
-    numéricos.
+class CompoundParameter(Parameter):
+    """Representa un parámetro que puede tomar distintos valores, representados
+    por una lista de objetos 'Parameter'.
 
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
     nuevamente el método '_parse_value' para implementar lógica de parseo y
-    validación propias de StrOrIdParameter.
+    validación propias de CompoundParameter.
 
     Attributes:
-        _id_param (IdsParameter): Parámetro de lista de IDs.
-        _str_param (StrParameter): Parámetro de string.
+        _parameters (tuple): Lista de 'Parameter'. Se intenta parsear el valor
+            recibido con cada uno, en orden, hasta que uno retorne un valor.
 
     """
 
-    def __init__(self, id_length, id_padding_char='0'):
-        self._id_param = IdsParameter(id_length, id_padding_char)
-        self._str_param = StrParameter()
-        super().__init__()
+    def __init__(self, parameters, *args, **kwargs):
+        self._parameters = tuple(parameters)
+        super().__init__(*args, **kwargs)
 
     def _parse_value(self, val):
-        try:
-            return self._id_param.get_value(val)
-        except ValueError:
-            return self._str_param.get_value(val)
+        for param in self._parameters:
+            try:
+                return param.get_value(val)
+            except ValueError:
+                # Probar cada Parameter interno hasta agotar la lista
+                pass
+
+        raise ValueError(strings.COMPOUND_PARAM_ERROR)
 
 
 class BoolParameter(Parameter):
@@ -1096,7 +1099,8 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.DEPT_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(entities=[N.STATE, N.MUN, N.STREET]),
-    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1125,7 +1129,8 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE,
                                                     N.STREET]),
-    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1152,9 +1157,12 @@ PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
 PARAMS_CENSUS_LOCALITIES = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.CENSUS_LOCALITY_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
-    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
-    N.MUN: StrOrIdsParameter(id_length=constants.MUNI_ID_LEN),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
+                               StrParameter()]),
+    N.MUN: CompoundParameter([IdsParameter(constants.MUNI_ID_LEN),
+                              StrParameter()]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1182,11 +1190,16 @@ PARAMS_CENSUS_LOCALITIES = EndpointParameters(shared_params={
 PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.SETTLEMENT_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
-    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
-    N.MUN: StrOrIdsParameter(id_length=constants.MUNI_ID_LEN),
-    N.CENSUS_LOCALITY: StrOrIdsParameter(
-        id_length=constants.CENSUS_LOCALITY_ID_LEN),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
+                               StrParameter()]),
+    N.MUN: CompoundParameter([IdsParameter(constants.MUNI_ID_LEN),
+                              StrParameter()]),
+    N.CENSUS_LOCALITY: CompoundParameter([
+        IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
+        StrParameter()
+    ]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1216,11 +1229,16 @@ PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.LOCALITY_ID_LEN),
     N.NAME: StrParameter(),
-    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
-    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
-    N.MUN: StrOrIdsParameter(id_length=constants.MUNI_ID_LEN),
-    N.CENSUS_LOCALITY: StrOrIdsParameter(
-        id_length=constants.CENSUS_LOCALITY_ID_LEN),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
+                               StrParameter()]),
+    N.MUN: CompoundParameter([IdsParameter(constants.MUNI_ID_LEN),
+                              StrParameter()]),
+    N.CENSUS_LOCALITY: CompoundParameter([
+        IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
+        StrParameter()
+    ]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1273,11 +1291,16 @@ _ADDRESSES_COMPLETE_FIELDS = [
 
 PARAMS_ADDRESSES = EndpointParameters(shared_params={
     N.ADDRESS: AddressParameter(),
-    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
-    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
-    N.CENSUS_LOCALITY: StrOrIdsParameter(
-        id_length=constants.CENSUS_LOCALITY_ID_LEN),
-    N.LOCALITY: StrOrIdsParameter(id_length=constants.LOCALITY_ID_LEN),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
+                               StrParameter()]),
+    N.CENSUS_LOCALITY: CompoundParameter([
+        IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
+        StrParameter()
+    ]),
+    N.LOCALITY: CompoundParameter([IdsParameter(constants.LOCALITY_ID_LEN),
+                                   StrParameter()]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=_ADDRESSES_BASIC_FIELDS,
@@ -1305,10 +1328,14 @@ PARAMS_STREETS = EndpointParameters(shared_params={
     N.INTERSECTION: IntersectionParameter(entities=[N.STREET, N.MUN, N.DEPT,
                                                     N.STATE]),
     N.CATEGORY: StrParameter(),
-    N.STATE: StrOrIdsParameter(id_length=constants.STATE_ID_LEN),
-    N.DEPT: StrOrIdsParameter(id_length=constants.DEPT_ID_LEN),
-    N.CENSUS_LOCALITY: StrOrIdsParameter(
-        id_length=constants.CENSUS_LOCALITY_ID_LEN),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
+                               StrParameter()]),
+    N.CENSUS_LOCALITY: CompoundParameter([
+        IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
+        StrParameter()
+    ]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],

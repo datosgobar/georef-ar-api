@@ -35,6 +35,7 @@ NOT_ALLOWED = 'Método no permitido en el recurso seleccionado.'
 ID_PARAM_INVALID = 'Cada ID debe ser numérico y de longitud {}.'
 ID_PARAM_LENGTH = 'La cantidad de ID debe ser menor o igual que {}.'
 ID_PARAM_UNIQUE = 'La lista no debe contener ID repetidos (ID repetido: {}).'
+COMPOUND_PARAM_ERROR = 'El valor del parámetro no es válido.'
 FIELD_LIST_EMPTY = 'La lista no contiene valores.'
 FIELD_LIST_REPEATED = 'La lista contiene valores repetidos.'
 FIELD_LIST_INVALID_CHOICE = 'El parámetro debe consistir en una lista de \
