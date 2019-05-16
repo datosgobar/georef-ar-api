@@ -161,7 +161,7 @@ class ElasticsearchSearch(ABC):
 
         """
         if fields:
-            self._search = self._search.source(include=fields)
+            self._search = self._search.source(includes=fields)
 
         self._search = self._search[offset:offset + size]
 
