@@ -1,5 +1,10 @@
 # Historial de versiones
 
+## **0.5.3** - 2019/05/16
+- Agrega campo `parametros` a todas las respuestas de la API. El campo contiene los valores (interpretados) de los parámetros recibidos por la API en la consulta.
+- Agrega archivo `.prj` a respuestas de consultas en formato *Shapefile*.
+- Modifica el valor del campo de respuesta `altura.valor` en el recurso `/direcciones`. El campo ahora contiene la altura de la dirección en formato numérico, es decir, `int` o `float`. Si la dirección no contiene una altura numérica (por ejemplo, "Calle 15 S/N"), el valor del campo es `null`.
+
 ## **0.5.2** - 2019/05/14
 - Agrega parámetro `localidad` a recurso `/direcciones`.
 

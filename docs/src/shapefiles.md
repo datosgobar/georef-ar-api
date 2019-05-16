@@ -3,7 +3,7 @@
 
 La API permite la descarga de geometrías a través del formato [ESRI Shapefile](https://es.wikipedia.org/wiki/Shapefile). Para utilizar el formato, se debe agregar `formato=shp` a la lista de parámetros especificados en la URL. El formato Shapefile está disponible en la versión GET de todos los recursos, con las excepción de `/direcciones` y `/ubicacion`.
 
-Cuando se especifica `formato=shp`, la respuesta de la API es un archivo ZIP que contiene los tres archivos requeridos por el estándar: `.shp`, `.shx` y `.dbf`. El archivo luego puede ser abierto con programas como [QGIS](https://www.qgis.org/en/site/). El sistema de coordenadas de las geometrías descargadas es WGS84 (EPSG 4326).
+Cuando se especifica `formato=shp`, la respuesta de la API es un archivo ZIP que contiene cuatro archivos estándar: `.shp`, `.shx`, `.dbf` y `.prj`. El archivo luego puede ser abierto con programas como [QGIS](https://www.qgis.org/en/site/). El sistema de coordenadas de las geometrías descargadas es WGS84 (EPSG 4326).
 
 Por ejemplo, si se desea obtener todas las calles del municipio Alta García (ID 141372), se puede utilizar la siguiente consulta:
 
