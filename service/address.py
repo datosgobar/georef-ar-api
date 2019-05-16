@@ -185,7 +185,8 @@ class AddressQueryPlanner(ABC):
             address_hit[N.CENSUS_LOCALITY] = census_locality
 
         address_hit[N.DOOR_NUM] = {
-            N.VALUE: self._address_data.door_number_value,
+            # Utilizar el valor numérico (int/float) como valor de altura
+            N.VALUE: self._numerical_door_number,
             N.UNIT: self._address_data.door_number_unit
         }
         address_hit[N.FLOOR] = self._address_data.floor
