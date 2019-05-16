@@ -179,7 +179,7 @@ Resultados:
             "direcciones": [
                 {
                     "altura": {
-                        "valor": "3100"
+                        "valor": 3100
                     },
                     "calle": {
                         "id": "0642701011435",
@@ -205,7 +205,7 @@ Resultados:
             "direcciones": [
                 {
                     "altura": {
-                        "valor": "4010"
+                        "valor": 4010
                     },
                     "calle": {
                         "id": "8204229000610",

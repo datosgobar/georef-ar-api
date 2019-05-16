@@ -28,7 +28,7 @@ Al normalizar una dirección, la API devuelve varios campos de datos. Para enten
         {
             "altura": {
                 "unidad": "nro",
-                "valor": "260"
+                "valor": 260
             },
             "calle": {
                 "categoria": "AV",
@@ -71,7 +71,7 @@ Como se puede observar, campos de respuesta estándar son:
 
 - `altura`
 	- `unidad`: Unidad de la altura, o prefijo del valor numérico de la misma.
-	- `valor`: Valor numérico de la altura.
+	- `valor`: Valor numérico de la altura, o `null` si la altura ingresada no fue numérica.
 - `calle`: Propiedades de la primera calle presente en la dirección.
 	- `nombre`: Nombre normalizado de la **calle 1**.
 	- `id`: ID de la **calle 1**.

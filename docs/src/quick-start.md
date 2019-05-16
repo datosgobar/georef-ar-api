@@ -98,7 +98,7 @@ A continuación, se muestran algunos ejemplos de uso de la API, utilizando los r
 		{
 			"altura": {
 				"unidad": null,
-				"valor": "2950"
+				"valor": 2950
 			},
 			"calle": {
 				"categoria": "CALLE",
