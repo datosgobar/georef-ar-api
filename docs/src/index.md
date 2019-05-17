@@ -18,7 +18,7 @@ Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usa
     <tr><td>Sgo. del Estero</td></tr>
 </table>
 
-`GET`[`https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo. del Estero`](https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
+`GET` [`https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo. del Estero`](https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
 
 ```json
 {
@@ -49,7 +49,7 @@ Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, pue
     <tr><td>-34.603633</td><td>-58.3837587</td></tr>
 </table>
 
-`GET`[`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
+`GET` [`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
 ```json
 {
     "ubicacion": {
@@ -78,7 +78,7 @@ Finalmente, se puede utilizar la API como punto de referencia al momento de crea
 
 Listar las provincias de la República Argentina:
 
-`GET`[`https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre`](https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre)
+`GET` [`https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre`](https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre)
 ```json
 {
     "provincias": [
@@ -97,7 +97,7 @@ Listar las provincias de la República Argentina:
 
 Asumiendo que el usuario selecciona **Chaco** (ID: **22**), se ejecutaría la siguiente consulta para obtener el listado de municipios:
 
-`GET`[`https://apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100`](https://apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100)
+`GET` [`https://apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100`](https://apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100)
 ```json
 {
     "municipios": [

@@ -53,7 +53,7 @@ Dependiendo del punto elegido, es posible no obtener un municipio como parte de 
 
 Con municipio:
 
-`GET`[`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
+`GET` [`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529)
 ```json
 {
     "ubicacion": {
@@ -78,7 +78,7 @@ Con municipio:
 
 Sin municipio:
 
-`GET`[`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&lon=-62.898`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&lon=-62.898)
+`GET` [`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&lon=-62.898`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&lon=-62.898)
 ```json
 {
     "ubicacion": {
