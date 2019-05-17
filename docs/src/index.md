@@ -78,7 +78,7 @@ Finalmente, se puede utilizar la API como punto de referencia al momento de crea
 
 Listar las provincias de la República Argentina:
 
-`GET`[`https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre`](https://apis.datos.gob.ar/georef/api/provincias)
+`GET`[`https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre`](https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre)
 ```json
 {
     "provincias": [
