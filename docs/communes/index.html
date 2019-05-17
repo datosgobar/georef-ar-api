@@ -13,7 +13,7 @@
         <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
       
       
-        <link rel="canonical" href="http://apis.datos.gob.ar/georef/addresses/">
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/communes/">
       
       
         <meta name="author" content="Datos Argentina">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Normalización de direcciones - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+        <title>Comunas de CABA - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
       
     
     
@@ -104,7 +104,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#normalizacion-de-direcciones" tabindex="1" class="md-skip">
+      <a href="#comunas-de-caba" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -130,7 +130,7 @@
                 API del Servicio de Normalización de Datos Geográficos de Argentina
               </span>
               <span class="md-header-nav__topic">
-                Normalización de direcciones
+                Comunas de CABA
               </span>
             
           
@@ -333,63 +333,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Normalización de direcciones
-      </label>
-    
-    <a href="./" title="Normalización de direcciones" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../addresses/" title="Normalización de direcciones" class="md-nav__link">
       Normalización de direcciones
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Contenidos de la sección</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#parametros-y-filtros" title="Parámetros y filtros" class="md-nav__link">
-    Parámetros y filtros
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#campos-de-respuesta" title="Campos de respuesta" class="md-nav__link">
-    Campos de respuesta
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#normalizacion-de-direcciones-por-lotes" title="Normalización de direcciones por lotes" class="md-nav__link">
-    Normalización de direcciones por lotes
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -481,10 +429,12 @@
           
           
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-11" type="checkbox" id="nav-2-11">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-11" type="checkbox" id="nav-2-11" checked>
     
     <label class="md-nav__link" for="nav-2-11">
       Referencia metodológica
@@ -500,11 +450,20 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../communes/" title="Comunas de CABA" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" title="Comunas de CABA" class="md-nav__link md-nav__link--active">
       Comunas de CABA
     </a>
+    
   </li>
 
         
@@ -695,36 +654,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">Contenidos de la sección</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#parametros-y-filtros" title="Parámetros y filtros" class="md-nav__link">
-    Parámetros y filtros
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#campos-de-respuesta" title="Campos de respuesta" class="md-nav__link">
-    Campos de respuesta
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#normalizacion-de-direcciones-por-lotes" title="Normalización de direcciones por lotes" class="md-nav__link">
-    Normalización de direcciones por lotes
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -736,105 +665,26 @@
               
                 
                 
-                <h1 id="normalizacion-de-direcciones">Normalización de Direcciones<a class="headerlink" href="#normalizacion-de-direcciones" title="Permanent link">&para;</a></h1>
-<p>El recurso <code>/direcciones</code> de la API permite normalizar y georreferenciar direcciones de calles. Como todos los otros recursos, cuenta con varios filtros y opciones que permiten controlar los resultados obtenidos.</p>
-<h2 id="parametros-y-filtros">Parámetros y filtros<a class="headerlink" href="#parametros-y-filtros" title="Permanent link">&para;</a></h2>
-<p>El único parámetro obligatorio del recurso <code>/direcciones</code> es <code>direccion</code>. El mismo debe tomar el valor de una dirección: es decir, una combinación de nombres de calles y una altura preferiblemente numérica. La API tolera direcciones con distintas estructuras, y se hace un esfuerzo en intentar interpretar qué información representa cada parte del valor recibido, teniendo en cuenta errores de escritura comunes. Para lograr esto, se utiliza la librería <a href="https://github.com/datosgobar/georef-ar-address">georef-ar-address</a>. En algunos casos, la estructura de la dirección no puede ser interpretada correctamente; para evitar estos casos se recomienda utilizar direcciones con el siguiente formato aproximado:</p>
-<ul>
-<li><strong>calle</strong> [altura]</li>
-<li><strong>calle 1</strong> [altura] <em>esquina/y</em> <strong>calle 2</strong></li>
-<li><strong>calle 1</strong> <em>esquina/y</em> <strong>calle 2</strong> [altura]</li>
-<li><strong>calle 1</strong> [altura] <em>entre</em> <strong>calle 2</strong> y <strong>calle 3</strong></li>
-<li><strong>calle 1</strong> <em>entre</em> <strong>calle 2</strong> y <strong>calle 3</strong> [altura]</li>
-</ul>
-<p>En todos los casos, el valor [altura] es opcional, y de estar presente puede ser seguido de un piso/número de departamento.</p>
-<p>El resto de los parámetros aceptados por el recurso <code>/direccion</code> están listados en la <a href="https://datosgobar.github.io/georef-ar-api/open-api">referencia completa de la API</a>. Se recomienda utilizar los parámetros <code>provincia</code>, <code>departamento</code>, <code>localidad_censal</code> y/o <code>localidad</code> para obtener resultados más precisos.</p>
-<h2 id="campos-de-respuesta">Campos de respuesta<a class="headerlink" href="#campos-de-respuesta" title="Permanent link">&para;</a></h2>
-<p>Al normalizar una dirección, la API devuelve varios campos de datos. Para entender el significado de cada uno, es conveniente utilizar un ejemplo de uso:</p>
-<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/direcciones?direccion=Av.%20Santa%20Fe%20nro%20260%202ndo%20C,%20entre%20Santa%20Rosa%20y%20Col%C3%B3n&amp;departamento=capital&amp;provincia=cordoba">https://apis.datos.gob.ar/georef/api/direcciones?direccion=Av. Santa Fe nro 260 2ndo C, entre Santa Rosa y Colón&amp;departamento=capital&amp;provincia=cordoba</a></p>
-<pre><code class="json">{
-    &quot;cantidad&quot;: 1,
-    &quot;direcciones&quot;: [
-        {
-            &quot;altura&quot;: {
-                &quot;unidad&quot;: &quot;nro&quot;,
-                &quot;valor&quot;: 260
-            },
-            &quot;calle&quot;: {
-                &quot;categoria&quot;: &quot;AV&quot;,
-                &quot;id&quot;: &quot;1401401002460&quot;,
-                &quot;nombre&quot;: &quot;AV SANTA FE&quot;
-            },
-            &quot;calle_cruce_1&quot;: {
-                &quot;categoria&quot;: &quot;CALLE&quot;,
-                &quot;id&quot;: &quot;1401401038100&quot;,
-                &quot;nombre&quot;: &quot;SANTA ROSA&quot;
-            },
-            &quot;calle_cruce_2&quot;: {
-                &quot;categoria&quot;: &quot;AV&quot;,
-                &quot;id&quot;: &quot;1401401002060&quot;,
-                &quot;nombre&quot;: &quot;AV COLON&quot;
-            },
-            &quot;departamento&quot;: {
-                &quot;id&quot;: &quot;14014&quot;,
-                &quot;nombre&quot;: &quot;Capital&quot;
-            },
-            &quot;localidad_censal&quot;: {
-                &quot;id&quot;: &quot;14014010&quot;,
-                &quot;nombre&quot;: &quot;Córdoba&quot;
-            },
-            &quot;nomenclatura&quot;: &quot;AV SANTA FE 260 (ENTRE SANTA ROSA Y AV COLON), Capital, Córdoba&quot;,
-            &quot;piso&quot;: null,
-            &quot;provincia&quot;: {
-                &quot;id&quot;: &quot;14&quot;,
-                &quot;nombre&quot;: &quot;Córdoba&quot;
-            },
-            &quot;ubicacion&quot;: {
-                &quot;lat&quot;: -31.4080674840673,
-                &quot;lon&quot;: -64.20062417513701
-            }
-        }
-    ],
-    &quot;inicio&quot;: 0,
-    &quot;total&quot;: 1,
-    &quot;parametros&quot;: { ... }
-}
-</code></pre>
-
-<p>Como se puede observar, campos de respuesta estándar son:</p>
-<ul>
-<li><code>altura</code><ul>
-<li><code>unidad</code>: Unidad de la altura, o prefijo del valor numérico de la misma.</li>
-<li><code>valor</code>: Valor numérico de la altura, o <code>null</code> si la altura ingresada no fue numérica.</li>
-</ul>
-</li>
-<li><code>calle</code>: Propiedades de la primera calle presente en la dirección.<ul>
-<li><code>nombre</code>: Nombre normalizado de la <strong>calle 1</strong>.</li>
-<li><code>id</code>: ID de la <strong>calle 1</strong>.</li>
-<li><code>categoria</code>: Tipo de la <strong>calle 1</strong>.</li>
-</ul>
-</li>
-<li><code>calle_cruce_1</code>: Propiedades de la segunda calle presente en la dirección <em>(valores opcionales)</em>.<ul>
-<li><code>nombre</code>: Nombre normalizado de la <strong>calle 2</strong>.</li>
-<li><code>id</code>: ID de la <strong>calle 2</strong>.</li>
-<li><code>categoria</code>: Tipo de la <strong>calle 2</strong>.</li>
-</ul>
-</li>
-<li><code>calle_cruce_1</code>: Propiedades de la tercera calle presente en la dirección <em>(valores opcionales)</em>.<ul>
-<li><code>nombre</code>: Nombre normalizado de la <strong>calle 3</strong>.</li>
-<li><code>id</code>: ID de la <strong>calle 3</strong>.</li>
-<li><code>categoria</code>: Tipo de la <strong>calle 3</strong>.</li>
-</ul>
-</li>
-<li><code>departamento</code>: Departamento de la <strong>calle 1</strong>.</li>
-<li><code>localidad_censal</code>: Localidad censal de la <strong>calle 1</strong>.</li>
-<li><code>provincia</code>: Provincia de la <strong>calle 1</strong>.</li>
-<li><code>piso</code>: Piso extraído de la dirección.</li>
-<li><code>nomenclatura</code>: Versión normalizada de la dirección.</li>
-<li><code>ubicacion</code>: Resultados de la georreferenciación de la dirección (<code>lon</code> y <code>lat</code>). Cuando los valores están presentes, representan una <strong>aproximación</strong> de la ubicación de la dirección. Cuando no están presentes, se debe a que los datos indexados en la API no fueron suficientes para obtener un resultado estimativo. La efectividad de la georreferenciación varía de acuerdo a cada región del país.</li>
-</ul>
-<h2 id="normalizacion-de-direcciones-por-lotes">Normalización de direcciones por lotes<a class="headerlink" href="#normalizacion-de-direcciones-por-lotes" title="Permanent link">&para;</a></h2>
-<p>Para normalizar grandes cantidades de direcciones, se recomienda utilizar los recursos de <a href="../bulk/">consultas por lotes</a>.</p>
+                <h1 id="comunas-de-caba">Comunas de CABA<a class="headerlink" href="#comunas-de-caba" title="Permanent link">&para;</a></h1>
+<p>Las comunas de la Ciudad Autónoma de Buenos Aires (CABA) se encuentran disponibles bajo el recurso <code>/departamentos</code>. Los IDs y los nombres de las comunas están definidos por la <a href="https://www.boletinoficial.gob.ar/detalleAviso/primera/203487/20190318">Resolución 55/2019 de INDEC</a>, y son los siguientes:</p>
+<table>
+    <tr><th>ID</th><th>Nombre Oficial</th></tr>
+    <tr><td>02007</td><td>Comuna 1 </td></tr>
+    <tr><td>02014</td><td>Comuna 2 </td></tr>
+    <tr><td>02021</td><td>Comuna 3 </td></tr>
+    <tr><td>02028</td><td>Comuna 4 </td></tr>
+    <tr><td>02035</td><td>Comuna 5 </td></tr>
+    <tr><td>02042</td><td>Comuna 6 </td></tr>
+    <tr><td>02049</td><td>Comuna 7 </td></tr>
+    <tr><td>02056</td><td>Comuna 8 </td></tr>
+    <tr><td>02063</td><td>Comuna 9 </td></tr>
+    <tr><td>02070</td><td>Comuna 10</td></tr>
+    <tr><td>02077</td><td>Comuna 11</td></tr>
+    <tr><td>02084</td><td>Comuna 12</td></tr>
+    <tr><td>02091</td><td>Comuna 13</td></tr>
+    <tr><td>02098</td><td>Comuna 14</td></tr>
+    <tr><td>02105</td><td>Comuna 15</td></tr>
+</table>
                 
                   
                 
@@ -855,7 +705,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../bulk/" title="Consultas por lotes" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../jwt-token/" title="Autenticarse con JWT" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -864,19 +714,19 @@
                 <span class="md-footer-nav__direction">
                   Anterior
                 </span>
-                Consultas por lotes
+                Autenticarse con JWT
               </span>
             </div>
           </a>
         
         
-          <a href="../geom-operations/" title="Operaciones con geometrías" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../localities/" title="Localidades y asentamientos" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Operaciones con geometrías
+                Localidades y asentamientos
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
