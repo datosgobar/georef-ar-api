@@ -444,6 +444,9 @@
 		    "municipio": {
 			"$ref": "#/components/schemas/municipio_sub_entidad"
 		    },
+		    "localidad_censal": {
+			"$ref": "#/components/schemas/localidad_censal_sub_entidad"
+		    },
                     "categoria": {
                         "type": "string",
                         "example": "Componente de localidad compuesta (LC)",
@@ -735,6 +738,9 @@
 		    "municipio": {
 			"$ref": "#/components/schemas/municipio_sub_entidad"
 		    },
+		    "localidad_censal": {
+			"$ref": "#/components/schemas/localidad_censal_sub_entidad"
+		    },
                     "categoria": {
                         "type": "string",
                         "example": "Sitio edificado (ST)",
@@ -939,6 +945,9 @@
                     "departamento": {
 			"$ref": "#/components/schemas/departamento_sub_entidad"
                     },
+		    "localidad_censal": {
+			"$ref": "#/components/schemas/localidad_censal_sub_entidad"
+		    },
                     "categoria": {
                         "type": "string",
                         "example": "CALLE"
@@ -1037,9 +1046,6 @@
             "calle": {
                 "type": "object",
                 "properties": {
-                    "departamento": {
-			"$ref": "#/components/schemas/departamento_sub_entidad"
-                    },
 		    "altura": {
 			"type": "object",
 			"properties": {
@@ -1086,6 +1092,12 @@
                     "provincia": {
 			"$ref": "#/components/schemas/provincia_sub_entidad"
                     },
+                    "departamento": {
+			"$ref": "#/components/schemas/departamento_sub_entidad"
+                    },
+		    "localidad_censal": {
+			"$ref": "#/components/schemas/localidad_censal_sub_entidad"
+		    },
                     "categoria": {
                         "type": "string",
                         "example": "CALLE",
