@@ -208,10 +208,11 @@ Cada línea del archivo de datos de calles tiene la siguiente estructura:
 ```
 
 ### Intersecciones de Calles (`intersecciones.ndjson`)
-El archivo de datos de intersecciones no debe tener intersecciones repetidas. Es decir, dadas las calles con ID X y ID Z, solo debe estar presente la intersección X-Z o la Z-X, pero no ambas. Cada línea del archivo de datos de intersecciones tiene la siguiente estructura:
+El archivo de datos de intersecciones contiene todas las intersecciones existentes entre calles. Dadas dos calles, se listan todas las intersecciones que las mismas comparten (una o más). El ID de cada intersección está compuesto de tres partes: el ID de la primera calle, el ID de la segunda, y el número de intersección entre las dos calles (comenzando desde `01`). **No se repiten intersecciones**: es decir, dadas las calles con ID X y ID Z, solo están presentes las intersecciones X-Z-N o las Z-X-N, pero no ambos grupos. Cada línea del archivo de datos de intersecciones tiene la siguiente estructura:
 ```
 {
-	"id": "0207001002300-0207001007975", // ID de la calle A, ID de la calle B
+	// ID de la calle A, ID de la calle B, número de intersección (dos dígitos)
+	"id": "0207001002300-0207001007975-01",
 	"calle_a": {
 		"id": "0207001002300", // ID de la calle A
 		"nombre": "BOSTON", // Nombre de la calle A
