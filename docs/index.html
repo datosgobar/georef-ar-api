@@ -769,7 +769,7 @@
     <tr><td>Sgo. del Estero</td></tr>
 </table>
 
-<p><code>GET</code><a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo. del Estero</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero"><code>https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo. del Estero</code></a></p>
 <pre><code class="json">{
     &quot;provincias&quot;: [
         {
@@ -796,7 +796,7 @@
     <tr><td>-34.603633</td><td>-58.3837587</td></tr>
 </table>
 
-<p><code>GET</code><a href="https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529"><code>https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529"><code>https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&amp;lon=-66.7529</code></a></p>
 <pre><code class="json">{
     &quot;ubicacion&quot;: {
         &quot;departamento&quot;: {
@@ -821,7 +821,7 @@
 <h2 id="referencia">Referencia<a class="headerlink" href="#referencia" title="Permanent link">&para;</a></h2>
 <p>Finalmente, se puede utilizar la API como punto de referencia al momento de crear datos que estén vinculados a datos geográficos. Por ejemplo, si se cuenta con un formulario en el que se debe mostrar a un usuario un listado de provincias, y luego un listado de municipios a partir de la provincia seleccionada, se podrían ejecutar las siguientes consultas:</p>
 <p>Listar las provincias de la República Argentina:</p>
-<p><code>GET</code><a href="https://apis.datos.gob.ar/georef/api/provincias"><code>https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre"><code>https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre</code></a></p>
 <pre><code class="json">{
     &quot;provincias&quot;: [
         {
@@ -838,7 +838,7 @@
 </code></pre>
 
 <p>Asumiendo que el usuario selecciona <strong>Chaco</strong> (ID: <strong>22</strong>), se ejecutaría la siguiente consulta para obtener el listado de municipios:</p>
-<p><code>GET</code><a href="https://apis.datos.gob.ar/georef/api/municipios?provincia=22&amp;campos=id,nombre&amp;max=100"><code>https://apis.datos.gob.ar/georef/api/municipios?provincia=22&amp;campos=id,nombre&amp;max=100</code></a></p>
+<p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/municipios?provincia=22&amp;campos=id,nombre&amp;max=100"><code>https://apis.datos.gob.ar/georef/api/municipios?provincia=22&amp;campos=id,nombre&amp;max=100</code></a></p>
 <pre><code class="json">{
     &quot;municipios&quot;: [
         {

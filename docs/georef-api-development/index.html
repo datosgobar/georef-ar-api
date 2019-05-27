@@ -133,7 +133,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#guia-de-instalacion-y-ejecucion-para-desarrolladores" tabindex="1" class="md-skip">
+      <a href="#guia-de-instalacion-y-ejecucion" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -1137,8 +1137,8 @@
               
                 
                 
-                <h1 id="guia-de-instalacion-y-ejecucion-para-desarrolladores">Guía de instalación y ejecución para desarrolladores<a class="headerlink" href="#guia-de-instalacion-y-ejecucion-para-desarrolladores" title="Permanent link">&para;</a></h1>
-<p>En este documento se detallan los pasos a seguir si se desea configurar un servidor de API Georef propio.</p>
+                <h1 id="guia-de-instalacion-y-ejecucion">Guía de instalación y ejecución<a class="headerlink" href="#guia-de-instalacion-y-ejecucion" title="Permanent link">&para;</a></h1>
+<p>En este documento se detallan los pasos a seguir si se desea configurar un servidor de Georef API propio.</p>
 <h2 id="dependencias">Dependencias<a class="headerlink" href="#dependencias" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="https://www.elastic.co/downloads/elasticsearch">Elasticsearch &gt;=7.0.0</a></li>
@@ -1252,17 +1252,21 @@ $ source venv/bin/activate
 <pre><code class="bash">(venv) $ make start_dev_server
 </code></pre>
 
-<p>O También:</p>
+<p>O también:</p>
 <pre><code class="bash">(venv) $ make start_gunicorn_dev_server
+</code></pre>
+
+<p>Luego, comprobar que la API esté funcionando:</p>
+<pre><code class="bash">$ curl localhost:5000/api/provincias
 </code></pre>
 
 <h4 id="entornos-productivos">Entornos productivos<a class="headerlink" href="#entornos-productivos" title="Permanent link">&para;</a></h4>
 <h5 id="51-configurar-servicio-georef-ar-api-para-systemd">5.1 Configurar servicio <code>georef-ar-api</code> para <code>systemd</code><a class="headerlink" href="#51-configurar-servicio-georef-ar-api-para-systemd" title="Permanent link">&para;</a></h5>
-<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service"><code>config/georef-ar-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>', que deben ser reemplazados por el usuario.</p>
+<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service"><code>config/georef-ar-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>', que deben ser reemplazados por los valores apropiados.</p>
 <h5 id="52-activar-y-arrancar-el-servicio">5.2 Activar y arrancar el servicio<a class="headerlink" href="#52-activar-y-arrancar-el-servicio" title="Permanent link">&para;</a></h5>
 <pre><code class="bash">$ sudo systemctl daemon-reload
-$ sudo systemctl enable georef-ar-api.service
-$ sudo systemctl start georef-ar-api.service
+$ sudo systemctl enable georef-ar-api
+$ sudo systemctl start georef-ar-api
 </code></pre>
 
 <h5 id="53-configurar-nginx">5.3 Configurar <code>nginx</code><a class="headerlink" href="#53-configurar-nginx" title="Permanent link">&para;</a></h5>

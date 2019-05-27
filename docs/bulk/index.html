@@ -854,12 +854,16 @@
 
 <p>Como se muestra en el ejemplo, la respuesta contiene una lista <code>resultados</code>, con los resultados de cada consulta individual adentro. Las estructuras de las respuestas se mantienen idénticas que los recursos <code>GET</code>.</p>
 <div class="admonition warning">
-<p class="admonition-title">Cantidad máxima de consultas</p>
+<p class="admonition-title">Cantidad máxima de consultas y resultados</p>
 <p>La cantidad de consultas en una misma petición no debe superar las 1000.</p>
 <p>Adicionalmente, el total de los parámetros <code>max</code> sumados de todas las consultas no debe superar los 5000.
-Por ejemplo, se permite enviar 1000 consultas con <code>max=5</code>, o 100 consultas con <code>max=50</code>, pero no 1000 consultas con <code>max=10</code>.</p>
+Por ejemplo, se permite enviar 1000 consultas con <code>"max": 5</code>, o 100 consultas con <code>"max": 50</code>, pero no 1000 consultas con <code>"max": 10</code>.</p>
 </div>
 <p>Utilizando los recursos por lotes, se pueden normalizar mayores cantidades de datos en menos tiempo. Por ejemplo, si se cuenta con 50000 direcciones, tan solo se necesitan 10 consultas para normalizar el activo de datos entero. Utilizando los recursos <code>GET</code>, se necesitarían 50000 (una por dato).</p>
+<div class="admonition tip">
+<p class="admonition-title">Mejor resultado por consulta</p>
+<p>El uso más común de las consultas por lotes es normalizar una lista de datos, donde cada dato es una consulta. Ya que la API ordena los resultados de más acertados a menos acertados por defecto, <strong>es recomendable agregar</strong> <code>"max": 1</code> <strong>a los parámetros de todas las consultas</strong>, para obtener exclusivamente el mejor resultado por cada dato de la lista. Esto reduce la cantidad de datos transmitidos y mejora los tiempos de respuesta.</p>
+</div>
 <h2 id="ejemplos-de-uso">Ejemplos de uso<a class="headerlink" href="#ejemplos-de-uso" title="Permanent link">&para;</a></h2>
 <p>A diferencia de los recursos <code>GET</code>, los ejemplos de operaciones por lotes se muestran utilizando comandos construídos sobre la herramienta <code>curl</code>. La sección de <a href="../python-usage/">ejemplos con Python</a> también contiene ejemplos de uso de los recursos <code>POST</code>.</p>
 <h3 id="busqueda-de-municipios-en-lotes">Búsqueda de municipios en lotes<a class="headerlink" href="#busqueda-de-municipios-en-lotes" title="Permanent link">&para;</a></h3>
