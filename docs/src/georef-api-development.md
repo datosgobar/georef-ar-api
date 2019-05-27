@@ -1,6 +1,6 @@
-# Guía de instalación y ejecución para desarrolladores
+# Guía de instalación y ejecución
 
-En este documento se detallan los pasos a seguir si se desea configurar un servidor de API Georef propio.
+En este documento se detallan los pasos a seguir si se desea configurar un servidor de Georef API propio.
 
 ## Dependencias
 
@@ -146,20 +146,25 @@ Correr la API de Georef utilizando un servidor de prueba (no apto para producci�
 (venv) $ make start_dev_server
 ```
 
-O También:
+O también:
 ```bash
 (venv) $ make start_gunicorn_dev_server
 ```
 
+Luego, comprobar que la API esté funcionando:
+```bash
+$ curl localhost:5000/api/provincias
+```
+
 #### Entornos productivos
 ##### 5.1 Configurar servicio `georef-ar-api` para `systemd`
-Copiar el archivo [`config/georef-ar-api.service`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service) a `/etc/systemd/system/` y configurarlo. Notar los campos marcados entre '`<`' y '`>`', que deben ser reemplazados por el usuario.
+Copiar el archivo [`config/georef-ar-api.service`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service) a `/etc/systemd/system/` y configurarlo. Notar los campos marcados entre '`<`' y '`>`', que deben ser reemplazados por los valores apropiados.
 
 ##### 5.2 Activar y arrancar el servicio
 ```bash
 $ sudo systemctl daemon-reload
-$ sudo systemctl enable georef-ar-api.service
-$ sudo systemctl start georef-ar-api.service
+$ sudo systemctl enable georef-ar-api
+$ sudo systemctl start georef-ar-api
 ```
 
 ##### 5.3 Configurar `nginx`
