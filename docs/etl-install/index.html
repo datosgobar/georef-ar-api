@@ -133,7 +133,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#instalacion-y-ejecucion-del-etl-georef" tabindex="1" class="md-skip">
+      <a href="#instalacion-y-ejecucion-de-georef-etl" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -658,6 +658,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#dependencias" title="Dependencias" class="md-nav__link">
+    Dependencias
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1-instalacion" title="1. Instalación" class="md-nav__link">
     1. Instalación
   </a>
@@ -716,6 +723,19 @@
   <a href="#2-ejecucion" title="2. Ejecución" class="md-nav__link">
     2. Ejecución
   </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opciones-adicionales" title="Opciones Adicionales" class="md-nav__link">
+    Opciones Adicionales
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -770,6 +790,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#dependencias" title="Dependencias" class="md-nav__link">
+    Dependencias
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1-instalacion" title="1. Instalación" class="md-nav__link">
     1. Instalación
   </a>
@@ -829,6 +856,19 @@
     2. Ejecución
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opciones-adicionales" title="Opciones Adicionales" class="md-nav__link">
+    Opciones Adicionales
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -855,7 +895,9 @@
               
                 
                 
-                <h1 id="instalacion-y-ejecucion-del-etl-georef">Instalación y Ejecución del ETL Georef<a class="headerlink" href="#instalacion-y-ejecucion-del-etl-georef" title="Permanent link">&para;</a></h1>
+                <h1 id="instalacion-y-ejecucion-de-georef-etl">Instalación y Ejecución de Georef ETL<a class="headerlink" href="#instalacion-y-ejecucion-de-georef-etl" title="Permanent link">&para;</a></h1>
+<p>En este documento se detallan los pasos a seguir si se desea ejecutar el ETL de Georef en un entorno propio.</p>
+<h2 id="dependencias">Dependencias<a class="headerlink" href="#dependencias" title="Permanent link">&para;</a></h2>
 <p>El proyecto <code>georef-ar-etl</code> utiliza los siguientes componentes para cumplir sus funciones:</p>
 <ul>
 <li>PostgreSQL 9.5</li>
@@ -929,6 +971,26 @@ $ source env/bin/activate
 <pre><code class="bash">(env) $ python -m georef_ar_etl -p provincias -p departamentos
 </code></pre>
 
+<h3 id="opciones-adicionales">Opciones Adicionales<a class="headerlink" href="#opciones-adicionales" title="Permanent link">&para;</a></h3>
+<p>El ETL cuenta con varias opciones de ejecución que modifican su comportamiento. La primera opción a destacar es <code>-c</code>/<code>--command</code>, la cual permite elegir qué tarea (subcomando) se desea ejecutar. Sus valores posibles son:</p>
+<ul>
+<li><code>etl</code>: Valor por defecto. Ejecuta el ETL. Las subopciones disponibles son:<ul>
+<li><code>-p</code>/<code>--processes</code>: Permite seleccionar entidades geográficas específicas. Por defecto, se utilizan todas las disponibles.</li>
+<li><code>-s</code>/<code>--start</code>: Permite especificar el número de paso por donde comenzar el ETL.</li>
+<li><code>-e</code>/<code>--end</code>: Permite especificar el número de paso por donde finalizar el ETL.</li>
+<li><code>--no-mail</code>: Deshabilita el envío de emails.</li>
+</ul>
+</li>
+<li><code>console</code>: Ejecuta una consola interactiva Python la cual puede ser utilizada para realizar pruebas con distintos componentes internos del ETL. La variable <code>ctx</code> contiene una instancia de <code>Context</code> lista para ser utilizada.</li>
+<li><code>info</code>: Muestra los pasos que componen el ETL de cada entidad geográfica.</li>
+<li><code>stats</code>: Muestra información sobre los datos actualmente cargados en la base de datos.</li>
+</ul>
+<p>Las siguientes opciones se aplican a todos los subcomandos:</p>
+<ul>
+<li><code>-m</code>/<code>--mode</code>: Permite especificar el modo de ejecución (<code>normal</code>, <code>interactive</code> o <code>testing</code>). En modo <code>interactive</code>, se saltean operaciones costosas para agilizar el ETL, y se crean las tablas automáticamente incluso si no se ejecutaron las migraciones. Su uso es recomendado solo durante el desarrollo del proyecto.</li>
+<li><code>-v</code>/<code>--verbose</code>: Muestra información adicional durante la ejecución.</li>
+<li><code>-h</code>/<code>--help</code>: Muestra ayuda sobre el uso de <code>georef_ar_etl</code>.</li>
+</ul>
 <h2 id="3-resultados">3. Resultados<a class="headerlink" href="#3-resultados" title="Permanent link">&para;</a></h2>
 <p>Por defecto, los productos del ETL serán:</p>
 <p>Las tablas:</p>

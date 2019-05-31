@@ -133,7 +133,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#guia-de-instalacion-y-ejecucion" tabindex="1" class="md-skip">
+      <a href="#instalacion-y-ejecucion-de-georef-api" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -708,8 +708,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-correr-api" title="5. Correr API" class="md-nav__link">
-    5. Correr API
+  <a href="#5-ejecutar-la-api" title="5. Ejecutar la API" class="md-nav__link">
+    5. Ejecutar la API
   </a>
   
     <nav class="md-nav">
@@ -744,27 +744,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#53-configurar-nginx" title="5.3 Configurar nginx" class="md-nav__link">
-    5.3 Configurar nginx
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#54-opcional-crear-cache-para-nginx" title="5.4 (Opcional) Crear cache para nginx" class="md-nav__link">
-    5.4 (Opcional) Crear cache para nginx
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#55-activar-y-validar-configuracion-nginx" title="5.5 Activar y validar configuración nginx" class="md-nav__link">
-    5.5 Activar y validar configuración nginx
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -783,6 +762,13 @@
         <li class="md-nav__item">
   <a href="#tests" title="Tests" class="md-nav__link">
     Tests
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling" title="Profiling" class="md-nav__link">
+    Profiling
   </a>
   
 </li>
@@ -1041,8 +1027,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-correr-api" title="5. Correr API" class="md-nav__link">
-    5. Correr API
+  <a href="#5-ejecutar-la-api" title="5. Ejecutar la API" class="md-nav__link">
+    5. Ejecutar la API
   </a>
   
     <nav class="md-nav">
@@ -1077,27 +1063,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#53-configurar-nginx" title="5.3 Configurar nginx" class="md-nav__link">
-    5.3 Configurar nginx
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#54-opcional-crear-cache-para-nginx" title="5.4 (Opcional) Crear cache para nginx" class="md-nav__link">
-    5.4 (Opcional) Crear cache para nginx
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#55-activar-y-validar-configuracion-nginx" title="5.5 Activar y validar configuración nginx" class="md-nav__link">
-    5.5 Activar y validar configuración nginx
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1120,6 +1085,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#profiling" title="Profiling" class="md-nav__link">
+    Profiling
+  </a>
+  
+</li>
+      
       
       
       
@@ -1137,14 +1109,14 @@
               
                 
                 
-                <h1 id="guia-de-instalacion-y-ejecucion">Guía de instalación y ejecución<a class="headerlink" href="#guia-de-instalacion-y-ejecucion" title="Permanent link">&para;</a></h1>
+                <h1 id="instalacion-y-ejecucion-de-georef-api">Instalación y ejecución de Georef API<a class="headerlink" href="#instalacion-y-ejecucion-de-georef-api" title="Permanent link">&para;</a></h1>
 <p>En este documento se detallan los pasos a seguir si se desea configurar un servidor de Georef API propio.</p>
 <h2 id="dependencias">Dependencias<a class="headerlink" href="#dependencias" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://www.elastic.co/downloads/elasticsearch">Elasticsearch &gt;=7.0.0</a></li>
-<li><a href="https://www.python.org/downloads/">Python &gt;=3.6.0</a></li>
-<li><a href="https://nginx.org/">Nginx</a> <em>(para entornos productivos)</em></li>
+<li>Elasticsearch &gt;= 7.0.0</li>
+<li>Python &gt;= 3.6.0</li>
 </ul>
+<p>A continuación, se detallan los pasos a seguir para instalar y ejecutar la API en un entorno Ubuntu 16.04 (Xenial).</p>
 <h2 id="instalacion">Instalación<a class="headerlink" href="#instalacion" title="Permanent link">&para;</a></h2>
 <h3 id="1-elasticsearch">1. Elasticsearch<a class="headerlink" href="#1-elasticsearch" title="Permanent link">&para;</a></h3>
 <p>Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más servidores (nodos).</p>
@@ -1177,21 +1149,21 @@ $ cd georef-ar-api
 </code></pre>
 
 <h4 id="22-crear-un-entorno-virtual-y-activarlo">2.2 Crear un entorno virtual y activarlo<a class="headerlink" href="#22-crear-un-entorno-virtual-y-activarlo" title="Permanent link">&para;</a></h4>
-<pre><code class="bash">$ python3 -m venv venv
-$ source venv/bin/activate
+<pre><code class="bash">$ python3 -m venv env
+$ source env/bin/activate
 </code></pre>
 
 <h4 id="23-instalar-dependencias-con-pip">2.3 Instalar dependencias con <code>pip</code><a class="headerlink" href="#23-instalar-dependencias-con-pip" title="Permanent link">&para;</a></h4>
-<pre><code class="bash">(venv) $ pip3 install -r requirements.txt -r requirements-dev.txt
+<pre><code class="bash">(env) $ pip3 install -r requirements.txt -r requirements-dev.txt
 </code></pre>
 
 <h4 id="24-copiar-el-archivo-de-configuracion">2.4 Copiar el archivo de configuración<a class="headerlink" href="#24-copiar-el-archivo-de-configuracion" title="Permanent link">&para;</a></h4>
-<pre><code class="bash">(venv) $ cp config/georef.example.cfg config/georef.cfg
+<pre><code class="bash">(env) $ cp config/georef.example.cfg config/georef.cfg
 </code></pre>
 
 <p>Luego, completar el archivo <code>config/georef.cfg</code> con los valores apropiados.</p>
 <h4 id="25-copiar-el-archivo-de-configuracion-de-logs">2.5 Copiar el archivo de configuración de logs<a class="headerlink" href="#25-copiar-el-archivo-de-configuracion-de-logs" title="Permanent link">&para;</a></h4>
-<pre><code class="bash">(venv) $ cp config/logging.example.ini config/logging.ini
+<pre><code class="bash">(env) $ cp config/logging.example.ini config/logging.ini
 </code></pre>
 
 <p>Luego, completar el archivo <code>config/logging.ini</code> con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.</p>
@@ -1199,23 +1171,23 @@ $ source venv/bin/activate
 <p>El siguiente paso es indexar todos los datos de entidades geográficas en Elasticsearch, para poder consultarlos vía el servidor de la API. Para lograr esto, la API acepta una serie de archivos NDJSON donde deberían estar almacenados los datos. La estructura de dichos archivos está detallada en <a href="../etl-data/">este documento</a>.</p>
 <p>El archivo de configuración <code>config/georef.cfg</code> debe especificar una ruta local o una URL externa para cada archivo de datos NDJSON. Notar que los valores por defecto (en <code>georef.example.cfg</code>) utilizan el portal de descargas <code>infra.datos.gob.ar</code>, que siempre provee la última versión de los archivos NDJSON disponibles. La rama <code>master</code> de <code>georef-ar-api</code> siempre se mantiene compatible con la última versión de los datos disponibles en <code>infra.datos.gob.ar</code>. El archivo de configuración también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto en <code>georef.example.cfg</code> también puede ser utilizado, ya que utiliza la versión del archivo almacenado en <code>infra.datos.gob.ar</code>. El mismo criterio se aplica al archivo de términos excluyentes. En resumen, si se utilizó <code>georef.example.cfg</code> como base para configurar la API, las URLs de los archivos ya deberían estar configuradas correctamente.</p>
 <p>Para indexar los datos, ejecutar:</p>
-<pre><code class="bash">(venv) $ make index
+<pre><code class="bash">(env) $ make index
 </code></pre>
 
 <p>Listar los índices creados, y otros datos adicionales:</p>
-<pre><code class="bash">(venv) $ make print_index_stats
+<pre><code class="bash">(env) $ make print_index_stats
 </code></pre>
 
 <h3 id="4-opcional-re-indexar-datos">4. (Opcional) Re-indexar datos<a class="headerlink" href="#4-opcional-re-indexar-datos" title="Permanent link">&para;</a></h3>
 <p>Si se modifican los archivos de datos NDJSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:</p>
 <h4 id="indexar-datos-nuevos">Indexar datos nuevos<a class="headerlink" href="#indexar-datos-nuevos" title="Permanent link">&para;</a></h4>
 <p>Si se desea actualizar los índices con los nuevos datos, <strong>pero solo si los datos entrantes son más recientes que los ya indexados</strong>, se puede utilizar nuevamente la receta <code>index</code>:</p>
-<pre><code class="bash">(venv) $ make index
+<pre><code class="bash">(env) $ make index
 </code></pre>
 
 <h4 id="forzar-re-indexado">Forzar re-indexado<a class="headerlink" href="#forzar-re-indexado" title="Permanent link">&para;</a></h4>
 <p>Si se desea forzar un re-indexado, es decir, si se desea indexar los datos nuevamente sin importar la fecha de creación, se debe utilizar la siguiente receta:</p>
-<pre><code class="bash">(venv) $ make index_forced
+<pre><code class="bash">(env) $ make index_forced
 </code></pre>
 
 <p>La receta <code>index_forced</code> intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en <code>config/georef.cfg</code>. El uso de la receta es recomendado cuando se requiere re-indexar los datos incondicionalmente. Algunas de las situaciones donde esto es necesario son:</p>
@@ -1227,8 +1199,8 @@ $ source venv/bin/activate
 <li>Modificación de listado de términos excluyentes</li>
 </ul>
 <p>Cualquiera de las dos opciones también permite indexar datos selectivamente: se debe especificar el nombre del índice a crear/re-indexar. Por ejemplo:</p>
-<pre><code class="bash">(venv) $ make index INDEX_NAME=localidades
-(venv) $ make index_forced INDEX_NAME=calles
+<pre><code class="bash">(env) $ make index INDEX_NAME=localidades
+(env) $ make index_forced INDEX_NAME=calles
 </code></pre>
 
 <p>Los nombres de los índices disponibles son:</p>
@@ -1246,59 +1218,50 @@ $ source venv/bin/activate
 <li><code>intersecciones</code></li>
 <li><code>cuadras</code></li>
 </ul>
-<h3 id="5-correr-api">5. Correr API<a class="headerlink" href="#5-correr-api" title="Permanent link">&para;</a></h3>
+<h3 id="5-ejecutar-la-api">5. Ejecutar la API<a class="headerlink" href="#5-ejecutar-la-api" title="Permanent link">&para;</a></h3>
 <h4 id="entornos-de-desarrollo">Entornos de desarrollo<a class="headerlink" href="#entornos-de-desarrollo" title="Permanent link">&para;</a></h4>
-<p>Correr la API de Georef utilizando un servidor de prueba (no apto para producción):</p>
-<pre><code class="bash">(venv) $ make start_dev_server
+<p>Ejecutar la API de Georef utilizando un servidor de prueba (no apto para producción):</p>
+<pre><code class="bash">(env) $ make start_dev_server
 </code></pre>
 
-<p>O también:</p>
-<pre><code class="bash">(venv) $ make start_gunicorn_dev_server
+<p>El servidor lanzado con <code>start_dev_server</code> se reinicia automáticamente cuando se modifica el código de la API. Esto es útil al momento de agregar nuevas funcionalidades.</p>
+<p>También es posible ejecutar la API utilizando <code>gunicorn</code> como servidor HTTP:</p>
+<pre><code class="bash">(env) $ make start_gunicorn_dev_server
 </code></pre>
 
-<p>Luego, comprobar que la API esté funcionando:</p>
+<p>Para comprobar que la API esté funcionando:</p>
 <pre><code class="bash">$ curl localhost:5000/api/provincias
 </code></pre>
 
 <h4 id="entornos-productivos">Entornos productivos<a class="headerlink" href="#entornos-productivos" title="Permanent link">&para;</a></h4>
 <h5 id="51-configurar-servicio-georef-ar-api-para-systemd">5.1 Configurar servicio <code>georef-ar-api</code> para <code>systemd</code><a class="headerlink" href="#51-configurar-servicio-georef-ar-api-para-systemd" title="Permanent link">&para;</a></h5>
-<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service"><code>config/georef-ar-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>', que deben ser reemplazados por los valores apropiados.</p>
+<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service"><code>config/georef-ar-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. <strong>Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>'</strong>, que deben ser reemplazados por los valores apropiados.</p>
 <h5 id="52-activar-y-arrancar-el-servicio">5.2 Activar y arrancar el servicio<a class="headerlink" href="#52-activar-y-arrancar-el-servicio" title="Permanent link">&para;</a></h5>
 <pre><code class="bash">$ sudo systemctl daemon-reload
 $ sudo systemctl enable georef-ar-api
 $ sudo systemctl start georef-ar-api
 </code></pre>
 
-<h5 id="53-configurar-nginx">5.3 Configurar <code>nginx</code><a class="headerlink" href="#53-configurar-nginx" title="Permanent link">&para;</a></h5>
-<p>Primero, crear <code>/etc/nginx/sites-available/georef-ar-api.nginx</code> tomando como base la configuración del archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.nginx"><code>georef-ar-api.nginx</code></a>.</p>
-<h5 id="54-opcional-crear-cache-para-nginx">5.4 (Opcional) Crear cache para <code>nginx</code><a class="headerlink" href="#54-opcional-crear-cache-para-nginx" title="Permanent link">&para;</a></h5>
-<p>Si se desea activar el uso del cache de <code>nginx</code>, descomentar las líneas contentiendo las directivas <code>proxy_cache</code> y <code>proxy_cache_valid</code> del archivo <code>georef-ar-api.nginx</code> creado. Luego, activar el cache <code>georef</code> agregando la siguiente línea al archivo de configuración <code>nginx.conf</code> (sección <code>http</code>):</p>
-<pre><code class="nginx">proxy_cache_path /data/nginx/cache levels=1:2 inactive=120m keys_zone=georef:10m use_temp_path=off;
-</code></pre>
-
-<p>Finalmente, crear el directorio <code>/data/nginx/cache</code>.</p>
-<h5 id="55-activar-y-validar-configuracion-nginx">5.5 Activar y validar configuración <code>nginx</code><a class="headerlink" href="#55-activar-y-validar-configuracion-nginx" title="Permanent link">&para;</a></h5>
-<p>Generar un link simbólico a la configuración del sitio:</p>
-<pre><code class="bash">$ sudo ln -s /etc/nginx/sites-available/georef-ar-api.nginx /etc/nginx/sites-enabled/georef-ar-api.nginx
-</code></pre>
-
-<p>Validar la configuración:</p>
-<pre><code class="bash">$ sudo nginx -T
-</code></pre>
-
-<p>Reiniciar Nginx:</p>
-<pre><code class="bash">$ systemctl restart nginx.service
+<p>Luego, comprobar que la API esté funcionando:</p>
+<pre><code class="bash">$ curl localhost:5000/api/provincias
 </code></pre>
 
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>Para ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):</p>
-<pre><code class="bash">(venv) $ make test
+<pre><code class="bash">(env) $ make test
 </code></pre>
 
 <p>Para más información sobre los tests, ver el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/tests/README.md"><code>tests/README.md</code></a>.</p>
 <p>Para comprobar que no existan errores comunes en el código, y que su estilo sea correcto:</p>
-<pre><code class="bash">(venv) $ make code_checks
+<pre><code class="bash">(env) $ make code_checks
 </code></pre>
+
+<h2 id="profiling"><em>Profiling</em><a class="headerlink" href="#profiling" title="Permanent link">&para;</a></h2>
+<p>Es posible realizar pruebas de <em>performance</em> de la API utilizando el siguiente comando:</p>
+<pre><code class="bash">(env) $ make start_profile_server
+</code></pre>
+
+<p>Luego, al realizar cualquier consulta a <code>localhost:5000</code>, se almacenará en el directorio <code>profile/</code> información sobre el tiempo que llevó completar la consulta. Los datos se generan utilizando el módulo <code>cProfile</code> de Python.</p>
                 
                   
                 
