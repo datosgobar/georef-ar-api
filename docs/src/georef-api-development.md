@@ -1,12 +1,13 @@
-# Guía de instalación y ejecución
+# Instalación y ejecución de Georef API
 
 En este documento se detallan los pasos a seguir si se desea configurar un servidor de Georef API propio.
 
 ## Dependencias
 
-- [Elasticsearch >=7.0.0](https://www.elastic.co/downloads/elasticsearch)
-- [Python >=3.6.0](https://www.python.org/downloads/)
-- [Nginx](https://nginx.org/) *(para entornos productivos)*
+- Elasticsearch >= 7.0.0
+- Python >= 3.6.0
+
+A continuación, se detallan los pasos a seguir para instalar y ejecutar la API en un entorno Ubuntu 16.04 (Xenial).
 
 ## Instalación
 
@@ -54,25 +55,25 @@ $ cd georef-ar-api
 
 #### 2.2 Crear un entorno virtual y activarlo
 ```bash
-$ python3 -m venv venv
-$ source venv/bin/activate
+$ python3 -m venv env
+$ source env/bin/activate
 ```
 
 #### 2.3 Instalar dependencias con `pip`
 ```bash
-(venv) $ pip3 install -r requirements.txt -r requirements-dev.txt
+(env) $ pip3 install -r requirements.txt -r requirements-dev.txt
 ```
 
 #### 2.4 Copiar el archivo de configuración
 ```bash
-(venv) $ cp config/georef.example.cfg config/georef.cfg
+(env) $ cp config/georef.example.cfg config/georef.cfg
 ```
 
 Luego, completar el archivo `config/georef.cfg` con los valores apropiados.
 
 #### 2.5 Copiar el archivo de configuración de logs
 ```bash
-(venv) $ cp config/logging.example.ini config/logging.ini
+(env) $ cp config/logging.example.ini config/logging.ini
 ```
 
 Luego, completar el archivo `config/logging.ini` con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.
@@ -84,12 +85,12 @@ El archivo de configuración `config/georef.cfg` debe especificar una ruta local
 
 Para indexar los datos, ejecutar:
 ```bash
-(venv) $ make index
+(env) $ make index
 ```
 
 Listar los índices creados, y otros datos adicionales:
 ```bash
-(venv) $ make print_index_stats
+(env) $ make print_index_stats
 ```
 	
 ### 4. (Opcional) Re-indexar datos
@@ -99,14 +100,14 @@ Si se modifican los archivos de datos NDJSON, es posible re-indexarlos sin borra
 Si se desea actualizar los índices con los nuevos datos, **pero solo si los datos entrantes son más recientes que los ya indexados**, se puede utilizar nuevamente la receta `index`:
   
 ```bash
-(venv) $ make index
+(env) $ make index
 ```
 
 #### Forzar re-indexado
 Si se desea forzar un re-indexado, es decir, si se desea indexar los datos nuevamente sin importar la fecha de creación, se debe utilizar la siguiente receta:
 
 ```bash
-(venv) $ make index_forced
+(env) $ make index_forced
 ```
 
 La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en `config/georef.cfg`. El uso de la receta es recomendado cuando se requiere re-indexar los datos incondicionalmente. Algunas de las situaciones donde esto es necesario son:
@@ -120,8 +121,8 @@ La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteri
 
 Cualquiera de las dos opciones también permite indexar datos selectivamente: se debe especificar el nombre del índice a crear/re-indexar. Por ejemplo:
 ```bash
-(venv) $ make index INDEX_NAME=localidades
-(venv) $ make index_forced INDEX_NAME=calles
+(env) $ make index INDEX_NAME=localidades
+(env) $ make index_forced INDEX_NAME=calles
 ```
 
 Los nombres de los índices disponibles son:
@@ -139,26 +140,28 @@ Los nombres de los índices disponibles son:
 - `intersecciones`
 - `cuadras`
 
-### 5. Correr API 
+### 5. Ejecutar la API 
 #### Entornos de desarrollo
-Correr la API de Georef utilizando un servidor de prueba (no apto para producción):
+Ejecutar la API de Georef utilizando un servidor de prueba (no apto para producción):
 ```bash
-(venv) $ make start_dev_server
+(env) $ make start_dev_server
 ```
 
-O también:
+El servidor lanzado con `start_dev_server` se reinicia automáticamente cuando se modifica el código de la API. Esto es útil al momento de agregar nuevas funcionalidades.
+
+También es posible ejecutar la API utilizando `gunicorn` como servidor HTTP:
 ```bash
-(venv) $ make start_gunicorn_dev_server
+(env) $ make start_gunicorn_dev_server
 ```
 
-Luego, comprobar que la API esté funcionando:
+Para comprobar que la API esté funcionando:
 ```bash
 $ curl localhost:5000/api/provincias
 ```
 
 #### Entornos productivos
 ##### 5.1 Configurar servicio `georef-ar-api` para `systemd`
-Copiar el archivo [`config/georef-ar-api.service`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service) a `/etc/systemd/system/` y configurarlo. Notar los campos marcados entre '`<`' y '`>`', que deben ser reemplazados por los valores apropiados.
+Copiar el archivo [`config/georef-ar-api.service`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service) a `/etc/systemd/system/` y configurarlo. **Notar los campos marcados entre '`<`' y '`>`'**, que deben ser reemplazados por los valores apropiados.
 
 ##### 5.2 Activar y arrancar el servicio
 ```bash
@@ -167,38 +170,16 @@ $ sudo systemctl enable georef-ar-api
 $ sudo systemctl start georef-ar-api
 ```
 
-##### 5.3 Configurar `nginx`
-Primero, crear `/etc/nginx/sites-available/georef-ar-api.nginx` tomando como base la configuración del archivo [`georef-ar-api.nginx`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.nginx).
-
-##### 5.4 (Opcional) Crear cache para `nginx`
-Si se desea activar el uso del cache de `nginx`, descomentar las líneas contentiendo las directivas `proxy_cache` y `proxy_cache_valid` del archivo `georef-ar-api.nginx` creado. Luego, activar el cache `georef` agregando la siguiente línea al archivo de configuración `nginx.conf` (sección `http`):
-
-```nginx
-proxy_cache_path /data/nginx/cache levels=1:2 inactive=120m keys_zone=georef:10m use_temp_path=off;
-```
-
-Finalmente, crear el directorio `/data/nginx/cache`.
-
-##### 5.5 Activar y validar configuración `nginx`
-Generar un link simbólico a la configuración del sitio:
+Luego, comprobar que la API esté funcionando:
 ```bash
-$ sudo ln -s /etc/nginx/sites-available/georef-ar-api.nginx /etc/nginx/sites-enabled/georef-ar-api.nginx
+$ curl localhost:5000/api/provincias
 ```
 
-Validar la configuración:
-```bash
-$ sudo nginx -T
-```
-
-Reiniciar Nginx:
-```bash
-$ systemctl restart nginx.service
-```
 
 ## Tests
 Para ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):
 ```bash
-(venv) $ make test
+(env) $ make test
 ```
 
 Para más información sobre los tests, ver el archivo [`tests/README.md`](https://github.com/datosgobar/georef-ar-api/blob/master/tests/README.md).
@@ -206,5 +187,13 @@ Para más información sobre los tests, ver el archivo [`tests/README.md`](https
 
 Para comprobar que no existan errores comunes en el código, y que su estilo sea correcto:
 ```bash
-(venv) $ make code_checks
+(env) $ make code_checks
 ```
+
+## *Profiling*
+Es posible realizar pruebas de *performance* de la API utilizando el siguiente comando:
+```bash
+(env) $ make start_profile_server
+```
+
+Luego, al realizar cualquier consulta a `localhost:5000`, se almacenará en el directorio `profile/` información sobre el tiempo que llevó completar la consulta. Los datos se generan utilizando el módulo `cProfile` de Python.

@@ -14,7 +14,7 @@ User=<usuario>
 WorkingDirectory=<ruta a georef-ar-api>
 
 # Completar la ruta a georef-ar-api
-ExecStart=<ruta a georef-ar-api>/venv/bin/gunicorn \
+ExecStart=<ruta a georef-ar-api>/env/bin/gunicorn \
           --pid /run/gunicorn/api-pid \
           -w 4 -k gevent \
           --bind 0.0.0.0:5000 service:app \

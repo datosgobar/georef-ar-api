@@ -1,4 +1,8 @@
-# Instalación y Ejecución del ETL Georef
+# Instalación y Ejecución de Georef ETL
+
+En este documento se detallan los pasos a seguir si se desea ejecutar el ETL de Georef en un entorno propio.
+
+## Dependencias
 
 El proyecto `georef-ar-etl` utiliza los siguientes componentes para cumplir sus funciones:
 
@@ -96,6 +100,25 @@ Para ejecutar el ETL de una o más entidades geográficas en particular, utiliza
 ```bash
 (env) $ python -m georef_ar_etl -p provincias -p departamentos
 ```
+
+### Opciones Adicionales
+
+El ETL cuenta con varias opciones de ejecución que modifican su comportamiento. La primera opción a destacar es `-c`/`--command`, la cual permite elegir qué tarea (subcomando) se desea ejecutar. Sus valores posibles son:
+
+- `etl`: Valor por defecto. Ejecuta el ETL. Las subopciones disponibles son:
+	+ `-p`/`--processes`: Permite seleccionar entidades geográficas específicas. Por defecto, se utilizan todas las disponibles.
+	+ `-s`/`--start`: Permite especificar el número de paso por donde comenzar el ETL.
+	+ `-e`/`--end`: Permite especificar el número de paso por donde finalizar el ETL.
+	+ `--no-mail`: Deshabilita el envío de emails.
+- `console`: Ejecuta una consola interactiva Python la cual puede ser utilizada para realizar pruebas con distintos componentes internos del ETL. La variable `ctx` contiene una instancia de `Context` lista para ser utilizada.
+- `info`: Muestra los pasos que componen el ETL de cada entidad geográfica.
+- `stats`: Muestra información sobre los datos actualmente cargados en la base de datos.
+
+Las siguientes opciones se aplican a todos los subcomandos:
+
+- `-m`/`--mode`: Permite especificar el modo de ejecución (`normal`, `interactive` o `testing`). En modo `interactive`, se saltean operaciones costosas para agilizar el ETL, y se crean las tablas automáticamente incluso si no se ejecutaron las migraciones. Su uso es recomendado solo durante el desarrollo del proyecto.
+- `-v`/`--verbose`: Muestra información adicional durante la ejecución.
+- `-h`/`--help`: Muestra ayuda sobre el uso de `georef_ar_etl`.
 
 ## 3. Resultados
 

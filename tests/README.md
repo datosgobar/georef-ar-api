@@ -10,3 +10,8 @@ Para ejecutar todos los tests desde la raíz del proyecto, utilizar:
 ```bash
 $ make test
 ```
+
+Para ejecutar solo los tests que **no** requieren Elasticsearch:
+```bash
+$ make test_mock
+```
