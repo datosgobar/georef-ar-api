@@ -722,33 +722,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#entornos-productivos" title="Entornos productivos" class="md-nav__link">
-    Entornos productivos
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#51-configurar-servicio-georef-ar-api-para-systemd" title="5.1 Configurar servicio georef-ar-api para systemd" class="md-nav__link">
-    5.1 Configurar servicio georef-ar-api para systemd
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#52-activar-y-arrancar-el-servicio" title="5.2 Activar y arrancar el servicio" class="md-nav__link">
-    5.2 Activar y arrancar el servicio
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -790,6 +763,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../deploy/" title="Entornos productivos" class="md-nav__link">
+      Entornos productivos
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../history/" title="Historial de versiones" class="md-nav__link">
       Historial de versiones
     </a>
@@ -815,13 +800,13 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-4" type="checkbox" id="nav-4-4">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-5" type="checkbox" id="nav-4-5">
     
-    <label class="md-nav__link" for="nav-4-4">
+    <label class="md-nav__link" for="nav-4-5">
       ETL
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
-      <label class="md-nav__title" for="nav-4-4">
+      <label class="md-nav__title" for="nav-4-5">
         ETL
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -1041,33 +1026,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#entornos-productivos" title="Entornos productivos" class="md-nav__link">
-    Entornos productivos
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#51-configurar-servicio-georef-ar-api-para-systemd" title="5.1 Configurar servicio georef-ar-api para systemd" class="md-nav__link">
-    5.1 Configurar servicio georef-ar-api para systemd
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#52-activar-y-arrancar-el-servicio" title="5.2 Activar y arrancar el servicio" class="md-nav__link">
-    5.2 Activar y arrancar el servicio
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1233,19 +1191,7 @@ $ source env/bin/activate
 <pre><code class="bash">$ curl localhost:5000/api/provincias
 </code></pre>
 
-<h4 id="entornos-productivos">Entornos productivos<a class="headerlink" href="#entornos-productivos" title="Permanent link">&para;</a></h4>
-<h5 id="51-configurar-servicio-georef-ar-api-para-systemd">5.1 Configurar servicio <code>georef-ar-api</code> para <code>systemd</code><a class="headerlink" href="#51-configurar-servicio-georef-ar-api-para-systemd" title="Permanent link">&para;</a></h5>
-<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service"><code>config/georef-ar-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. <strong>Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>'</strong>, que deben ser reemplazados por los valores apropiados.</p>
-<h5 id="52-activar-y-arrancar-el-servicio">5.2 Activar y arrancar el servicio<a class="headerlink" href="#52-activar-y-arrancar-el-servicio" title="Permanent link">&para;</a></h5>
-<pre><code class="bash">$ sudo systemctl daemon-reload
-$ sudo systemctl enable georef-ar-api
-$ sudo systemctl start georef-ar-api
-</code></pre>
-
-<p>Luego, comprobar que la API esté funcionando:</p>
-<pre><code class="bash">$ curl localhost:5000/api/provincias
-</code></pre>
-
+<p>Si se desea preparar la API para uso en entornos productivos, consultar la guía de instalación para <a href="../deploy/">entornos productivos</a>.</p>
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>Para ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):</p>
 <pre><code class="bash">(env) $ make test
@@ -1297,13 +1243,13 @@ $ sudo systemctl start georef-ar-api
           </a>
         
         
-          <a href="../history/" title="Historial de versiones" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../deploy/" title="Entornos productivos" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Historial de versiones
+                Entornos productivos
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

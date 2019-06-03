@@ -13,7 +13,7 @@
         <meta name="description" content="Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina">
       
       
-        <link rel="canonical" href="http://apis.datos.gob.ar/georef/localities/">
+        <link rel="canonical" href="http://apis.datos.gob.ar/georef/deploy/">
       
       
         <meta name="author" content="Datos Argentina">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Localidades y asentamientos - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
+        <title>Entornos productivos - API del Servicio de Normalización de Datos Geográficos de Argentina</title>
       
     
     
@@ -133,7 +133,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#localidades-y-asentamientos" tabindex="1" class="md-skip">
+      <a href="#entornos-productivos" tabindex="1" class="md-skip">
         Saltar a contenido
       </a>
     
@@ -158,7 +158,7 @@
               API del Servicio de Normalización de Datos Geográficos de Argentina
             </span>
             <span class="md-header-nav__topic">
-              Localidades y asentamientos
+              Entornos productivos
             </span>
           
         </div>
@@ -309,12 +309,10 @@
             
             
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
     
     <label class="md-nav__link" for="nav-2">
       Usuarios
@@ -450,12 +448,10 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-11" type="checkbox" id="nav-2-11" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2-11" type="checkbox" id="nav-2-11">
     
     <label class="md-nav__link" for="nav-2-11">
       Referencia metodológica
@@ -483,63 +479,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Localidades y asentamientos
-      </label>
-    
-    <a href="./" title="Localidades y asentamientos" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../localities/" title="Localidades y asentamientos" class="md-nav__link">
       Localidades y asentamientos
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Contenidos de la sección</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#localidades-censales" title="Localidades censales" class="md-nav__link">
-    Localidades censales
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#localidades" title="Localidades" class="md-nav__link">
-    Localidades
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#asentamientos" title="Asentamientos" class="md-nav__link">
-    Asentamientos
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -583,10 +527,12 @@
             
             
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
     
     <label class="md-nav__link" for="nav-4">
       Desarrolladores
@@ -614,11 +560,83 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../deploy/" title="Entornos productivos" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Entornos productivos
+      </label>
+    
+    <a href="./" title="Entornos productivos" class="md-nav__link md-nav__link--active">
       Entornos productivos
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Contenidos de la sección</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-configurar-servicio-para-systemd" title="1. Configurar servicio para systemd" class="md-nav__link">
+    1. Configurar servicio para systemd
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-configurar-nginx" title="2. Configurar Nginx" class="md-nav__link">
+    2. Configurar Nginx
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-crear-archivo-de-configuracion" title="2.1 Crear archivo de configuración" class="md-nav__link">
+    2.1 Crear archivo de configuración
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-opcional-configurar-cache" title="2.2 (Opcional) Configurar cache" class="md-nav__link">
+    2.2 (Opcional) Configurar cache
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-activar-y-validar-la-configuracion" title="2.3 Activar y validar la configuración" class="md-nav__link">
+    2.3 Activar y validar la configuración
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -734,23 +752,43 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#localidades-censales" title="Localidades censales" class="md-nav__link">
-    Localidades censales
+  <a href="#1-configurar-servicio-para-systemd" title="1. Configurar servicio para systemd" class="md-nav__link">
+    1. Configurar servicio para systemd
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#localidades" title="Localidades" class="md-nav__link">
-    Localidades
+  <a href="#2-configurar-nginx" title="2. Configurar Nginx" class="md-nav__link">
+    2. Configurar Nginx
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-crear-archivo-de-configuracion" title="2.1 Crear archivo de configuración" class="md-nav__link">
+    2.1 Crear archivo de configuración
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#asentamientos" title="Asentamientos" class="md-nav__link">
-    Asentamientos
+        
+          <li class="md-nav__item">
+  <a href="#22-opcional-configurar-cache" title="2.2 (Opcional) Configurar cache" class="md-nav__link">
+    2.2 (Opcional) Configurar cache
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-activar-y-validar-la-configuracion" title="2.3 Activar y validar la configuración" class="md-nav__link">
+    2.3 Activar y validar la configuración
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -771,20 +809,51 @@
               
                 
                 
-                <h1 id="localidades-y-asentamientos">Localidades y asentamientos<a class="headerlink" href="#localidades-y-asentamientos" title="Permanent link">&para;</a></h1>
-<p>Entre los distintos tipos de entidades geográficas que maneja la API, se encuentran las <strong>localidades censales</strong>, las <strong>localidades</strong> y los <strong>asentamientos</strong>. A continuación se explica en detalle la definición de cada una de estas entidades.</p>
-<h2 id="localidades-censales">Localidades censales<a class="headerlink" href="#localidades-censales" title="Permanent link">&para;</a></h2>
-<p>El listado de <strong>localidades censales</strong> proviene de <a href="https://www.indec.gov.ar/codgeo.asp">INDEC</a>. Las localidades censales son unidades geoestadísticas elaboradas por INDEC para los censos nacionales.</p>
-<p>El recurso correspondiente de la API es <a href="https://apis.datos.gob.ar/georef/api/localidades-censales"><code>/localidades-censales</code></a>.</p>
-<h2 id="localidades">Localidades<a class="headerlink" href="#localidades" title="Permanent link">&para;</a></h2>
-<p>Las <strong>localidades</strong> (a no ser confundidas con las localidades censales) provienen de <a href="http://www.bahra.gob.ar/">BAHRA</a>. La base BAHRA identifica localidades, parajes y sitios edificados de la República Argentina con un nombre y un código único.</p>
-<p>El listado de localidades se contruye a partir de un <strong>subconjunto de BAHRA</strong>. Nosotros consideramos que <strong>este subconjunto es el que mejor representa el concepto general de "localidad", el cual no tiene definición formal</strong>.</p>
-<p>Notar que todas las localidades pertenecen a una localidad censal.</p>
-<p>El recurso correspondiente de la API es <a href="https://apis.datos.gob.ar/georef/api/localidades"><code>/localidades</code></a>.</p>
-<h2 id="asentamientos">Asentamientos<a class="headerlink" href="#asentamientos" title="Permanent link">&para;</a></h2>
-<p>Los <strong>asentamientos</strong> también provienen de BAHRA. Sin embargo, el listado de asentamientos se contruye a partir de la <strong>enteridad de BAHRA</strong>. Esto implica que todas las entidades del listado de localidades están incluidas en el listado de asentamientos. El listado de asentamientos, sin embargo, contiene entidades que en general un usuario no consideraría ser una "localidad".</p>
-<p>Notar que los asentamientos <strong>opcionalmente</strong> pueden pertenecer a una localidad censal.</p>
-<p>El recurso correspondiente de la API es <a href="https://apis.datos.gob.ar/georef/api/asentamientos"><code>/asentamientos</code></a>.</p>
+                <h1 id="entornos-productivos">Entornos productivos<a class="headerlink" href="#entornos-productivos" title="Permanent link">&para;</a></h1>
+<p>Para instalar la API de Georef en un entorno productivo, es necesario completar todos los pasos detallados en la <a href="../georef-api-development/">guía de instalación y ejecución</a>. Luego, seguir los siguientes pasos adicionales:</p>
+<h2 id="1-configurar-servicio-para-systemd">1. Configurar servicio para systemd<a class="headerlink" href="#1-configurar-servicio-para-systemd" title="Permanent link">&para;</a></h2>
+<p>Copiar el archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service"><code>config/georef-ar-api.service</code></a> a <code>/etc/systemd/system/</code> y configurarlo. <strong>Notar los campos marcados entre '<code>&lt;</code>' y '<code>&gt;</code>'</strong>, que deben ser reemplazados por los valores apropiados.</p>
+<p>Luego, activar y arrancar el nuevo servicio:</p>
+<pre><code class="bash">$ sudo systemctl daemon-reload
+$ sudo systemctl enable georef-ar-api
+$ sudo systemctl start georef-ar-api
+</code></pre>
+
+<p>Una vez ejecutados los comandos, comprobar que la API esté funcionando:</p>
+<pre><code class="bash">$ curl localhost:5000/api/provincias
+</code></pre>
+
+<p>El servicio instalado asegura que la API sea ejecutada al reinicar el sistema operativo, y se encarga de automáticamente almacenar todos los <em>logs</em> generados por la API. Los mismos pueden ser consultados utilizando:</p>
+<pre><code class="bash">$ sudo journalctl -u georef-ar-api
+</code></pre>
+
+<p>Ver <code>man journalctl</code> para más detalles de uso.</p>
+<h2 id="2-configurar-nginx">2. Configurar Nginx<a class="headerlink" href="#2-configurar-nginx" title="Permanent link">&para;</a></h2>
+<p>Resulta conveniente configurar un servidor Nginx que actúe como receptor de todas las consultas destinadas al servidor de la API. El servidor Nginx permite controlar tamaños máximos de consultas y respuestas, establecer <em>caches</em>, y muchas más utilidades. Asumiendo que se instaló Nginx utilizando el administrador de paquetes (<code>apt</code>), seguir los siguientes pasos:</p>
+<h3 id="21-crear-archivo-de-configuracion">2.1 Crear archivo de configuración<a class="headerlink" href="#21-crear-archivo-de-configuracion" title="Permanent link">&para;</a></h3>
+<p>Primero, crear <code>/etc/nginx/sites-available/georef-ar-api.nginx</code> tomando como base la configuración del archivo <a href="https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.nginx"><code>georef-ar-api.nginx</code></a>.</p>
+<h3 id="22-opcional-configurar-cache">2.2 (Opcional) Configurar <em>cache</em><a class="headerlink" href="#22-opcional-configurar-cache" title="Permanent link">&para;</a></h3>
+<p>Si se desea activar el uso del <em>cache</em> de Nginx, descomentar las líneas contentiendo las directivas <code>proxy_cache</code> y <code>proxy_cache_valid</code> del archivo <code>georef-ar-api.nginx</code> creado. Luego, activar el <em>cache</em> <code>georef</code> agregando la siguiente línea al archivo de configuración <code>nginx.conf</code> (sección <code>http</code>):</p>
+<pre><code class="nginx">proxy_cache_path /data/nginx/cache levels=1:2 inactive=120m keys_zone=georef:10m use_temp_path=off;
+</code></pre>
+
+<p>Finalmente, crear el directorio <code>/data/nginx/cache</code>.</p>
+<h3 id="23-activar-y-validar-la-configuracion">2.3 Activar y validar la configuración<a class="headerlink" href="#23-activar-y-validar-la-configuracion" title="Permanent link">&para;</a></h3>
+<p>Generar un link simbólico a la configuración de Georef:</p>
+<pre><code class="bash">$ sudo ln -s /etc/nginx/sites-available/georef-ar-api.nginx /etc/nginx/sites-enabled/georef-ar-api.nginx
+</code></pre>
+
+<p>Validar la configuración:</p>
+<pre><code class="bash">$ sudo nginx -T
+</code></pre>
+
+<p>Finalmente, reiniciar Nginx:</p>
+<pre><code class="bash">$ sudo systemctl restart nginx.service
+</code></pre>
+
+<p>Una vez ejecutados los comandos, comprobar nuevamente que la API esté funcionando, en el puerto 80 estándar:</p>
+<pre><code class="bash">$ curl localhost/api/provincias
+</code></pre>
                 
                   
                 
@@ -805,7 +874,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../communes/" title="Comunas de CABA" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../georef-api-development/" title="Instalación y Ejecución" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -814,19 +883,19 @@
                 <span class="md-footer-nav__direction">
                   Anterior
                 </span>
-                Comunas de CABA
+                Instalación y Ejecución
               </span>
             </div>
           </a>
         
         
-          <a href="../terms/" title="Condiciones de uso" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../history/" title="Historial de versiones" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Siguiente
                 </span>
-                Condiciones de uso
+                Historial de versiones
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
