@@ -159,22 +159,7 @@ Para comprobar que la API esté funcionando:
 $ curl localhost:5000/api/provincias
 ```
 
-#### Entornos productivos
-##### 5.1 Configurar servicio `georef-ar-api` para `systemd`
-Copiar el archivo [`config/georef-ar-api.service`](https://github.com/datosgobar/georef-ar-api/blob/master/config/georef-ar-api.service) a `/etc/systemd/system/` y configurarlo. **Notar los campos marcados entre '`<`' y '`>`'**, que deben ser reemplazados por los valores apropiados.
-
-##### 5.2 Activar y arrancar el servicio
-```bash
-$ sudo systemctl daemon-reload
-$ sudo systemctl enable georef-ar-api
-$ sudo systemctl start georef-ar-api
-```
-
-Luego, comprobar que la API esté funcionando:
-```bash
-$ curl localhost:5000/api/provincias
-```
-
+Si se desea preparar la API para uso en entornos productivos, consultar la guía de instalación para [entornos productivos](deploy.md).
 
 ## Tests
 Para ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):

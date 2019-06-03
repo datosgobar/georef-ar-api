@@ -27,6 +27,7 @@ nav:
   - Aplicaciones: applications.md
   - Desarrolladores:
     - Instalación y Ejecución: georef-api-development.md
+    - Entornos productivos: deploy.md
     - Historial de versiones: history.md
     - Instalación de Python 3.6: python3.6.md
     - ETL:

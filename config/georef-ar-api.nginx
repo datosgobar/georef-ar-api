@@ -1,0 +1,15 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    # Descomentar las siguientes dos líneas para activar el uso de
+    # cache de nginx. El archivo de configuración nginx.conf DEBE
+    # contener la directiva 'proxy_cache_path' activada con keys_zone=georef
+
+    # proxy_cache georef;
+    # proxy_cache_valid 200 120m;
+
+    location / {
+        proxy_pass http://localhost:5000;
+    }
+}
