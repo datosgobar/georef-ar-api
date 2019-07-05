@@ -20,7 +20,7 @@ DEPARTMENTS = [
     (['22161'], 'TAPENAGÁ'),
     (['58091'], 'PEHUENCHES'),
     (['78042'], 'MAGALLANES'),
-    (['02012'], 'COMUNA 12'),
+    (['02084'], 'COMUNA 12'),
     (['26014'], 'CUSHAMEN'),
     (['50119'], 'TUNUYÁN'),
     (['62056'], 'ÑORQUINCO'),

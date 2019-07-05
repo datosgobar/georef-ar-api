@@ -106,7 +106,7 @@ class AddressQueryPlanner(ABC):
         query = self._query.copy()
 
         query['name'] = street
-        if add_number and self._numerical_door_number:
+        if add_number and self._numerical_door_number is not None:
             query['number'] = self._numerical_door_number
 
         if force_all:
