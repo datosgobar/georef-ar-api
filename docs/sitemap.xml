@@ -2,52 +2,52 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
      <loc>http://apis.datos.gob.ar/georef/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/quick-start/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/bulk/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/addresses/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/geom-operations/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/shapefiles/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/download/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/spreadsheet-integration/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/python-usage/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/jwt-token/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
@@ -57,57 +57,57 @@
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/communes/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/localities/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/terms/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/applications/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/georef-api-development/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/deploy/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/history/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/python3.6/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/etl/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/etl-data/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
     <url>
      <loc>http://apis.datos.gob.ar/georef/etl-install/</loc>
-     <lastmod>2019-06-03</lastmod>
+     <lastmod>2019-07-21</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>

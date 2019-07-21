@@ -1,7 +1,11 @@
+body {
+    color: rgba(0, 0, 0, 0.9);
+}
+
 .md-header {
     background-color: hsl(0, 0%, 100%);
     color: #0695c8;
-    height: 65px !important;
+    height: 6.8rem;
 }
 
 .md-flex {
@@ -114,15 +118,11 @@ tr:nth-child(odd) {
 }
 
 table {
-    text-align: center;
     margin: 0 auto;
-    display: table;
-    width: 100%;
 }
 
 tbody {
-    display: table;
-    width: 100%;
+    display: inline;
 }
 
 .wy-nav-top {
@@ -131,37 +131,5 @@ tbody {
 
 .md-typeset .admonition,
 .md-typeset details {
-    font-size: 1em;
+    font-size: 1.6rem;
 }
-
-h1 .toclink,
-h2 .toclink,
-h3 .toclink,
-h4 .toclink,
-h5 .toclink,
-h6 .toclink,
-p,
-li {
-    color: rgba(0, 0, 0, 0.54);
-}
-
-body {
-    color: rgba(0, 0, 0, 0.6);
-}
-
-.md-typeset iframe,
-.md-typeset img,
-.md-typeset svg {
-    max-width: 100%;
-    margin: 0 auto;
-    display: inherit;
-}
-
-.recomendado {
-    color: green;
-}
-
-.no-recomendado {
-    color: red;
-}
-

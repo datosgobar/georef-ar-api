@@ -79,6 +79,13 @@ Luego, instalar los paquetes necesarios:
 (env) $ pip install -r requirements.txt
 ```
 
+Si estás usando Anaconda como gestor de entornos virtuales:
+```bash
+(env) $ conda install psycopg2
+(env) $ conda install gdal
+(env) $ pip install -r requirements.txt
+```
+
 ### 1.6 Migración inicial
 
 Para crear las tablas utilizadas en el proceso de ETL, utilizar la receta `migrate`:
