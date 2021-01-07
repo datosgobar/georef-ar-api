@@ -120,4 +120,4 @@ Notar que al ser datos que no son modificados regularmente, es posible retener c
 
 *Si sos usuario de la API de Normalización de Datos Geográficos y querés estar al tanto de los  cambios y novedades, [inscribite en la base de contactos de Datos Argentina](bit.ly/contacto-datos-argentina) y elegí sobre qué temas querés que te escribamos.*
 
-*¿Tenés algo que contarnos? Nos encantaría que nos cuentes por [Twitter](https://twitter.com/datosgobar) o por [mail](mailto:datos@modernizacion.gob.ar) qué mejoró usar la API en tu trabajo y qué le falta para mejorar aún más.*
+*¿Tenés algo que contarnos? Nos encantaría que nos cuentes por [Twitter](https://twitter.com/datosgobar) o por [mail](mailto:datosargentina@jefatura.gob.ar) qué mejoró usar la API en tu trabajo y qué le falta para mejorar aún más.*

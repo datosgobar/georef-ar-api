@@ -15,4 +15,4 @@ Lista de proyectos y aplicaciones que utilizan, extienden o documentan la API de
 
 ¿Desarrollaste una librería o tenés un proyecto que usa la API? Te [invitamos a contarnos](https://twitter.com/datosgobar) así la agregamos a esta lista.
 
-Para todo lo demás, podés mandarnos tu comentario o consulta a [datos@modernizacion.gob.ar](mailto:datos@modernizacion.gob.ar).
+Para todo lo demás, podés mandarnos tu comentario o consulta a [datosargentina@jefatura.gob.ar](mailto:datosargentina@jefatura.gob.ar).
