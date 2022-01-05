@@ -671,7 +671,7 @@
                 <h1 id="descarga-de-geometrias">Descarga de Geometrías<a class="headerlink" href="#descarga-de-geometrias" title="Permanent link">&para;</a></h1>
 <p>La API permite la descarga de geometrías a través del formato <a href="https://es.wikipedia.org/wiki/Shapefile">ESRI Shapefile</a>. Para utilizar el formato, se debe agregar <code>formato=shp</code> a la lista de parámetros especificados en la URL. El formato Shapefile está disponible en la versión GET de todos los recursos, con las excepción de <code>/direcciones</code> y <code>/ubicacion</code>.</p>
 <p>Cuando se especifica <code>formato=shp</code>, la respuesta de la API es un archivo ZIP que contiene cuatro archivos estándar: <code>.shp</code>, <code>.shx</code>, <code>.dbf</code> y <code>.prj</code>. El archivo luego puede ser abierto con programas como <a href="https://www.qgis.org/en/site/">QGIS</a>. El sistema de coordenadas de las geometrías descargadas es WGS84 (EPSG 4326).</p>
-<p>Por ejemplo, si se desea obtener todas las calles del municipio Alta García (ID 141372), se puede utilizar la siguiente consulta:</p>
+<p>Por ejemplo, si se desea obtener todas las calles del municipio Alta Gracia (ID 141372), se puede utilizar la siguiente consulta:</p>
 <p><code>GET</code> <a href="https://apis.datos.gob.ar/georef/api/calles?interseccion=municipio:141372&amp;formato=shp&amp;max=1000">https://apis.datos.gob.ar/georef/api/calles?interseccion=municipio:141372&amp;formato=shp&amp;max=1000</a></p>
 <p>Que descargaría los siguientes datos:</p>
 <p><img alt="" src="../assets/calles1.png" />
