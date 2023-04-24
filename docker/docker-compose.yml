@@ -1,0 +1,48 @@
+version: '2.2'
+services:
+  # for three nodes see: https://www.elastic.co/guide/en/elasticsearch/reference/7.5/docker.html#docker-compose-file
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_STACK_VERSION
+    container_name: georef-api_es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true  # disable swapping out parts of the JVM heap to disk (https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html)
+      - "ES_JAVA_OPTS=$JAVA_OPTS"
+    ulimits:
+      memlock:  # configures the range of memory that ElasticSearch will use. Setting this to –1 means unlimited.
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    networks:
+      - geonet
+  app:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile_api
+    image: datosgobar/georef-etl_api
+    container_name: georef-api_app
+    environment:
+      - "GEOREF_CONFIG=config/georef.cfg"
+      - "FLASK_APP=service/__init__.py"
+      - "FLASK_ENV=development"
+    command: flask run --host=0.0.0.0 --port=5000
+    volumes:
+      - ../config:/opt/app-root/src/georef-ar-api/config:ro
+      - ../source:/opt/app-root/src/georef-ar-api/source
+      - ../logs:/opt/app-root/src/georef-ar-api/logs
+      - ../backups:/opt/app-root/src/georef-ar-api/backups
+    ports:
+      - 8080:5000
+    networks:
+      - geonet
+
+volumes:
+  data01:
+    driver: local
+
+networks:
+  geonet:
+    driver: bridge
