@@ -37,7 +37,7 @@ Para correr la aplicación:
 Situarse dentro de la carpeta "docker" y correr el siguiente comando:
 
 ```
-docker-compose up
+docker-compose up -d
 ```
 
 Para indexar los archivos generados por el ETL correr el siguiente comando:

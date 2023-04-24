@@ -816,7 +816,41 @@ $ source env/bin/activate
 
 <p>Luego, al realizar cualquier consulta a <code>localhost:5000</code>, se almacenará en el directorio <code>profile/</code> información sobre el tiempo que llevó completar la consulta. Los datos se generan utilizando el módulo <code>cProfile</code> de Python.</p>
                 
-                  
+                  <h2 id="d11-instalacion">Utilizando contenedores<a class="headerlink" href="#d11-instalacion" title="Permanent link">&para;</a></h2>
+
+                <p>Para correr los contenedores asegúrate de tener instalado docker-compose. El archivo de configuración correrá dos servicios creando los siguientes contenedores:</p>
+                <ul>
+                    <li>georef-api_es01: Un contenedor con Elasticsearch procesar e indexar los datos. Estos datos son almacenados y persistidos en un volumen de docker.</li>
+                    <li>georef-api_app: Un contenedor con la aplicación. Al correrlo la primera vez es necesario correr una indexación.</li>
+                </ul>
+
+                <h3 id="d1-codigo">1. Código<a class="headerlink" href="#d1-codigo" title="Permanent link">&para;</a></h3>
+                <p>Clonar el repositorio:</p>
+                <pre>
+                    <code class="bash">$ git clone https://github.com/datosgobar/georef-ar-api.git
+$ cd georef-ar-etl
+                </code></pre>
+
+                <h3 id="d2-configuracion">2. Configuración<a class="headerlink" href="#d2-configuracion" title="Permanent link">&para;</a></h3>
+                <p>Crear un nuevo archivo de configuración <code>georef.cfg</code>. Se recomienda partir desde el archivo de ejemplo en <code>docker/georef.example.cfg</code>:</p>
+                <pre><code class="bash">cp docker/georef.example.cfg config/georef.cfg
+                </code></pre>
+
+                <h3 id="d3-contenedores">3. Levantar contenedores<a class="headerlink" href="#d3-contenedores" title="Permanent link">&para;</a></h3>
+                <p>Para iniciar los contenedores situarse dentro de la carpeta docker y correr la receta:</p>
+                <pre><code class="bash">$ cd docker
+$ docker-compose up -d
+</code></pre>
+
+                <h3 id="d4-indexacion-inicial">4. Indexación inicial<a class="headerlink" href="#d4-indexacion-inicial" title="Permanent link">&para;</a></h3>
+<p>Para indexar los archivos generados por el ETL copiar los archivos a la carpeta source y luego utilizar la receta <code>index</code>:</p>
+<pre><code class="bash">$ docker-compose exec app make index
+</code></pre>
+
+                <h3 id="d5-consultas">5. Consultas<a class="headerlink" href="#d5-consultas" title="Permanent link">&para;</a></h3>
+                <p>Una vez finalizado el proceso de indexación se podrán hacer consultas a la API.</p>
+                <pre><code class="bash">$ curl localhost:5000/api/provincias
+</code></pre>
                 
               
               
