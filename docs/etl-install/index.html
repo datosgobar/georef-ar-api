@@ -679,7 +679,7 @@
                 <h1 id="d-instalacion-y-ejecucion-de-georef-etl">Instalación y Ejecución de Georef ETL<a class="headerlink" href="#d-instalacion-y-ejecucion-de-georef-etl" title="Permanent link">&para;</a></h1>
 <p>En este documento se detallan los pasos a seguir si se desea ejecutar el ETL de Georef en un entorno propio.</p>
 
-                <h2 id="d11-instalacion">1.1. Utilizando contenedores<a class="headerlink" href="#d11-instalacion" title="Permanent link">&para;</a></h2>
+                <h2 id="d11-instalacion">1. Instalación utilizando contenedores<a class="headerlink" href="#d11-instalacion" title="Permanent link">&para;</a></h2>
 
                 <p>Para correr los contenedores asegúrate de tener instalado docker-compose. El archivo de configuración puede correr tres servicios creando los siguientes contenedores:</p>
                 <ul>
@@ -688,40 +688,39 @@
                     <li>georref-etl_db_test: En forma optativa se puede levantar el tercer contenedor para correr las pruebas del ETL</li>
                 </ul>
 
-                <h3 id="d111-codigo">1.1.1 Código<a class="headerlink" href="#d111-codigo" title="Permanent link">&para;</a></h3>
+                <h3 id="d111-codigo">1.1 Código<a class="headerlink" href="#d111-codigo" title="Permanent link">&para;</a></h3>
                 <p>Clonar el repositorio:</p>
                 <pre>
                     <code class="bash">$ git clone https://github.com/datosgobar/georef-ar-etl.git
 $ cd georef-ar-etl
                 </code></pre>
 
-                <h3 id="d112-configuracion">1.1.2 Configuración<a class="headerlink" href="#d112-configuracion" title="Permanent link">&para;</a></h3>
+                <h3 id="d112-configuracion">1.2 Configuración<a class="headerlink" href="#d112-configuracion" title="Permanent link">&para;</a></h3>
                 <p>Crear un nuevo archivo de configuración <code>georef.cfg</code>. Se recomienda partir desde el archivo de ejemplo en <code>docker/georef.example.cfg</code>:</p>
                 <pre><code class="bash">cp docker/georef.example.cfg config/georef.cfg
                 </code></pre>
 
-                <h3 id="d113-contenedores">1.1.3 Levantar contenedores<a class="headerlink" href="#d113-contenedores" title="Permanent link">&para;</a></h3>
+                <h3 id="d113-contenedores">1.3 Levantar contenedores<a class="headerlink" href="#d113-contenedores" title="Permanent link">&para;</a></h3>
                 <p>Para iniciar los contenedores situarse dentro de la carpeta docker y correr la receta:</p>
                 <pre><code class="bash">$ cd docker
 $ docker-compose up -d
 </code></pre>
 
-                <h3 id="d114-migracion-inicial">1.1.4 Migración inicial<a class="headerlink" href="#d114-migracion-inicial" title="Permanent link">&para;</a></h3>
+                <h3 id="d114-migracion-inicial">1.4 Migración inicial<a class="headerlink" href="#d114-migracion-inicial" title="Permanent link">&para;</a></h3>
 <p>Para crear las tablas utilizadas en el proceso de ETL, utilizar la receta <code>migrate</code>:</p>
 <pre><code class="bash">(env) $ docker-compose exec app make migrate
 </code></pre>
 
-                <h3 id="d114-ejecucion">1.1.5. Ejecución<a class="headerlink" href="#d114-ejecucion" title="Permanent link">&para;</a></h3>
+                <h3 id="d114-ejecucion">1.5 Ejecución<a class="headerlink" href="#d114-ejecucion" title="Permanent link">&para;</a></h3>
                 <p>Una vez finalizado el proceso de instalación, utilizar la receta <code>run</code> para ejecutar todas las tareas del ETL. <strong>Se generarán los archivos de salida y reportes en las carpetas files/latest y reports</strong>.</p>
                 <pre><code class="bash">(env) $ docker-compose exec app make run
 </code></pre>
 
 
 
-<h2 id="1-instalacion">1.2. Instalación local<a class="headerlink" href="#1-instalacion" title="Permanent link">&para;</a></h2>
+<h2 id="1-instalacion">2. Instalación local<a class="headerlink" href="#1-instalacion" title="Permanent link">&para;</a></h2>
 
 
-<h2 id="dependencias">Dependencias<a class="headerlink" href="#dependencias" title="Permanent link">&para;</a></h2>
 <p>El proyecto <code>georef-ar-etl</code> utiliza los siguientes componentes para cumplir sus funciones:</p>
 <ul>
 <li>PostgreSQL 9.5</li>
@@ -730,20 +729,20 @@ $ docker-compose up -d
 <li>ogr2ogr (GDAL) 2.2.2</li>
 </ul>
 <p>A continuación, se detallan los pasos a seguir para instalar y ejecutar el ETL en un entorno Ubuntu 16.04 (Xenial).</p>
-<h3 id="12-dependencias">1.2.1 Dependencias<a class="headerlink" href="#12-dependencias" title="Permanent link">&para;</a></h3>
+<h3 id="12-dependencias">2.1 Dependencias<a class="headerlink" href="#12-dependencias" title="Permanent link">&para;</a></h3>
 <p>Primero, instalar PostgreSQL, PostGIS y ogr2ogr utilizando el comando <code>apt</code>:</p>
 <pre><code class="bash">$ sudo add-apt-repository -y ppa:ubuntugis/ppa
 $ sudo apt update
 $ sudo apt install postgresql-9.5 postgresql-9.5-postgis-2.4 gdal-bin libpq-dev
 </code></pre>
 
-<h3 id="12-codigo">1.2.2 Código<a class="headerlink" href="#12-codigo" title="Permanent link">&para;</a></h3>
+<h3 id="12-codigo">2.2 Código<a class="headerlink" href="#12-codigo" title="Permanent link">&para;</a></h3>
 <p>Luego, clonar el repositorio:</p>
 <pre><code class="bash">$ git clone https://github.com/datosgobar/georef-ar-etl.git
 $ cd georef-ar-etl
 </code></pre>
 
-<h3 id="13-configuracion">1.2.3 Configuración<a class="headerlink" href="#13-configuracion" title="Permanent link">&para;</a></h3>
+<h3 id="13-configuracion">2.3 Configuración<a class="headerlink" href="#13-configuracion" title="Permanent link">&para;</a></h3>
 <p>Crear un nuevo archivo de configuración <code>georef.cfg</code>. Se recomienda partir desde el archivo de ejemplo en <code>config/georef.example.cfg</code>:</p>
 <pre><code class="bash">cp config/georef.example.cfg config/georef.cfg
 </code></pre>
@@ -757,7 +756,7 @@ user = georef
 password = changeme
 </code></pre>
 
-<h3 id="14-base-de-datos">1.2.4 Base de Datos<a class="headerlink" href="#14-base-de-datos" title="Permanent link">&para;</a></h3>
+<h3 id="14-base-de-datos">2.4 Base de Datos<a class="headerlink" href="#14-base-de-datos" title="Permanent link">&para;</a></h3>
 <p>Para el funcionamiento del ETL, se debe contar con una base de datos con la extensión PostGIS habilitada, y un usuario que pueda crear, eliminar y modificar tablas.</p>
 <p>Bajo un usuario administrador de PostgreSQL (por defecto, <code>postgres</code>), utilizar el comando <code>psql</code> para ejecutar las sentencias necesarias:</p>
 <pre><code class="sql">create database georef_ar_etl with encoding = 'utf-8';
@@ -769,7 +768,7 @@ create user georef with login password 'changeme';
 grant all privileges on all tables in schema public to georef;
 </code></pre>
 
-<h3 id="15-entorno-python">1.2.5 Entorno Python<a class="headerlink" href="#15-entorno-python" title="Permanent link">&para;</a></h3>
+<h3 id="15-entorno-python">2.5 Entorno Python<a class="headerlink" href="#15-entorno-python" title="Permanent link">&para;</a></h3>
 <p>En la raíz del proyecto clonado con <code>git</code>, ejecutar los siguientes comandos para crear un nuevo entorno virtual de Python con <code>venv</code>:</p>
 <pre><code class="bash">$ python3 -m venv env
 $ source env/bin/activate
@@ -785,13 +784,13 @@ $ source env/bin/activate
 (env) $ pip install -r requirements.txt
 </code></pre>
 
-<h3 id="16-migracion-inicial">1.2.6 Migración inicial<a class="headerlink" href="#16-migracion-inicial" title="Permanent link">&para;</a></h3>
+<h3 id="16-migracion-inicial">2.6 Migración inicial<a class="headerlink" href="#16-migracion-inicial" title="Permanent link">&para;</a></h3>
 <p>Para crear las tablas utilizadas en el proceso de ETL, utilizar la receta <code>migrate</code>:</p>
 <pre><code class="bash">(env) $ make migrate
 </code></pre>
 
 <p>El comando debe volver a ejecutarse si se actualiza el proyecto y existen nuevas migraciones. Se recomienda ejecutar el comando incondicionalmente cuando se actualiza el proyecto, ya que si no existen migraciones nuevas no se realizará ningún cambio.</p>
-<h2 id="2-ejecucion">2. Ejecución<a class="headerlink" href="#2-ejecucion" title="Permanent link">&para;</a></h2>
+<h2 id="2-ejecucion">3. Ejecución<a class="headerlink" href="#2-ejecucion" title="Permanent link">&para;</a></h2>
 <p>Una vez finalizado el proceso de instalación, utilizar la receta <code>run</code> para ejecutar todas las tareas del ETL. <strong>El entorno virtual de Python debe estar activado</strong>.</p>
 <pre><code class="bash">(env) $ make run
 </code></pre>
@@ -820,7 +819,7 @@ $ source env/bin/activate
 <li><code>-v</code>/<code>--verbose</code>: Muestra información adicional durante la ejecución.</li>
 <li><code>-h</code>/<code>--help</code>: Muestra ayuda sobre el uso de <code>georef_ar_etl</code>.</li>
 </ul>
-<h2 id="3-resultados">3. Resultados<a class="headerlink" href="#3-resultados" title="Permanent link">&para;</a></h2>
+<h2 id="3-resultados">4. Resultados<a class="headerlink" href="#3-resultados" title="Permanent link">&para;</a></h2>
 <p>Por defecto, los productos del ETL serán:</p>
 <p>Las tablas:</p>
 <ul>
