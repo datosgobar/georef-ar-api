@@ -1,5 +1,5 @@
 elasticsearch-dsl==7.0.0
-Flask==1.0.2
+Flask==2.3.2
 georef-ar-address==0.0.9
 geojson==2.3.0
 gunicorn[gevent]==19.9.0
