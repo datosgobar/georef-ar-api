@@ -13,6 +13,6 @@ COPY requirements-dev.txt .
 RUN pip install -r requirements.txt
 RUN pip install -r requirements-dev.txt
 
-RUN pip install Flask==2.0.0  # Actualizar en requirements.txt
+RUN pip install Flask==2.0.0
 
 COPY . .
