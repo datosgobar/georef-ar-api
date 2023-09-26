@@ -283,6 +283,13 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         })
         self.assertTrue(len(data) == 0)
 
+    def test_address_number_0(self):
+        """Se deberían aceptar búsquedas con altura 0."""
+        data = self.get_response({
+            'direccion': 'MAIPU 0'
+        })
+        self.assertTrue(len(data) > 0)
+
     def test_address_search_fuzziness(self):
         """La búsqueda aproximada debe tener una tolerancia de AUTO:4,8."""
         expected = [
