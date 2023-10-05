@@ -44,8 +44,8 @@ def add_complete_downloads(bp, urls):
     """
     entities = [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES,
                 N.CENSUS_LOCALITIES.replace('_', '-'), N.SETTLEMENTS,
-                N.LOCALITIES, N.STREETS]
-    formats = ['json', 'csv', 'geojson']
+                N.LOCALITIES, N.STREETS, N.STREET_BLOCKS]
+    formats = ['json', 'csv', 'geojson', 'ndjson']
 
     for entity in entities:
         entity_urls = urls[entity]
