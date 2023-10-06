@@ -24,7 +24,7 @@ services:
     build:
       context: ..
       dockerfile: ./docker/Dockerfile_api
-    image: datosgobar/georef-etl_api
+    image: datosgobar/georef-api_app
     container_name: georef-api_app
     environment:
       - "GEOREF_CONFIG=config/georef.cfg"
