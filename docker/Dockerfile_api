@@ -1,18 +1,12 @@
 FROM python:3.9
 
-RUN apt-get update
-RUN apt-get -y upgrade
-RUN apt-get install -y libgeos-3.9.0 libgeos-c1v5
+RUN apt-get update && apt-get -y upgrade && apt-get install -y libgeos3.11.1 libgeos-c1v5
 
 RUN pip install --upgrade pip
 
 WORKDIR /opt/app-root/src/georef-ar-api
 
 COPY requirements.txt .
-COPY requirements-dev.txt .
 RUN pip install -r requirements.txt
-RUN pip install -r requirements-dev.txt
-
-RUN pip install Flask==2.0.0
 
 COPY . .
