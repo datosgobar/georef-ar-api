@@ -26,7 +26,7 @@ from elasticsearch_dsl import MetaField
 from .. import names as N
 
 GEOM_INDEX_SUFFIX = '{}-geometria'
-GEOMETRYLESS_INDICES = {N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES}
+GEOMETRYLESS_INDICES = {N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES, N.LOCAL_GOVERNMENTS}
 
 # -----------------------------------------------------------------------------
 # Analizadores, Filtros, Normalizadores
@@ -313,6 +313,23 @@ class Municipality(Entity):
 
 
 class MunicipalityGeom(Entity):
+    geometria = GeoShape()
+
+
+class LocalGovernment(Entity):
+    nombre = NameField
+    nombre_completo = UnindexedTextField
+    centroide = CentroidField
+    geometria = GeoShape()
+    provincia = StateSubField
+    categoria = UnindexedTextField
+    fuente = UnindexedTextField
+
+    class Meta:
+        source = MetaField(excludes=['geometria'])
+
+
+class LocalGovernmentGeom(Entity):
     geometria = GeoShape()
 
 

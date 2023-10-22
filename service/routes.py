@@ -92,6 +92,11 @@ def get_municipalities():
     return normalizer.process_municipality(request)
 
 
+@bp_v1_0.route('/gobiernos-locales', methods=['GET', 'POST'])
+def get_local_governments():
+    return normalizer.process_local_government(request)
+
+
 @bp_v1_0.route('/localidades-censales', methods=['GET', 'POST'])
 def get_census_localities():
     return normalizer.process_census_locality(request)

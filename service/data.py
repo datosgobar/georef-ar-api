@@ -858,6 +858,20 @@ class MunicipalitiesGeometrySearch(TerritoriesSearch):
         super().__init__(es_config.geom_index_for(N.MUNICIPALITIES), query)
 
 
+class LocalGovernmentsGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de gobiernos locales.
+
+    Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
+    utilizando 'LocalGovernmentsSearch', que internamente utilizará esta clase.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(es_config.geom_index_for(N.LOCAL_GOVERNMENTS), query)
+
+
 class MunicipalitiesSearch(TerritoriesSearch):
     """Representa una búsqueda de municipios.
 
@@ -868,6 +882,18 @@ class MunicipalitiesSearch(TerritoriesSearch):
     def __init__(self, query):
         super().__init__(N.MUNICIPALITIES, query,
                          geom_search_class=MunicipalitiesGeometrySearch)
+
+
+class LocalGovernmentsSearch(TerritoriesSearch):
+    """Representa una búsqueda de gobiernos locales.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(N.LOCAL_GOVERNMENTS, query,
+                         geom_search_class=LocalGovernmentsGeometrySearch)
 
 
 class CensusLocalitiesSearch(TerritoriesSearch):
@@ -907,6 +933,7 @@ _ENTITY_SEARCH_CLASSES = {
     N.STATES: StatesSearch,
     N.DEPARTMENTS: DepartmentsSearch,
     N.MUNICIPALITIES: MunicipalitiesSearch,
+    N.LOCAL_GOVERNMENTS: LocalGovernmentsSearch,
     N.CENSUS_LOCALITIES: CensusLocalitiesSearch,
     N.SETTLEMENTS: SettlementsSearch,
     N.LOCALITIES: LocalitiesSearch,
