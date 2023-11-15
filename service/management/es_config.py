@@ -12,7 +12,7 @@ la performance de la búsqueda por id/nombre/etc se ve disminuida. Para poder
 contar con las geometrías originales (para queries GeoShape y para poder
 utilizarlas como valores de respuesta), se crean índices adicionales con las
 geometrías intactas. Notar que este cambio solo se aplica a entidades que
-tienen geometrías de gran tamaño (provincias, municipios y departamentos).
+tienen geometrías de gran tamaño (provincias, gobiernos locales y departamentos).
 
 Para más información, ver:
 https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommendations.html#maximum-document-size
@@ -26,7 +26,7 @@ from elasticsearch_dsl import MetaField
 from .. import names as N
 
 GEOM_INDEX_SUFFIX = '{}-geometria'
-GEOMETRYLESS_INDICES = {N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES}
+GEOMETRYLESS_INDICES = {N.STATES, N.DEPARTMENTS, N.LOCAL_GOVERNMENTS}
 
 # -----------------------------------------------------------------------------
 # Analizadores, Filtros, Normalizadores
@@ -204,7 +204,7 @@ DepartmentSubField = Object(
     dynamic='strict'
 )
 
-MunicipalitySubField = Object(
+LocalGovernmentSubField = Object(
     properties={
         'id': Keyword(),
         'nombre': NameField
@@ -299,7 +299,7 @@ class DepartmentGeom(Entity):
     geometria = GeoShape()
 
 
-class Municipality(Entity):
+class LocalGovernment(Entity):
     nombre = NameField
     nombre_completo = UnindexedTextField
     centroide = CentroidField
@@ -312,7 +312,7 @@ class Municipality(Entity):
         source = MetaField(excludes=['geometria'])
 
 
-class MunicipalityGeom(Entity):
+class LocalGovernmentGeom(Entity):
     geometria = GeoShape()
 
 
@@ -322,7 +322,7 @@ class CensusLocality(Entity):
     geometria = GeoShape()
     provincia = StateSubField
     departamento = DepartmentSubField
-    municipio = MunicipalitySubField
+    gobierno_local = LocalGovernmentSubField
     categoria = UnindexedTextField
     funcion = UnindexedTextField
     fuente = UnindexedTextField
@@ -334,7 +334,7 @@ class Settlement(Entity):
     geometria = GeoShape()
     provincia = StateSubField
     departamento = DepartmentSubField
-    municipio = MunicipalitySubField
+    gobierno_local = LocalGovernmentSubField
     localidad_censal = CensusLocalitySubField
     categoria = UnindexedTextField
     fuente = UnindexedTextField

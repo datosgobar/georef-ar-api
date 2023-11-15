@@ -15,7 +15,7 @@ from service.management import es_config
 INTERSECTION_PARAM_TYPES = {
     N.STATES,
     N.DEPARTMENTS,
-    N.MUNICIPALITIES,
+    N.LOCAL_GOVERNMENTS,
     N.STREETS
 }
 
@@ -423,8 +423,8 @@ class TerritoriesSearch(ElasticsearchSearch):
 
         if municipality:
             self._search = self._search.query(_build_subentity_query(
-                N.MUN_ID,
-                N.MUN_NAME,
+                N.LG_ID,
+                N.LG_NAME,
                 municipality,
                 exact
             ))
@@ -855,7 +855,7 @@ class MunicipalitiesGeometrySearch(TerritoriesSearch):
     """
 
     def __init__(self, query):
-        super().__init__(es_config.geom_index_for(N.MUNICIPALITIES), query)
+        super().__init__(es_config.geom_index_for(N.LOCAL_GOVERNMENTS), query)
 
 
 class MunicipalitiesSearch(TerritoriesSearch):
@@ -866,7 +866,7 @@ class MunicipalitiesSearch(TerritoriesSearch):
     """
 
     def __init__(self, query):
-        super().__init__(N.MUNICIPALITIES, query,
+        super().__init__(N.LOCAL_GOVERNMENTS, query,
                          geom_search_class=MunicipalitiesGeometrySearch)
 
 
@@ -906,7 +906,7 @@ class LocalitiesSearch(TerritoriesSearch):
 _ENTITY_SEARCH_CLASSES = {
     N.STATES: StatesSearch,
     N.DEPARTMENTS: DepartmentsSearch,
-    N.MUNICIPALITIES: MunicipalitiesSearch,
+    N.LOCAL_GOVERNMENTS: MunicipalitiesSearch,
     N.CENSUS_LOCALITIES: CensusLocalitiesSearch,
     N.SETTLEMENTS: SettlementsSearch,
     N.LOCALITIES: LocalitiesSearch,

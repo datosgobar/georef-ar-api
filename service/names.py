@@ -28,8 +28,8 @@ STATE = 'provincia'
 STATES = 'provincias'
 DEPARTMENTS = 'departamentos'
 DEPT = 'departamento'
-MUN = 'municipio'
-MUNICIPALITIES = 'municipios'
+LG = 'gobierno_local'
+LOCAL_GOVERNMENTS = 'gobiernos_locales'
 CENSUS_LOCALITIES = 'localidades_censales'
 CENSUS_LOCALITY = 'localidad_censal'
 SETTLEMENTS = 'asentamientos'
@@ -107,9 +107,9 @@ DEPT_NAME = join(DEPT, NAME)
 DEPT_SOURCE = join(DEPT, SOURCE)
 CENSUS_LOCALITY_ID = join(CENSUS_LOCALITY, ID)
 CENSUS_LOCALITY_NAME = join(CENSUS_LOCALITY, NAME)
-MUN_ID = join(MUN, ID)
-MUN_NAME = join(MUN, NAME)
-MUN_SOURCE = join(MUN, SOURCE)
+LG_ID = join(LG, ID)
+LG_NAME = join(LG, NAME)
+LG_SOURCE = join(LG, SOURCE)
 EXACT_SUFFIX = join('{}', EXACT)
 C_LAT = join(CENTROID, LAT)
 C_LON = join(CENTROID, LON)
@@ -142,7 +142,7 @@ STREET_X2_CATEGORY = join(STREET_X2, CATEGORY)
 _PLURALS = {
     STATE: STATES,
     DEPT: DEPARTMENTS,
-    MUN: MUNICIPALITIES,
+    LG: LOCAL_GOVERNMENTS,
     CENSUS_LOCALITY: CENSUS_LOCALITIES,
     SETTLEMENT: SETTLEMENTS,
     LOCALITY: LOCALITIES,

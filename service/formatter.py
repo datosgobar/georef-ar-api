@@ -51,17 +51,17 @@ _DEPARTMENTS_CSV_FIELDS = [
     (N.CATEGORY, [N.DEPT, N.CATEGORY])
 ]
 
-_MUNICIPALITIES_CSV_FIELDS = [
-    (N.ID, [N.MUN, N.ID]),
-    (N.NAME, [N.MUN, N.NAME]),
-    (N.COMPLETE_NAME, [N.MUN, N.COMPLETE_NAME]),
-    (N.C_LAT, [N.MUN, N.CENTROID, N.LAT]),
-    (N.C_LON, [N.MUN, N.CENTROID, N.LON]),
+_LOCAL_GOVERNMENTS_CSV_FIELDS = [
+    (N.ID, [N.LG, N.ID]),
+    (N.NAME, [N.LG, N.NAME]),
+    (N.COMPLETE_NAME, [N.LG, N.COMPLETE_NAME]),
+    (N.C_LAT, [N.LG, N.CENTROID, N.LAT]),
+    (N.C_LON, [N.LG, N.CENTROID, N.LON]),
     (N.STATE_ID, [N.STATE, N.ID]),
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.STATE_INTERSECTION, [N.STATE, N.INTERSECTION]),
-    (N.SOURCE, [N.MUN, N.SOURCE]),
-    (N.CATEGORY, [N.MUN, N.CATEGORY])
+    (N.SOURCE, [N.LG, N.SOURCE]),
+    (N.CATEGORY, [N.LG, N.CATEGORY])
 ]
 
 _CENSUS_LOCALITIES_CSV_FIELDS = [
@@ -73,8 +73,8 @@ _CENSUS_LOCALITIES_CSV_FIELDS = [
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.DEPT_ID, [N.DEPT, N.ID]),
     (N.DEPT_NAME, [N.DEPT, N.NAME]),
-    (N.MUN_ID, [N.MUN, N.ID]),
-    (N.MUN_NAME, [N.MUN, N.NAME]),
+    (N.LG_ID, [N.LG, N.ID]),
+    (N.LG_NAME, [N.LG, N.NAME]),
     (N.SOURCE, [N.CENSUS_LOCALITY, N.SOURCE]),
     (N.FUNCTION, [N.CENSUS_LOCALITY, N.FUNCTION]),
     (N.CATEGORY, [N.CENSUS_LOCALITY, N.CATEGORY])
@@ -89,8 +89,8 @@ _SETTLEMENTS_CSV_FIELDS = [
     (N.STATE_NAME, [N.STATE, N.NAME]),
     (N.DEPT_ID, [N.DEPT, N.ID]),
     (N.DEPT_NAME, [N.DEPT, N.NAME]),
-    (N.MUN_ID, [N.MUN, N.ID]),
-    (N.MUN_NAME, [N.MUN, N.NAME]),
+    (N.LG_ID, [N.LG, N.ID]),
+    (N.LG_NAME, [N.LG, N.NAME]),
     (N.CENSUS_LOCALITY_ID, [N.CENSUS_LOCALITY, N.ID]),
     (N.CENSUS_LOCALITY_NAME, [N.CENSUS_LOCALITY, N.NAME]),
     (N.SOURCE, [N.LOCALITY, N.SOURCE]),
@@ -146,7 +146,7 @@ _ADDRESSES_CSV_FIELDS = [
 _ENDPOINT_CSV_FIELDS = {
     N.STATES: _STATES_CSV_FIELDS,
     N.DEPARTMENTS: _DEPARTMENTS_CSV_FIELDS,
-    N.MUNICIPALITIES: _MUNICIPALITIES_CSV_FIELDS,
+    N.LOCAL_GOVERNMENTS: _LOCAL_GOVERNMENTS_CSV_FIELDS,
     N.CENSUS_LOCALITIES: _CENSUS_LOCALITIES_CSV_FIELDS,
     N.SETTLEMENTS: _SETTLEMENTS_CSV_FIELDS,
     N.LOCALITIES: _LOCALITIES_CSV_FIELDS,
@@ -166,8 +166,8 @@ _SHP_SHORT_FIELD_NAMES = {
         N.DEPT_ID: 'dpto_id',
         N.CENSUS_LOCALITY_ID: 'lcen_id',
         N.CENSUS_LOCALITY_NAME: 'lcen_nombre',
-        N.MUN_NAME: 'muni_nombre',
-        N.MUN_ID: 'muni_id',
+        N.LG_NAME: 'gl_nombre',
+        N.LG_ID: 'gl_id',
         N.C_LAT: 'centr_lat',
         N.C_LON: 'centr_lon',
         N.FULL_NAME: 'nomencla',
@@ -468,7 +468,7 @@ def create_404_error_response():
             'recursos_disponibles': [
                 '/api/provincias',
                 '/api/departamentos',
-                '/api/municipios',
+                '/api/gobiernos-locales',
                 '/api/localidades-censales',
                 '/api/asentamientos',
                 '/api/localidades',

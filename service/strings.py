@@ -47,8 +47,8 @@ FIELD_INTERSECTION_FORMAT = 'El parámetro debe seguir el siguiente formato: \
 clave ayuda).'
 FIELD_INTERSECTION_FORMAT_HELP = [
     'provincia:94:38',
-    'municipio:740038, departamento:74049',
+    'gobierno_local:740038, departamento:74049',
     'departamento:62035:62007:62084',
-    'municipio:700070:700049, provincia:02',
+    'gobierno_local:700070:700049, provincia:02',
     'departamento:14028'
 ]

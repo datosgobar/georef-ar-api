@@ -42,7 +42,7 @@ def add_complete_downloads(bp, urls):
             georef.example.cfg para más detalles.
 
     """
-    entities = [N.STATES, N.DEPARTMENTS, N.MUNICIPALITIES,
+    entities = [N.STATES, N.DEPARTMENTS, N.LOCAL_GOVERNMENTS.replace('_', '-'),
                 N.CENSUS_LOCALITIES.replace('_', '-'), N.SETTLEMENTS,
                 N.LOCALITIES, N.STREETS, N.STREET_BLOCKS]
     formats = ['json', 'csv', 'geojson', 'ndjson']
@@ -87,9 +87,9 @@ def get_departments():
     return normalizer.process_department(request)
 
 
-@bp_v1_0.route('/municipios', methods=['GET', 'POST'])
-def get_municipalities():
-    return normalizer.process_municipality(request)
+@bp_v1_0.route('/gobiernos-locales', methods=['GET', 'POST'])
+def get_local_governments():
+    return normalizer.process_local_government(request)
 
 
 @bp_v1_0.route('/localidades-censales', methods=['GET', 'POST'])

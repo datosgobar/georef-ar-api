@@ -53,8 +53,8 @@ INDEX_NAMES = [
     es_config.geom_index_for(N.STATES),
     N.DEPARTMENTS,
     es_config.geom_index_for(N.DEPARTMENTS),
-    N.MUNICIPALITIES,
-    es_config.geom_index_for(N.MUNICIPALITIES),
+    N.LOCAL_GOVERNMENTS,
+    es_config.geom_index_for(N.LOCAL_GOVERNMENTS),
     N.CENSUS_LOCALITIES,
     N.SETTLEMENTS,
     N.LOCALITIES,
@@ -223,8 +223,8 @@ class GeorefIndex:
     - provincias-geometria
     - departamentos
     - departamentos-geometria
-    - municipios
-    - municipios-geometria
+    - gobiernos_locales
+    - gobiernos_locales-geometria
     - localidades
     - calles
     - intersecciones
@@ -846,17 +846,17 @@ def run_index(es, forced, name='all', verbose=False):
                     doc_class=es_config.DepartmentGeom,
                     filepath=app.config['DEPARTMENTS_FILE'],
                     includes=[N.ID, N.GEOM]),
-        GeorefIndex(alias=N.MUNICIPALITIES,
-                    doc_class=es_config.Municipality,
-                    filepath=app.config['MUNICIPALITIES_FILE'],
+        GeorefIndex(alias=N.LOCAL_GOVERNMENTS,
+                    doc_class=es_config.LocalGovernment,
+                    filepath=app.config['LOCAL_GOVERNMENTS_FILE'],
                     synonyms_filepath=app.config['SYNONYMS_FILE'],
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'municipios.ndjson')),
-        GeorefIndex(alias=es_config.geom_index_for(N.MUNICIPALITIES),
-                    doc_class=es_config.MunicipalityGeom,
-                    filepath=app.config['MUNICIPALITIES_FILE'],
+                                                 'gobiernos-locales.ndjson')),
+        GeorefIndex(alias=es_config.geom_index_for(N.LOCAL_GOVERNMENTS),
+                    doc_class=es_config.LocalGovernmentGeom,
+                    filepath=app.config['LOCAL_GOVERNMENTS_FILE'],
                     includes=[N.ID, N.GEOM]),
         GeorefIndex(alias=N.CENSUS_LOCALITIES,
                     doc_class=es_config.CensusLocality,

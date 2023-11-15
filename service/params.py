@@ -578,7 +578,7 @@ class IntersectionParameter(Parameter):
         id_lengths = {
             N.STATE: constants.STATE_ID_LEN,
             N.DEPT: constants.DEPT_ID_LEN,
-            N.MUN: constants.MUNI_ID_LEN,
+            N.LG: constants.LOCAL_GOVERNMENT_ID_LEN,
             N.STREET: constants.STREET_ID_LEN
         }
 
@@ -1072,7 +1072,7 @@ class EndpointParameters:
 PARAMS_STATES = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STATE_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.MUN, N.STREET]),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.LG, N.STREET]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1098,7 +1098,7 @@ PARAMS_STATES = EndpointParameters(shared_params={
 PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.DEPT_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(entities=[N.STATE, N.MUN, N.STREET]),
+    N.INTERSECTION: IntersectionParameter(entities=[N.STATE, N.LG, N.STREET]),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
                                 StrParameter()]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
@@ -1124,8 +1124,8 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
-PARAMS_MUNICIPALITIES = EndpointParameters(shared_params={
-    N.ID: IdsParameter(id_length=constants.MUNI_ID_LEN),
+PARAMS_LOCAL_GOVERNMENTS = EndpointParameters(shared_params={
+    N.ID: IdsParameter(id_length=constants.LOCAL_GOVERNMENT_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE,
                                                     N.STREET]),
@@ -1161,14 +1161,14 @@ PARAMS_CENSUS_LOCALITIES = EndpointParameters(shared_params={
                                 StrParameter()]),
     N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
                                StrParameter()]),
-    N.MUN: CompoundParameter([IdsParameter(constants.MUNI_ID_LEN),
-                              StrParameter()]),
+    N.LG: CompoundParameter([IdsParameter(constants.LOCAL_GOVERNMENT_ID_LEN),
+                             StrParameter()]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME, N.DEPT_ID,
-                                           N.DEPT_NAME, N.MUN_ID, N.MUN_NAME,
+                                           N.DEPT_NAME, N.LG_ID, N.LG_NAME,
                                            N.CATEGORY, N.FUNCTION],
                                  complete=[N.SOURCE]),
     N.MAX: IntParameter(default=10, lower_limit=1,
@@ -1194,8 +1194,8 @@ PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
                                 StrParameter()]),
     N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
                                StrParameter()]),
-    N.MUN: CompoundParameter([IdsParameter(constants.MUNI_ID_LEN),
-                              StrParameter()]),
+    N.LG: CompoundParameter([IdsParameter(constants.LOCAL_GOVERNMENT_ID_LEN),
+                             StrParameter()]),
     N.CENSUS_LOCALITY: CompoundParameter([
         IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
         StrParameter()
@@ -1205,7 +1205,7 @@ PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME, N.DEPT_ID,
-                                           N.DEPT_NAME, N.MUN_ID, N.MUN_NAME,
+                                           N.DEPT_NAME, N.LG_ID, N.LG_NAME,
                                            N.CENSUS_LOCALITY_ID,
                                            N.CENSUS_LOCALITY_NAME,
                                            N.CATEGORY],
@@ -1233,8 +1233,8 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
                                 StrParameter()]),
     N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
                                StrParameter()]),
-    N.MUN: CompoundParameter([IdsParameter(constants.MUNI_ID_LEN),
-                              StrParameter()]),
+    N.LG: CompoundParameter([IdsParameter(constants.LOCAL_GOVERNMENT_ID_LEN),
+                             StrParameter()]),
     N.CENSUS_LOCALITY: CompoundParameter([
         IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
         StrParameter()
@@ -1244,7 +1244,7 @@ PARAMS_LOCALITIES = EndpointParameters(shared_params={
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME, N.DEPT_ID,
-                                           N.DEPT_NAME, N.MUN_ID, N.MUN_NAME,
+                                           N.DEPT_NAME, N.LG_ID, N.LG_NAME,
                                            N.CENSUS_LOCALITY_ID,
                                            N.CENSUS_LOCALITY_NAME,
                                            N.CATEGORY],
@@ -1325,7 +1325,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 PARAMS_STREETS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
-    N.INTERSECTION: IntersectionParameter(entities=[N.STREET, N.MUN, N.DEPT,
+    N.INTERSECTION: IntersectionParameter(entities=[N.STREET, N.LG, N.DEPT,
                                                     N.STATE]),
     N.CATEGORY: StrParameter(),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
@@ -1368,10 +1368,10 @@ PARAMS_LOCATION = EndpointParameters(shared_params={
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.LAT,
                                         N.LON],
-                                 standard=[N.DEPT_ID, N.DEPT_NAME, N.MUN_ID,
-                                           N.MUN_NAME],
+                                 standard=[N.DEPT_ID, N.DEPT_NAME, N.LG_ID,
+                                           N.LG_NAME],
                                  complete=[N.STATE_SOURCE, N.DEPT_SOURCE,
-                                           N.MUN_SOURCE])
+                                           N.LG_SOURCE])
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml'])
 })

@@ -230,8 +230,8 @@ def process_department(request):
         })
 
 
-def process_municipality(request):
-    """Procesa una request GET o POST para consultar datos de municipios.
+def process_local_government(request):
+    """Procesa una request GET o POST para consultar datos de gobiernos locales.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
     Args:
@@ -242,8 +242,8 @@ def process_municipality(request):
 
     """
     return _process_entity(
-        request, N.MUNICIPALITIES,
-        params.PARAMS_MUNICIPALITIES, {
+        request, N.LOCAL_GOVERNMENTS,
+        params.PARAMS_LOCAL_GOVERNMENTS, {
             N.ID: 'ids',
             N.NAME: 'name',
             N.INTERSECTION: 'geo_shape_ids',
@@ -275,7 +275,7 @@ def process_census_locality(request):
             N.NAME: 'name',
             N.STATE: 'state',
             N.DEPT: 'department',
-            N.MUN: 'municipality',
+            N.LG: 'local_government',
             N.EXACT: 'exact',
             N.ORDER: 'order',
             N.FIELDS: 'fields',
@@ -301,7 +301,7 @@ def process_settlement(request):
         N.NAME: 'name',
         N.STATE: 'state',
         N.DEPT: 'department',
-        N.MUN: 'municipality',
+        N.LG: 'local_government',
         N.CENSUS_LOCALITY: 'census_locality',
         N.EXACT: 'exact',
         N.ORDER: 'order',
@@ -327,7 +327,7 @@ def process_locality(request):
         N.NAME: 'name',
         N.STATE: 'state',
         N.DEPT: 'department',
-        N.MUN: 'municipality',
+        N.LG: 'local_government',
         N.CENSUS_LOCALITY: 'census_locality',
         N.EXACT: 'exact',
         N.ORDER: 'order',

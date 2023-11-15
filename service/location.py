@@ -47,7 +47,7 @@ def _build_location_result(params, query, state, dept, muni):
     return QueryResult.from_single_entity({
         N.STATE: state,
         N.DEPT: dept,
-        N.MUN: muni,
+        N.LG: muni,
         N.LAT: query['lat'],
         N.LON: query['lon']
     }, params)
