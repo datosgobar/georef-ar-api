@@ -256,31 +256,6 @@ def process_municipality(request):
         })
 
 
-def process_local_government(request):
-    """Procesa una request GET o POST para consultar datos de gobiernos locales.
-    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
-
-    Args:
-        request (flask.Request): Request GET o POST de flask.
-
-    Returns:
-        flask.Response: respuesta HTTP
-
-    """
-    return _process_entity(
-        request, N.LOCAL_GOVERNMENTS,
-        params.PARAMS_LOCAL_GOVERNMENTS, {
-            N.ID: 'ids',
-            N.NAME: 'name',
-            N.INTERSECTION: 'geo_shape_ids',
-            N.STATE: 'state',
-            N.EXACT: 'exact',
-            N.ORDER: 'order',
-            N.FIELDS: 'fields',
-            N.OFFSET: 'offset',
-            N.MAX: 'size'
-        })
-
 def process_census_locality(request):
     """Procesa una request GET o POST para consultar datos de localidades
     censales. En caso de ocurrir un error de parseo, se retorna una respuesta
