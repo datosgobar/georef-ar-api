@@ -5,13 +5,13 @@ Contiene las clases y funciones necesarias para la implementación del recurso
 """
 
 from service.data import ElasticsearchSearch, StatesSearch, DepartmentsSearch
-from service.data import MunicipalitiesSearch
+from service.data import LocalGovernmentsSearch
 from service import names as N
 from service.geometry import Point
 from service.query_result import QueryResult
 
 
-def _build_location_result(params, query, state, dept, muni):
+def _build_location_result(params, query, state, dept, lg):
     """Construye un resultado para una consulta al endpoint de ubicación.
 
     Args:
@@ -22,7 +22,7 @@ def _build_location_result(params, query, state, dept, muni):
             Puede ser None.
         dept (dict): Departamento encontrado en la ubicación especificada.
             Puede ser None.
-        muni (dict): Municipio encontrado en la ubicación especificada. Puede
+        lg (dict): Gobierno local encontrado en la ubicación especificada. Puede
             ser None.
 
     Returns:
@@ -39,15 +39,15 @@ def _build_location_result(params, query, state, dept, muni):
         # El punto no está en la República Argentina
         state = empty_entity.copy()
         dept = empty_entity.copy()
-        muni = empty_entity.copy()
+        lg = empty_entity.copy()
     else:
         dept = dept or empty_entity.copy()
-        muni = muni or empty_entity.copy()
+        lg = lg or empty_entity.copy()
 
     return QueryResult.from_single_entity({
         N.STATE: state,
         N.DEPT: dept,
-        N.LG: muni,
+        N.LG: lg,
         N.LAT: query['lat'],
         N.LON: query['lon']
     }, params)
@@ -55,7 +55,7 @@ def _build_location_result(params, query, state, dept, muni):
 
 def run_location_queries(es, params_list, queries):
     """Dada una lista de queries de ubicación, construye las queries apropiadas
-    a índices de departamentos y municipios, y las ejecuta utilizando
+    a índices de departamentos y gobiernos locales, y las ejecuta utilizando
     Elasticsearch.
 
     Args:
@@ -75,7 +75,7 @@ def run_location_queries(es, params_list, queries):
     # se podría modificar la función para que funcione de la siguiente forma:
     #
     # (Recordar que las provincias y departamentos cubren todo el territorio
-    # nacional, pero no los municipios.)
+    # nacional, pero no los gobiernos locales.)
     #
     # Por cada consulta, implementar un patrón similar al de address.py (con
     # iteradores de consultas), donde cada iterador ('búsqueda') realiza los
@@ -83,14 +83,14 @@ def run_location_queries(es, params_list, queries):
     #
     # 1) Buscar la posición en el índice de departamentos.
     # 2) Si se obtuvo un departamento, buscar la posición nuevamente pero en el
-    #    índice de municipios. Si no se obtuvo nada, cancelar la búsqueda.
-    # 3) Componer el departamento, la provincia del departamento y el municipio
+    #    índice de gobiernos locales. Si no se obtuvo nada, cancelar la búsqueda.
+    # 3) Componer el departamento, la provincia del departamento y el gobierno local
     #    en un QueryResult para completar la búsqueda.
 
     all_searches = []
 
     state_searches = []
-    muni_searches = []
+    lg_searches = []
     dept_searches = []
 
     for query in queries:
@@ -100,7 +100,7 @@ def run_location_queries(es, params_list, queries):
             'size': 1
         }
 
-        # Buscar la posición en provincias, departamentos y municipios
+        # Buscar la posición en provincias, departamentos y gobiernos locales
 
         search = StatesSearch(es_query)
         all_searches.append(search)
@@ -110,27 +110,27 @@ def run_location_queries(es, params_list, queries):
         all_searches.append(search)
         dept_searches.append(search)
 
-        search = MunicipalitiesSearch(es_query)
+        search = LocalGovernmentsSearch(es_query)
         all_searches.append(search)
-        muni_searches.append(search)
+        lg_searches.append(search)
 
     # Ejecutar todas las búsquedas preparadas
     ElasticsearchSearch.run_searches(es, all_searches)
 
     locations = []
     iterator = zip(params_list, queries, state_searches, dept_searches,
-                   muni_searches)
+                   lg_searches)
 
-    for params, query, state_search, dept_search, muni_search in iterator:
+    for params, query, state_search, dept_search, lg_search in iterator:
         # Ya que la query de tipo location retorna una o cero entidades,
         # extraer la primera entidad de los resultados, o tomar None si
         # no hay resultados.
         state = state_search.result.hits[0] if state_search.result else None
         dept = dept_search.result.hits[0] if dept_search.result else None
-        muni = muni_search.result.hits[0] if muni_search.result else None
+        lg = lg_search.result.hits[0] if lg_search.result else None
 
         result = _build_location_result(params.received_values(), query, state,
-                                        dept, muni)
+                                        dept, lg)
         locations.append(result)
 
     return locations

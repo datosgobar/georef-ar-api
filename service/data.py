@@ -375,7 +375,7 @@ class TerritoriesSearch(ElasticsearchSearch):
         super().__init__(index, query)
 
     def _read_query(self, ids=None, name=None, census_locality=None,
-                    municipality=None, department=None, state=None,
+                    local_government=None, department=None, state=None,
                     exact=False, geo_shape_geoms=None, order=None, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
         'self._search'. Luego, invoca al método '_read_query' de la superclase
@@ -386,7 +386,7 @@ class TerritoriesSearch(ElasticsearchSearch):
             name (str): Filtrar por nombre de entidades.
             census_locality (list, str): Filtrar por nombre o IDs de
                 localidades censales.
-            municipality (list, str): Filtrar por nombre o IDs de municipios.
+            local_government (list, str): Filtrar por nombre o IDs de gobiernos locales.
             department (list, str): Filtrar por nombre o IDs de departamentos.
             state (list, str): Filtrar por nombre o IDs de provincias.
             exact (bool): Si es verdadero, desactivar la búsqueda fuzzy para
@@ -421,11 +421,11 @@ class TerritoriesSearch(ElasticsearchSearch):
                 exact
             ))
 
-        if municipality:
+        if local_government:
             self._search = self._search.query(_build_subentity_query(
                 N.LG_ID,
                 N.LG_NAME,
-                municipality,
+                local_government,
                 exact
             ))
 
@@ -844,11 +844,11 @@ class DepartmentsSearch(TerritoriesSearch):
                          geom_search_class=DepartmentsGeometrySearch)
 
 
-class MunicipalitiesGeometrySearch(TerritoriesSearch):
-    """Representa una búsqueda de geometrías de municipios.
+class LocalGovernmentsGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de gobiernos locales.
 
     Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
-    utilizando 'MunicipalitiesSearch', que internamente utilizará esta clase.
+    utilizando 'LocalGovernmentsSearch', que internamente utilizará esta clase.
 
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
@@ -858,8 +858,8 @@ class MunicipalitiesGeometrySearch(TerritoriesSearch):
         super().__init__(es_config.geom_index_for(N.LOCAL_GOVERNMENTS), query)
 
 
-class MunicipalitiesSearch(TerritoriesSearch):
-    """Representa una búsqueda de municipios.
+class LocalGovernmentsSearch(TerritoriesSearch):
+    """Representa una búsqueda de gobiernos locales.
 
     Ver documentación de la clase 'TerritoriesSearch' para más información.
 
@@ -867,7 +867,7 @@ class MunicipalitiesSearch(TerritoriesSearch):
 
     def __init__(self, query):
         super().__init__(N.LOCAL_GOVERNMENTS, query,
-                         geom_search_class=MunicipalitiesGeometrySearch)
+                         geom_search_class=LocalGovernmentsGeometrySearch)
 
 
 class CensusLocalitiesSearch(TerritoriesSearch):
@@ -906,7 +906,7 @@ class LocalitiesSearch(TerritoriesSearch):
 _ENTITY_SEARCH_CLASSES = {
     N.STATES: StatesSearch,
     N.DEPARTMENTS: DepartmentsSearch,
-    N.LOCAL_GOVERNMENTS: MunicipalitiesSearch,
+    N.LOCAL_GOVERNMENTS: LocalGovernmentsSearch,
     N.CENSUS_LOCALITIES: CensusLocalitiesSearch,
     N.SETTLEMENTS: SettlementsSearch,
     N.LOCALITIES: LocalitiesSearch,
@@ -981,7 +981,7 @@ def _build_subentity_query(id_field, name_field, value, exact):
     condición se utiliza para filtrar resultados utilizando IDs o nombre de una
     subentidad contenida por otra. Por ejemplo, se pueden buscar departamentos
     filtrando por nombre de provincia, o localidades filtrando por IDS de
-    municipios.
+    gobiernos locales.
 
     Args:
         id_field (str): Nombre del campo de ID de la subentidad.
@@ -1070,7 +1070,7 @@ def _build_geo_indexed_shape_query(field, index, entity_id, entity_geom_path,
                                    relation):
     """Crea una condición de búsqueda por relación geométrica con una geometría
     pre-indexada. La geometría debe pertenecer a una entidad de tipo provincia,
-    departamento o municipio.
+    departamento o gobierno local.
 
     Args:
         field (str): Campo de la condición.
@@ -1132,7 +1132,7 @@ def _build_terms_query(field, values):
 def _build_name_query(field, value, exact=False):
     """Crea una condición de búsqueda por nombre para Elasticsearch.
     Las entidades con nombres son, por el momento, las provincias, los
-    departamentos, los municipios, las localidades y las calles.
+    departamentos, los gobiernos locales, las localidades y las calles.
 
     Args:
         field (str): Campo de la condición.

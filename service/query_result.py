@@ -17,7 +17,7 @@ class QueryResult:
     Internamente, ambos casos se almacenan como una lista.
 
     Attributes:
-        _entities (list): Lista de entidades (provincias, municipios,
+        _entities (list): Lista de entidades (provincias, gobierno locales,
             ubicaciones, calles, etc.).
         _params (dict): Parámetros de consulta que generaron este objeto
             'QueryResult'.
