@@ -3,15 +3,15 @@
 Contiene las clases y funciones necesarias para la implementación del recurso
 /ubicacion de la API.
 """
-
-from service.data import ElasticsearchSearch, StatesSearch, DepartmentsSearch
+from service.constants import SB_DISTANCE_TOLERANCE, STREET_ID_LEN, SB_MAX_SEARCH
+from service.data import ElasticsearchSearch, StatesSearch, DepartmentsSearch, StreetBlocksSearch
 from service.data import LocalGovernmentsSearch
 from service import names as N
 from service.geometry import Point
 from service.query_result import QueryResult
 
 
-def _build_location_result(params, query, state, dept, lg):
+def _build_location_result(params, query, state, dept, lg, sb):
     """Construye un resultado para una consulta al endpoint de ubicación.
 
     Args:
@@ -24,6 +24,8 @@ def _build_location_result(params, query, state, dept, lg):
             Puede ser None.
         lg (dict): Gobierno local encontrado en la ubicación especificada. Puede
             ser None.
+        sb (dict): Cuadra más cercana en un radio predefinido para la ubicación
+            especificada. Puede ser None.
 
     Returns:
         QueryResult: Resultado de ubicación.
@@ -43,11 +45,13 @@ def _build_location_result(params, query, state, dept, lg):
     else:
         dept = dept or empty_entity.copy()
         lg = lg or empty_entity.copy()
+        sb = sb or empty_entity.copy()
 
     return QueryResult.from_single_entity({
         N.STATE: state,
         N.DEPT: dept,
         N.LG: lg,
+        N.STREET: sb,
         N.LAT: query['lat'],
         N.LON: query['lon']
     }, params)
@@ -92,6 +96,7 @@ def run_location_queries(es, params_list, queries):
     state_searches = []
     lg_searches = []
     dept_searches = []
+    sb_searches = []
 
     for query in queries:
         es_query = {
@@ -114,23 +119,104 @@ def run_location_queries(es, params_list, queries):
         all_searches.append(search)
         lg_searches.append(search)
 
+        search = StreetBlocksSearch({
+            'geo_shape_geoms': [Point.from_json_location(query).to_geojson_circle(SB_DISTANCE_TOLERANCE)],
+            'fields': [N.ID, N.STREET_NAME, N.STREET_SOURCE, N.GEOM, N.DOOR_NUM],
+            'size': SB_MAX_SEARCH
+        })
+        all_searches.append(search)
+        sb_searches.append(search)
+
     # Ejecutar todas las búsquedas preparadas
     ElasticsearchSearch.run_searches(es, all_searches)
 
     locations = []
     iterator = zip(params_list, queries, state_searches, dept_searches,
-                   lg_searches)
+                   lg_searches, sb_searches)
 
-    for params, query, state_search, dept_search, lg_search in iterator:
+    for params, query, state_search, dept_search, lg_search, sb_search in iterator:
         # Ya que la query de tipo location retorna una o cero entidades,
         # extraer la primera entidad de los resultados, o tomar None si
         # no hay resultados.
         state = state_search.result.hits[0] if state_search.result else None
         dept = dept_search.result.hits[0] if dept_search.result else None
         lg = lg_search.result.hits[0] if lg_search.result else None
+        sb = calc_nearest_street_block_params(params, sb_search)
 
         result = _build_location_result(params.received_values(), query, state,
-                                        dept, lg)
+                                        dept, lg, sb)
         locations.append(result)
 
     return locations
+
+
+def calc_nearest_street_block_params(params, sb_search):
+
+    if sb_search.result is None:
+        return None
+
+    location = [params.values['lon'], params.values['lat']]
+
+    nearest_street_block = None
+    min_distance = None
+    k = None
+    a = None
+    v = None
+
+    for hit in sb_search.result.hits:
+        coord = hit['geometria']['coordinates']
+        if len(coord) != 1 or len(coord[0][0]) != 2:
+            continue
+
+        a0 = coord[0][0]
+        a1 = coord[0][1]
+        ai = [a1[0] - a0[0], a1[1] - a0[1]]
+        vi = [location[0] - a0[0], location[1] - a0[1]]
+
+        ki = vi[0] * ai[0] + vi[1] * ai[1] / (ai[0] ** 2 + ai[1] ** 2)
+
+        if ki < 0:
+            d = ((location[0] - a0[0]) ** 2 + (location[1] - a0[1]) ** 2) ** 0.5
+        elif ki > 1:
+            d = ((location[0] - a1[0]) ** 2 + (location[1] - a1[1]) ** 2) ** 0.5
+        else:
+            d = ((vi[0] - ki * ai[0]) ** 2 + (vi[1] - ki * ai[1]) ** 2) ** 0.5
+
+        if min_distance and d > min_distance:
+            continue
+
+        min_distance = d
+        k = ki
+        a = ai
+        v = vi
+        nearest_street_block = hit
+
+    parity = "even" if v[0] * a[1] - v[1] * a[0] < 0 else "odd"
+
+    k = max(0, min(1, k))
+
+    sr = nearest_street_block['altura']['inicio']['derecha']
+    sl = nearest_street_block['altura']['inicio']['izquierda']
+    er = nearest_street_block['altura']['fin']['derecha']
+    el = nearest_street_block['altura']['fin']['izquierda']
+
+    result = {
+        'id': nearest_street_block['id'][:STREET_ID_LEN],
+        'nombre': nearest_street_block['calle']['nombre'],
+        'fuente': nearest_street_block['calle']['fuente'],
+    }
+
+    number = None
+    if parity == "even" and el > 0 and sl < el:
+        n = sl + k * (el - sl)
+        number = min(el, max(sl, 2 * round(n / 2)))
+    elif parity == "odd" and er > 0 and sr < er:
+        n = sr + k * (er - sr)
+        number = min(er, max(sr, 2 * round(n / 2) + 1))
+
+    if number:
+        result.update({
+            'altura': number,
+        })
+
+    return result

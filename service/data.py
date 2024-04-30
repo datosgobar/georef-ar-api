@@ -682,7 +682,7 @@ class IntersectionsSearch(ElasticsearchSearch):
         self._result = ElasticsearchResult(response, self._offset)
 
 
-class StreetBlocksSearch(ElasticsearchSearch):
+class StreetBlocksSearch(TerritoriesSearch):
     """Representa una búsqueda de cuadras de calles. Utiliza el índice
     'cuadras' para buscar datos.
 
@@ -697,7 +697,8 @@ class StreetBlocksSearch(ElasticsearchSearch):
                 dentro del diccionario.
 
         """
-        super().__init__(N.STREET_BLOCKS, query)
+        super().__init__(N.STREET_BLOCKS, query,
+                         geom_search_class=StreetBlocksGeometrySearch)
 
     def _read_query(self, name=None, category=None, census_locality=None,
                     department=None, state=None, number=None, exact=False,
@@ -790,6 +791,20 @@ class StreetBlocksSearch(ElasticsearchSearch):
         """
         response = yield self._search
         self._result = ElasticsearchResult(response, self._offset)
+
+
+class StreetBlocksGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de cuadras.
+
+    Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
+    utilizando 'StreetBlocksSearch', que internamente utilizará esta clase.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(es_config.geom_index_for(N.STREET_BLOCKS), query)
 
 
 class StatesGeometrySearch(TerritoriesSearch):
