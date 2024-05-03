@@ -151,54 +151,69 @@ def run_location_queries(es, params_list, queries):
 
 
 def calc_nearest_street_block_params(params, sb_search):
+    """Analiza los resultados devueltos por la consulta y estima la numeración de la cuadra más cercana.
+
+    Args:
+        params: Los parámetros de la consulta.
+        sb_search: Resultados de la consulta al índice de cuadras.
+
+    Returns:
+        dict: Parámetros de la calle y la altura
+
+    """
 
     if sb_search.result is None:
         return None
 
-    location = [params.values['lon'], params.values['lat']]
+    location = Point(params.values['lon'], params.values['lat'])
 
     nearest_street_block = None
-    min_distance = None
     k = None
-    a = None
-    v = None
+    min_dist_min = None
+    point_a = None
+    point_b = None
 
     for hit in sb_search.result.hits:
-        coord = hit['geometria']['coordinates']
+        coord = hit[N.GEOM]['coordinates']
+
+        # Las cuadras deben estar constituidas por un único segmento
         if len(coord) != 1 or len(coord[0][0]) != 2:
             continue
 
-        a0 = coord[0][0]
-        a1 = coord[0][1]
-        ai = [a1[0] - a0[0], a1[1] - a0[1]]
-        vi = [location[0] - a0[0], location[1] - a0[1]]
+        a = Point(*coord[0][0])
+        b = Point(*coord[0][1])
 
-        ki = vi[0] * ai[0] + vi[1] * ai[1] / (ai[0] ** 2 + ai[1] ** 2)
+        length_street_block = a.approximate_distance_meters(b)
+        distance_a = location.approximate_distance_meters(a)
+        distance_b = location.approximate_distance_meters(b)
 
-        if ki < 0:
-            d = ((location[0] - a0[0]) ** 2 + (location[1] - a0[1]) ** 2) ** 0.5
-        elif ki > 1:
-            d = ((location[0] - a1[0]) ** 2 + (location[1] - a1[1]) ** 2) ** 0.5
+        s = (distance_a + distance_b + length_street_block) / 2
+        distance_a_b = 2 * (s * (s - distance_a) * (s - distance_b) * (s - length_street_block)) ** 0.5 / length_street_block
+
+        k = max(0, min(1, ((distance_a ** 2 - distance_a_b ** 2) ** 0.5) / length_street_block))
+
+        if k < 0:
+            min_dist = distance_a
+        elif k > 0:
+            min_dist = distance_b
         else:
-            d = ((vi[0] - ki * ai[0]) ** 2 + (vi[1] - ki * ai[1]) ** 2) ** 0.5
+            min_dist = distance_a_b
 
-        if min_distance and d > min_distance:
-            continue
+        if not min_dist_min or min_dist < min_dist_min:
+            min_dist_min = min_dist
+            nearest_street_block = hit
+            point_a = a
+            point_b = b
 
-        min_distance = d
-        k = ki
-        a = ai
-        v = vi
-        nearest_street_block = hit
+    a = [point_b.lon - point_a.lon, point_b.lat - point_a.lat]
+    v = [location.lon - point_a.lon, location.lat - point_a.lat]
 
     parity = "even" if v[0] * a[1] - v[1] * a[0] < 0 else "odd"
 
-    k = max(0, min(1, k))
-
-    sr = nearest_street_block['altura']['inicio']['derecha']
-    sl = nearest_street_block['altura']['inicio']['izquierda']
-    er = nearest_street_block['altura']['fin']['derecha']
-    el = nearest_street_block['altura']['fin']['izquierda']
+    sr = nearest_street_block[N.DOOR_NUM][N.START][N.RIGHT]
+    sl = nearest_street_block[N.DOOR_NUM][N.START][N.LEFT]
+    er = nearest_street_block[N.DOOR_NUM][N.END][N.RIGHT]
+    el = nearest_street_block[N.DOOR_NUM][N.END][N.LEFT]
 
     result = {
         'id': nearest_street_block['id'][:STREET_ID_LEN],
