@@ -205,6 +205,9 @@ def calc_nearest_street_block_params(params, sb_search):
             point_a = a
             point_b = b
 
+    if not point_a or not point_b:
+        return None
+
     a = [point_b.lon - point_a.lon, point_b.lat - point_a.lat]
     v = [location.lon - point_a.lon, location.lat - point_a.lat]
 
