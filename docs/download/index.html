@@ -670,11 +670,41 @@
                 
                 <h1 id="descarga-de-base-completa">Descarga de base completa<a class="headerlink" href="#descarga-de-base-completa" title="Permanent link">&para;</a></h1>
 <p>Si se desea operar con la totalidad de los datos utilizados por la API, es recomendable descargarse la base completa de datos.</p>
-<p>Cada recurso (sin contar <code>/ubicacion</code>) de la API cuenta con variantes de descarga completa. Para acceder a las variantes, agregar <code>.json</code>, <code>.csv</code>, o <code>.geojson</code> al final de la ruta del recurso. Por ejemplo:</p>
+<p>Cada recurso (sin contar <code>/ubicacion</code>) de la API cuenta con variantes de descarga completa. Para acceder a las variantes, agregar <code>.json</code>, <code>.csv</code>,<code>.geojson</code> o <code>.ndjson</code> al final de la ruta del recurso. Por ejemplo:</p>
 <ul>
-<li><a href="https://apis.datos.gob.ar/georef/api/calles.json">https://apis.datos.gob.ar/georef/api/calles.json</a></li>
-<li><a href="https://apis.datos.gob.ar/georef/api/provincias.csv">https://apis.datos.gob.ar/georef/api/provincias.csv</a></li>
-<li><a href="https://apis.datos.gob.ar/georef/api/provincias.geojson">https://apis.datos.gob.ar/georef/api/localidades.geojson</a></li>
+
+  <li><a href="https://apis.datos.gob.ar/georef/api/provincias.csv">https://apis.datos.gob.ar/georef/api/provincias.csv</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/provincias.csv">https://apis.datos.gob.ar/georef/api/provincias.json</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/provincias.geojson">https://apis.datos.gob.ar/georef/api/provincias.geojson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/provincias.ndjson">https://apis.datos.gob.ar/georef/api/provincias.ndjson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/departamentos.csv">https://apis.datos.gob.ar/georef/api/departamentos.csv</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/departamentos.json">https://apis.datos.gob.ar/georef/api/departamentos.json</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/departamentos.geojson">https://apis.datos.gob.ar/georef/api/departamentos.geojson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/departamentos.ndjson">https://apis.datos.gob.ar/georef/api/departamentos.ndjson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/municipios.csv">https://apis.datos.gob.ar/georef/api/municipios.csv</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/municipios.json">https://apis.datos.gob.ar/georef/api/municipios.json</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/municipios.geojson">https://apis.datos.gob.ar/georef/api/municipios.geojson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/municipios.ndjson">https://apis.datos.gob.ar/georef/api/municipios.ndjson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/localidades.csv">https://apis.datos.gob.ar/georef/api/localidades.csv</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/localidades.json">https://apis.datos.gob.ar/georef/api/localidades.json</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/localidades.geojson">https://apis.datos.gob.ar/georef/api/localidades.geojson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/localidades.ndjson">https://apis.datos.gob.ar/georef/api/localidades.ndjson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/localidades_censales.csv">https://apis.datos.gob.ar/georef/api/localidades_censales.csv</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/localidades_censales.json">https://apis.datos.gob.ar/georef/api/localidades_censales.json</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/localidades_censales.geojson">https://apis.datos.gob.ar/georef/api/localidades_censales.geojson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/localidades_censales.ndjson">https://apis.datos.gob.ar/georef/api/localidades_censales.ndjson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/asentamientos.csv">https://apis.datos.gob.ar/georef/api/asentamientos.csv</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/asentamientos.json">https://apis.datos.gob.ar/georef/api/asentamientos.json</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/asentamientos.geojson">https://apis.datos.gob.ar/georef/api/asentamientos.geojson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/asentamientos.ndjson">https://apis.datos.gob.ar/georef/api/asentamientos.ndjson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/calles.csv">https://apis.datos.gob.ar/georef/api/calles.csv</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/calles.json">https://apis.datos.gob.ar/georef/api/calles.json</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/calles.geojson">https://apis.datos.gob.ar/georef/api/calles.geojson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/calles.ndjson">https://apis.datos.gob.ar/georef/api/calles.ndjson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/cuadras.csv">https://apis.datos.gob.ar/georef/api/cuadras.csv</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/cuadras.json">https://apis.datos.gob.ar/georef/api/cuadras.json</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/cuadras.geojson">https://apis.datos.gob.ar/georef/api/cuadras.geojson</a></li>
+  <li><a href="https://apis.datos.gob.ar/georef/api/cuadras.ndjson">https://apis.datos.gob.ar/georef/api/cuadras.ndjson</a></li>
 </ul>
                 
                   
