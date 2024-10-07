@@ -188,7 +188,7 @@
                     "categoria": {
                         "type": "string",
                         "example": "Departamento"
-                    },
+                    }
                 }
             },
             "departamento_sub_entidad": {
@@ -2466,6 +2466,73 @@
 		    }
 		}
 	    }
+	},
+	"/{filename}": {
+	    "get": {
+		"summary": "Se puede obtener un listado entero de las entidades geográficas disponibles en distintos formatos",
+		"description": "Se puede obtener una lista de la totatildad de provincias, municipios, departamentos, localidades, localidades censales, asentamientos, calles o cuadras en formato csv, json, geojson o ndjson",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+			{
+				"name": "filename",
+				"in": "path",
+				"description": "se brinda la entidad de interés con la extensión deseada. Las opciones disponibles son:\n\n* `provincias.csv` \n\n* `provincias.json` \n* `provincias.geojson` \n* `provincias.ndjson` \n* `departamentos.csv` \n* `departamentos.json` \n\n* `departamentos.geojson` \n\n* `departamentos.ndjson`\n* `municipios.csv`\n* `municipios.json`\n* `municipios.geojson`\n* `municipios.ndjson`\n* `localidades.csv`\n* `localidades.json`\n* `localidades.geojson`\n* `localidades.ndjson`\n* `localidades_censales.csv`\n* `localidades_censales.json`\n* `localidades_censales.geojson`\n* `localidades_censales.ndjson`\n* `asentamientos.csv`\n* `asentamientos.json`\n* `asentamientos.geojson`\n* `asentamientos.ndjson`\n* `calles.csv`\n* `calles.json`\n* `calles.geojson`\n* `calles.ndjson`\n* `cuadras.csv`\n* `cuadras.json`\n* `cuadras.geojson`\n* `cuadras.ndjson`\n*",
+				"required": true,
+				"schema": {
+				  "type": "string",
+				"enum": [
+	"provincias.csv",
+	"provincias.json",
+	"provincias.geojson",
+	"provincias.ndjson",
+	"departamentos.csv",
+	"departamentos.json",
+	"departamentos.geojson",
+	"departamentos.ndjson",
+	"municipios.csv",
+	"municipios.json",
+	"municipios.geojson",
+	"municipios.ndjson",
+	"localidades.csv",
+	"localidades.json",
+	"localidades.geojson",
+	"localidades.ndjson",
+	"localidades_censales.csv",
+	"localidades_censales.json",
+	"localidades_censales.geojson",
+	"localidades_censales.ndjson",
+	"asentamientos.csv",
+	"asentamientos.json",
+	"asentamientos.geojson",
+	"asentamientos.ndjson",
+	"calles.csv",
+	"calles.json",
+	"calles.geojson",
+	"calles.ndjson",
+	"cuadras.csv",
+	"cuadras.json",
+	"cuadras.geojson",
+	"cuadras.ndjson"
+]
+
+				}
+			  }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado solicitado",
+			"content": { }
+		},
+		    "400": {
+				"description":"Error en la solicitud",
+				"content":{}
+			
+		    }
+		}
+	    }
+	   
 	}
     }
 }

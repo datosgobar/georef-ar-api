@@ -313,6 +313,30 @@ class IdsParameter(Parameter):
         return list(ids)
 
 
+class IdsAlphamericParameter(IdsParameter):
+
+    def _parse_value(self, val):
+        items = val.split(self._sep)
+        if len(items) > constants.MAX_RESULT_LEN:
+            raise ValueError(strings.ID_PARAM_LENGTH.format(
+                constants.MAX_RESULT_LEN))
+
+        ids = set()
+        for item in items:
+            item = item.strip()
+
+            if len(item) > self._id_length or len(item) < self._min_length:
+                raise ValueError(strings.ID_ALPHAMERIC_PARAM_INVALID.format(
+                    self._min_length, self._id_length))
+
+            if item in ids:
+                raise ValueError(strings.ID_PARAM_UNIQUE.format(item))
+
+            ids.add(item)
+
+        return list(ids)
+
+
 class CompoundParameter(Parameter):
     """Representa un parámetro que puede tomar distintos valores, representados
     por una lista de objetos 'Parameter'.
@@ -1188,7 +1212,7 @@ PARAMS_CENSUS_LOCALITIES = EndpointParameters(shared_params={
 )
 
 PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
-    N.ID: IdsParameter(id_length=constants.SETTLEMENT_ID_LEN),
+    N.ID: IdsAlphamericParameter(id_length=constants.SETTLEMENT_ID_LEN, padding_length=2),
     N.NAME: StrParameter(),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
                                 StrParameter()]),
