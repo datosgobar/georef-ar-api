@@ -123,6 +123,11 @@ def get_location():
     return normalizer.process_location(request)
 
 
+@bp_v1_0.route('/cuadras', methods=['GET', 'POST'])
+def get_street_blocks():
+    return normalizer.process_street_block(request)
+
+
 # Última versión de la API
 app.register_blueprint(bp_v1_0, url_prefix='/api')
 

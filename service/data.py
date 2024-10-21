@@ -723,7 +723,23 @@ class StreetBlocksSearch(TerritoriesSearch):
             kwargs (dict): Parámetros a delegar a la superclase.
 
         """
+
+        ids = kwargs.pop('ids', None)
+        street = kwargs.pop('street', None)
+
         super()._read_query(**kwargs)
+
+        if ids:
+            self._search = self._search.filter(_build_terms_query(
+                N.ID,
+                ids
+            ))
+
+        if street:
+            self._search = self._search.filter(_build_terms_query(
+                N.join(N.STREET, N.ID),
+                street
+            ))
 
         if name:
             self._search = self._search.query(_build_name_query(
@@ -925,7 +941,8 @@ _ENTITY_SEARCH_CLASSES = {
     N.CENSUS_LOCALITIES: CensusLocalitiesSearch,
     N.SETTLEMENTS: SettlementsSearch,
     N.LOCALITIES: LocalitiesSearch,
-    N.STREETS: StreetsSearch
+    N.STREETS: StreetsSearch,
+    N.STREET_BLOCKS: StreetBlocksSearch
 }
 """dict: Mantiene un registro de nombres de índices vs. clase a utilizar para
 buscar en los mismos."""

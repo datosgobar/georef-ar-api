@@ -1401,3 +1401,39 @@ PARAMS_LOCATION = EndpointParameters(shared_params={
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml'])
 })
+
+PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
+    N.ID: IdsParameter(id_length=constants.STREET_BLOCK_ID_LEN),
+    N.STREET: IdsParameter(id_length=constants.STREET_ID_LEN),
+    N.NAME: StrParameter(),
+    N.CATEGORY: StrParameter(),
+    N.CENSUS_LOCALITY: CompoundParameter([
+        IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
+        StrParameter()
+    ]),
+    N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
+                               StrParameter()]),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.DOOR_NUM: IntParameter(default=None),
+    N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
+    N.FLATTEN: BoolParameter(),
+    N.FIELDS: FieldListParameter(basic=[N.ID],
+                                 standard=[N.START_R, N.START_L, N.END_R,
+                                           N.END_L],
+                                 complete=[N.STREET_ID, N.STREET_NAME]),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json',
+                           choices=['json', 'csv', 'xml', 'shp'])
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+)

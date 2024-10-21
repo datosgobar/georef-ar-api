@@ -735,3 +735,31 @@ def process_location(request):
         logger.exception(
             'Excepción en manejo de consulta para recurso: ubicacion')
         return formatter.create_internal_error_response()
+
+
+def process_street_block(request):
+    """Procesa una request GET o POST para consultar datos de cuadras.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    return _process_entity(request, N.STREET_BLOCKS, params.PARAMS_STREET_BLOCKS, {
+        N.ID: 'ids',
+        N.STREET: 'street',
+        N.NAME: 'name',
+        N.CATEGORY: 'category',
+        N.CENSUS_LOCALITY: 'census_locality',
+        N.DEPT: 'department',
+        N.STATE: 'state',
+        N.DOOR_NUM: 'number',
+        N.EXACT: 'exact',
+        N.ORDER: 'order',
+        N.FIELDS: 'fields',
+        N.OFFSET: 'offset',
+        N.MAX: 'size'
+    })
