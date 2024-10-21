@@ -117,6 +117,16 @@ _STREETS_CSV_FIELDS = [
     (N.SOURCE, [N.STREET, N.SOURCE])
 ]
 
+_STREET_BLOCKS_CSV_FIELDS = [
+    (N.ID, [N.STREET_BLOCK, N.ID]),
+    (N.STREET_NAME, [N.STREET, N.NAME]),
+    (N.STREET_ID, [N.STREET, N.ID]),
+    (N.START_R, [N.STREET_BLOCK, N.DOOR_NUM, N.START, N.RIGHT]),
+    (N.START_L, [N.STREET_BLOCK, N.DOOR_NUM, N.START, N.LEFT]),
+    (N.END_R, [N.STREET_BLOCK, N.DOOR_NUM, N.END, N.RIGHT]),
+    (N.END_L, [N.STREET_BLOCK, N.DOOR_NUM, N.END, N.LEFT]),
+]
+
 _ADDRESSES_CSV_FIELDS = [
     (N.FULL_NAME, [N.ADDRESS, N.FULL_NAME]),
     (N.STREET_NAME, [N.STREET, N.NAME]),
@@ -151,7 +161,8 @@ _ENDPOINT_CSV_FIELDS = {
     N.SETTLEMENTS: _SETTLEMENTS_CSV_FIELDS,
     N.LOCALITIES: _LOCALITIES_CSV_FIELDS,
     N.STREETS: _STREETS_CSV_FIELDS,
-    N.ADDRESSES: _ADDRESSES_CSV_FIELDS
+    N.ADDRESSES: _ADDRESSES_CSV_FIELDS,
+    N.STREET_BLOCKS: _STREET_BLOCKS_CSV_FIELDS
 }
 
 
@@ -175,7 +186,8 @@ _SHP_SHORT_FIELD_NAMES = {
         N.START_R: 'alt_ini_der',
         N.START_L: 'alt_ini_izq',
         N.END_R: 'alt_fin_der',
-        N.END_L: 'alt_fin_izq'
+        N.END_L: 'alt_fin_izq',
+        N.STREET_NAME: 'calle_nomb'
     }.items()
 }
 """dict: El formato Shapefile no permite campos cuyos nombres tengan más de 11

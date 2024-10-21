@@ -37,6 +37,7 @@ SETTLEMENT = 'asentamiento'
 LOCALITIES = 'localidades'
 LOCALITY = 'localidad'
 STREET = 'calle'
+STREET_BLOCK = 'cuadra'
 STREET_A = 'calle_a'
 STREET_B = 'calle_b'
 STREET_X1 = 'calle_cruce_1'
@@ -151,7 +152,8 @@ _PLURALS = {
     LOCATION: LOCATIONS,
     RESULT: RESULTS,
     ERROR: ERRORS,
-    INTERSECTION: INTERSECTIONS
+    INTERSECTION: INTERSECTIONS,
+    STREET_BLOCK: STREET_BLOCKS
 }
 
 _SINGULARS = {value: key for key, value in _PLURALS.items()}
