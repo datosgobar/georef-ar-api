@@ -359,6 +359,7 @@ def _build_street_query_format(parsed_params):
         N.STATE: 'state',
         N.DEPT: 'department',
         N.CENSUS_LOCALITY: 'census_locality',
+        N.LOCALITY: 'locality',
         N.EXACT: 'exact',
         N.FIELDS: 'fields',
         N.CATEGORY: 'category',

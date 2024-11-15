@@ -220,6 +220,14 @@ CensusLocalitySubField = Object(
     dynamic='strict'
 )
 
+LocalitySubField = Object(
+    properties={
+        'id': Keyword(),
+        'nombre': NameField
+    },
+    dynamic='strict'
+)
+
 StreetSubField = Object(
     properties={
         'id': Keyword(),
@@ -352,6 +360,7 @@ class Street(Entity):
     provincia = StateSubField
     departamento = DepartmentSubField
     localidad_censal = CensusLocalitySubField
+    localidad = LocalitySubField
     # Indexar las categorías de calles ya que se puede filtrar por las mismas
     categoria = Text(
         analyzer=name_analyzer_synonyms,
@@ -369,6 +378,7 @@ class Intersection(Entity):
 class StreetBlock(Entity):
     calle = StreetSubField
     altura = StreetNumbersField
+    localidad = LocalitySubField
     geometria = GeoShape()
 
 

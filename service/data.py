@@ -495,7 +495,7 @@ class StreetsSearch(ElasticsearchSearch):
         self._geo_shape_ids = query.pop('geo_shape_ids', None)
         super().__init__(N.STREETS, query)
 
-    def _read_query(self, ids=None, name=None, census_locality=None,
+    def _read_query(self, ids=None, name=None, census_locality=None, locality=None,
                     department=None, state=None, category=None, order=None,
                     exact=False, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
@@ -544,6 +544,14 @@ class StreetsSearch(ElasticsearchSearch):
                 N.CENSUS_LOCALITY_ID,
                 N.CENSUS_LOCALITY_NAME,
                 census_locality,
+                exact
+            ))
+
+        if locality:
+            self._search = self._search.query(_build_subentity_query(
+                N.LOCALITY_ID,
+                N.LOCALITY_NAME,
+                locality,
                 exact
             ))
 

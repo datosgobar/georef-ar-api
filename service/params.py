@@ -1360,6 +1360,10 @@ PARAMS_STREETS = EndpointParameters(shared_params={
         IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
         StrParameter()
     ]),
+    N.LOCALITY: CompoundParameter([
+        IdsParameter(constants.LOCALITY_ID_LEN),
+        StrParameter()
+    ]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
@@ -1368,6 +1372,7 @@ PARAMS_STREETS = EndpointParameters(shared_params={
                                            N.DEPT_ID, N.DEPT_NAME,
                                            N.CENSUS_LOCALITY_ID,
                                            N.CENSUS_LOCALITY_NAME, N.FULL_NAME,
+                                           N.LOCALITY_ID, N.LOCALITY_NAME,
                                            N.CATEGORY],
                                  complete=[N.SOURCE]),
     N.MAX: IntParameter(default=10, lower_limit=1,
@@ -1421,7 +1426,10 @@ PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
     N.FIELDS: FieldListParameter(basic=[N.ID],
                                  standard=[N.START_R, N.START_L, N.END_R,
                                            N.END_L],
-                                 complete=[N.STREET_ID, N.STREET_NAME]),
+                                 complete=[
+                                     N.STREET_ID, N.STREET_NAME,
+                                     N.LOCALITY_ID, N.LOCALITY_NAME
+                                 ]),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0,
