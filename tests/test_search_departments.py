@@ -370,7 +370,7 @@ class SearchDepartmentsTest(GeorefLiveTest):
                 'nombre': 'SAN BLAS DE LOS SAUCES'
             },
             {
-                'interseccion': 'municipio:180315'
+                'interseccion': 'gobierno_local:180315'
             },
             {
                 'interseccion': 'provincia:14'

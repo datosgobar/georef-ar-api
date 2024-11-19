@@ -3,7 +3,7 @@ from service import formatter
 from . import GeorefLiveTest, asciifold
 
 
-MUNICIPALITIES = [
+LOCAL_GOVERNMENTS = [
     (['060098'], 'BERISSO'),
     (['060756', '180143'], 'SAN ISIDRO'),
     (['100056'], 'ANTOFAGASTA DE LA SIERRA'),
@@ -43,12 +43,12 @@ MUNICIPALITIES = [
 ]
 
 
-class SearchMunicipalitiesTest(GeorefLiveTest):
-    """Pruebas de búsqueda de municipios."""
+class SearchLocalGovernmentsTest(GeorefLiveTest):
+    """Pruebas de búsqueda de gobiernos locales."""
 
     def setUp(self):
-        self.endpoint = '/api/v1.0/municipios'
-        self.entity = 'municipios'
+        self.endpoint = '/api/v1.0/gobiernos-locales'
+        self.entity = 'gobiernos_locales'
         super().setUp()
 
     def test_max_results_returned(self):
@@ -67,7 +67,7 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         self.assertTrue(len(data['id']) == 6)
 
     def test_id_search(self):
-        """La búsqueda por ID debe devolver el municipio correspondiente."""
+        """La búsqueda por ID debe devolver el gobierno local correspondiente."""
         data = self.get_response({'id': '060182'})
         self.assertListEqual([p['nombre'] for p in data],
                              ['Coronel de Marina Leonardo Rosales'])
@@ -104,7 +104,7 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         self.assertListEqual(fields, sorted(data.keys()))
 
     def test_filter_results_fields(self):
-        """Los campos de los municipios devueltos deben ser filtrables."""
+        """Los campos de los gobiernos locales devueltos deben ser filtrables."""
         fields_lists = [
             ['fuente', 'id', 'nombre'],
             ['fuente', 'id', 'centroide.lat', 'centroide.lon', 'nombre'],
@@ -165,9 +165,9 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         self.assertListEqual(sorted(data), data)
 
     def test_name_exact_search(self):
-        """La búsqueda por nombre exacto debe devolver los municipios
+        """La búsqueda por nombre exacto debe devolver los gobiernos locales
          correspondientes."""
-        self.assert_name_search_id_matches(MUNICIPALITIES, exact=True)
+        self.assert_name_search_id_matches(LOCAL_GOVERNMENTS, exact=True)
 
     def test_name_exact_search_ignores_case(self):
         """La búsqueda por nombre exacto debe ignorar mayúsculas y
@@ -261,7 +261,7 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         self.assert_name_search_id_matches(expected)
 
     def test_code_prefix(self):
-        """Los IDs de los municipios deben comenzar con el ID de sus
+        """Los IDs de los gobiernos locales deben comenzar con el ID de sus
         provincias."""
         data = self.get_response({'max': 25})
         results = [
@@ -272,9 +272,9 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         self.assertTrue(all(results) and results)
 
     def test_search_by_state(self):
-        """Se debe poder buscar municipios por provincia."""
+        """Se debe poder buscar gobiernos locales por provincia."""
 
-        # Algunas provincias no tienen municipios, por el momento buscar
+        # Algunas provincias no tienen gobiernos locales, por el momento buscar
         # utilizando una provincia que sabemos contiene uno o mas
         state_id, state_name = '82', 'SANTA FE'
 
@@ -298,7 +298,7 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         }
 
         body = {
-            'municipios': [query] * req_len
+            'gobiernos_locales': [query] * req_len
         }
 
         results = self.get_response(method='POST', body=body)
@@ -308,11 +308,11 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         """La búsqueda de una query sin parámetros debería funcionar
         correctamente."""
         results = self.get_response(method='POST', body={
-            'municipios': [{}]
+            'gobiernos_locales': [{}]
         })
 
         first = results[0]
-        self.assertTrue(len(results) == 1 and len(first['municipios']) == 10)
+        self.assertTrue(len(results) == 1 and len(first['gobiernos_locales']) == 10)
 
     def test_bulk_equivalent(self):
         """Los resultados de una query envíada vía bulk deberían ser idénticos a
@@ -354,7 +354,7 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
                                                         return_value='full'))
 
         bulk_results = self.get_response(method='POST', body={
-            'municipios': queries
+            'gobiernos_locales': queries
         })
 
         self.assertEqual(individual_results, bulk_results)
@@ -397,16 +397,16 @@ class SearchMunicipalitiesTest(GeorefLiveTest):
         forma específica."""
         resp = self.get_response({'formato': 'csv', 'campos': 'completo'})
         headers = next(resp)
-        self.assertListEqual(headers, ['municipio_id',
-                                       'municipio_nombre',
-                                       'municipio_nombre_completo',
-                                       'municipio_centroide_lat',
-                                       'municipio_centroide_lon',
+        self.assertListEqual(headers, ['gobierno_local_id',
+                                       'gobierno_local_nombre',
+                                       'gobierno_local_nombre_completo',
+                                       'gobierno_local_centroide_lat',
+                                       'gobierno_local_centroide_lon',
                                        'provincia_id',
                                        'provincia_nombre',
                                        'provincia_interseccion',
-                                       'municipio_fuente',
-                                       'municipio_categoria'])
+                                       'gobierno_local_fuente',
+                                       'gobierno_local_categoria'])
 
     def test_xml_format(self):
         """Se debería poder obtener resultados en formato XML (sin

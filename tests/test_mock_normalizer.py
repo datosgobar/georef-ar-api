@@ -7,7 +7,7 @@ ENDPOINTS = [
     '/calles',
     '/provincias',
     '/departamentos',
-    '/municipios',
+    '/gobiernos-locales',
     '/localidades'
 ]
 

@@ -7,26 +7,26 @@ LOCATIONS = [
     ('-27.27416', '-66.75292', {
         'provincia': '10',
         'departamento': '10035',
-        'municipio': '100077'
+        'gobierno_local': '100077'
     }),
     ('-35.493', '-60.968', {
         'provincia': '06',
         'departamento': '06588',
-        'municipio': '060588'
+        'gobierno_local': '060588'
     }),
     ('-53.873', '-67.825', {
         'provincia': '94',
         'departamento': '94008',
-        'municipio': '940007'
+        'gobierno_local': '940007'
     }),
     ('-25.718', '-53.994', {
         'provincia': '54',
         'departamento': '54049',
-        'municipio': '540182'
+        'gobierno_local': '540182'
     })
 ]
 
-LOCATIONS_NO_MUNI = [
+LOCATIONS_NO_GL = [
     ('-31.480693', '-59.0928132', {
         'provincia': '30',
         'departamento': '30113'
@@ -49,7 +49,7 @@ class SearchLocationTest(GeorefLiveTest):
         fields = sorted([
             'provincia',
             'departamento',
-            'municipio',
+            'gobierno_local',
             'lat',
             'lon'
         ])
@@ -74,7 +74,7 @@ class SearchLocationTest(GeorefLiveTest):
                                       ['provincia.id', 'provincia.nombre',
                                        'lat', 'lon', 'departamento.id',
                                        'departamento.nombre',
-                                       'municipio.id', 'municipio.nombre'],
+                                       'gobierno_local.id', 'gobierno_local.nombre'],
                                       {'lat': location[0], 'lon': location[1]},
                                       iterable=False)
 
@@ -87,10 +87,10 @@ class SearchLocationTest(GeorefLiveTest):
                                       ['provincia.id', 'provincia.nombre',
                                        'lat', 'lon', 'departamento.id',
                                        'departamento.nombre',
-                                       'municipio.id', 'municipio.nombre',
+                                       'gobierno_local.id', 'gobierno_local.nombre',
                                        'provincia.fuente',
                                        'departamento.fuente',
-                                       'municipio.fuente'],
+                                       'gobierno_local.fuente'],
                                       {'lat': location[0], 'lon': location[1]},
                                       iterable=False)
 
@@ -101,8 +101,8 @@ class SearchLocationTest(GeorefLiveTest):
             ['provincia.id', 'provincia.nombre', 'lat', 'lon'],
             ['departamento.id', 'provincia.fuente', 'lat', 'lon',
              'provincia.id', 'provincia.nombre'],
-            ['lon', 'municipio.id', 'provincia.id',
-             'provincia.nombre', 'lat', 'municipio.fuente']
+            ['lon', 'gobierno_local.id', 'provincia.id',
+             'provincia.nombre', 'lat', 'gobierno_local.fuente']
         ]
         fields_lists = [sorted(l) for l in fields_lists]
 
@@ -126,7 +126,7 @@ class SearchLocationTest(GeorefLiveTest):
         for lat, lon, data in LOCATIONS:
             res = self.get_response({'lat': lat, 'lon': lon})
             validations.append(all([
-                res['municipio']['id'] == data['municipio'],
+                res['gobierno_local']['id'] == data['gobierno_local'],
                 res['departamento']['id'] == data['departamento'],
                 res['provincia']['id'] == data['provincia']
             ]))
@@ -144,18 +144,18 @@ class SearchLocationTest(GeorefLiveTest):
 
         validations = [
             data[field] == empty_entity
-            for field in ['departamento', 'municipio', 'provincia']
+            for field in ['departamento', 'gobierno_local', 'provincia']
         ]
 
         self.assertTrue(validations and all(validations))
 
-    def test_no_muni(self):
-        """Cuando se especifican coordenadas que no contienen un municipio,
-        el campo 'municipio' debe tener un valor nulo."""
-        location = LOCATIONS_NO_MUNI[0]
+    def test_no_gl(self):
+        """Cuando se especifican coordenadas que no contienen un gobierno local,
+        el campo 'gobierno_local' debe tener un valor nulo."""
+        location = LOCATIONS_NO_GL[0]
         data = self.get_response({'lat': location[0], 'lon': location[1]})
-        muni = data['municipio']
-        self.assertTrue(muni['id'] is None and muni['nombre'] is None)
+        gl = data['gobierno_local']
+        self.assertTrue(gl['id'] is None and gl['nombre'] is None)
 
     def test_infinity(self):
         """Cuando se especifica Infinity como valor numérico, se debe responder
@@ -233,19 +233,19 @@ class SearchLocationTest(GeorefLiveTest):
 
         self.assertTrue(validations and all(validations))
 
-    def test_municipality_centroids(self):
+    def test_local_government_centroids(self):
         """Cuando se utiliza el centroide de una entidad (con geometría convexa
         o casi convexa) como ubicación, se debería obtener la misma entidad
         como parte de la respuesta."""
-        concave_munis = ['060595', '500014', '625140', '460049', '386266',
+        concave_gls = ['060595', '500014', '625140', '460049', '386266',
                          '220469']
 
         results = self.get_response(
-            endpoint='/api/municipios',
+            endpoint='/api/gobiernos-locales',
             method='POST',
             body={
-                'municipios': [
-                    {'id': mun_id} for mun_id in concave_munis
+                'gobiernos_locales': [
+                    {'id': mun_id} for mun_id in concave_gls
                 ]
             }
         )
@@ -253,12 +253,12 @@ class SearchLocationTest(GeorefLiveTest):
         validations = []
 
         for result in results:
-            muni = result['municipios'][0]
-            lat = muni['centroide']['lat']
-            lon = muni['centroide']['lon']
+            gl = result['gobiernos_locales'][0]
+            lat = gl['centroide']['lat']
+            lon = gl['centroide']['lon']
             location = self.get_response({'lat': lat, 'lon': lon})
 
-            validations.append(location['municipio']['id'] == muni['id'])
+            validations.append(location['gobiernos_locales']['id'] == gl['id'])
 
         self.assertTrue(validations and all(validations))
 

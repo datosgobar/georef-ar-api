@@ -14,7 +14,7 @@ class RoutesTest(GeorefMockTest):
         urls = [
             '/api/v1.0/provincias',
             '/api/v1.0/departamentos',
-            '/api/v1.0/municipios',
+            '/api/v1.0/gobiernos-locales',
             '/api/v1.0/localidades',
             '/api/v1.0/direcciones',
             '/api/v1.0/calles',

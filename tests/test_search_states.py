@@ -358,7 +358,7 @@ class SearchStatesTest(GeorefLiveTest):
                 'interseccion': 'departamento:82133'
             },
             {
-                'interseccion': 'municipio:060014'
+                'interseccion': 'gobierno_local:060014'
             }
         ]
 

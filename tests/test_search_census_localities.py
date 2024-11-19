@@ -81,7 +81,7 @@ class SearchCensusLocalityTest(GeorefLiveTest):
             'nombre',
             'provincia',
             'departamento',
-            'municipio',
+            'gobierno_local',
             'categoria',
             'funcion'
         ])
@@ -95,7 +95,7 @@ class SearchCensusLocalityTest(GeorefLiveTest):
             ['fuente', 'id', 'centroide.lat', 'nombre'],
             ['fuente', 'id', 'centroide.lat', 'nombre', 'provincia.id'],
             ['departamento.id', 'fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'municipio.id', 'nombre', 'provincia.nombre']
+            ['fuente', 'id', 'gobierno_local.id', 'nombre', 'provincia.nombre']
         ]
         fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
@@ -120,7 +120,7 @@ class SearchCensusLocalityTest(GeorefLiveTest):
                                        'centroide.lon', 'provincia.id',
                                        'provincia.nombre', 'departamento.id',
                                        'departamento.nombre',
-                                       'municipio.id', 'municipio.nombre',
+                                       'gobierno_local.id', 'gobierno_local.nombre',
                                        'categoria', 'funcion'])
 
     def test_complete_fields_set(self):
@@ -132,7 +132,7 @@ class SearchCensusLocalityTest(GeorefLiveTest):
                                        'provincia.id', 'provincia.nombre',
                                        'departamento.id',
                                        'departamento.nombre',
-                                       'municipio.id', 'municipio.nombre',
+                                       'gobierno_local.id', 'gobierno_local.nombre',
                                        'categoria', 'funcion'])
 
     def test_field_prefixes(self):
@@ -229,18 +229,18 @@ class SearchCensusLocalityTest(GeorefLiveTest):
         results = [loc['departamento']['id'] == dept_id for loc in data]
         self.assertTrue(all(results) and results)
 
-    def test_search_by_municipality(self):
-        """Se debe poder buscar localidades por municipio."""
+    def test_search_by_local_government(self):
+        """Se debe poder buscar localidades por gobierno local."""
 
-        # Algunos municipios no tienen localidades censales, por el momento
-        # buscar utilizando un municipio que sabemos contiene una o más
+        # Algunos gobiernos locales no tienen localidades censales, por el momento
+        # buscar utilizando un gobierno local que sabemos contiene una o más
         mun_id, mun_name = '460112', 'Rosario Vera Peñaloza'
 
-        data = self.get_response({'municipio': mun_id})
-        data.extend(self.get_response({'municipio': mun_name}))
-        data.extend(self.get_response({'municipio': mun_name, 'exacto': 1}))
+        data = self.get_response({'gobierno_local': mun_id})
+        data.extend(self.get_response({'gobierno_local': mun_name}))
+        data.extend(self.get_response({'gobierno_local': mun_name, 'exacto': 1}))
 
-        results = [loc['municipio']['id'] == mun_id for loc in data]
+        results = [loc['gobierno_local']['id'] == mun_id for loc in data]
         self.assertTrue(all(results) and results)
 
     def test_flat_results(self):
@@ -296,7 +296,7 @@ class SearchCensusLocalityTest(GeorefLiveTest):
                 'departamento': '14007'
             },
             {
-                'municipio': '620133'
+                'gobierno_local': '620133'
             },
             {
                 'orden': 'nombre'
@@ -364,8 +364,8 @@ class SearchCensusLocalityTest(GeorefLiveTest):
                                        'provincia_nombre',
                                        'departamento_id',
                                        'departamento_nombre',
-                                       'municipio_id',
-                                       'municipio_nombre',
+                                       'gobierno_local_id',
+                                       'gobierno_local_nombre',
                                        'localidad_censal_fuente',
                                        'localidad_censal_funcion',
                                        'localidad_censal_categoria'])
@@ -379,8 +379,8 @@ class SearchCensusLocalityTest(GeorefLiveTest):
 
         header = next(resp)
         row = next(resp)
-        self.assertTrue(row[header.index('municipio_id')] == '' and
-                        row[header.index('municipio_nombre')] == '')
+        self.assertTrue(row[header.index('gobierno_local_id')] == '' and
+                        row[header.index('gobierno_local_nombre')] == '')
 
     def test_xml_format(self):
         """Se debería poder obtener resultados en formato XML (sin
@@ -420,8 +420,8 @@ class SearchCensusLocalityTest(GeorefLiveTest):
             'id',
             'prov_id',
             'prov_nombre',
-            'muni_nombre',
-            'muni_id',
+            'gl_nombre',
+            'gl_id',
             'dpto_nombre',
             'dpto_id',
             'categoria',

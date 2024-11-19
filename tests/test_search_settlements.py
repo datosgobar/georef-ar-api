@@ -83,7 +83,7 @@ class SearchSettlementTest(GeorefLiveTest):
             ['fuente', 'id', 'centroide.lat', 'nombre'],
             ['fuente', 'id', 'centroide.lat', 'nombre', 'provincia.id'],
             ['departamento.id', 'fuente', 'id', 'nombre'],
-            ['fuente', 'id', 'municipio.id', 'nombre', 'provincia.nombre']
+            ['fuente', 'id', 'gobierno_local.id', 'nombre', 'provincia.nombre']
         ]
         fields_lists = [sorted(l) for l in fields_lists]
         fields_results = []
@@ -108,7 +108,7 @@ class SearchSettlementTest(GeorefLiveTest):
                                        'centroide.lon', 'provincia.id',
                                        'provincia.nombre', 'departamento.id',
                                        'departamento.nombre',
-                                       'municipio.id', 'municipio.nombre',
+                                       'gobierno_local.id', 'gobierno_local.nombre',
                                        'localidad_censal.id',
                                        'localidad_censal.nombre',
                                        'categoria'])
@@ -122,7 +122,7 @@ class SearchSettlementTest(GeorefLiveTest):
                                        'provincia.id', 'provincia.nombre',
                                        'departamento.id',
                                        'departamento.nombre',
-                                       'municipio.id', 'municipio.nombre',
+                                       'gobierno_local.id', 'gobierno_local.nombre',
                                        'localidad_censal.id',
                                        'localidad_censal.nombre',
                                        'categoria'])
@@ -224,18 +224,18 @@ class SearchSettlementTest(GeorefLiveTest):
         results = [loc['departamento']['id'] == dept_id for loc in data]
         self.assertTrue(all(results) and results)
 
-    def test_search_by_municipality(self):
-        """Se debe poder buscar asentamientos por municipio."""
+    def test_search_by_local_government(self):
+        """Se debe poder buscar asentamientos por gobierno local."""
 
-        # Algunos municipios no tienen asentamientos, por el momento buscar
-        # utilizando un municipio que sabemos contiene una o mas
-        mun_id, mun_name = '100224', 'Fiambalá'
+        # Algunos gobiernos locales no tienen asentamientos, por el momento buscar
+        # utilizando un gobierno local que sabemos contiene una o mas
+        gl_id, gl_name = '100224', 'Fiambalá'
 
-        data = self.get_response({'municipio': mun_id})
-        data.extend(self.get_response({'municipio': mun_name}))
-        data.extend(self.get_response({'municipio': mun_name, 'exacto': 1}))
+        data = self.get_response({'gobierno_local': gl_id})
+        data.extend(self.get_response({'gobierno_local': gl_name}))
+        data.extend(self.get_response({'gobierno_local': gl_name, 'exacto': 1}))
 
-        results = [loc['municipio']['id'] == mun_id for loc in data]
+        results = [loc['gobierno_local']['id'] == gl_id for loc in data]
         self.assertTrue(all(results) and results)
 
     def test_search_by_census_locality(self):
@@ -300,7 +300,7 @@ class SearchSettlementTest(GeorefLiveTest):
                 'departamento': '14007'
             },
             {
-                'municipio': '620133'
+                'gobierno_local': '620133'
             },
             {
                 'orden': 'nombre'
@@ -368,8 +368,8 @@ class SearchSettlementTest(GeorefLiveTest):
                                        'provincia_nombre',
                                        'departamento_id',
                                        'departamento_nombre',
-                                       'municipio_id',
-                                       'municipio_nombre',
+                                       'gobierno_local_id',
+                                       'gobierno_local_nombre',
                                        'localidad_censal_id',
                                        'localidad_censal_nombre',
                                        'localidad_fuente',
@@ -384,8 +384,8 @@ class SearchSettlementTest(GeorefLiveTest):
 
         header = next(resp)
         row = next(resp)
-        self.assertTrue(row[header.index('municipio_id')] == '' and
-                        row[header.index('municipio_nombre')] == '')
+        self.assertTrue(row[header.index('gobierno_local_id')] == '' and
+                        row[header.index('gobierno_local_nombre')] == '')
 
     def test_xml_format(self):
         """Se debería poder obtener resultados en formato XML (sin
@@ -425,8 +425,8 @@ class SearchSettlementTest(GeorefLiveTest):
             'id',
             'prov_id',
             'prov_nombre',
-            'muni_nombre',
-            'muni_id',
+            'gl_nombre',
+            'gl_id',
             'dpto_nombre',
             'dpto_id',
             'categoria',

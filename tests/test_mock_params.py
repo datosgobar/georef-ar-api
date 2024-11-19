@@ -7,7 +7,7 @@ from . import GeorefMockTest
 ENDPOINTS = [
     '/provincias',
     '/departamentos',
-    '/municipios',
+    '/gobiernos-locales',
     '/localidades',
     '/calles'
 ]
@@ -53,8 +53,8 @@ class ParamParsingTest(GeorefMockTest):
             'provincias': []
         }
 
-        self.assert_errors_match('/municipios', [
-            {(T.INVALID_BULK.value, 'municipios')}
+        self.assert_errors_match('/gobiernos-locales', [
+            {(T.INVALID_BULK.value, 'gobiernos_locales')}
         ], body=body)
 
     def test_bulk_invalid_type(self):
@@ -80,12 +80,12 @@ class ParamParsingTest(GeorefMockTest):
         """No se deberían aceptar operaciones bulk que contengan
         elementos que no sean objetos."""
         body = {
-            'municipios': [{}, 1]
+            'gobiernos_locales': [{}, 1]
         }
 
-        self.assert_errors_match('/municipios', [
+        self.assert_errors_match('/gobiernos-locales', [
             set(),
-            {(T.INVALID_BULK_ENTRY.value, 'municipios')}
+            {(T.INVALID_BULK_ENTRY.value, 'gobiernos_locales')}
         ], body=body)
 
     def test_unknown_param(self):
@@ -157,14 +157,14 @@ class ParamParsingTest(GeorefMockTest):
     def test_invalid_param_location(self):
         """El parámetro 'formato' solo se puede especificar vía querystring."""
         body = {
-            'municipios': [
+            'gobiernos_locales': [
                 {
                     'formato': 'csv'
                 }
             ]
         }
 
-        self.assert_errors_match('/municipios', [
+        self.assert_errors_match('/gobiernos-locales', [
             {(T.UNKNOWN_PARAM.value, 'formato')}
         ], body=body)
 
@@ -228,14 +228,14 @@ class ParamParsingTest(GeorefMockTest):
     def test_id_param_length(self):
         """Los parámtros de tipo ID no deberían aceptar valores de longitud
         mayores a las especificadas."""
-        self.assert_errors_match('/municipios?id=1111111', {
+        self.assert_errors_match('/gobiernos-locales?id=1111111', {
             (T.VALUE_ERROR.value, 'id')
         })
 
     def test_id_param_length_short(self):
         """Los parámtros de tipo ID no deberían aceptar valores de longitud
         menores a las de cierto rango de tolerancia."""
-        self.assert_errors_match('/municipios?id=1111', {
+        self.assert_errors_match('/gobiernos-locales?id=1111', {
             (T.VALUE_ERROR.value, 'id')
         })
 
@@ -313,7 +313,7 @@ class ParamParsingTest(GeorefMockTest):
         """En bulk, el parámetro 'max' debe realizar validaciones a nivel
         conjunto de valores."""
         body = {
-            'municipios': [
+            'gobiernos_locales': [
                 {
                     'max': 4000
                 },
@@ -326,7 +326,7 @@ class ParamParsingTest(GeorefMockTest):
             ]
         }
 
-        self.assert_errors_match('/municipios', [
+        self.assert_errors_match('/gobiernos-locales', [
             {(T.INVALID_SET.value, 'max')},
             {(T.INVALID_SET.value, 'max')},
             {(T.INVALID_SET.value, 'max')}
@@ -337,7 +337,7 @@ class ParamParsingTest(GeorefMockTest):
         conjunto de valores, sólo si no existen errores a nivel consulta
         individuales."""
         body = {
-            'municipios': [
+            'gobiernos_locales': [
                 {
                     'max': 6000
                 },
@@ -350,7 +350,7 @@ class ParamParsingTest(GeorefMockTest):
             ]
         }
 
-        self.assert_errors_match('/municipios', [
+        self.assert_errors_match('/gobiernos-locales', [
             {(T.VALUE_ERROR.value, 'max')},
             set(),
             {(T.VALUE_ERROR.value, 'max')}
@@ -447,7 +447,7 @@ class ParamParsingTest(GeorefMockTest):
     def test_invalid_intersection_empty_list(self):
         """El parámetro 'interseccion' no debería aceptar listas de IDs
         vacías."""
-        self.assert_errors_match('/provincias?interseccion=municipio:', {
+        self.assert_errors_match('/provincias?interseccion=gobierno_local:', {
             (T.VALUE_ERROR.value, 'interseccion')
         })
 
@@ -474,11 +474,11 @@ class ParamParsingTest(GeorefMockTest):
             }
         )
 
-    def test_invalid_intersection_municipality(self):
+    def test_invalid_intersection_local_government(self):
         """El parámetro 'interseccion' no debería aceptar buscar entidades
         utilizando la misma entidad como argumento."""
         self.assert_errors_match(
-            '/municipios?interseccion=municipio:900105', {
+            '/gobiernos-locales?interseccion=gobierno_local:900105', {
                 (T.VALUE_ERROR.value, 'interseccion')
             }
         )
@@ -486,20 +486,20 @@ class ParamParsingTest(GeorefMockTest):
     def test_invalid_intersection_id_len(self):
         """El parámetro 'interseccion' debería comprobar la longitud de los
         IDs recibidos."""
-        self.assert_errors_match('/provincias?interseccion=municipio:99', {
+        self.assert_errors_match('/provincias?interseccion=gobierno_local:99', {
             (T.VALUE_ERROR.value, 'interseccion')
         })
 
     def test_invalid_intersection_id_empty(self):
         """El parámetro 'interseccion' no debería aceptar IDs vacíos."""
-        self.assert_errors_match('/departamentos?interseccion=municipio:::', {
+        self.assert_errors_match('/departamentos?interseccion=gobierno_local:::', {
             (T.VALUE_ERROR.value, 'interseccion')
         })
 
     def test_invalid_intersection_id_repeated(self):
         """El parámetro 'interseccion' no debería aceptar IDs repetidos."""
         self.assert_errors_match(
-            '/municipios?interseccion=departamento:90084:90084', {
+            '/gobiernos-locales?interseccion=departamento:90084:90084', {
                 (T.VALUE_ERROR.value, 'interseccion')
             }
         )
@@ -507,7 +507,7 @@ class ParamParsingTest(GeorefMockTest):
     def test_invalid_intersection_empty_set(self):
         """El parámetro 'interseccion' no debería aceptar conjuntos
         entidad-IDs vacíos."""
-        self.assert_errors_match('/municipios?interseccion=provincia:02,,,', {
+        self.assert_errors_match('/gobiernos-locales?interseccion=provincia:02,,,', {
             (T.VALUE_ERROR.value, 'interseccion')
         })
 
