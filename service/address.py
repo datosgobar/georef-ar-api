@@ -160,7 +160,7 @@ class AddressQueryPlanner(ABC):
         return template.format(**fmt)
 
     def _build_base_address_hit(self, state=None, dept=None,
-                                census_locality=None):
+                                census_locality=None, locality=None):
         """Construye la base de un resultado de búsqueda de direcciones.
 
         Args:
@@ -183,6 +183,9 @@ class AddressQueryPlanner(ABC):
 
         if census_locality:
             address_hit[N.CENSUS_LOCALITY] = census_locality
+
+        if locality:
+            address_hit[N.LOCALITY] = locality
 
         address_hit[N.DOOR_NUM] = {
             # Utilizar el valor numérico (int/float) como valor de altura
@@ -391,6 +394,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             address_hit[N.STREET_X1] = self._build_street_entity()
             address_hit[N.STREET_X2] = self._build_street_entity()
             address_hit[N.SOURCE] = street[N.SOURCE]
+            address_hit[N.LOCALITY] = street_block.get(N.LOCALITY)
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(street)

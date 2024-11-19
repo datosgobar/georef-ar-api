@@ -1301,6 +1301,7 @@ _ADDRESSES_STANDARD_FIELDS = [
     N.STATE_ID, N.STATE_NAME,
     N.DEPT_ID, N.DEPT_NAME,
     N.CENSUS_LOCALITY_ID, N.CENSUS_LOCALITY_NAME,
+    N.LOCALITY_ID, N.LOCALITY_NAME,
     N.DOOR_NUM_UNIT,
     N.FLOOR,
     N.STREET_CATEGORY,
@@ -1414,6 +1415,10 @@ PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
     N.CATEGORY: StrParameter(),
     N.CENSUS_LOCALITY: CompoundParameter([
         IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
+        StrParameter()
+    ]),
+    N.LOCALITY: CompoundParameter([
+        IdsParameter(constants.LOCALITY_ID_LEN),
         StrParameter()
     ]),
     N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),

@@ -608,7 +608,7 @@ class IntersectionsSearch(ElasticsearchSearch):
         """
         super().__init__(N.INTERSECTIONS, query)
 
-    def _read_query(self, ids=None, geo_shape_geoms=None, census_locality=None,
+    def _read_query(self, ids=None, geo_shape_geoms=None, census_locality=None, locality=None,
                     department=None, state=None, exact=False, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
         'self._search'. Luego, invoca al método '_read_query' de la superclase
@@ -709,6 +709,7 @@ class StreetBlocksSearch(TerritoriesSearch):
                          geom_search_class=StreetBlocksGeometrySearch)
 
     def _read_query(self, name=None, category=None, census_locality=None,
+                    ids=None, street=None, locality=None,
                     department=None, state=None, number=None, exact=False,
                     order=None, **kwargs):
         """Lee los parámetros de búsqueda recibidos y los agrega al atributo
@@ -731,9 +732,6 @@ class StreetBlocksSearch(TerritoriesSearch):
             kwargs (dict): Parámetros a delegar a la superclase.
 
         """
-
-        ids = kwargs.pop('ids', None)
-        street = kwargs.pop('street', None)
 
         super()._read_query(**kwargs)
 
@@ -768,6 +766,14 @@ class StreetBlocksSearch(TerritoriesSearch):
                 N.join(N.STREET, N.CENSUS_LOCALITY_ID),
                 N.join(N.STREET, N.CENSUS_LOCALITY_NAME),
                 census_locality,
+                exact
+            ))
+
+        if locality:
+            self._search = self._search.query(_build_subentity_query(
+                N.LOCALITY_ID,
+                N.LOCALITY_NAME,
+                locality,
                 exact
             ))
 
