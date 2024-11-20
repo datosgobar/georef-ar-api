@@ -37,7 +37,7 @@ class ParamParsingTest(GeorefMockTest):
         endpoint = choice(ENDPOINTS)
 
         self.assert_errors_match(endpoint, [
-            {(T.INVALID_BULK.value, endpoint[1:])}
+            {(T.INVALID_BULK.value, endpoint[1:].replace('-', '_'))}
         ], method='POST', body={})
 
     def test_bulk_empty_json_locations(self):
