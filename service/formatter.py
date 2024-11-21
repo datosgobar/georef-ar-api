@@ -175,6 +175,8 @@ _SHP_SHORT_FIELD_NAMES = {
         N.STATE_INTERSECTION: 'prov_intscn',
         N.DEPT_NAME: 'dpto_nombre',
         N.DEPT_ID: 'dpto_id',
+        N.LOCALITY_ID: 'loc_id',
+        N.LOCALITY_NAME: 'loc_nombre',
         N.CENSUS_LOCALITY_ID: 'lcen_id',
         N.CENSUS_LOCALITY_NAME: 'lcen_nombre',
         N.LG_NAME: 'gl_nombre',
