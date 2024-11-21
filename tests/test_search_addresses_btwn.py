@@ -1,7 +1,7 @@
 from service.geometry import Point
 from .test_search_addresses_simple import SearchAddressesBaseTest
 
-COMMON_BTWN = 'parana entre santa fe y alvear'
+COMMON_BTWN = 'gral las heras entre azcuenaga y cantilo'
 
 
 class SearchAddressesBtwnTest(SearchAddressesBaseTest):

@@ -374,7 +374,7 @@ class SearchCensusLocalityTest(GeorefLiveTest):
         """Un valor vacío (None) debería estar representado como '' en CSV."""
         resp = self.get_response({
             'formato': 'csv',
-            'id': '74021040'
+            'id': '74021065'
         })
 
         header = next(resp)

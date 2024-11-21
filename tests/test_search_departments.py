@@ -14,7 +14,7 @@ DEPARTMENTS = [
     (['34042'], 'PILAGÁS'),
     (['38042'], 'PALPALÁ'),
     (['46119'], 'SAN BLAS DE LOS SAUCES'),
-    (['82028'], 'VILLA CONSTITUCIÓN'),
+    (['82028'], 'CONSTITUCIÓN'),
     (['06266'], 'EXALTACIÓN DE LA CRUZ'),
     (['14154'], 'SOBREMONTE'),
     (['22161'], 'TAPENAGÁ'),

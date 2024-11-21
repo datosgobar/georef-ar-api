@@ -11,11 +11,11 @@ LOCAL_GOVERNMENTS = [
     (['100063'], 'BELÉN'),
     (['060134'], 'CAÑUELAS'),
     (['060168'], 'CASTELLI'),
-    (['060175'], 'COLÓN'),
-    (['060182'], 'CORONEL DE MARINA LEONARDO ROSALES'),
+    (['060175', '300007'], 'COLÓN'),
+    (['060182'], 'CORONEL ROSALES'),
     (['060203'], 'CORONEL SUÁREZ'),
     (['060274'], 'FLORENCIO VARELA'),
-    (['060277'], 'FLORENTINO AMEGHINO'),
+    (['060277', '540476'], 'FLORENTINO AMEGHINO'),
     (['060351'], 'GENERAL PINTO'),
     (['340126'], 'IBARRETA'),
     (['060294'], 'GENERAL ARENALES'),
@@ -33,8 +33,8 @@ LOCAL_GOVERNMENTS = [
     (['060679', '500084', '700084', '823183'], 'RIVADAVIA'),
     (['060700'], 'SAAVEDRA'),
     (['060714'], 'SALTO'),
-    (['060770', '141106', '540504'], 'SAN PEDRO'),
-    (['060778', '142875', '540203', '822350'], 'SAN VICENTE'),
+    (['060770', '141106', '540504', '302259', '866392'], 'SAN PEDRO'),
+    (['060778', '142875', '540203', '820045', '866185'], 'SAN VICENTE'),
     (['060840'], 'TRES DE FEBRERO'),
     (['060798'], 'TAPALQUÉ'),
     (['060819'], 'TORNQUIST'),
@@ -70,7 +70,7 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
         """La búsqueda por ID debe devolver el gobierno local correspondiente."""
         data = self.get_response({'id': '060182'})
         self.assertListEqual([p['nombre'] for p in data],
-                             ['Coronel de Marina Leonardo Rosales'])
+                             ['Coronel Rosales'])
 
     def test_pagination(self):
         """Los resultados deberían poder ser paginados."""
@@ -424,6 +424,9 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
     def test_shp_format(self):
         """Se debería poder obtener resultados en formato SHP (sin
         parámetros)."""
+        # TODO: Revisar. Al permitir geometrías mixtas del tipo POLYGON y POINTS pareciera que el valor de shapeType
+        #  ha cambiado de 5 a 1 respectivamente para los archivos descargados. Revisar las implicancias del cambio.
+        #  Ref: https://en.wikipedia.org/wiki/Shapefile
         self.assert_valid_shp_type(
             shape_type=5,  # 5 == POLYGON
             params={'max': 1}

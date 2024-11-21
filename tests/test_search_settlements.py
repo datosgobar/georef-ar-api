@@ -5,13 +5,13 @@ from .test_search_states import STATES
 
 
 SETTLEMENTS = [
-    (['06007000007'], 'CASEY'),
-    (['14007000030'], 'FALDA DE LOS REARTES'),
-    (['82021000008'], 'CAMPO AMBROGGIO'),
-    (['26007000010'], 'EL RIACHO SAN JOSE'),
-    (['26056010000'], 'ALDEA EPULEF'),
-    (['94021000011'], 'PUERTO ARGENTINO'),
-    (['94015010000'], 'LAGUNA ESCONDIDA')
+    (['06399A02'], 'CASEY'),
+    (['14007A35'], 'RIBERA DE LOS REARTES'),
+    (['82021A02'], 'CAMPO AMBROGGIO'),
+    (['26007A21'], 'RIACHO SAN JOSE'),
+    (['26056010'], 'ALDEA EPULEF'),
+    (['94021010', '54056A35'], 'PUERTO ARGENTINO'),
+    (['94015010'], 'LAGUNA ESCONDIDA')
 ]
 
 
@@ -36,12 +36,12 @@ class SearchSettlementTest(GeorefLiveTest):
     def test_id_length(self):
         """El ID de la entidad debe tener la longitud correcta."""
         data = self.get_response({'max': 1})[0]
-        self.assertTrue(len(data['id']) == 11)
+        self.assertTrue(len(data['id']) == 8 or len(data['id']) == 10)  # TODO: Revisar las longitudes de los IDs de asentamientos
 
     def test_id_search(self):
         """La búsqueda por ID debe devolver el asentamiento correspondiente."""
-        data = self.get_response({'id': '06840010015'})
-        self.assertListEqual([p['nombre'] for p in data], ['VILLA RAFFO'])
+        data = self.get_response({'id': '0684001006'})
+        self.assertListEqual([p['nombre'] for p in data], ['José Ingenieros'])
 
     def test_pagination(self):
         """Los resultados deberían poder ser paginados."""
@@ -65,6 +65,7 @@ class SearchSettlementTest(GeorefLiveTest):
     def test_null_dept_locality(self):
         """Los asentamientos con departamento nulo deberían ser válidos y
         existir en la API."""
+        # TODO: Revisar si debería existir. Actualmente ninguno cumple esta codición.
         resp = self.get_response({'id': '02000010000'})
         self.assertTrue(resp[0]['departamento']['id'] is None and
                         resp[0]['departamento']['nombre'] is None)
@@ -169,8 +170,8 @@ class SearchSettlementTest(GeorefLiveTest):
     def test_short_id_search(self):
         """La búsqueda por ID debe devolver la entidad correcta incluso si
         se omiten ceros iniciales."""
-        data = self.get_response({'id': '6021020000'})
-        self.assertTrue(data[0]['id'] == '06021020000')
+        data = self.get_response({'id': '6021010'})
+        self.assertTrue(data[0]['id'] == '06021010')
 
     def test_name_exact_gibberish_search(self):
         """La búsqueda por nombre exacto debe devolver 0 resultados cuando se
@@ -285,7 +286,7 @@ class SearchSettlementTest(GeorefLiveTest):
                 'nombre': 'BARRIO'
             },
             {
-                'id': '14007000022'
+                'id': '1400727001'
             },
             {
                 'max': 2
@@ -379,7 +380,7 @@ class SearchSettlementTest(GeorefLiveTest):
         """Un valor vacío (None) debería estar representado como '' en CSV."""
         resp = self.get_response({
             'formato': 'csv',
-            'id': '78007020000'
+            'id': '78007A02'
         })
 
         header = next(resp)

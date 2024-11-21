@@ -54,8 +54,8 @@ class IntersectionsTest(GeorefLiveTest):
         gobierno locales por intersección."""
         self.assert_intersection_contains_ids(
             'departamentos',
-            {'interseccion': 'gobierno_local:625056', 'max': 100},
-            ['62035', '62014', '62049', '62091']
+            {'interseccion': 'gobierno_local:620224', 'max': 100},
+            ['62056', '62070', '62021']
         )
 
     def test_intersection_dept_street(self):
@@ -182,7 +182,7 @@ class IntersectionsTest(GeorefLiveTest):
     def assert_intersection_contains_ids(self, endpoint, params, ids):
         api_endpoint = '/api/' + endpoint
         resp = self.get_response(params, endpoint=api_endpoint,
-                                 entity=endpoint)
+                                 entity=endpoint.replace("-", "_"))
         matched_ids = [hit['id'] for hit in resp]
 
         self.assertTrue(all(i in matched_ids for i in ids))

@@ -116,6 +116,8 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'altura.inicio.izquierda',
                                        'departamento.id',
                                        'departamento.nombre',
+                                       'localidad.id',
+                                       'localidad.nombre',
                                        'localidad_censal.id',
                                        'localidad_censal.nombre',
                                        'nomenclatura',
@@ -133,6 +135,8 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'altura.inicio.izquierda',
                                        'departamento.id',
                                        'departamento.nombre',
+                                       'localidad.id',
+                                       'localidad.nombre',
                                        'localidad_censal.id',
                                        'localidad_censal.nombre',
                                        'nomenclatura',
@@ -173,7 +177,7 @@ class SearchStreetsTest(GeorefLiveTest):
             ('RUTA', 'ruta'),
             ('AUT', 'autopista'),
             ('CALLE', 'calle'),
-            ('PJE', 'pasaje')
+            ('PJE', 'pasaje')  # TODO: Algunos registros contienen "PJE" y otros "PASAJE"
         ]
 
         for street_type, street_type_long in street_types:
@@ -360,6 +364,8 @@ class SearchStreetsTest(GeorefLiveTest):
             'alt_fin_der',
             'alt_fin_izq',
             'fuente',
+            'loc_id',
+            'loc_nombre',
             'lcen_id',
             'lcen_nombre'
         ])

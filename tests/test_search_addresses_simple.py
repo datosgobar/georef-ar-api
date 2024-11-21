@@ -36,6 +36,8 @@ class SearchAddressesBaseTest(GeorefLiveTest):
                                        'calle_cruce_2.categoria',
                                        'departamento.id',
                                        'departamento.nombre',
+                                       'localidad.id',
+                                       'localidad.nombre',
                                        'localidad_censal.id',
                                        'localidad_censal.nombre',
                                        'nomenclatura',
@@ -59,6 +61,8 @@ class SearchAddressesBaseTest(GeorefLiveTest):
                                        'calle_cruce_2.categoria',
                                        'departamento.id',
                                        'departamento.nombre',
+                                       'localidad.id',
+                                       'localidad.nombre',
                                        'localidad_censal.id',
                                        'localidad_censal.nombre',
                                        'nomenclatura',
@@ -223,7 +227,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """La búsqueda exacta debe devolver las direcciones
         correspondientes."""
         addresses = [
-            (['0627001001535'], 'DICKSON TURNER 600'),
+            (['0627001001880'], 'DICKSON TURNER 600'),
             (['1401401002655'], 'BALTAZAR PARDO DE FIGUEROA 600'),
             (['5002802006060'], 'PJE DR LENCINAS 700'),
             (['4202102000325'], 'AV PEDRO LURO 600'),
@@ -246,10 +250,10 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_address_exact_search_ignores_tildes(self):
         """La búsqueda exacta debe ignorar tildes."""
         expected = [
-            (['0663804007285'], 'INT MANUEL MARTIGNONÉ 250'),
-            (['0663804007285'], 'INT MANUEL MARTIGNONE 250'),
-            (['0663804007285'], 'INT MANUEL MARTIGNOÑE 250'),
-            (['0663804007285'], 'INT MANUEL MARTIGÑONÉ 250')
+            (['0663804009860'], 'MARTIGNONÉ MANUEL INT 250'),
+            (['0663804009860'], 'MARTIGNONE MANUEL INT 250'),
+            (['0663804009860'], 'MARTIGNOÑE MANUEL INT 250'),
+            (['0663804009860'], 'MARTIGÑONÉ MANUEL INT 250')
         ]
 
         self.assert_address_search_id_matches(expected, exact=True)
@@ -293,12 +297,12 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_address_search_fuzziness(self):
         """La búsqueda aproximada debe tener una tolerancia de AUTO:4,8."""
         expected = [
-            (['0676305002780'], 'RACONDEGUI 301'),      # -2 caracteres (de 8+)
-            (['0676305002780'], 'ARACONDEGUI 301'),     # -1 caracteres (de 8+)
-            (['0676305002780'], 'zZARACONDEGUI 301'),   # +1 caracteres (de 8+)
-            (['0676305002780'], 'zZARACONDEGUIi 301'),  # +2 caracteres (de 8+)
-            (['0202801006430'], 'NCLAN 3000'),         # -1 caracteres (de 4-7)
-            (['0202801006430'], 'iINCLAN 3000')        # +1 caracteres (de 4-7)
+            (['0676305003265'], 'RACONDEGUI 301'),      # -2 caracteres (de 8+)
+            (['0676305003265'], 'ARACONDEGUI 301'),     # -1 caracteres (de 8+)
+            (['0676305003265'], 'zZARACONDEGUI 301'),   # +1 caracteres (de 8+)
+            (['0676305003265'], 'zZARACONDEGUIi 301'),  # +2 caracteres (de 8+)
+            (['0642701009230'], 'NCLAN 2400'),         # -1 caracteres (de 4-7)
+            (['0642701009230'], 'iINCLAN 2400')        # +1 caracteres (de 4-7)
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -317,15 +321,15 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """La búsqueda aproximada debe también actuar como autocompletar cuando
         la longitud de la query es >= 4."""
         expected = [
-            (['0207701007975'], 'MARCOS SASTRE 2600'),
-            (['0207701007975'], 'MARCOS SASTR 2600'),
-            (['0207701007975'], 'MARCOS SAST 2600'),
-            (['0207701007975'], 'MARCOS SAS 2600'),
-            (['0209101004195'], 'CAP GRL RAMON FREIRE 2201'),
-            (['0209101004195'], 'CAP GRL RAMON FREIR 2201'),
-            (['0209101004195'], 'CAP GRL RAMON FREI 2201'),
-            (['0209101004195'], 'CAP GRL RAMON FRE 2201'),
-            (['0209101004195'], 'CAP GRL RAMON FR 2201')
+            (['0207701007975'], 'MARCOS SASTRE 2650'),
+            (['0207701007975'], 'MARCOS SASTR 2650'),
+            (['0207701007975'], 'MARCOS SAST 2650'),
+            (['0207701007975'], 'MARCOS SAS 2650'),
+            (['0208401004195'], 'CTAN GRAL RAMON FREIRE 4201'),
+            (['0208401004195'], 'CTAN GRAL RAMON FREIR 4201'),
+            (['0208401004195'], 'CTAN GRAL RAMON FREI 4201'),
+            (['0208401004195'], 'CTAN GRAL RAMON FRE 4201'),
+            (['0208401004195'], 'CTAN GRAL RAMON FR 4201')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -333,26 +337,26 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_address_search_stopwords(self):
         """La búsqueda aproximada debe ignorar stopwords."""
         expected = [
-            (['8208427005185'], 'HILARION DE LA QUINTANA BIS 100'),
-            (['8208427005185'], 'HILARION DE DE QUINTANA BIS 100'),
-            (['8208427005185'], 'HILARION DE DE LA QUINTANA BIS 100'),
-            (['8208427005185'], 'HILARION DE LA LA QUINTANA BIS 100'),
-            (['8208427005185'], 'HILARION DE DE LA LA LA QUINTANA BIS 100'),
+            (['8208427005195'], 'HILARION DE LA QUINTANA BIS 100'),
+            (['8208427005195'], 'HILARION DE DE QUINTANA BIS 100'),
+            (['8208427005195'], 'HILARION DE DE LA QUINTANA BIS 100'),
+            (['8208427005195'], 'HILARION DE LA LA QUINTANA BIS 100'),
+            (['8208427005195'], 'HILARION DE DE LA LA LA QUINTANA BIS 100'),
         ]
 
         self.assert_address_search_id_matches(expected)
 
     def test_address_search_fuzzy_various(self):
         """La búsqueda aproximada debe devolver las direcciones correctas
-        incluso cuando el usuario comite varios errores (mayúsculas, tildes,
+        incluso cuando el usuario comete varios errores (mayúsculas, tildes,
         stopwords, letras incorrectas, etc.)."""
         expected = [
-            (['0662310000330'], 'bv paraguay 1000'),
-            (['0662310000330'], 'boulevar paraguay 1000'),
-            (['0662310000330'], 'boulevár paraguay 1000'),
-            (['5804201000085'], 'avenida estanislao flore 1000'),
-            (['5804201000085'], 'av estanislao flore 1000'),
-            (['5804201000085'], 'AV ESTANISLAOOO FLORES 1000'),
+            (['0662310000410'], 'bv paraguay 1000'),
+            (['0662310000410'], 'boulevar paraguay 1000'),
+            (['0662310000410'], 'boulevár paraguay 1000'),
+            (['5804201000085'], 'avenida estanislao flore 350'),
+            (['5804201000085'], 'av estanislao flore 350'),
+            (['5804201000085'], 'AV ESTANISLAOOO FLORES 350'),
             (['0203501005600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
             (['0203501005600'], 'fransisco acuna figeroa 1000')
         ]
@@ -450,15 +454,15 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     def test_filter_by_locality(self):
         """Se debería poder filtrar direcciones por localidad."""
         self.assert_locality_search(
-            '0207701011160', 'Vallejos 4500', 'Villa Devoto'
+            '0642701013350', 'Talcahuano 1550', 'Villa Eduardo Madero'
         )
 
         self.assert_locality_search(
-            '0207701011160', 'Vallejos 4500', '02077010002'
+            '0642701013350', 'Talcahuano 1550', '0642701013'
         )
 
         self.assert_locality_search(
-            '0207701011160', 'Vallejos 4500', '02077010002'
+            '0642701013350', 'Talcahuano 1550', '0642701013'
         )
 
     def test_filter_by_locality_and_census_locality(self):
@@ -470,7 +474,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         )
 
         self.assert_locality_search(
-            '8208431000190', 'Balcarce 2000', '82084310000',
+            '8208431000190', 'Balcarce 2000', '82084310',
             'Villa Gobernador Gálvez'
         )
 
@@ -480,7 +484,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         )
 
         self.assert_locality_search(
-            '8208431000190', 'Balcarce 2000', '82084310000',
+            '8208431000190', 'Balcarce 2000', '82084310',
             '82084310'
         )
 

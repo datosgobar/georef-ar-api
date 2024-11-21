@@ -27,9 +27,9 @@ LOCATIONS = [
 ]
 
 LOCATIONS_NO_GL = [
-    ('-31.480693', '-59.0928132', {
-        'provincia': '30',
-        'departamento': '30113'
+    ('-47.6783585', '-69.4638138', {
+        'provincia': '78',
+        'departamento': '78014'
     })
 ]
 
@@ -84,7 +84,8 @@ class SearchLocationTest(GeorefLiveTest):
         location = LOCATIONS[0]
 
         self.assert_fields_set_equals('completo',
-                                      ['provincia.id', 'provincia.nombre',
+                                      ['calle.fuente', 'calle.id', 'calle.nombre',
+                                       'provincia.id', 'provincia.nombre',
                                        'lat', 'lon', 'departamento.id',
                                        'departamento.nombre',
                                        'gobierno_local.id', 'gobierno_local.nombre',
@@ -258,7 +259,7 @@ class SearchLocationTest(GeorefLiveTest):
             lon = gl['centroide']['lon']
             location = self.get_response({'lat': lat, 'lon': lon})
 
-            validations.append(location['gobiernos_locales']['id'] == gl['id'])
+            validations.append(location['gobierno_local']['id'] == gl['id'])
 
         self.assertTrue(validations and all(validations))
 
