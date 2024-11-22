@@ -299,12 +299,10 @@ class IdsParameter(Parameter):
         for item in items:
             item = item.strip()
 
-            if not item.isdigit() or len(item) > self._id_length or \
-               len(item) < self._min_length:
-                raise ValueError(strings.ID_PARAM_INVALID.format(
-                    self._id_length))
+            self._check_type(item)
+            self._check_length(item)
+            item = self._get_item_justyfing(item)
 
-            item = item.rjust(self._id_length, self._padding_char)
             if item in ids:
                 raise ValueError(strings.ID_PARAM_UNIQUE.format(item))
 
@@ -312,64 +310,92 @@ class IdsParameter(Parameter):
 
         return list(ids)
 
+    def _check_type(self, item):
+        if not item.isdigit():
+            raise ValueError(strings.ID_PARAM_INVALID.format(
+                self._id_length))
 
-class IdsTwoLengthParameter(IdsParameter):
+    def _check_length(self, item):
+        if len(item) > self._id_length or len(item) < self._min_length:
+            raise ValueError(strings.ID_PARAM_INVALID.format(
+                self._id_length))
 
-    def __init__(self, *two_length, padding_char='0', sep=','):
-        max_length = max(two_length)
-        min_length = min(two_length)
-        super().__init__(max_length, padding_char=padding_char, padding_length=max_length - min_length, sep=sep)
-        self._max_length = max_length
-        self._min_length = min_length
-
-    def _parse_value(self, val):
-        items = val.split(self._sep)
-        if len(items) > constants.MAX_RESULT_LEN:
-            raise ValueError(strings.ID_PARAM_LENGTH.format(
-                constants.MAX_RESULT_LEN))
-
-        ids = set()
-        for item in items:
-            item = item.strip()
-
-            if not item.isdigit() or len(item) > self._id_length:
-                raise ValueError(strings.ID_TWO_LENGTH_PARAM_INVALID.format(
-                    self._min_length, self._max_length))
-
-            id_length = self._id_length if len(item) > self._min_length else self._min_length
-            item = item.rjust(id_length, self._padding_char)
-            if item in ids:
-                raise ValueError(strings.ID_PARAM_UNIQUE.format(item))
-
-            ids.add(item)
-
-        return list(ids)
+    def _get_item_justyfing(self, item):
+        return item.rjust(self._id_length, self._padding_char)
 
 
-class IdsAlphamericTwoLengthParameter(IdsTwoLengthParameter):
+class IdsFixedLengthParameter(IdsParameter):
+    """Representa un parámetro de tipo lista de IDs numéricos. Se aceptan
+    listas de IDs separados por comas (esto incluye listas de longitud 1, es
+    decir, un solo ID sin comas). No se aceptan IDs repetidos.
 
-    def _parse_value(self, val):
-        items = val.split(self._sep)
-        if len(items) > constants.MAX_RESULT_LEN:
-            raise ValueError(strings.ID_PARAM_LENGTH.format(
-                constants.MAX_RESULT_LEN))
+    Se heredan las propiedades y métodos de la clase IdsParameter, redefiniendo la forma
+    de validar la longitud de cada ID y su justificación.
 
-        ids = set()
-        for item in items:
-            item = item.strip()
+    Por ejemplo, para una lista de longitudes [4, 6, 9] con un padding de 1 se obtendrían las siguientes verificaciones
 
-            if len(item) > self._id_length:
-                raise ValueError(strings.ID_ALPHAMERIC_TWO_LENGTH_PARAM_INVALID.format(
-                    self._min_length, self._id_length))
+    Posición:  1|2|3|4|5|6|7|8|9
+               X X # .
+               X X # # # .
+               X X # # X # # # .
 
-            id_length = self._id_length if len(item) > self._min_length else self._min_length
-            item = item.rjust(id_length, self._padding_char)
-            if item in ids:
-                raise ValueError(strings.ID_PARAM_UNIQUE.format(item))
+    Longitudes de items:
 
-            ids.add(item)
+        n = 1 o 2           INVÁLIDA
+        n = 3               Se completa a 4 dígitos
+        n = 4               VÁLIDA
+        n = 5               Se completa a 6 dígitos
+        n = 6               VÁLIDA
+        n = 7               INVÁLIDA
+        n = 8               Se completa a 9 dígitos
+        n = 9               VÁLIDA
 
-        return list(ids)
+    Attributes:
+        _length (int): Una lista de longitudes de los IDs a aceptar/devolver.
+        _padding_char (str): Caracter a utilizar para completar los IDs
+            recibidos con longitud menor a _id_length.
+        _padding_lenght (int): Cantidad de digitos que pueden faltar para completar la siguiente longitud de la lista
+        de longitudes pasadas en _length
+        _min_length (int): Longitud mínima de valores str a procesar.
+        _sep (str): Caracter a utilizar para separar listas de IDs.
+
+    """
+    def __init__(self, *lengths, padding_char='0', padding_length=1, sep=','):
+        super().__init__(max(lengths), padding_char=padding_char, padding_length=padding_length, sep=sep)
+        self._lengths = sorted(lengths)
+        self._padding_length = padding_length
+
+    def _check_length(self, item):
+        if len(item) > self._id_length or len(item) < self._lengths[0] - self._padding_length:
+            raise ValueError(
+                strings.ID_FIXED_LENGTH_PARAM_INVALID.format(",".join([str(value) for value in self._lengths]))
+            )
+
+        for bottom_length, top_length in zip(self._lengths[:-1], self._lengths[1:]):
+            if bottom_length < len(item) < top_length - self._padding_length:
+                raise ValueError(
+                    strings.ID_FIXED_LENGTH_PARAM_INVALID.format(",".join([str(value) for value in self._lengths]))
+                )
+
+    def _get_item_justyfing(self, item):
+        if len(item) <= self._lengths[0]:
+            return item.rjust(self._lengths[0], self._padding_char)
+        for bottom_length, top_length in zip(self._lengths[:-1], self._lengths[1:]):
+            if bottom_length < len(item) <= top_length:
+                if len(item) < top_length - self._padding_length:
+                    raise ValueError(
+                        strings.ID_FIXED_LENGTH_PARAM_INVALID.format(",".join([str(value) for value in self._lengths]))
+                    )
+                return item.rjust(top_length, self._padding_char)
+        raise ValueError(
+            strings.ID_FIXED_LENGTH_PARAM_INVALID.format(",".join([str(value) for value in self._lengths]))
+        )
+
+
+class IdsAlphamericFixedLengthParameter(IdsFixedLengthParameter):
+
+    def _check_type(self, item):
+        pass
 
 
 class CompoundParameter(Parameter):
@@ -1247,7 +1273,7 @@ PARAMS_CENSUS_LOCALITIES = EndpointParameters(shared_params={
 )
 
 PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
-    N.ID: IdsAlphamericTwoLengthParameter(*constants.SETTLEMENT_ID_LEN),
+    N.ID: IdsAlphamericFixedLengthParameter(*constants.SETTLEMENT_ID_LEN),
     N.NAME: StrParameter(),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
                                 StrParameter()]),
@@ -1286,7 +1312,7 @@ PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
 )
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
-    N.ID: IdsTwoLengthParameter(*constants.LOCALITY_ID_LEN),
+    N.ID: IdsFixedLengthParameter(*constants.LOCALITY_ID_LEN),
     N.NAME: StrParameter(),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
                                 StrParameter()]),
@@ -1359,7 +1385,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
         IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
         StrParameter()
     ]),
-    N.LOCALITY: CompoundParameter([IdsTwoLengthParameter(*constants.LOCALITY_ID_LEN),
+    N.LOCALITY: CompoundParameter([IdsFixedLengthParameter(*constants.LOCALITY_ID_LEN),
                                    StrParameter()]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
@@ -1397,7 +1423,7 @@ PARAMS_STREETS = EndpointParameters(shared_params={
         StrParameter()
     ]),
     N.LOCALITY: CompoundParameter([
-        IdsTwoLengthParameter(*constants.LOCALITY_ID_LEN),
+        IdsFixedLengthParameter(*constants.LOCALITY_ID_LEN),
         StrParameter()
     ]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
@@ -1453,7 +1479,7 @@ PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
         StrParameter()
     ]),
     N.LOCALITY: CompoundParameter([
-        IdsTwoLengthParameter(*constants.LOCALITY_ID_LEN),
+        IdsFixedLengthParameter(*constants.LOCALITY_ID_LEN),
         StrParameter()
     ]),
     N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
