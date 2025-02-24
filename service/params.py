@@ -313,7 +313,14 @@ class IdsParameter(Parameter):
         return list(ids)
 
 
-class IdsAlphamericParameter(IdsParameter):
+class IdsTwoLengthParameter(IdsParameter):
+
+    def __init__(self, *two_length, padding_char='0', sep=','):
+        max_length = max(two_length)
+        min_length = min(two_length)
+        super().__init__(max_length, padding_char=padding_char, padding_length=max_length - min_length, sep=sep)
+        self._max_length = max_length
+        self._min_length = min_length
 
     def _parse_value(self, val):
         items = val.split(self._sep)
@@ -325,10 +332,38 @@ class IdsAlphamericParameter(IdsParameter):
         for item in items:
             item = item.strip()
 
-            if len(item) > self._id_length or len(item) < self._min_length:
-                raise ValueError(strings.ID_ALPHAMERIC_PARAM_INVALID.format(
+            if not item.isdigit() or len(item) > self._id_length:
+                raise ValueError(strings.ID_TWO_LENGTH_PARAM_INVALID.format(
+                    self._min_length, self._max_length))
+
+            id_length = self._id_length if len(item) > self._min_length else self._min_length
+            item = item.rjust(id_length, self._padding_char)
+            if item in ids:
+                raise ValueError(strings.ID_PARAM_UNIQUE.format(item))
+
+            ids.add(item)
+
+        return list(ids)
+
+
+class IdsAlphamericTwoLengthParameter(IdsTwoLengthParameter):
+
+    def _parse_value(self, val):
+        items = val.split(self._sep)
+        if len(items) > constants.MAX_RESULT_LEN:
+            raise ValueError(strings.ID_PARAM_LENGTH.format(
+                constants.MAX_RESULT_LEN))
+
+        ids = set()
+        for item in items:
+            item = item.strip()
+
+            if len(item) > self._id_length:
+                raise ValueError(strings.ID_ALPHAMERIC_TWO_LENGTH_PARAM_INVALID.format(
                     self._min_length, self._id_length))
 
+            id_length = self._id_length if len(item) > self._min_length else self._min_length
+            item = item.rjust(id_length, self._padding_char)
             if item in ids:
                 raise ValueError(strings.ID_PARAM_UNIQUE.format(item))
 
@@ -1212,7 +1247,7 @@ PARAMS_CENSUS_LOCALITIES = EndpointParameters(shared_params={
 )
 
 PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
-    N.ID: IdsAlphamericParameter(id_length=constants.SETTLEMENT_ID_LEN, padding_length=2),
+    N.ID: IdsAlphamericTwoLengthParameter(*constants.SETTLEMENT_ID_LEN),
     N.NAME: StrParameter(),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
                                 StrParameter()]),
@@ -1251,7 +1286,7 @@ PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
 )
 
 PARAMS_LOCALITIES = EndpointParameters(shared_params={
-    N.ID: IdsParameter(id_length=constants.LOCALITY_ID_LEN),
+    N.ID: IdsTwoLengthParameter(*constants.LOCALITY_ID_LEN),
     N.NAME: StrParameter(),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
                                 StrParameter()]),
@@ -1323,7 +1358,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
         IdsParameter(constants.CENSUS_LOCALITY_ID_LEN),
         StrParameter()
     ]),
-    N.LOCALITY: CompoundParameter([IdsParameter(constants.LOCALITY_ID_LEN),
+    N.LOCALITY: CompoundParameter([IdsTwoLengthParameter(*constants.LOCALITY_ID_LEN),
                                    StrParameter()]),
     N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
     N.FLATTEN: BoolParameter(),
