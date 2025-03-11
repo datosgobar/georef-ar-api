@@ -394,7 +394,6 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             address_hit[N.STREET_X1] = self._build_street_entity()
             address_hit[N.STREET_X2] = self._build_street_entity()
             address_hit[N.SOURCE] = street[N.SOURCE]
-            address_hit[N.LOCALITY] = street_block.get(N.LOCALITY)
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(street)

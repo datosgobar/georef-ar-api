@@ -235,6 +235,7 @@ StreetSubField = Object(
         'provincia': StateSubField,
         'departamento': DepartmentSubField,
         'localidad_censal': CensusLocalitySubField,
+        'localidad': LocalitySubField,
         'categoria': UnindexedTextField,
         'fuente': UnindexedTextField
     },
@@ -378,7 +379,7 @@ class Intersection(Entity):
 class StreetBlock(Entity):
     calle = StreetSubField
     altura = StreetNumbersField
-    localidad = LocalitySubField
+    localidad_censal = CensusLocalitySubField
     geometria = GeoShape()
 
 
