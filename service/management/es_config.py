@@ -380,6 +380,7 @@ class StreetBlock(Entity):
     calle = StreetSubField
     altura = StreetNumbersField
     localidad_censal = CensusLocalitySubField
+    localidad = LocalitySubField
     geometria = GeoShape()
 
 
