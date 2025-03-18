@@ -388,7 +388,9 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             street = street_block[N.STREET]
             address_hit = self._build_base_address_hit(
                 street.get(N.STATE), street.get(N.DEPT),
-                street.get(N.CENSUS_LOCALITY))
+                street.get(N.CENSUS_LOCALITY),
+                street.get(N.LOCALITY)
+            )
 
             address_hit[N.STREET] = self._build_street_entity(street)
             address_hit[N.STREET_X1] = self._build_street_entity()
@@ -680,7 +682,9 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         for street_1, street_2, point in intersections:
             address_hit = self._build_base_address_hit(
                 street_1.get(N.STATE), street_1.get(N.DEPT),
-                street_1.get(N.CENSUS_LOCALITY))
+                street_1.get(N.CENSUS_LOCALITY),
+                street_1.get(N.LOCALITY)
+            )
 
             address_hit[N.STREET] = self._build_street_entity(street_1)
             address_hit[N.STREET_X1] = self._build_street_entity(street_2)
@@ -979,7 +983,9 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         for entry in entries:
             address_hit = self._build_base_address_hit(
                 entry.street_1.get(N.STATE), entry.street_1.get(N.DEPT),
-                entry.street_1.get(N.CENSUS_LOCALITY))
+                entry.street_1.get(N.CENSUS_LOCALITY),
+                entry.street_1.get(N.LOCALITY)
+            )
 
             address_hit[N.STREET] = self._build_street_entity(entry.street_1)
             address_hit[N.STREET_X1] = self._build_street_entity(
