@@ -41,7 +41,7 @@ def run_street_queries(es, params_list, queries, formats):
             # La nomenclatura incluye el nombre de la provincia y del depto.,
             # agregar esos campos a la query para luego poder extraer sus
             # nombres.
-            processed_query['fields'] += (N.STATE, N.DEPT)
+            processed_query['fields'] += (N.STATE, N.DEPT, N.LOCALITY)
 
         searches.append(data.StreetsSearch(processed_query))
 
@@ -51,8 +51,8 @@ def run_street_queries(es, params_list, queries, formats):
         if N.FULL_NAME in fmt[N.FIELDS]:
             # Agregar nomenclatura a cada hit del resultado.
             for hit in search.result.hits:
-                full_name = '{}, {}, {}'.format(
-                    hit[N.NAME], hit[N.DEPT][N.NAME], hit[N.STATE][N.NAME]
+                full_name = '{}, {}, {}, {}'.format(
+                    hit[N.NAME], hit[N.LOCALITY][N.NAME], hit[N.DEPT][N.NAME], hit[N.STATE][N.NAME]
                 )
                 hit[N.FULL_NAME] = full_name
 

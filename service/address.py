@@ -138,6 +138,7 @@ class AddressQueryPlanner(ABC):
         # En la mayoría de los casos, las tres calles van a ser del mismo
         # lugar.
         fmt = {
+            'loc': streets[0][N.LOCALITY][N.NAME],
             'state': streets[0][N.STATE][N.NAME],
             'dept': streets[0][N.DEPT][N.NAME],
             'door_number': door_number
@@ -156,7 +157,7 @@ class AddressQueryPlanner(ABC):
         else:
             raise ValueError('Unknown address type')
 
-        template += ', {dept}, {state}'
+        template += ', {loc}, {dept}, {state}'
         return template.format(**fmt)
 
     def _build_base_address_hit(self, state=None, dept=None,
