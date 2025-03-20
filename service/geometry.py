@@ -9,6 +9,10 @@ import shapely.geometry
 import shapely.ops
 from service import names as N
 
+from shapely.geometry import LineString
+from pyproj import Transformer
+from service.constants import STREET_AXIS_OFFSET
+
 # Radio de la tierra promedio para WGS84
 _MEAN_EARTH_RADIUS_KM = 6371.0088
 
@@ -93,7 +97,12 @@ def street_block_number_location(geom, door_numbers, number,
             #  - Los extremos inicio y comienzo de la cuadra no son iguales.
             # Con las condiciones dadas, realizar la interpolación y retornar
             # el resultado.
-            ip = line.interpolate((number - start) / (end - start),
+            line_utm = LineString(Transformer.from_crs("EPSG:4326", "EPSG:32721", always_xy=True).transform(*coord) for coord in line.coords)
+            side = "left" if number % 2 == 0 else "right" # Numeración par a la izquierda y numeración impar a la derecha.
+            offset_line_utm = line_utm.parallel_offset(STREET_AXIS_OFFSET, side=side)
+            line = LineString(Transformer.from_crs("EPSG:32721", "EPSG:4326", always_xy=True).transform(*coord) for coord in offset_line_utm.coords)
+            numerator = number - start if side == "left" else end - number # Ver doc de parallel_offset "...Vertices of right hand offset lines will be ordered inreverse."
+            ip = line.interpolate(numerator / (end - start),
                                   normalized=True)
 
             return Point.from_shapely_point(ip)

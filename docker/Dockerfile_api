@@ -1,6 +1,6 @@
 FROM python:3.9
 
-RUN apt-get update && apt-get -y upgrade && apt-get install -y libgeos3.11.1 libgeos-c1v5
+RUN apt-get update && apt-get -y upgrade && apt-get install -y libgeos3.11.1 libgeos-c1v5 proj-bin proj-data libproj-dev
 
 RUN pip install --upgrade pip
 
