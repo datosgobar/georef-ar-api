@@ -7,6 +7,8 @@ utilizando la librería Shapely.
 import math
 import shapely.geometry
 import shapely.ops
+from shapely.geos import geos_version
+
 from service import names as N
 
 from shapely.geometry import LineString
@@ -41,14 +43,51 @@ def _street_block_extents(door_nums, number):
     end_r = door_nums[N.END][N.RIGHT]
     end_l = door_nums[N.END][N.LEFT]
 
-    if start_r <= number <= end_r:
-        return start_r, end_r
+    # Se determina la paridad de los lados de la cuadra
+    def get_parity(start, end):
+        if start % 2 == end % 2:
+            return "even" if start % 2 == 0 else "odd"
+        return None
 
-    if start_l <= number <= end_l:
-        return start_l, end_l
+    parity_l = get_parity(start_l, end_l)
+    parity_r = get_parity(start_r, end_r)
+
+    # Al menos un lado debe tener definida su paridad
+    if not parity_r and not parity_l:
+        raise ValueError('Wrong street numeration')
+
+    # ...y no pueden tener ambos lados la misma paridad
+    if parity_r == parity_l:
+        raise ValueError('Wrong street numeration')
+
+    parity = "even" if number % 2 == 0 else "odd"
+
+    if parity_r == parity and start_r <= number <= end_r:
+        return "right", start_r, end_r
+
+    if parity_l == parity and start_l <= number <= end_l:
+        return "left", start_l, end_l
 
     raise ValueError('Street number out of range')
 
+def offset_block_street(line, side, distance=STREET_AXIS_OFFSET):
+    transformer_to_utm = Transformer.from_crs("EPSG:4326", "EPSG:5345", always_xy=True)
+    transformer_to_wgs84 = Transformer.from_crs("EPSG:5345", "EPSG:4326", always_xy=True)
+
+    line_utm = LineString([transformer_to_utm.transform(*coord) for coord in line.coords])
+    offset_line_utm = line_utm.parallel_offset(distance, side=side)
+
+    # Note: the behaviour regarding orientation of the resulting line depends on the GEOS version. With GEOS < 3.11,
+    # the line retains the same direction for a left offset (positive distance) or has reverse direction for a right
+    # offset (negative distance), and this behaviour was documented as such in previous Shapely versions. Starting
+    # with GEOS 3.11, the function tries to preserve the orientation of the original line.
+    # https://shapely.readthedocs.io/en/stable/manual.html#object.parallel_offset
+    if shapely.geos.geos_version < (3, 11, 0) and (side == "right" and distance > 0 or side == "left" and distance < 0):
+        offset_line_utm = LineString(offset_line_utm.coords[::-1])
+
+    offset_line_wsg84 = LineString([transformer_to_wgs84.transform(*coord) for coord in offset_line_utm.coords])
+
+    return offset_line_wsg84
 
 def street_block_number_location(geom, door_numbers, number,
                                  approximate=False):
@@ -86,8 +125,8 @@ def street_block_number_location(geom, door_numbers, number,
     shape = shapely.geometry.MultiLineString(geom['coordinates'])
     line = shapely.ops.linemerge(shape)
 
-    if isinstance(line, shapely.geometry.LineString) and number is not None:
-        start, end = _street_block_extents(door_numbers, number)
+    if isinstance(line, shapely.geometry.LineString) and isinstance(number, int):
+        side, start, end = _street_block_extents(door_numbers, number)
 
         if start < end:
             # Se cumplen las condiciones:
@@ -97,12 +136,10 @@ def street_block_number_location(geom, door_numbers, number,
             #  - Los extremos inicio y comienzo de la cuadra no son iguales.
             # Con las condiciones dadas, realizar la interpolación y retornar
             # el resultado.
-            line_utm = LineString(Transformer.from_crs("EPSG:4326", "EPSG:32721", always_xy=True).transform(*coord) for coord in line.coords)
-            side = "left" if number % 2 == 0 else "right" # Numeración par a la izquierda y numeración impar a la derecha.
-            offset_line_utm = line_utm.parallel_offset(STREET_AXIS_OFFSET, side=side)
-            line = LineString(Transformer.from_crs("EPSG:32721", "EPSG:4326", always_xy=True).transform(*coord) for coord in offset_line_utm.coords)
-            numerator = number - start if side == "left" else end - number # Ver doc de parallel_offset "...Vertices of right hand offset lines will be ordered inreverse."
-            ip = line.interpolate(numerator / (end - start),
+
+            side_line = offset_block_street(line, side)
+
+            ip = side_line.interpolate((number - start) / (end - start),
                                   normalized=True)
 
             return Point.from_shapely_point(ip)
