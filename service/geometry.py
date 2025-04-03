@@ -56,10 +56,6 @@ def _street_block_extents(door_nums, number):
     if not parity_r and not parity_l:
         raise ValueError('Wrong street numeration')
 
-    # ...y no pueden tener ambos lados la misma paridad
-    if parity_r == parity_l:
-        raise ValueError('Wrong street numeration')
-
     parity = "even" if number % 2 == 0 else "odd"
 
     if parity_r == parity and start_r <= number <= end_r:
