@@ -62,13 +62,6 @@ class SearchSettlementTest(GeorefLiveTest):
         # IDs de entidades entre resultados.
         self.assertEqual(len(results), page_size * pages)
 
-    def test_null_dept_locality(self):
-        """Los asentamientos con departamento nulo deberían ser válidos y
-        existir en la API."""
-        # TODO: Revisar si debería existir. Actualmente ninguno cumple esta codición.
-        resp = self.get_response({'id': '02000010000'})
-        self.assertTrue(resp[0]['departamento']['id'] is None and
-                        resp[0]['departamento']['nombre'] is None)
 
     def test_total_results(self):
         """Dada una query sin parámetros, se deben retornar los metadatos de
