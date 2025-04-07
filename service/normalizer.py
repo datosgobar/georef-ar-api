@@ -503,7 +503,6 @@ def _build_address_query_format(parsed_params):
         N.DEPT: 'department',
         N.STATE: 'state',
         N.CENSUS_LOCALITY: 'census_locality',
-        N.LOCALITY: 'locality',
         N.EXACT: 'exact',
         N.OFFSET: 'offset',
         N.ORDER: 'order',
