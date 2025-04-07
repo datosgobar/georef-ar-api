@@ -191,7 +191,18 @@ _SHP_SHORT_FIELD_NAMES = {
         N.START_L: 'alt_ini_izq',
         N.END_R: 'alt_fin_der',
         N.END_L: 'alt_fin_izq',
-        N.STREET_NAME: 'calle_nomb'
+        N.STREET_NAME: 'calle_nomb',
+        N.STREET_CATEGORY: "calle_ca",
+        N.STREET_X1_ID: "calle_x1_id",
+        N.STREET_X1_CATEGORY: "calle_x1_ca",
+        N.STREET_X1_NAME: "calle_x1_no",
+        N.STREET_X2_ID: "calle_x2_id",
+        N.STREET_X2_CATEGORY: "calle_x2_ca",
+        N.STREET_X2_NAME: "calle_x2_no",
+        N.DOOR_NUM_VAL: "altura_val",
+        N.DOOR_NUM_UNIT: "altura_uni",
+        N.LOCATION_LAT: "ubicac_lat",
+        N.LOCATION_LON: "ubicac_lon",
     }.items()
 }
 """dict: El formato Shapefile no permite campos cuyos nombres tengan más de 11

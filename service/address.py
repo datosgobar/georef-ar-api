@@ -410,6 +410,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
                 )
 
                 address_hit[N.LOCATION] = point.to_json_location()
+                address_hit[N.GEOM] = point.to_geojson()
 
             address_hits.append(address_hit)
 
@@ -692,6 +693,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
             address_hit[N.STREET_X2] = self._build_street_entity()
             address_hit[N.LOCATION] = point.to_json_location()
             address_hit[N.SOURCE] = street_1[N.SOURCE]
+            address_hit[N.GEOM] = point.to_geojson()
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(street_1,
@@ -998,6 +1000,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
             if N.LOCATION_LAT in fields or N.LOCATION_LON in fields:
                 point = entry.point()
                 address_hit[N.LOCATION] = point.to_json_location()
+                address_hit[N.GEOM] = point.to_geojson()
 
             if N.FULL_NAME in fields:
                 address_hit[N.FULL_NAME] = self._address_full_name(
