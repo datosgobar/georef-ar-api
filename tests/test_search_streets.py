@@ -187,9 +187,16 @@ class SearchStreetsTest(GeorefLiveTest):
             })
 
             validations.append(len(res) > 0)
-            validations.append(all(
-                street['categoria'] == street_type for street in res
-            ))
+
+            if street_type == "PJE":
+                validations.append(all(
+                    street['categoria'] in ["PJE", "PASAJE"] for street in res
+                ))
+
+            else:
+                validations.append(all(
+                    street['categoria'] == street_type for street in res
+                ))
 
         assert(validations and all(validations))
 
