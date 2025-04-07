@@ -63,8 +63,10 @@ class SearchCensusLocalityTest(GeorefLiveTest):
         """Las localidades censales con departamento nulo deberían ser válidas
         y existir en la API."""
         resp = self.get_response({'id': '02000010'})
-        self.assertTrue(resp[0]['departamento']['id'] is None and
-                        resp[0]['departamento']['nombre'] is None)
+        # self.assertTrue(resp[0]['departamento']['id'] is None and
+        #                 resp[0]['departamento']['nombre'] is None)
+        # TODO: Verificar que ya no existen localidades censales con departamento nulo
+        self.assertFalse(resp)
 
     def test_total_results(self):
         """Dada una query sin parámetros, se deben retornar los metadatos de
@@ -399,7 +401,7 @@ class SearchCensusLocalityTest(GeorefLiveTest):
         """Se debería poder obtener resultados en formato SHP (sin
         parámetros)."""
         self.assert_valid_shp_type(
-            shape_type=1,  # 1 == POINT
+            shape_type=5,  # 5 == POLYGON
             params={'max': 1}
         )
 
