@@ -314,6 +314,8 @@ class SearchStreetsTest(GeorefLiveTest):
                                        'departamento_nombre',
                                        'localidad_censal_id',
                                        'localidad_censal_nombre',
+                                       'localidad_id',
+                                       'localidad_nombre',
                                        'calle_fuente'])
 
     def test_xml_format(self):
