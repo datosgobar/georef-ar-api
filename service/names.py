@@ -93,6 +93,8 @@ TOTAL = 'total'
 TYPE = 'tipo'
 UNIT = 'unidad'
 VALUE = 'valor'
+DISP = 'desplazamiento'
+VERIFY = 'verificar'
 
 ##########################
 #    Valores compuestos  #

@@ -43,6 +43,38 @@ def _street_block_extents(door_nums, number):
     end_r = door_nums[N.END][N.RIGHT]
     end_l = door_nums[N.END][N.LEFT]
 
+    if start_r <= number <= end_r:
+        return start_r, end_r
+
+    if start_l <= number <= end_l:
+        return start_l, end_l
+
+    raise ValueError('Street number out of range')
+
+def _street_block_extents_on_side(door_nums, number):
+    """Dados los datos de alturas de una cuadra, y una altura recibida en una
+        consulta, retorna los extremos de la cuadra que contienen la altura. Los
+        valores devueltos corresponderán al lado derecho o izquierdo de la cuadra,
+        o None.
+
+        Args:
+            door_nums (dict): Datos de alturas de la cuadra.
+            number (int): Altura recibida en una consulta.
+
+        Raises:
+            ValueError: Si la altura no está contenida dentro de ninguna
+                combinación de extremos.
+
+        Returns:
+            tuple (str, int, int): Lado, altura inicial y final de la cuadra que contienen la
+                altura especificada.
+
+        """
+    start_r = door_nums[N.START][N.RIGHT]
+    start_l = door_nums[N.START][N.LEFT]
+    end_r = door_nums[N.END][N.RIGHT]
+    end_l = door_nums[N.END][N.LEFT]
+
     # Se determina la paridad de los lados de la cuadra
     def get_parity(start, end):
         if start % 2 == end % 2:
@@ -86,7 +118,7 @@ def offset_block_street(line, side, distance=STREET_AXIS_OFFSET):
     return offset_line_wsg84
 
 def street_block_number_location(geom, door_numbers, number,
-                                 approximate=False):
+                                 approximate=False, displacement=0):
     """Intenta obtener las coordenadas de una altura dentro de una calle
     (georreferenciación). Para lograr esto, se toma la geometría de la cuadra
     obtenida vía Elasticsearch, y se realiza una interpolación utilizando los
@@ -106,6 +138,8 @@ def street_block_number_location(geom, door_numbers, number,
         number (int or None): Número de puerta o altura.
         approximate (bool): Si es verdadero, devolver un estimado de las
             coordenadas en caso de que la interpolación falle.
+        displacement (int): Si es mayor que cero devolver el punto desplazado hacia
+            el lado de la calle correspondiente.
 
     Raises:
         TypeError: Cuando la geometría no es de tipo Point.
@@ -121,8 +155,12 @@ def street_block_number_location(geom, door_numbers, number,
     shape = shapely.geometry.MultiLineString(geom['coordinates'])
     line = shapely.ops.linemerge(shape)
 
-    if isinstance(line, shapely.geometry.LineString) and isinstance(number, int):
-        side, start, end = _street_block_extents(door_numbers, number)
+    if isinstance(line, shapely.geometry.LineString) and number is not None:
+        if displacement:
+            side, start, end = _street_block_extents_on_side(door_numbers, number)
+            line = offset_block_street(line, side)
+        else:
+            start, end = _street_block_extents(door_numbers, number)
 
         if start < end:
             # Se cumplen las condiciones:
@@ -132,10 +170,7 @@ def street_block_number_location(geom, door_numbers, number,
             #  - Los extremos inicio y comienzo de la cuadra no son iguales.
             # Con las condiciones dadas, realizar la interpolación y retornar
             # el resultado.
-
-            side_line = offset_block_street(line, side)
-
-            ip = side_line.interpolate((number - start) / (end - start),
+            ip = line.interpolate((number - start) / (end - start),
                                   normalized=True)
 
             return Point.from_shapely_point(ip)
