@@ -914,6 +914,18 @@ class LocalGovernmentsSearch(TerritoriesSearch):
         super().__init__(N.LOCAL_GOVERNMENTS, query,
                          geom_search_class=LocalGovernmentsGeometrySearch)
 
+    def _read_query(self, ids=None, name=None, census_locality=None, local_government=None, department=None, state=None,
+                    exact=False, geo_shape_geoms=None, order=None, category=None, **kwargs):
+        super()._read_query(ids, name, census_locality, local_government, department, state, exact, geo_shape_geoms,
+                            order, **kwargs)
+
+        if category:
+            self._search = self._search.query(_build_match_query(
+                N.CATEGORY,
+                category,
+                fuzzy=True
+            ))
+
 
 class CensusLocalitiesSearch(TerritoriesSearch):
     """Representa una búsqueda de localidades censales.

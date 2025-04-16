@@ -252,7 +252,8 @@ def process_local_government(request):
             N.ORDER: 'order',
             N.FIELDS: 'fields',
             N.OFFSET: 'offset',
-            N.MAX: 'size'
+            N.MAX: 'size',
+            N.CATEGORY: 'category',
         })
 
 

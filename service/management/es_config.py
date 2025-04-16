@@ -314,7 +314,11 @@ class LocalGovernment(Entity):
     centroide = CentroidField
     geometria = GeoShape()
     provincia = StateSubField
-    categoria = UnindexedTextField
+    # Indexar los gobiernos locales ya que se puede filtrar por las mismas
+    categoria = Text(
+        analyzer=name_analyzer_synonyms,
+        search_analyzer=name_analyzer
+    )
     fuente = UnindexedTextField
 
     class Meta:
