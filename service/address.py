@@ -539,6 +539,8 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         """
         self._intersections_result = None
         self._intersection_hits = None
+        self._displacement = query.pop(N.DISP)
+        self._verify = query.pop(N.VERIFY)
 
         super().__init__(query, fmt)
 
