@@ -8,6 +8,7 @@ from functools import wraps
 from flask import current_app, request, redirect, Blueprint
 from service import app, normalizer, formatter
 from service import names as N
+from service.decorators import inject_and_rename_entity_param
 
 
 def disable_cache(f):
@@ -85,6 +86,12 @@ def get_states():
 @bp_v1_0.route('/departamentos', methods=['GET', 'POST'])
 def get_departments():
     return normalizer.process_department(request)
+
+
+@bp_v1_0.route('/municipios', methods=['GET', 'POST'])
+@inject_and_rename_entity_param('municipios', 'gobiernos_locales', categoria="Municipio")
+def get_municipalities():
+    return normalizer.process_local_government(request)
 
 
 @bp_v1_0.route('/gobiernos-locales', methods=['GET', 'POST'])
