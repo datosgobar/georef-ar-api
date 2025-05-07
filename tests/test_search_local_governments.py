@@ -12,7 +12,7 @@ LOCAL_GOVERNMENTS = [
     (['060134'], 'CAÑUELAS'),
     (['060168'], 'CASTELLI'),
     (['060175', '300007'], 'COLÓN'),
-    (['060182'], 'CORONEL ROSALES'),
+    (['060182'], 'CORONEL DE MARINA LEONARDO ROSALES'),
     (['060203'], 'CORONEL SUÁREZ'),
     (['060274'], 'FLORENCIO VARELA'),
     (['060277', '540476'], 'FLORENTINO AMEGHINO'),
@@ -33,7 +33,7 @@ LOCAL_GOVERNMENTS = [
     (['060679', '500084', '700084', '823183'], 'RIVADAVIA'),
     (['060700'], 'SAAVEDRA'),
     (['060714'], 'SALTO'),
-    (['060770', '141106', '540504', '302259', '866392'], 'SAN PEDRO'),
+    (['060770', '141106', '540504', '309175', '866392'], 'SAN PEDRO'),
     (['060778', '142875', '540203', '820045', '866185'], 'SAN VICENTE'),
     (['060840'], 'TRES DE FEBRERO'),
     (['060798'], 'TAPALQUÉ'),
@@ -70,7 +70,7 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
         """La búsqueda por ID debe devolver el gobierno local correspondiente."""
         data = self.get_response({'id': '060182'})
         self.assertListEqual([p['nombre'] for p in data],
-                             ['Coronel Rosales'])
+                             ['Coronel de Marina Leonardo Rosales'])
 
     def test_pagination(self):
         """Los resultados deberían poder ser paginados."""

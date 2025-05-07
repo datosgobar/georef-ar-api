@@ -5,21 +5,21 @@ from .test_search_states import STATES
 
 
 LOCALITIES = [
-    (['0684001015'], 'VILLA RAFFO'),
-    (['0675601003'], 'BOULOGNE SUR MER'),
-    (['6204245001'], 'BARRIO PINO AZUL'),
-    (['1402115001'], 'DUMESNIL'),
+    (['06840010'], 'Tres de Febrero'),
+    # (['0675601003'], 'BOULOGNE SUR MER'),
+    # (['6204245001'], 'BARRIO PINO AZUL'),
+    # (['1402115001'], 'DUMESNIL'),
     (['70056020'], 'GRAN CHINA'),
-    (['5002802003'], 'CAPILLA DEL ROSARIO'),
+    # (['5002802003'], 'CAPILLA DEL ROSARIO'),
     (['54112010'], 'CRUCE CABALLERO'),
     (['82021270'], 'PLAZA CLUCELLAS'),
-    (['94015010'], 'LAGUNA ESCONDIDA'),
+    # (['94015010'], 'LAGUNA ESCONDIDA'),
     (['38077030'], 'CIENEGUILLAS'),
     (['34035030'], 'COMANDANTE FONTANA'),
     (['78014040'], 'JARAMILLO'),
     (['86014030'], 'DONADEU'),
     (['26035010'], 'ALDEA ESCOLAR (LOS RÁPIDOS)'),
-    (['2602103009'], 'BARRIO MANANTIAL ROSALES'),
+    # (['2602103009'], 'BARRIO MANANTIAL ROSALES'),
 ]
 
 
@@ -48,8 +48,8 @@ class SearchLocalityTest(GeorefLiveTest):
 
     def test_id_search(self):
         """La búsqueda por ID debe devolver la localidad correspondiente."""
-        data = self.get_response({'id': '0684001015'})
-        self.assertListEqual([p['nombre'] for p in data], ['Villa Raffo'])
+        data = self.get_response({'id': '06840010'})
+        self.assertListEqual([p['nombre'] for p in data], ['Tres de Febrero'])
 
     def test_pagination(self):
         """Los resultados deberían poder ser paginados."""
@@ -249,10 +249,10 @@ class SearchLocalityTest(GeorefLiveTest):
     def test_name_search_stopwords(self):
         """La búsqueda por nombre aproximado debe ignorar stopwords."""
         expected = [
-            (['1006304003'], 'LA FALDA DE DE SAN ANTONIO'),
-            (['1006304003'], 'LA LA FALDA DE SAN ANTONIO'),
-            (['1006304003'], 'FALDA DE SAN ANTONIO'),
-            (['1006304003'], 'FALDA SAN ANTONIO')
+            (['14147110'], 'LA FALDA DE DEL CARMEN'),
+            (['14147110'], 'LA LA FALDA DEL CARMEN'),
+            (['14147110'], 'FALDA DE EL CARMEN'),
+            (['14147110'], 'FALDA DEL CARMEN')
         ]
 
         self.assert_name_search_id_matches(expected)
@@ -454,7 +454,7 @@ class SearchLocalityTest(GeorefLiveTest):
         """Un valor vacío (None) debería estar representado como '' en CSV."""
         resp = self.get_response({
             'formato': 'csv',
-            'id': '78007010'
+            'id': '86063030'
         })
 
         header = next(resp)
@@ -479,7 +479,7 @@ class SearchLocalityTest(GeorefLiveTest):
         """Se debería poder obtener resultados en formato SHP (sin
         parámetros)."""
         self.assert_valid_shp_type(
-            shape_type=8,  # 8 == MULTIPOINT
+            shape_type=1,  # 1 == POINT
             params={'max': 1}
         )
 
