@@ -152,8 +152,8 @@ class IntersectionsTest(GeorefLiveTest):
         calles por intersección."""
         self.assert_intersection_contains_ids(
             'calles',
-            {'interseccion': 'calle:0209101002235', 'max': 1000},
-            ['0209101011450', '0209101011450', '0209101008685']
+            {'interseccion': 'calle:020910100102235', 'max': 1000},
+            ['020910100101075', '020910100101240', '020910100101275']
         )
 
     def test_intersection_street_not_self_intersect(self):

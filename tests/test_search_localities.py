@@ -479,7 +479,7 @@ class SearchLocalityTest(GeorefLiveTest):
         """Se debería poder obtener resultados en formato SHP (sin
         parámetros)."""
         self.assert_valid_shp_type(
-            shape_type=1,  # 1 == POINT
+            shape_type=8,  # 8 == MULTIPOINT
             params={'max': 1}
         )
 
