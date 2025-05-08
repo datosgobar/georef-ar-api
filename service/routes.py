@@ -110,8 +110,9 @@ def get_settlements():
 
 
 @bp_v1_0.route('/localidades', methods=['GET', 'POST'])
+@inject_and_rename_entity_param('localidades', 'asentamientos', categoria="Localidad simple,Componente de localidad compuesta")
 def get_localities():
-    return normalizer.process_locality(request)
+    return normalizer.process_settlement(request)
 
 
 @bp_v1_0.route('/calles', methods=['GET', 'POST'])
