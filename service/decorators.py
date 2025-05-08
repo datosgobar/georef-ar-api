@@ -2,6 +2,9 @@ from functools import wraps
 from flask import request
 from werkzeug.datastructures import MultiDict
 
+from service.names import RESULTS
+from flask import jsonify
+
 
 def inject_and_rename_entity_param(from_key, to_key, **new_params):
     """
@@ -24,7 +27,21 @@ def inject_and_rename_entity_param(from_key, to_key, **new_params):
                 original_args = request.args
                 try:
                     request.args = modified_args
-                    return f(*args, **kwargs)
+                    response = f(*args, **kwargs)
+
+                    # Intentar revertir el cambio en la respuesta
+                    try:
+                        if hasattr(response, 'get_json'):
+                            resp_json = response.get_json()
+                            if isinstance(resp_json, dict) and to_key in resp_json:
+                                resp_json[from_key] = resp_json[to_key]
+                                del resp_json[to_key]
+
+                                return jsonify(resp_json)
+                    except Exception:
+                        pass  # Si no se puede parsear como JSON, dejar la respuesta tal cual
+
+                    return response
                 finally:
                     # Siempre se retorna el request original
                     request.args = original_args
@@ -44,7 +61,22 @@ def inject_and_rename_entity_param(from_key, to_key, **new_params):
                         original_json[to_key] = items
                         del original_json[from_key]
 
-                return f(*args, **kwargs)
+                response = f(*args, **kwargs)
+
+                # Intentar revertir el cambio en la respuesta JSON
+                try:
+                    if hasattr(response, 'get_json'):
+                        resp_json = response.get_json()
+                        if isinstance(resp_json, dict) and RESULTS in resp_json:
+                            for result in resp_json[RESULTS]:
+                                if isinstance(result, dict) and to_key in result:
+                                    result[from_key] = result[to_key]
+                                    del result[to_key]
+                            return jsonify(resp_json)
+                except Exception:
+                    pass
+
+                return response
 
             else:
                 return f(*args, **kwargs)
