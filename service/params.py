@@ -1300,7 +1300,8 @@ PARAMS_SETTLEMENTS = EndpointParameters(shared_params={
                         upper_limit=constants.MAX_RESULT_LEN),
     N.OFFSET: IntParameter(lower_limit=0,
                            upper_limit=constants.MAX_RESULT_WINDOW),
-    N.EXACT: BoolParameter()
+    N.EXACT: BoolParameter(),
+    N.CATEGORY: StrParameter(),
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
                            choices=['json', 'csv', 'geojson', 'xml', 'shp'])

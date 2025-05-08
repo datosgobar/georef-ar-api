@@ -314,7 +314,7 @@ class LocalGovernment(Entity):
     centroide = CentroidField
     geometria = GeoShape()
     provincia = StateSubField
-    # Indexar los gobiernos locales ya que se puede filtrar por las mismas
+    # Indexar las categorías, ya que se puede filtrar por las mismas
     categoria = Text(
         analyzer=name_analyzer_synonyms,
         search_analyzer=name_analyzer
@@ -349,7 +349,11 @@ class Settlement(Entity):
     departamento = DepartmentSubField
     gobierno_local = LocalGovernmentSubField
     localidad_censal = CensusLocalitySubField
-    categoria = UnindexedTextField
+    # Indexar las categorías, ya que se puede filtrar por las mismas
+    categoria = Text(
+        analyzer=name_analyzer_synonyms,
+        search_analyzer=name_analyzer
+    )
     fuente = UnindexedTextField
 
 
