@@ -673,8 +673,9 @@ class IntersectionParameter(Parameter):
         self._id_params = {}
 
         for entity in entities:
-            self._id_params[entity] = IdsParameter(
-                id_length=id_lengths[entity], sep=':')
+            length_tuple = (id_lengths[entity],) if isinstance(id_lengths[entity], int) else id_lengths[entity]
+            self._id_params[entity] = IdsFixedLengthParameter(
+                *length_tuple, sep=':')
 
         super().__init__(required)
 
@@ -1414,7 +1415,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 )
 
 PARAMS_STREETS = EndpointParameters(shared_params={
-    N.ID: IdsParameter(id_length=constants.STREET_ID_LEN),
+    N.ID: IdsFixedLengthParameter(*constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
     N.INTERSECTION: IntersectionParameter(entities=[N.STREET, N.LG, N.DEPT,
                                                     N.STATE]),
@@ -1476,7 +1477,7 @@ PARAMS_LOCATION = EndpointParameters(shared_params={
 
 PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STREET_BLOCK_ID_LEN),
-    N.STREET: IdsParameter(id_length=constants.STREET_ID_LEN),
+    N.STREET: IdsFixedLengthParameter(*constants.STREET_ID_LEN),
     N.NAME: StrParameter(),
     N.CATEGORY: StrParameter(),
     N.CENSUS_LOCALITY: CompoundParameter([

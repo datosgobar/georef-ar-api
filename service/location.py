@@ -121,7 +121,7 @@ def run_location_queries(es, params_list, queries):
 
         search = StreetBlocksSearch({
             'geo_shape_geoms': [Point.from_json_location(query).to_geojson_circle(SB_DISTANCE_TOLERANCE)],
-            'fields': [N.ID, N.STREET_NAME, N.STREET_SOURCE, N.GEOM, N.DOOR_NUM],
+            'fields': [N.ID, N.STREET_ID, N.STREET_NAME, N.STREET_SOURCE, N.GEOM, N.DOOR_NUM],
             'size': SB_MAX_SEARCH
         })
         all_searches.append(search)
@@ -219,7 +219,7 @@ def calc_nearest_street_block_params(params, sb_search):
     el = nearest_street_block[N.DOOR_NUM][N.END][N.LEFT]
 
     result = {
-        'id': nearest_street_block['id'][:STREET_ID_LEN],
+        'id': nearest_street_block['calle']['id'],
         'nombre': nearest_street_block['calle']['nombre'],
         'fuente': nearest_street_block['calle']['fuente'],
     }
