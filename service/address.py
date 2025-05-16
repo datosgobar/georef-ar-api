@@ -351,7 +351,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         """
         self._elasticsearch_result = None
         self._displacement = query.pop(N.DISP)
-        self._verify = query.pop(N.VERIFY)
+        self._verify = query.pop(N.VERIFY) or query.get('exact')
         super().__init__(query, fmt)
 
     def planner_steps(self):
