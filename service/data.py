@@ -976,9 +976,10 @@ _ENTITY_SEARCH_CLASSES = {
     N.STATES: StatesSearch,
     N.DEPARTMENTS: DepartmentsSearch,
     N.LOCAL_GOVERNMENTS: LocalGovernmentsSearch,
+    N.MUNICIPALITIES: LocalGovernmentsSearch,
     N.CENSUS_LOCALITIES: CensusLocalitiesSearch,
     N.SETTLEMENTS: SettlementsSearch,
-    N.LOCALITIES: LocalitiesSearch,
+    N.LOCALITIES: SettlementsSearch,
     N.STREETS: StreetsSearch,
     N.STREET_BLOCKS: StreetBlocksSearch
 }
