@@ -26,7 +26,7 @@ from elasticsearch_dsl import MetaField
 from .. import names as N
 
 GEOM_INDEX_SUFFIX = '{}-geometria'
-GEOMETRYLESS_INDICES = {N.STATES, N.DEPARTMENTS, N.LOCAL_GOVERNMENTS}
+GEOMETRYLESS_INDICES = {N.STATES, N.DEPARTMENTS, N.AGGLOMERATIONS, N.CENSUS_TRACTS, N.CENSUS_BLOCKS, N.LOCAL_GOVERNMENTS}
 
 # -----------------------------------------------------------------------------
 # Analizadores, Filtros, Normalizadores
@@ -204,6 +204,14 @@ DepartmentSubField = Object(
     dynamic='strict'
 )
 
+CensusTractsSubField = Object(
+    properties={
+        'id': Keyword(),
+        'interseccion': Float(index=False)
+    },
+    dynamic='strict'
+)
+
 LocalGovernmentSubField = Object(
     properties={
         'id': Keyword(),
@@ -305,6 +313,52 @@ class Department(Entity):
 
 
 class DepartmentGeom(Entity):
+    geometria = GeoShape()
+
+
+class Agglomeration(Entity):
+    nombre = NameField
+    centroide = CentroidField
+    geometria = GeoShape()
+    fuente = UnindexedTextField
+
+    class Meta:
+        source = MetaField(excludes=['geometria'])
+
+
+class AgglomerationGeom(Entity):
+    geometria = GeoShape()
+
+
+class CensusTracts(Entity):
+    centroide = CentroidField
+    geometria = GeoShape()
+    provincia = StateSubField
+    departamento = DepartmentSubField
+    fuente = UnindexedTextField
+
+    class Meta:
+        source = MetaField(excludes=['geometria'])
+
+
+class CensusTractsGeom(Entity):
+    geometria = GeoShape()
+
+
+class CensusBlocks(Entity):
+    centroide = CentroidField
+    geometria = GeoShape()
+    provincia = StateSubField
+    departamento = DepartmentSubField
+    fraccion_censal = CensusTractsSubField
+    categoria = UnindexedTextField
+    fuente = UnindexedTextField
+
+    class Meta:
+        source = MetaField(excludes=['geometria'])
+
+
+class CensusBlocksGeom(Entity):
     geometria = GeoShape()
 
 

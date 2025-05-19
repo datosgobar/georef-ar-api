@@ -1210,6 +1210,89 @@ PARAMS_DEPARTMENTS = EndpointParameters(shared_params={
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
+PARAMS_AGGLOMERATIONS = EndpointParameters(shared_params={
+    N.ID: IdsParameter(id_length=constants.AGGLO_ID_LEN),
+    N.NAME: StrParameter(),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE, N.LG,
+                                                    N.STREET]),
+    N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
+    N.FLATTEN: BoolParameter(),
+    N.FIELDS: FieldListParameter(basic=[N.ID, N.NAME],
+                                 standard=[N.C_LAT, N.C_LON],
+                                 complete=[N.SOURCE]),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json',
+                           choices=['json', 'csv', 'geojson', 'xml', 'shp'])
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+)
+
+PARAMS_CENSUS_TRACTS = EndpointParameters(shared_params={
+    N.ID: IdsParameter(id_length=constants.CENSUS_TRACTS_ID_LEN),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE,
+                                                    N.STREET]),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.ORDER: StrParameter(choices=[N.ID]),
+    N.FLATTEN: BoolParameter(),
+    N.FIELDS: FieldListParameter(basic=[N.ID],
+                                 standard=[N.C_LAT, N.C_LON, N.STATE_ID,
+                                           N.STATE_NAME],
+                                 complete=[N.SOURCE, N.STATE_INTERSECTION]),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json',
+                           choices=['json', 'csv', 'geojson', 'xml', 'shp'])
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+)
+
+PARAMS_CENSUS_BLOCKS = EndpointParameters(shared_params={
+    N.ID: IdsParameter(id_length=constants.CENSUS_BLOCKS_ID_LEN),
+    N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE,
+                                                    N.STREET]),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.ORDER: StrParameter(choices=[N.ID]),
+    N.FLATTEN: BoolParameter(),
+    N.FIELDS: FieldListParameter(basic=[N.ID],
+                                 standard=[N.C_LAT, N.C_LON,
+                                           N.STATE_ID, N.STATE_NAME,
+                                           ],
+                                 complete=[N.SOURCE, N.CATEGORY]),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json',
+                           choices=['json', 'csv', 'geojson', 'xml', 'shp'])
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+)
+
 PARAMS_LOCAL_GOVERNMENTS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.LOCAL_GOVERNMENT_ID_LEN),
     N.NAME: StrParameter(),

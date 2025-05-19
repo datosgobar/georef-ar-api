@@ -495,6 +495,10 @@ def create_404_error_response():
             'recursos_disponibles': [
                 '/api/provincias',
                 '/api/departamentos',
+                '/api/aglomerados',
+                '/api/fracciones-censales',
+                '/api/radios-censales',
+                '/api/municipios',
                 '/api/gobiernos-locales',
                 '/api/localidades-censales',
                 '/api/asentamientos',

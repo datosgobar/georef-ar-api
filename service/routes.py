@@ -88,6 +88,21 @@ def get_departments():
     return normalizer.process_department(request)
 
 
+@bp_v1_0.route('/aglomerados', methods=['GET', 'POST'])
+def get_agglomerations():
+    return normalizer.process_agglomeration(request)
+
+
+@bp_v1_0.route('/fracciones-censales', methods=['GET', 'POST'])
+def get_census_tracts():
+    return normalizer.process_census_tracts(request)
+
+
+@bp_v1_0.route('/radios-censales', methods=['GET', 'POST'])
+def get_census_blocks():
+    return normalizer.process_census_blocks(request)
+
+
 @bp_v1_0.route('/municipios', methods=['GET', 'POST'])
 @add_params(categoria="Municipio")
 def get_municipalities():

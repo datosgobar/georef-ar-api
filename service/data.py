@@ -889,6 +889,84 @@ class DepartmentsSearch(TerritoriesSearch):
                          geom_search_class=DepartmentsGeometrySearch)
 
 
+class AgglomerationsGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de aglomerados.
+
+    Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
+    utilizando 'AgglomerationsSearch', que internamente utilizará esta clase.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(es_config.geom_index_for(N.AGGLOMERATIONS), query)
+
+
+class AgglomerationsSearch(TerritoriesSearch):
+    """Representa una búsqueda de aglomerados.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(N.AGGLOMERATIONS, query,
+                         geom_search_class=AgglomerationsGeometrySearch)
+
+
+class CensusTractsGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de fracciones censales.
+
+    Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
+    utilizando 'CensusTractsSearch', que internamente utilizará esta clase.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(es_config.geom_index_for(N.CENSUS_TRACTS), query)
+
+
+class CensusTractsSearch(TerritoriesSearch):
+    """Representa una búsqueda de fracciones censales.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(N.CENSUS_TRACTS, query,
+                         geom_search_class=CensusTractsGeometrySearch)
+
+
+class CensusBlocksGeometrySearch(TerritoriesSearch):
+    """Representa una búsqueda de geometrías de radios censales.
+
+    Reservada para uso interno en 'data.py'. Se pueden buscar geometrías
+    utilizando 'CensusBlocksSearch', que internamente utilizará esta clase.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(es_config.geom_index_for(N.CENSUS_BLOCKS), query)
+
+
+class CensusBlocksSearch(TerritoriesSearch):
+    """Representa una búsqueda de aglomerados.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(N.CENSUS_BLOCKS, query,
+                         geom_search_class=CensusBlocksGeometrySearch)
+
+
 class LocalGovernmentsGeometrySearch(TerritoriesSearch):
     """Representa una búsqueda de geometrías de gobiernos locales.
 
@@ -975,6 +1053,9 @@ class LocalitiesSearch(TerritoriesSearch):
 _ENTITY_SEARCH_CLASSES = {
     N.STATES: StatesSearch,
     N.DEPARTMENTS: DepartmentsSearch,
+    N.AGGLOMERATIONS: AgglomerationsSearch,
+    N.CENSUS_TRACTS: CensusTractsSearch,
+    N.CENSUS_BLOCKS: CensusBlocksSearch,
     N.LOCAL_GOVERNMENTS: LocalGovernmentsSearch,
     N.MUNICIPALITIES: LocalGovernmentsSearch,
     N.CENSUS_LOCALITIES: CensusLocalitiesSearch,

@@ -229,6 +229,78 @@ def process_department(request):
             N.MAX: 'size'
         })
 
+def process_agglomeration(request):
+    """Procesa una request GET o POST para consultar datos de aglomerados.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    return _process_entity(
+        request, N.AGGLOMERATIONS,
+        params.PARAMS_AGGLOMERATIONS, {
+            N.ID: 'ids',
+            N.NAME: 'name',
+            N.INTERSECTION: 'geo_shape_ids',
+            N.EXACT: 'exact',
+            N.ORDER: 'order',
+            N.FIELDS: 'fields',
+            N.OFFSET: 'offset',
+            N.MAX: 'size'
+        })
+
+def process_census_tracts(request):
+    """Procesa una request GET o POST para consultar datos de fracciones censales.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    return _process_entity(
+        request, N.CENSUS_TRACTS,
+        params.PARAMS_CENSUS_TRACTS, {
+            N.ID: 'ids',
+            N.INTERSECTION: 'geo_shape_ids',
+            N.STATE: 'state',
+            N.EXACT: 'exact',
+            N.ORDER: 'order',
+            N.FIELDS: 'fields',
+            N.OFFSET: 'offset',
+            N.MAX: 'size'
+        })
+
+def process_census_blocks(request):
+    """Procesa una request GET o POST para consultar datos de radios censales.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    return _process_entity(
+        request, N.CENSUS_BLOCKS,
+        params.PARAMS_CENSUS_BLOCKS, {
+            N.ID: 'ids',
+            N.NAME: 'name',
+            N.INTERSECTION: 'geo_shape_ids',
+            N.STATE: 'state',
+            N.EXACT: 'exact',
+            N.ORDER: 'order',
+            N.FIELDS: 'fields',
+            N.OFFSET: 'offset',
+            N.MAX: 'size'
+        })
 
 def process_municipality(request):
     """Procesa una request GET o POST para consultar datos de gobiernos locales.
