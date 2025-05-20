@@ -295,6 +295,7 @@ def process_census_blocks(request):
             N.NAME: 'name',
             N.INTERSECTION: 'geo_shape_ids',
             N.STATE: 'state',
+            N.CENSUS_TRACT: 'census_tract',
             N.EXACT: 'exact',
             N.ORDER: 'order',
             N.FIELDS: 'fields',

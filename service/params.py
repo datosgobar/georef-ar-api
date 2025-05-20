@@ -1270,6 +1270,7 @@ PARAMS_CENSUS_BLOCKS = EndpointParameters(shared_params={
                                                     N.STREET]),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
                                 StrParameter()]),
+    N.CENSUS_TRACT: CompoundParameter([IdsParameter(constants.CENSUS_TRACT_ID_LEN)]),
     N.ORDER: StrParameter(choices=[N.ID]),
     N.FLATTEN: BoolParameter(),
     N.FIELDS: FieldListParameter(basic=[N.ID],

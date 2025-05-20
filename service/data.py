@@ -966,6 +966,21 @@ class CensusBlocksSearch(TerritoriesSearch):
         super().__init__(N.CENSUS_BLOCKS, query,
                          geom_search_class=CensusBlocksGeometrySearch)
 
+    def _read_query(self, ids=None, name=None, census_locality=None, local_government=None, department=None, state=None,
+                    exact=False, geo_shape_geoms=None, order=None, **kwargs):
+
+        census_tract = kwargs.pop('census_tract', None)
+
+        super()._read_query(ids, name, census_locality, local_government, department, state, exact, geo_shape_geoms,
+                            order, **kwargs)
+        if census_tract:
+            self._search = self._search.query(_build_subentity_query(
+                N.CENSUS_TRACT_ID,
+                "",
+                census_tract,
+                exact
+            ))
+
 
 class LocalGovernmentsGeometrySearch(TerritoriesSearch):
     """Representa una búsqueda de geometrías de gobiernos locales.
