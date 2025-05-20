@@ -1237,7 +1237,7 @@ PARAMS_AGGLOMERATIONS = EndpointParameters(shared_params={
 )
 
 PARAMS_CENSUS_TRACTS = EndpointParameters(shared_params={
-    N.ID: IdsParameter(id_length=constants.CENSUS_TRACTS_ID_LEN),
+    N.ID: IdsParameter(id_length=constants.CENSUS_TRACT_ID_LEN),
     N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE,
                                                     N.STREET]),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
@@ -1265,7 +1265,7 @@ PARAMS_CENSUS_TRACTS = EndpointParameters(shared_params={
 )
 
 PARAMS_CENSUS_BLOCKS = EndpointParameters(shared_params={
-    N.ID: IdsParameter(id_length=constants.CENSUS_BLOCKS_ID_LEN),
+    N.ID: IdsParameter(id_length=constants.CENSUS_BLOCK_ID_LEN),
     N.INTERSECTION: IntersectionParameter(entities=[N.DEPT, N.STATE,
                                                     N.STREET]),
     N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
