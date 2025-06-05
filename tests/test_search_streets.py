@@ -29,7 +29,7 @@ class SearchStreetsTest(GeorefLiveTest):
     def test_id_length(self):
         """El ID de la entidad debe tener la longitud correcta."""
         data = self.get_response({'max': 1})[0]
-        self.assertTrue(len(data['id']) == 13)
+        self.assertTrue(len(data['id']) == 15)
 
     def test_name_ordering(self):
         """Los resultados deben poder ser ordenados por nombre."""
@@ -202,7 +202,7 @@ class SearchStreetsTest(GeorefLiveTest):
 
     def test_id_search(self):
         """Se debería poder buscar calles por ID."""
-        identifier = '8208416001280'
+        identifier = '820841600001280'
         data = self.get_response({'id': identifier})[0]
 
         self.assertEqual(identifier, data['id'])
@@ -254,7 +254,7 @@ class SearchStreetsTest(GeorefLiveTest):
                 'max': 3
             },
             {
-                'id': '8208416001280'
+                'id': '820841600001280'
             },
             {
                 'campos': 'nombre,categoria'

@@ -18,7 +18,7 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
         self.assert_between_search_ids_matches(
             'Espejo entre Lamadrid y French',
             [
-                ('5002802004425', '5002802004460', '5002802003795')
+                ('500280200004425', '500280200004460', '500280200003795')
             ]
         )
 
@@ -29,7 +29,7 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
         self.assert_between_search_ids_matches(
             'Espejo entre French y Lamadrid',
             [
-                ('5002802004425', '5002802003795', '5002802004460')
+                ('500280200004425', '500280200003795', '500280200004460')
             ]
         )
 

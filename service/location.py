@@ -3,7 +3,7 @@
 Contiene las clases y funciones necesarias para la implementación del recurso
 /ubicacion de la API.
 """
-from service.constants import SB_DISTANCE_TOLERANCE, STREET_ID_LEN, SB_MAX_SEARCH
+from service.constants import SB_DISTANCE_TOLERANCE, SB_MAX_SEARCH
 from service.data import ElasticsearchSearch, StatesSearch, DepartmentsSearch, StreetBlocksSearch
 from service.data import LocalGovernmentsSearch
 from service import names as N

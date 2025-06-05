@@ -68,7 +68,7 @@ class ResponsesTest(GeorefMockTest):
         """Los parámetros enviados a la API deberían estar presentes bajo el
         valor 'parametros' (formato XML)."""
         params = {
-            'id': '1401401027080',
+            'id': '140140100027080',
             'max': 1,
             'aplanar': True,
             'orden': 'id',
