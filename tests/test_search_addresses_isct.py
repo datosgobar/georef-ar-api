@@ -35,7 +35,7 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         self.assert_intersection_search_ids_matches(
             'Av. San Juan y Piedras',
             [
-                ('0200701001725', '0200701009350')
+                ('020070100001725', '020070100009350')
             ])
 
     def test_basic_intersection_search_reversed(self):
@@ -45,7 +45,7 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         self.assert_intersection_search_ids_matches(
             'Piedras y Av. San Juan',
             [
-                ('0200701009350', '0200701001725')
+                ('020070100009350', '020070100001725')
             ])
 
     def test_intersection_search_keywords(self):
@@ -54,7 +54,7 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         self.assert_intersection_search_ids_matches(
             'Larrea esquina Sarmiento',  # al 3500?
             [
-                ('0202101007345', '0202101010480')
+                ('020210100007345', '020210100010480')
             ],
             params={
                 'provincia': '02'
