@@ -4,9 +4,9 @@ georef-ar-address==0.0.9
 geojson==2.3.0
 gunicorn[gevent]==19.9.0
 requests==2.20.0
-shapely==1.6.4.post2
+shapely==2.0.7
 pyshp==2.0.1
 tqdm==4.31.1
-Werkzeug==2.3.7
+Werkzeug==2.0.0
 
-pyproj~=3.0.0
+pyproj==3.6.1
