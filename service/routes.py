@@ -106,7 +106,7 @@ def get_census_blocks():
 @bp_v1_0.route('/municipios', methods=['GET', 'POST'])
 @add_params(categoria="Municipio")
 def get_municipalities():
-    return normalizer.process_minicipality(request)
+    return normalizer.process_municipality(request)
 
 
 @bp_v1_0.route('/gobiernos-locales', methods=['GET', 'POST'])
