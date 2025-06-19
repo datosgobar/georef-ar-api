@@ -771,8 +771,8 @@ class StreetBlocksSearch(TerritoriesSearch):
 
         if locality:
             self._search = self._search.query(_build_subentity_query(
-                N.LOCALITY_ID,
-                N.LOCALITY_NAME,
+                N.join(N.STREET, N.LOCALITY_ID),
+                N.join(N.STREET, N.LOCALITY_NAME),
                 locality,
                 exact
             ))
