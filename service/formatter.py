@@ -536,7 +536,9 @@ def create_404_error_response():
                 '/api/localidades',
                 '/api/calles',
                 '/api/direcciones',
-                '/api/ubicacion'
+                '/api/ubicacion',
+                '/api/cuadras',
+                '/api/establecimientos-educativos'
             ]
         }
     ]

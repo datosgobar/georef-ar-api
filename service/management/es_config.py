@@ -228,6 +228,14 @@ CensusLocalitySubField = Object(
     dynamic='strict'
 )
 
+SettlementSubField = Object(
+    properties={
+        'id': Keyword(),
+        'nombre': NameField
+    },
+    dynamic='strict'
+)
+
 LocalitySubField = Object(
     properties={
         'id': Keyword(),
@@ -444,6 +452,28 @@ class StreetBlock(Entity):
     localidad_censal = CensusLocalitySubField
     localidad = LocalitySubField
     geometria = GeoShape()
+
+
+class EducationalInstitution(Entity):
+    nombre = NameField
+    fuente = UnindexedTextField
+    # Indexar las categorías, ya que se puede filtrar por las mismas
+    categoria = Text(
+        analyzer=name_analyzer_synonyms,
+        search_analyzer=name_analyzer
+    )
+    gestion = Text(
+        analyzer=name_analyzer_synonyms,
+        search_analyzer=name_analyzer
+    )
+    domicilio = UnindexedTextField
+    niveles = UnindexedTextField
+    centroide = CentroidField
+    geometria = GeoShape()
+    provincia = StateSubField
+    departamento = DepartmentSubField
+    gobierno_local = LocalGovernmentSubField
+    asentamiento = SettlementSubField
 
 
 def create_index(es, name, doc_class, shards, replicas, synonyms=None,

@@ -67,6 +67,7 @@ INDEX_NAMES = [
     N.STREETS,
     N.INTERSECTIONS,
     N.STREET_BLOCKS,
+    N.EDUCATIONAL_INSTITUTIONS,
     'all'
 ]
 ES_TIMEOUT = 720
@@ -947,7 +948,15 @@ def run_index(es, forced, name='all', verbose=False):
                     excluding_terms_filepath=app.config[
                         'EXCLUDING_TERMS_FILE'],
                     backup_filepath=os.path.join(backups_dir,
-                                                 'cuadras.ndjson'))
+                                                 'cuadras.ndjson')),
+        GeorefIndex(alias=N.EDUCATIONAL_INSTITUTIONS,
+                    doc_class=es_config.EducationalInstitution,
+                    filepath=app.config['EDUCATIONAL_INSTITUTIONS_FILE'],
+                    synonyms_filepath=app.config['SYNONYMS_FILE'],
+                    excluding_terms_filepath=app.config[
+                        'EXCLUDING_TERMS_FILE'],
+                    backup_filepath=os.path.join(backups_dir,
+                                                 'establecimientos_educativos.ndjson')),
     ]
 
     files_cache = {}

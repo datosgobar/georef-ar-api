@@ -1054,6 +1054,37 @@ class SettlementsSearch(TerritoriesSearch):
             ))
 
 
+class EducationalInstitutionsSearch(TerritoriesSearch):
+    """Representa una búsqueda de establecimientos educativos.
+
+    Ver documentación de la clase 'TerritoriesSearch' para más información.
+
+    """
+
+    def __init__(self, query):
+        super().__init__(N.EDUCATIONAL_INSTITUTIONS, query)
+
+    def _read_query(self, ids=None, name=None, census_locality=None, local_government=None, department=None, state=None,
+                    exact=False, geo_shape_geoms=None, order=None, category=None, administration=None, settlement=None,
+                    **kwargs):
+        super()._read_query(ids, name, census_locality, local_government, department, state, exact, geo_shape_geoms,
+                            order, **kwargs)
+
+        if category:
+            self._search = self._search.query(_build_match_query(
+                N.CATEGORY,
+                category,
+                fuzzy=True
+            ))
+
+        if administration:
+            self._search = self._search.query(_build_match_query(
+                N.ADMINISTRATION,
+                administration,
+                fuzzy=True
+            ))
+
+
 class LocalitiesSearch(TerritoriesSearch):
     """Representa una búsqueda de localidades.
 
@@ -1077,7 +1108,8 @@ _ENTITY_SEARCH_CLASSES = {
     N.SETTLEMENTS: SettlementsSearch,
     N.LOCALITIES: SettlementsSearch,
     N.STREETS: StreetsSearch,
-    N.STREET_BLOCKS: StreetBlocksSearch
+    N.STREET_BLOCKS: StreetBlocksSearch,
+    N.EDUCATIONAL_INSTITUTIONS: EducationalInstitutionsSearch,
 }
 """dict: Mantiene un registro de nombres de índices vs. clase a utilizar para
 buscar en los mismos."""

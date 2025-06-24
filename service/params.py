@@ -1606,3 +1606,43 @@ PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
     [N.MAX, N.OFFSET],
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
+
+PARAMS_EDUCATIONAL_INSTITUTIONS = EndpointParameters(shared_params={
+    N.ID: IdsParameter(id_length=constants.STREET_BLOCK_ID_LEN),
+    N.NAME: StrParameter(),
+    N.CATEGORY: StrParameter(),
+    N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
+                               StrParameter()]),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.LG: CompoundParameter([IdsParameter(constants.LOCAL_GOVERNMENT_ID_LEN),
+                             StrParameter()]),
+    N.SETTLEMENT: CompoundParameter([IdsFixedLengthParameter(*constants.LOCALITY_ID_LEN),
+        StrParameter()]),
+    N.ADMINISTRATION: StrParameter(),
+    N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
+    N.FLATTEN: BoolParameter(),
+    N.FIELDS: FieldListParameter(basic=[N.C_LAT, N.C_LON, N.ID],
+                                 standard=[N.STATE_ID, N.STATE_NAME,
+                                           N.DEPT_ID, N.DEPT_NAME,
+                                           N.LG_ID, N.LG_NAME,
+                                           N.SETTLEMENT_ID, N.SETTLEMENT_NAME,
+                                           N.RAW_ADDRESS, N.NAME],
+                                 complete=[
+                                     N.CATEGORY, N.ADMINISTRATION, N.SOURCE
+                                 ]),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
+    N.EXACT: BoolParameter()
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json',
+                           choices=['json', 'csv', 'xml', 'shp'])
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+)

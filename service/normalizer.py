@@ -870,3 +870,32 @@ def process_street_block(request):
         N.OFFSET: 'offset',
         N.MAX: 'size'
     })
+
+
+def process_educational_institutions(request):
+    """Procesa una request GET o POST para consultar datos de establecimientos educativos.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    return _process_entity(request, N.EDUCATIONAL_INSTITUTIONS, params.PARAMS_EDUCATIONAL_INSTITUTIONS, {
+        N.ID: 'ids',
+        N.NAME: 'name',
+        N.CATEGORY: 'category',
+        N.ADMINISTRATION: 'administration',
+        N.STATE: 'state',
+        N.DEPT: 'department',
+        N.SETTLEMENT: 'settlement',
+        N.LG: 'local_government',
+        N.EXACT: 'exact',
+        N.ORDER: 'order',
+        N.FIELDS: 'fields',
+        N.OFFSET: 'offset',
+        N.MAX: 'size'
+    })
+
