@@ -1638,7 +1638,7 @@ PARAMS_EDUCATIONAL_INSTITUTIONS = EndpointParameters(shared_params={
     N.EXACT: BoolParameter()
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
-                           choices=['json', 'csv', 'xml', 'shp'])
+                           choices=['json', 'csv', 'geojson', 'xml', 'shp'])
 }).with_set_validator(
     N.MAX,
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)

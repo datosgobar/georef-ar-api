@@ -51,6 +51,7 @@ STREET_X1 = 'calle_cruce_1'
 STREET_X2 = 'calle_cruce_2'
 STREETS = 'calles'
 STREET_BLOCKS = 'cuadras'
+EDUCATIONAL_INSTITUTION = 'establecimiento_educativo'
 EDUCATIONAL_INSTITUTIONS = 'establecimientos_educativos'
 INTERSECTION = 'interseccion'
 INTERSECTIONS = 'intersecciones'
@@ -172,7 +173,8 @@ _PLURALS = {
     RESULT: RESULTS,
     ERROR: ERRORS,
     INTERSECTION: INTERSECTIONS,
-    STREET_BLOCK: STREET_BLOCKS
+    STREET_BLOCK: STREET_BLOCKS,
+    EDUCATIONAL_INSTITUTION: EDUCATIONAL_INSTITUTIONS,
 }
 
 _SINGULARS = {value: key for key, value in _PLURALS.items()}
