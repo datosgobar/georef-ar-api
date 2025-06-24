@@ -45,7 +45,8 @@ def add_complete_downloads(bp, urls):
     """
     entities = [N.STATES, N.DEPARTMENTS, N.LOCAL_GOVERNMENTS.replace('_', '-'),
                 N.CENSUS_LOCALITIES.replace('_', '-'), N.SETTLEMENTS,
-                N.LOCALITIES, N.STREETS, N.STREET_BLOCKS, N.EDUCATIONAL_INSTITUTIONS.replace('_', '-')]
+                N.LOCALITIES, N.STREETS, N.STREET_BLOCKS, N.EDUCATIONAL_INSTITUTIONS.replace('_', '-'),
+                N.UNIVERSITY_INSTITUTIONS.replace('_', '-')]
     formats = ['json', 'csv', 'geojson', 'ndjson']
 
     for entity in entities:
@@ -150,6 +151,9 @@ def get_location():
 def get_educational_institutions():
     return normalizer.process_educational_institutions(request)
 
+@bp_v1_0.route('/instituciones-universitarias', methods=['GET', 'POST'])
+def get_university_institutions():
+    return normalizer.process_university_institutions(request)
 
 @bp_v1_0.route('/cuadras', methods=['GET', 'POST'])
 def get_street_blocks():

@@ -462,18 +462,40 @@ class EducationalInstitution(Entity):
         analyzer=name_analyzer_synonyms,
         search_analyzer=name_analyzer
     )
+    domicilio = UnindexedTextField
+    localidad = UnindexedTextField
     gestion = Text(
         analyzer=name_analyzer_synonyms,
         search_analyzer=name_analyzer
     )
-    domicilio = UnindexedTextField
     niveles = UnindexedTextField
     centroide = CentroidField
     geometria = GeoShape()
     provincia = StateSubField
     departamento = DepartmentSubField
-    gobierno_local = LocalGovernmentSubField
-    asentamiento = SettlementSubField
+
+
+class UniversityInstitutions(Entity):
+    nombre = NameField
+    fuente = UnindexedTextField
+    # Indexar las categorías, ya que se puede filtrar por las mismas
+    categoria = Text(
+        analyzer=name_analyzer_synonyms,
+        search_analyzer=name_analyzer
+    )
+    domicilio = UnindexedTextField
+    localidad = UnindexedTextField
+    gestion = Text(
+        analyzer=name_analyzer_synonyms,
+        search_analyzer=name_analyzer
+    )
+    niveles = UnindexedTextField
+    universidad = UnindexedTextField
+    unidad_academica = UnindexedTextField
+    centroide = CentroidField
+    geometria = GeoShape()
+    provincia = StateSubField
+    departamento = DepartmentSubField
 
 
 def create_index(es, name, doc_class, shards, replicas, synonyms=None,

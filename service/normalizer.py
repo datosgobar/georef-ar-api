@@ -899,3 +899,30 @@ def process_educational_institutions(request):
         N.MAX: 'size'
     })
 
+def process_university_institutions(request):
+    """Procesa una request GET o POST para consultar datos de establecimientos educativos.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    return _process_entity(request, N.UNIVERSITY_INSTITUTIONS, params.PARAMS_UNIVERSITY_INSTITUTIONS, {
+        N.ID: 'ids',
+        N.NAME: 'name',
+        N.CATEGORY: 'category',
+        N.ADMINISTRATION: 'administration',
+        N.STATE: 'state',
+        N.DEPT: 'department',
+        N.UNIVERSITY: 'university',
+        N.EXACT: 'exact',
+        N.ORDER: 'order',
+        N.FIELDS: 'fields',
+        N.OFFSET: 'offset',
+        N.MAX: 'size'
+    })
+
+

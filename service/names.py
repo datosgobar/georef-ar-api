@@ -53,6 +53,8 @@ STREETS = 'calles'
 STREET_BLOCKS = 'cuadras'
 EDUCATIONAL_INSTITUTION = 'establecimiento_educativo'
 EDUCATIONAL_INSTITUTIONS = 'establecimientos_educativos'
+UNIVERSITY_INSTITUTION = 'institucion_universitaria'
+UNIVERSITY_INSTITUTIONS = 'instituciones_universitarias'
 INTERSECTION = 'interseccion'
 INTERSECTIONS = 'intersecciones'
 ADDRESS = 'direccion'
@@ -85,6 +87,9 @@ GEOM = 'geometria'
 HELP = 'ayuda'
 CATEGORY = 'categoria'
 ADMINISTRATION = 'gestion'
+ACADEMIC_UNITY = 'unidad_academica'
+LEVELS = 'niveles'
+UNIVERSITY = 'universidad'
 ID = 'id'
 ITEM = 'item'
 LAT = 'lat'
@@ -175,6 +180,7 @@ _PLURALS = {
     INTERSECTION: INTERSECTIONS,
     STREET_BLOCK: STREET_BLOCKS,
     EDUCATIONAL_INSTITUTION: EDUCATIONAL_INSTITUTIONS,
+    UNIVERSITY_INSTITUTION: UNIVERSITY_INSTITUTIONS,
 }
 
 _SINGULARS = {value: key for key, value in _PLURALS.items()}
