@@ -487,7 +487,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
                         street_block[N.DOOR_NUM],
                         self._numerical_door_number,
                         approximate=True,
-                        displacement=self._displacement
+                        displacement=6 if self._displacement else 0
                     )
                     address_hit[N.LOCATION] = point.to_json_location()
                     address_hit[N.GEOM] = point.to_geojson()
