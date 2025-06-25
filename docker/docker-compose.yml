@@ -36,6 +36,7 @@ services:
       - ../source:/opt/app-root/src/georef-ar-api/source
       - ../logs:/opt/app-root/src/georef-ar-api/logs
       - ../backups:/opt/app-root/src/georef-ar-api/backups
+      - ../cache:/opt/app-root/src/georef-ar-api/cache
     ports:
       - 8080:5000
     networks:
