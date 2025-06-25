@@ -138,7 +138,7 @@ class AddressQueryPlanner(ABC):
         # En la mayoría de los casos, las tres calles van a ser del mismo
         # lugar.
         fmt = {
-            'loc': streets[0][N.LOCALITY][N.NAME],
+            'loc': streets[0][N.LOCALITY][N.NAME] or streets[0][N.CENSUS_LOCALITY][N.NAME],
             'state': streets[0][N.STATE][N.NAME],
             'dept': streets[0][N.DEPT][N.NAME],
             'door_number': door_number

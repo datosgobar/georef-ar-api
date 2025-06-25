@@ -52,7 +52,7 @@ def run_street_queries(es, params_list, queries, formats):
             # Agregar nomenclatura a cada hit del resultado.
             for hit in search.result.hits:
                 full_name = '{}, {}, {}, {}'.format(
-                    hit[N.NAME], hit[N.LOCALITY][N.NAME], hit[N.DEPT][N.NAME], hit[N.STATE][N.NAME]
+                    hit[N.NAME], hit[N.LOCALITY][N.NAME] or hit[N.CENSUS_LOCALITY][N.NAME], hit[N.DEPT][N.NAME], hit[N.STATE][N.NAME]
                 )
                 hit[N.FULL_NAME] = full_name
 
