@@ -1657,7 +1657,7 @@ PARAMS_UNIVERSITY_INSTITUTIONS = EndpointParameters(shared_params={
                                            N.DEPT_ID, N.DEPT_NAME,
                                            N.LOCALITY, N.RAW_ADDRESS, N.NAME],
                                  complete=[
-                                     N.CATEGORY, N.ADMINISTRATION, N.SOURCE, N.LEVELS
+                                     N.CATEGORY, N.ADMINISTRATION, N.SOURCE, N.LEVELS, N.ACADEMIC_UNITY, N.UNIVERSITY
                                  ]),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
