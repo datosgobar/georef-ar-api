@@ -490,7 +490,8 @@ class UniversityInstitutions(Entity):
         search_analyzer=name_analyzer
     )
     niveles = UnindexedTextField
-    universidad = UnindexedTextField
+    # Indexar las universidades, ya que se puede filtrar por las mismas
+    universidad = NameField
     unidad_academica = UnindexedTextField
     centroide = CentroidField
     geometria = GeoShape()

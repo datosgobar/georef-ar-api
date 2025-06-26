@@ -1115,10 +1115,10 @@ class UniversityInstitutionsSearch(TerritoriesSearch):
             ))
 
         if university:
-            self._search = self._search.query(_build_match_query(
+            self._search = self._search.query(_build_name_query(
                 N.UNIVERSITY,
                 university,
-                fuzzy=True
+                exact
             ))
 
 class LocalitiesSearch(TerritoriesSearch):
