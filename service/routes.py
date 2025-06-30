@@ -147,6 +147,11 @@ def get_location():
     return normalizer.process_location(request)
 
 
+@bp_v1_0.route('/establecimientos-cercanos', methods=['GET'])
+@disable_cache
+def get_nearby_establishments():
+    return normalizer.process_nearby_establishments(request)
+
 @bp_v1_0.route('/establecimientos-educativos', methods=['GET', 'POST'])
 def get_educational_institutions():
     return normalizer.process_educational_institutions(request)

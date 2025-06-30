@@ -229,6 +229,7 @@ def process_department(request):
             N.MAX: 'size'
         })
 
+
 def process_agglomeration(request):
     """Procesa una request GET o POST para consultar datos de aglomerados.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
@@ -252,6 +253,7 @@ def process_agglomeration(request):
             N.OFFSET: 'offset',
             N.MAX: 'size'
         })
+
 
 def process_census_tracts(request):
     """Procesa una request GET o POST para consultar datos de fracciones censales.
@@ -277,6 +279,7 @@ def process_census_tracts(request):
             N.OFFSET: 'offset',
             N.MAX: 'size'
         })
+
 
 def process_census_blocks(request):
     """Procesa una request GET o POST para consultar datos de radios censales.
@@ -304,6 +307,7 @@ def process_census_blocks(request):
             N.OFFSET: 'offset',
             N.MAX: 'size'
         })
+
 
 def process_municipality(request):
     """Procesa una request GET o POST para consultar datos de gobiernos locales.
@@ -843,6 +847,115 @@ def process_location(request):
         return formatter.create_internal_error_response()
 
 
+def _build_establishments_query_format(parsed_params):
+    """Construye dos diccionarios a partir de parámetros de consulta
+    recibidos, el primero representando la query a Elasticsearch a
+    realizar y el segundo representando las propiedades de formato
+    (presentación) que se le debe dar a los datos obtenidos de la misma.
+
+    Args:
+        parsed_params (dict): Parámetros de una consulta para una ubicación.
+
+    Returns:
+        tuple: diccionario de query y diccionario de formato
+
+    """
+    # Construir query a partir de parámetros
+    query = utils.translate_keys(parsed_params, {
+
+    }, ignore=[N.FLATTEN, N.FORMAT])
+
+    # Construir reglas de formato a partir de parámetros
+    fmt = {
+        key: parsed_params[key]
+        for key in [N.FLATTEN, N.FIELDS, N.FORMAT]
+        if key in parsed_params
+    }
+
+    return query, fmt
+
+
+def _process_nearby_establishments_single(request):
+    """Procesa una request GET para consultar datos de establecimientos cercanos a una ubicación.
+        En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+        Args:
+            request (flask.Request): Request GET de flask.
+            name (str): Nombre de la entidad.
+            param_parser (ParameterSet): Objeto utilizado para parsear los
+                parámetros.
+            key_translations (dict): Traducciones de keys a utilizar para convertir
+                el diccionario de parámetros del usuario a un diccionario
+                representando una query a Elasticsearch.
+
+        Raises:
+            data.DataConnectionException: En caso de ocurrir un error de
+                conexión con la capa de manejo de datos.
+
+        Returns:
+            flask.Response: respuesta HTTP
+
+        """
+    try:
+        qs_params = params.PARAMS_NEARBY_ESTABLISHMENTS.parse_get_params(request.args)
+    except params.ParametersParseException as e:
+        return formatter.create_param_error_response_single(e.errors, e.fmt)
+
+    query, fmt = _build_establishments_query_format(qs_params.values)
+    tipo = request.args.get('tipo', 'todas').lower()
+    es = get_elasticsearch()
+
+    # Armar búsquedas según el tipo de establecimiento
+    searches = []
+    if tipo in ('educativo', 'todas'):
+        searches.append(data.EducationalEstablishmentsSearch(query))
+    if tipo in ('universitario', 'todas'):
+        searches.append(data.UniversityEstablishmentsSearch(query))
+
+    data.ElasticsearchSearch.run_searches(es, searches)
+
+    hits = []
+    total = 0
+    for s in searches:
+        hits.extend(s.result.hits)
+        total += s.result.total
+
+    query_result = QueryResult.from_entity_list(
+        hits, qs_params.received_values(), total, offset=0
+    )
+
+    return formatter.create_ok_response('establecimientos_cercanos', query_result, fmt)
+
+
+def process_nearby_establishments(request):
+    """Procesa una request GET o POST para consultar establecimientos cercanos a una o varias ubicaciones.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+    En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+        name (str): Nombre de la entidad.
+        param_parser (ParameterSet): Objeto utilizado para parsear los
+            parámetros.
+        key_translations (dict): Traducciones de keys a utilizar para convertir
+            los diccionarios de parámetros del usuario a una lista de
+            diccionarios representando las queries a Elasticsearch.
+
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    try:
+        if request.method == 'GET':
+            return _process_nearby_establishments_single(request)
+
+        raise NotImplementedError('Method not implemented')
+    except data.DataConnectionException:
+        logger.exception(
+            'Excepción en manejo de consulta para recurso: establecimientos-cercanos')
+        return formatter.create_internal_error_response()
+
+
 def process_street_block(request):
     """Procesa una request GET o POST para consultar datos de cuadras.
     En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
@@ -898,6 +1011,7 @@ def process_educational_institutions(request):
         N.OFFSET: 'offset',
         N.MAX: 'size'
     })
+
 
 def process_university_institutions(request):
     """Procesa una request GET o POST para consultar datos de establecimientos educativos.

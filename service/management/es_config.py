@@ -19,7 +19,7 @@ https://www.elastic.co/guide/en/elasticsearch/reference/current/general-recommen
 
 """
 
-from elasticsearch_dsl import Document, Index
+from elasticsearch_dsl import Document, Index, GeoPoint
 from elasticsearch_dsl import analyzer, normalizer, token_filter
 from elasticsearch_dsl import Object, Float, GeoShape, Keyword, Text, Integer
 from elasticsearch_dsl import MetaField
@@ -469,7 +469,7 @@ class EducationalInstitution(Entity):
         search_analyzer=name_analyzer
     )
     niveles = UnindexedTextField
-    centroide = CentroidField
+    centroide = GeoPoint()
     geometria = GeoShape()
     provincia = StateSubField
     departamento = DepartmentSubField
@@ -493,7 +493,7 @@ class UniversityInstitutions(Entity):
     # Indexar las universidades, ya que se puede filtrar por las mismas
     universidad = NameField
     unidad_academica = UnindexedTextField
-    centroide = CentroidField
+    centroide = GeoPoint()
     geometria = GeoShape()
     provincia = StateSubField
     departamento = DepartmentSubField

@@ -1563,6 +1563,20 @@ PARAMS_LOCATION = EndpointParameters(shared_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml'])
 })
 
+PARAMS_NEARBY_ESTABLISHMENTS = EndpointParameters(shared_params={
+    N.LAT: FloatParameter(required=True),
+    N.LON: FloatParameter(required=True),
+    N.TYPE: StrParameter(),
+    N.ADMINISTRATION: StrParameter(),
+    N.DISTANCE: IntParameter(default=1000),
+    N.FLATTEN: BoolParameter(),
+    N.FIELDS: FieldListParameter(basic=[N.CENTROID, N.ID, N.ESTABLISHMENT_TYPE],
+                                 standard=[N.NAME, N.RAW_ADDRESS, N.DISTANCE],
+                                 complete=[N.SOURCE])
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml'])
+})
+
 PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STREET_BLOCK_ID_LEN),
     N.STREET: IdsParameter(id_length=constants.STREET_ID_LEN),

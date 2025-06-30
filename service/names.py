@@ -64,6 +64,8 @@ LOCATIONS = 'ubicaciones'
 RESULT = 'resultado'
 RESULTS = 'resultados'
 RAW_ADDRESS = 'domicilio'
+NEARBY_ESTABLISHMENTS = 'near_buildings'
+ESTABLISHMENT_TYPE = 'tipo_establecimiento'
 
 # Campos, parámetros, etc.
 BASIC = 'basico'
@@ -111,6 +113,7 @@ UNIT = 'unidad'
 VALUE = 'valor'
 DISP = 'desplazar'
 VERIFY = 'verificar'
+DISTANCE = 'distancia'
 
 ##########################
 #    Valores compuestos  #
