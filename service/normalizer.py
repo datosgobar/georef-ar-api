@@ -862,7 +862,7 @@ def _build_establishments_query_format(parsed_params):
     """
     # Construir query a partir de parámetros
     query = utils.translate_keys(parsed_params, {
-
+        N.ADMINISTRATION: "administration"
     }, ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
