@@ -141,7 +141,6 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
                                       ['id', 'fuente', 'nombre',
                                        'centroide.lat', 'centroide.lon',
                                        'provincia.id', 'provincia.nombre',
-                                       'provincia.interseccion',
                                        'categoria', 'nombre_completo'])
 
     def test_name_ordering(self):
@@ -404,7 +403,6 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
                                        'gobierno_local_centroide_lon',
                                        'provincia_id',
                                        'provincia_nombre',
-                                       'provincia_interseccion',
                                        'gobierno_local_fuente',
                                        'gobierno_local_categoria'])
 
@@ -449,7 +447,6 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
             'id',
             'prov_id',
             'prov_nombre',
-            'prov_intscn',
             'centr_lat',
             'centr_lon',
             'fuente',
