@@ -386,21 +386,16 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             siguiente:
 
                 Si existe una o más cuadra con numeración válida
-                (según la condición de StreetBlocksSearch._read_query) que contiene la altura indicada se colocarán
-                en la lista de cuadras incluidas.
+                (según la condición de StreetBlocksSearch._read_query) que contiene la altura indicada se incorporará a
+                la lista.
 
                 Si se verifica que la numeración de la cuadra es válida (cumple con una numeración final, en
                 alguna mano, extrictamente mayor a la numeración inicial de la misma mano o su contraria) y la
-                altura queda excluida de la numeración de esa cuadra, se colocará en la lista de cuadras excluidas.
+                altura queda excluida de la numeración de esa cuadra, se omitirá.
 
                 Si no se cumple ninguna de las condiciones anteriores es probable que la cuadra no tenga numeración,
                 lo que indica que podría ser candidata a contener la altura indicada por el usuario. En ese caso
-                se la colocará en la lista de cuadras sin información.
-
-                Luego, se construirá una lista de cuadras conteniendo al principio las cuadras incluidas y a
-                continuación las cuadras sin información. Para las primeras se debería poder obtener la ubicación
-                exacta sin inconveniente. Para las segundas se podría optar por calcular el baricentro de la cuadra,
-                pero se considera conveniente devolver un valor None para la ubicación en este caso.
+                se incorporará a la lista.
 
                 Finalmente, se recortará la lista a los primeros "max" resultados indicados.
 
@@ -410,12 +405,10 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
         :param number: La altura especificada en la dirección.
         :param all_street_blocks: Una lista de todas la cuadras devueltas por la consulta a Elasticsearch.
-        :return: Una tupla de tres listas de cuadras: las que contienen la altura, las que no la contienen
-            y las que no se sabe.
+        :return: Una lista de cuadras: las que contienen la altura y las que no se sabe.
         """
-        included_street_blocks = []
-        excluded_street_blocks = []
-        unknown_street_blocks = []
+
+        filtered_street_blocks = []
 
         def is_include(s, n, e):
             if not isinstance(s, int):
@@ -438,7 +431,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             left_condition = is_include(start_l, number, end_l)
             include_condition = right_condition or left_condition
             if include_condition:
-                included_street_blocks.append(sb)
+                filtered_street_blocks.append(sb)
                 continue
 
             # Si la cuadra no contiene una numeración que involucre la altura, se verifica si la excluye
@@ -446,14 +439,13 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             end = max(end_r, end_l)
             exclude_condition = start < end and isinstance(number, int) and (number > end or number < end)
             if exclude_condition:
-                excluded_street_blocks.append(sb)
                 continue
 
             # Si no se pudo determinar la inclusión o exclusión de la altura (este es el caso de las cuadras sin
             # numeración) se la agrega a la lista de desconocidas
-            unknown_street_blocks.append(sb)
+            filtered_street_blocks.append(sb)
 
-        return included_street_blocks, excluded_street_blocks, unknown_street_blocks
+        return filtered_street_blocks
 
     def _build_address_hits(self):
         """Construye los resultados de la búsqueda de direcciones a partir
@@ -468,11 +460,10 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
         street_blocks = self._elasticsearch_result.hits
         if not self._verify:
-            included_street_blocks, excluded_street_blocks, unknown_street_blocks = self._filter_street_blocks(
+            filtered_street_blocks = self._filter_street_blocks(
                 self._address_data.normalized_door_number_value(), street_blocks
             )
-            street_blocks = included_street_blocks + unknown_street_blocks
-            street_blocks = street_blocks[:self._query['size']]
+            street_blocks = filtered_street_blocks[:self._query['size']]
 
         for street_block in street_blocks:
             street = street_block[N.STREET]
