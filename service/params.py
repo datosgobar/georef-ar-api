@@ -1570,6 +1570,8 @@ PARAMS_NEARBY_ESTABLISHMENTS = EndpointParameters(shared_params={
     N.ADMINISTRATION: StrParameter(),
     N.DISTANCE: IntParameter(default=1000),
     N.FLATTEN: BoolParameter(),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
     N.FIELDS: FieldListParameter(basic=[N.CENTROID, N.ID, N.ESTABLISHMENT_TYPE],
                                  standard=[N.NAME, N.RAW_ADDRESS, N.DISTANCE],
                                  complete=[N.SOURCE])
