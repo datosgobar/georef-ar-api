@@ -416,6 +416,16 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         included_street_blocks = []
         excluded_street_blocks = []
         unknown_street_blocks = []
+
+        def is_include(s, n, e):
+            if not isinstance(s, int):
+                return False
+            if not isinstance(e, int):
+                return False
+            if not isinstance(n, int):
+                return False
+            return s <= n <= e
+
         for sb in all_street_blocks:
             start_r = sb[N.DOOR_NUM][N.START][N.RIGHT]
             start_l = sb[N.DOOR_NUM][N.START][N.LEFT]
@@ -424,8 +434,8 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
             # Se replica la condición de búsqueda en data.StreetBlocksSearch._read_query en donde se buscan
             # las cuadras que en alguno de sus lados posean una numeración que contenga a la altura especificada.
-            right_condition = start_r <= number <= end_r
-            left_condition = start_l <= number <= end_l
+            right_condition = is_include(start_r, number, end_r)
+            left_condition = is_include(start_l, number, end_l)
             include_condition = right_condition or left_condition
             if include_condition:
                 included_street_blocks.append(sb)
@@ -434,7 +444,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             # Si la cuadra no contiene una numeración que involucre la altura, se verifica si la excluye
             start = min(start_r, start_l)
             end = max(end_r, end_l)
-            exclude_condition = start < end and (number > end or number < end)
+            exclude_condition = start < end and isinstance(number, int) and (number > end or number < end)
             if exclude_condition:
                 excluded_street_blocks.append(sb)
                 continue
