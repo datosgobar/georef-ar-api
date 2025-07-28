@@ -27,7 +27,7 @@ class IntersectionsTest(GeorefLiveTest):
         calles por intersección."""
         self.assert_intersection_contains_ids(
             'provincias',
-            {'interseccion': 'calle:7801407000555'},
+            {'interseccion': 'calle:780140700000055'},
             ['78']
         )
 
@@ -63,7 +63,7 @@ class IntersectionsTest(GeorefLiveTest):
         calles por intersección."""
         self.assert_intersection_contains_ids(
             'departamentos',
-            {'interseccion': 'calle:0638503000700'},
+            {'interseccion': 'calle:063850500000070'},
             ['06385']
         )
 
@@ -134,7 +134,7 @@ class IntersectionsTest(GeorefLiveTest):
         calles por intersección."""
         self.assert_intersection_contains_ids(
             'gobiernos-locales',
-            {'interseccion': 'calle:0638503000700'},
+            {'interseccion': 'calle:063850300000700'},
             ['060385']
         )
 
@@ -144,7 +144,7 @@ class IntersectionsTest(GeorefLiveTest):
         self.assert_intersection_contains_ids(
             'calles',
             {'interseccion': 'gobierno_local:220084', 'max': 1000},
-            ['2202801000850', '2202801000125', '2202801001110']
+            ['220280100000005', '220280100000015', '220280100000020']
         )
 
     def test_intersection_street_street(self):
@@ -164,8 +164,8 @@ class IntersectionsTest(GeorefLiveTest):
             # resultados a calles con ID X. Como los resultados de intersección
             # de calles con calle X no trae la calle X, cuando se limitan los
             # resultados a ID == X, los resultados son vacíos.
-            'interseccion': 'calle:0201301002235',
-            'id': '0201301002235'
+            'interseccion': 'calle:020910100102235',
+            'id': '020910100102235'
         }, endpoint='/api/calles', entity='calles')
 
         self.assertListEqual(resp, [])

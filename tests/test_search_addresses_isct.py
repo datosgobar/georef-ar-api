@@ -54,7 +54,7 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         self.assert_intersection_search_ids_matches(
             'Larrea esquina Sarmiento',  # al 3500?
             [
-                ('020210100007345', '020210100010480')
+                ('020210100107345', '020210100110480')
             ],
             params={
                 'provincia': '02'
