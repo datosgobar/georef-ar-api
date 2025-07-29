@@ -351,7 +351,6 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         """
         self._elasticsearch_result = None
         self._displacement = query.pop(N.DISP)
-        self._verify = query.pop(N.VERIFY) or query.get('exact')
         super().__init__(query, fmt)
 
     def planner_steps(self):
@@ -374,78 +373,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
         name = self._address_data.street_names[0]
         self._elasticsearch_result = yield self._build_street_blocks_search(
-            name, add_number=self._verify, force_all=not self._verify)
-
-    def _filter_street_blocks(self, number, all_street_blocks):
-        """
-            Esta función es llamada cuando el usuario no solicita verificar la altura que especifica en la
-            dirección cuando, por ejemplo, sólo busca normalizar la dirección sin importar su ubicación. En este
-            caso Elasticsearch retornará todas las cuadras de la calle en las localidades indicadas sin filtrar
-            por alturas.
-            De esta forma se puede atacar el problema actual de las cuadras sin numeración contemplando lo
-            siguiente:
-
-                Si existe una o más cuadra con numeración válida
-                (según la condición de StreetBlocksSearch._read_query) que contiene la altura indicada se incorporará a
-                la lista.
-
-                Si se verifica que la numeración de la cuadra es válida (cumple con una numeración final, en
-                alguna mano, extrictamente mayor a la numeración inicial de la misma mano o su contraria) y la
-                altura queda excluida de la numeración de esa cuadra, se omitirá.
-
-                Si no se cumple ninguna de las condiciones anteriores es probable que la cuadra no tenga numeración,
-                lo que indica que podría ser candidata a contener la altura indicada por el usuario. En ese caso
-                se incorporará a la lista.
-
-                Finalmente, se recortará la lista a los primeros "max" resultados indicados.
-
-            Como resultado de esto si en una localidad específica, donde exista la calle, todas sus cuadras tienen
-            una numeración válida, pero ninguna de ellas contiene la altura indicada, no se retornará un resultado.
-            Lo mismo que si la calle no existiese en la localidad indicada
-
-        :param number: La altura especificada en la dirección.
-        :param all_street_blocks: Una lista de todas la cuadras devueltas por la consulta a Elasticsearch.
-        :return: Una lista de cuadras: las que contienen la altura y las que no se sabe.
-        """
-
-        filtered_street_blocks = []
-
-        def is_include(s, n, e):
-            if not isinstance(s, int):
-                return False
-            if not isinstance(e, int):
-                return False
-            if not isinstance(n, int):
-                return False
-            return s <= n <= e
-
-        for sb in all_street_blocks:
-            start_r = sb[N.DOOR_NUM][N.START][N.RIGHT]
-            start_l = sb[N.DOOR_NUM][N.START][N.LEFT]
-            end_r = sb[N.DOOR_NUM][N.END][N.RIGHT]
-            end_l = sb[N.DOOR_NUM][N.END][N.LEFT]
-
-            # Se replica la condición de búsqueda en data.StreetBlocksSearch._read_query en donde se buscan
-            # las cuadras que en alguno de sus lados posean una numeración que contenga a la altura especificada.
-            right_condition = is_include(start_r, number, end_r)
-            left_condition = is_include(start_l, number, end_l)
-            include_condition = right_condition or left_condition
-            if include_condition:
-                filtered_street_blocks.append(sb)
-                continue
-
-            # Si la cuadra no contiene una numeración que involucre la altura, se verifica si la excluye
-            start = min(start_r, start_l)
-            end = max(end_r, end_l)
-            exclude_condition = start < end and isinstance(number, int) and (number > end or number < end)
-            if exclude_condition:
-                continue
-
-            # Si no se pudo determinar la inclusión o exclusión de la altura (este es el caso de las cuadras sin
-            # numeración) se la agrega a la lista de desconocidas
-            filtered_street_blocks.append(sb)
-
-        return filtered_street_blocks
+            name, add_number=True)
 
     def _build_address_hits(self):
         """Construye los resultados de la búsqueda de direcciones a partir
@@ -458,14 +386,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         address_hits = []
         fields = self._format[N.FIELDS]
 
-        street_blocks = self._elasticsearch_result.hits
-        if not self._verify:
-            filtered_street_blocks = self._filter_street_blocks(
-                self._address_data.normalized_door_number_value(), street_blocks
-            )
-            street_blocks = filtered_street_blocks[:self._query['size']]
-
-        for street_block in street_blocks:
+        for street_block in self._elasticsearch_result.hits:
             street = street_block[N.STREET]
             address_hit = self._build_base_address_hit(
                 street.get(N.STATE), street.get(N.DEPT),
@@ -541,7 +462,6 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         self._intersections_result = None
         self._intersection_hits = None
         self._displacement = query.pop(N.DISP)
-        self._verify = query.pop(N.VERIFY)
 
         super().__init__(query, fmt)
 
