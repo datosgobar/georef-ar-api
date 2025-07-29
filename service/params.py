@@ -1311,6 +1311,7 @@ PARAMS_LOCAL_GOVERNMENTS = EndpointParameters(shared_params={
                                  standard=[N.C_LAT, N.C_LON, N.STATE_ID,
                                            N.STATE_NAME],
                                  complete=[N.SOURCE,
+                                           N.STATE_INTERSECTION,
                                            N.CATEGORY, N.COMPLETE_NAME]),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
