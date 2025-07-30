@@ -2,6 +2,7 @@ from service.geometry import Point
 from .test_search_addresses_simple import SearchAddressesBaseTest
 
 COMMON_BTWN = 'gral las heras entre azcuenaga y cantilo'
+POPULAR_BTWN = 'belgrano entre salta y jujuy'
 
 
 class SearchAddressesBtwnTest(SearchAddressesBaseTest):
@@ -166,6 +167,22 @@ class SearchAddressesBtwnTest(SearchAddressesBaseTest):
             'Foo entre QuuzQuux y FoobarFoobar',
             []
         )
+
+    def test_max_results_returned(self):
+        """La cantidad máxima de resultados debe ser configurable.
+            Si bien es una combinación de tres calles poco probable, es posible y se debe considerar la respuesta de
+            varias localidades.
+        """
+        lengths = [1, 2, 3, 4]
+        results_lengths = [
+            len(self.get_response({
+                'max': length,
+                'direccion': POPULAR_BTWN
+            }))
+            for length in lengths
+        ]
+
+        self.assertListEqual(lengths, results_lengths)
 
     def assert_between_search_ids_matches(self, address, ids, params=None):
         if not params:

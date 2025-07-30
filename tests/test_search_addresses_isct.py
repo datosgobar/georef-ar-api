@@ -35,7 +35,7 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         self.assert_intersection_search_ids_matches(
             'Av. San Juan y Piedras',
             [
-                ('020070100001725', '020070100009350')
+                ('020070100101725', '020070100109350'), ('020070100601725', '020070100109350')
             ])
 
     def test_basic_intersection_search_reversed(self):
@@ -45,7 +45,7 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         self.assert_intersection_search_ids_matches(
             'Piedras y Av. San Juan',
             [
-                ('020070100009350', '020070100001725')
+                ('020070100109350', '020070100101725'), ('020070100109350', '020070100601725')
             ])
 
     def test_intersection_search_keywords(self):
@@ -168,6 +168,22 @@ class SearchAddressesIsctTest(SearchAddressesBaseTest):
         ordered = [r['calle']['id'] for r in resp]
         expected = sorted(ordered)
         self.assertListEqual(ordered, expected)
+
+    def test_max_results_returned(self):
+        """La cantidad máxima de resultados debe ser configurable.
+            Si bien es una combinación de tres calles poco probable, es posible y se debe considerar la respuesta de
+            varias localidades.
+        """
+        lengths = [1, 2, 3, 4]
+        results_lengths = [
+            len(self.get_response({
+                'max': length,
+                'direccion': COMMON_ISCT
+            }))
+            for length in lengths
+        ]
+
+        self.assertListEqual(lengths, results_lengths)
 
     def assert_intersection_search_ids_matches(self, address, ids,
                                                params=None):

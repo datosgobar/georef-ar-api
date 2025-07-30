@@ -258,14 +258,12 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
 
         self.assert_address_search_id_matches(expected, exact=True)
 
-    def assert_address_search_id_matches(self, term_matches, exact=False, verify=False):
+    def assert_address_search_id_matches(self, term_matches, exact=False):
         results = []
         for code, query in term_matches:
             params = {'direccion': query, 'provincia': code[0][:2]}
             if exact:
                 params['exacto'] = 1
-            if verify:
-                params['verificar'] = 1
             res = self.get_response(params)
             results.append(sorted([p['calle']['id'] for p in res]))
 
@@ -307,7 +305,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['064270101009230'], 'iINCLAN 2400')        # +1 caracteres (de 4-7)
         ]
 
-        self.assert_address_search_id_matches(expected, verify=True)
+        self.assert_address_search_id_matches(expected)
 
     def test_address_search_number_limits(self):
         """La búsqueda debe funcionar cuando la altura epecificada se encuentra
@@ -317,7 +315,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['140140100002760'], 'BARTOLOME ARGENSOLA 1999')  # hasta_i
         ]
 
-        self.assert_address_search_id_matches(expected, verify=False)
+        self.assert_address_search_id_matches(expected)
 
     def test_address_search_autocompletes(self):
         """La búsqueda aproximada debe también actuar como autocompletar cuando
@@ -363,7 +361,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['020350100105600'], 'fransisco acuna figeroa 1000')
         ]
 
-        self.assert_address_search_id_matches(expected, verify=True)
+        self.assert_address_search_id_matches(expected)
 
     def test_filter_by_state_name(self):
         """Se debe poder filtrar los resultados por nombre de provincia."""

@@ -177,7 +177,7 @@ class SearchStreetsTest(GeorefLiveTest):
             ('RUTA', 'ruta'),
             ('AUT', 'autopista'),
             ('CALLE', 'calle'),
-            ('PJE', 'pasaje')  # TODO: Algunos registros contienen "PJE" y otros "PASAJE"
+            ('PJE', 'pasaje')
         ]
 
         for street_type, street_type_long in street_types:
@@ -187,16 +187,9 @@ class SearchStreetsTest(GeorefLiveTest):
             })
 
             validations.append(len(res) > 0)
-
-            if street_type == "PJE":
-                validations.append(all(
-                    street['categoria'] in ["PJE", "PASAJE"] for street in res
-                ))
-
-            else:
-                validations.append(all(
-                    street['categoria'] == street_type for street in res
-                ))
+            validations.append(all(
+                street['categoria'] == street_type for street in res
+            ))
 
         assert(validations and all(validations))
 

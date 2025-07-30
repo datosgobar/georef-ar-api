@@ -141,6 +141,7 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
                                       ['id', 'fuente', 'nombre',
                                        'centroide.lat', 'centroide.lon',
                                        'provincia.id', 'provincia.nombre',
+                                       'provincia.interseccion',
                                        'categoria', 'nombre_completo'])
 
     def test_name_ordering(self):
@@ -403,6 +404,7 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
                                        'gobierno_local_centroide_lon',
                                        'provincia_id',
                                        'provincia_nombre',
+                                       'provincia_interseccion',
                                        'gobierno_local_fuente',
                                        'gobierno_local_categoria'])
 
@@ -422,9 +424,6 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
     def test_shp_format(self):
         """Se debería poder obtener resultados en formato SHP (sin
         parámetros)."""
-        # TODO: Revisar. Al permitir geometrías mixtas del tipo POLYGON y POINTS pareciera que el valor de shapeType
-        #  ha cambiado de 5 a 1 respectivamente para los archivos descargados. Revisar las implicancias del cambio.
-        #  Ref: https://en.wikipedia.org/wiki/Shapefile
         self.assert_valid_shp_type(
             shape_type=5,  # 5 == POLYGON
             params={'max': 1}
@@ -447,6 +446,7 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
             'id',
             'prov_id',
             'prov_nombre',
+            'prov_intscn',
             'centr_lat',
             'centr_lon',
             'fuente',
