@@ -1041,7 +1041,9 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         if not self._between_hits:
             return QueryResult.empty(params)
 
-        # TODO: Revisar total y offset
+        total = params.get(N.MAX, constants.MAX_RESULT_LEN)
+        offset = params.get(N.OFFSET, 0)
+        self._between_hits = self._between_hits[offset:offset + total]
         return QueryResult.from_entity_list(self._between_hits,
                                             params,
                                             len(self._between_hits),
