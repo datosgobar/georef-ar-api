@@ -1127,7 +1127,6 @@ class NearbyEstablishmentsSearch(TerritoriesSearch):
     def __init__(self, name, query):
         super().__init__(name, query)
         self._building_type = name
-        self._max = None
 
     def _read_query(self, ids=None, name=None, census_locality=None, local_government=None, department=None, state=None,
                     exact=False, geo_shape_geoms=None, lat=None, lon=None, order=None, tipo=None, distancia=1000, **kwargs):
@@ -1185,6 +1184,10 @@ class NearbyEstablishmentsSearch(TerritoriesSearch):
             new_hits.append(hit)
 
         result._hits = new_hits
+
+        if self._max:
+            result._hits = result._hits[:self._max]
+
         return result
 
 
