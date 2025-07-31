@@ -1127,9 +1127,12 @@ class NearbyEstablishmentsSearch(TerritoriesSearch):
     def __init__(self, name, query):
         super().__init__(name, query)
         self._building_type = name
+        self._max = None
 
     def _read_query(self, ids=None, name=None, census_locality=None, local_government=None, department=None, state=None,
                     exact=False, geo_shape_geoms=None, lat=None, lon=None, order=None, tipo=None, distancia=1000, **kwargs):
+
+        self._max = kwargs.pop('max', None)
         super()._read_query(ids, name, census_locality, local_government, department, state, exact, geo_shape_geoms,
                             order, **kwargs)
 
