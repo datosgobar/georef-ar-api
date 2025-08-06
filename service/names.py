@@ -115,6 +115,10 @@ DISP = 'desplazar'
 VERIFY = 'verificar'
 DISTANCE = 'distancia'
 
+# Tipos de establecimientos
+EDUCATIONS = 'educativos'
+UNIVERSITIES = 'universitarios'
+
 ##########################
 #    Valores compuestos  #
 ##########################

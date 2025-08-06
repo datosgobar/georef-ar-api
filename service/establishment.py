@@ -104,8 +104,8 @@ class UniversityEstablishmentsSearch(NearbyEstablishmentsSearch):
 
 
 ACTIVE_ESTABLISHMENTS_INDEX = {
-    N.EDUCATIONAL_INSTITUTIONS: EducationalEstablishmentsSearch,
-    N.UNIVERSITY_INSTITUTIONS: UniversityEstablishmentsSearch,
+    N.EDUCATIONS: EducationalEstablishmentsSearch,
+    N.UNIVERSITIES: UniversityEstablishmentsSearch,
 }
 
 

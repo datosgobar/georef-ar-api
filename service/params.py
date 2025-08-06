@@ -1566,7 +1566,10 @@ PARAMS_LOCATION = EndpointParameters(shared_params={
 PARAMS_NEARBY_ESTABLISHMENTS = EndpointParameters(shared_params={
     N.LAT: FloatParameter(required=True),
     N.LON: FloatParameter(required=True),
-    N.TYPE: StrParameter(),
+    N.TYPE: StrParameter(choices=[
+        N.EDUCATIONS,
+        N.UNIVERSITIES
+    ]),
     N.ADMINISTRATION: StrParameter(),
     N.DISTANCE: IntParameter(default=1000, lower_limit=10, upper_limit=500000),
     N.FLATTEN: BoolParameter(),
