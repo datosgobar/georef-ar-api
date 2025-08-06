@@ -177,7 +177,8 @@ class SearchStreetsTest(GeorefLiveTest):
             ('RUTA', 'ruta'),
             ('AUT', 'autopista'),
             ('CALLE', 'calle'),
-            ('PJE', 'pasaje')
+            ('PASAJE', 'pasaje'),
+            ('PASAJE', 'pje'),
         ]
 
         for street_type, street_type_long in street_types:
