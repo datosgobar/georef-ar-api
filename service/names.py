@@ -64,7 +64,7 @@ LOCATIONS = 'ubicaciones'
 RESULT = 'resultado'
 RESULTS = 'resultados'
 RAW_ADDRESS = 'domicilio'
-NEARBY_ESTABLISHMENTS = 'near_buildings'
+NEARBY_ESTABLISHMENTS = 'establecimientos_cercanos'
 ESTABLISHMENT_TYPE = 'tipo_establecimiento'
 
 # Campos, parámetros, etc.

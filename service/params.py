@@ -1568,11 +1568,11 @@ PARAMS_NEARBY_ESTABLISHMENTS = EndpointParameters(shared_params={
     N.LON: FloatParameter(required=True),
     N.TYPE: StrParameter(),
     N.ADMINISTRATION: StrParameter(),
-    N.DISTANCE: IntParameter(default=1000),
+    N.DISTANCE: IntParameter(default=1000, lower_limit=10, upper_limit=500000),
     N.FLATTEN: BoolParameter(),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
-    N.FIELDS: FieldListParameter(basic=[N.CENTROID, N.ID, N.ESTABLISHMENT_TYPE],
+    N.FIELDS: FieldListParameter(basic=[N.C_LAT, N.C_LON, N.ID, N.ESTABLISHMENT_TYPE],
                                  standard=[N.NAME, N.RAW_ADDRESS, N.DISTANCE],
                                  complete=[N.SOURCE])
 }, get_qs_params={

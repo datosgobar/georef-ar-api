@@ -6,7 +6,7 @@ de los recursos que expone la API.
 
 import logging
 from flask import current_app
-from service import data, params, formatter, address, location, utils, street
+from service import data, params, formatter, address, location, utils, street, establishment
 from service import names as N
 from service.query_result import QueryResult
 
@@ -862,7 +862,9 @@ def _build_establishments_query_format(parsed_params):
     """
     # Construir query a partir de parámetros
     query = utils.translate_keys(parsed_params, {
-        N.ADMINISTRATION: "administration"
+        N.ADMINISTRATION: "administration",
+        N.FIELDS: "fields",
+        N.MAX: 'size'
     }, ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
@@ -881,13 +883,6 @@ def _process_nearby_establishments_single(request):
 
         Args:
             request (flask.Request): Request GET de flask.
-            name (str): Nombre de la entidad.
-            param_parser (ParameterSet): Objeto utilizado para parsear los
-                parámetros.
-            key_translations (dict): Traducciones de keys a utilizar para convertir
-                el diccionario de parámetros del usuario a un diccionario
-                representando una query a Elasticsearch.
-
         Raises:
             data.DataConnectionException: En caso de ocurrir un error de
                 conexión con la capa de manejo de datos.
@@ -902,29 +897,46 @@ def _process_nearby_establishments_single(request):
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
     query, fmt = _build_establishments_query_format(qs_params.values)
-    tipo = request.args.get('tipo', 'todas').lower()
+
     es = get_elasticsearch()
 
-    # Armar búsquedas según el tipo de establecimiento
-    searches = []
-    if tipo in ('educativo', 'todas'):
-        searches.append(data.EducationalEstablishmentsSearch(query))
-    if tipo in ('universitario', 'todas'):
-        searches.append(data.UniversityEstablishmentsSearch(query))
+    query_results = establishment.run_establishment_queries(es, [qs_params], [query], [fmt])
 
-    data.ElasticsearchSearch.run_searches(es, searches)
+    return formatter.create_ok_response(N.NEARBY_ESTABLISHMENTS, query_results[0], fmt)
 
-    hits = []
-    total = 0
-    for s in searches:
-        hits.extend(s.result.hits)
-        total += s.result.total
 
-    query_result = QueryResult.from_entity_list(
-        hits, qs_params.received_values(), total, offset=0
-    )
+def _process_nearby_establishments_bulk(request):
+    """Procesa una request POST para obtener establecimiientos cercanos en varios puntos.
+        En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
 
-    return formatter.create_ok_response('establecimientos_cercanos', query_result, fmt)
+        Args:
+            request (flask.Request): Request POST de flask.
+
+        Raises:
+            data.DataConnectionException: En caso de ocurrir un error de
+                conexión con la capa de manejo de datos.
+
+        Returns:
+            flask.Response: respuesta HTTP
+
+        """
+    try:
+        body_params = params.PARAMS_NEARBY_ESTABLISHMENTS.parse_post_params(
+            request.args, request.json, N.NEARBY_ESTABLISHMENTS)
+    except params.ParametersParseException as e:
+        return formatter.create_param_error_response_bulk(e.errors)
+
+    queries = []
+    formats = []
+    for parsed_params in body_params:
+        query, fmt = _build_location_query_format(parsed_params.values)
+        queries.append(query)
+        formats.append(fmt)
+
+    es = get_elasticsearch()
+    results = establishment.run_establishment_queries(es, body_params, queries, formats)
+
+    return formatter.create_ok_response_bulk(N.LOCATION, results, formats)
 
 
 def process_nearby_establishments(request):
@@ -934,13 +946,6 @@ def process_nearby_establishments(request):
 
     Args:
         request (flask.Request): Request GET o POST de flask.
-        name (str): Nombre de la entidad.
-        param_parser (ParameterSet): Objeto utilizado para parsear los
-            parámetros.
-        key_translations (dict): Traducciones de keys a utilizar para convertir
-            los diccionarios de parámetros del usuario a una lista de
-            diccionarios representando las queries a Elasticsearch.
-
     Returns:
         flask.Response: respuesta HTTP
 
@@ -949,7 +954,7 @@ def process_nearby_establishments(request):
         if request.method == 'GET':
             return _process_nearby_establishments_single(request)
 
-        raise NotImplementedError('Method not implemented')
+        return _process_nearby_establishments_bulk(request)
     except data.DataConnectionException:
         logger.exception(
             'Excepción en manejo de consulta para recurso: establecimientos-cercanos')
