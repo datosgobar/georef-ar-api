@@ -41,7 +41,7 @@ def run_street_queries(es, params_list, queries, formats):
             # La nomenclatura incluye el nombre de la provincia y del depto.,
             # agregar esos campos a la query para luego poder extraer sus
             # nombres.
-            processed_query['fields'] += (N.STATE, N.DEPT, N.LOCALITY)
+            processed_query['fields'] += (N.STATE, N.DEPT, N.CENSUS_LOCALITY, N.LOCALITY)
 
         searches.append(data.StreetsSearch(processed_query))
 
