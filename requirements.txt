@@ -1,7 +1,7 @@
 elasticsearch-dsl==7.0.0
 Flask==2.0.0
-georef-ar-address==0.0.9
-geojson==2.3.0
+georef-ar-address==0.0.10
+geojson==3.2.0
 gunicorn[gevent]==19.9.0
 requests==2.20.0
 shapely==2.0.7
