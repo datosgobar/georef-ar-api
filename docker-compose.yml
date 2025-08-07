@@ -22,7 +22,7 @@ services:
       - geonet
   app:
     build:
-      context: ..
+      context: .
       dockerfile: ./docker/Dockerfile_api
     image: datosgobar/georef-api_app
     container_name: georef-api_app
@@ -32,13 +32,13 @@ services:
       - "FLASK_ENV=development"
     command: flask run --host=0.0.0.0 --port=5000
     volumes:
-      - ../config:/opt/app-root/src/georef-ar-api/config:ro
-      - ../source:/opt/app-root/src/georef-ar-api/source
-      - ../logs:/opt/app-root/src/georef-ar-api/logs
-      - ../backups:/opt/app-root/src/georef-ar-api/backups
-      - ../cache:/opt/app-root/src/georef-ar-api/cache
+      - ./config:/opt/app-root/src/georef-ar-api/config:ro
+      - ./source:/opt/app-root/src/georef-ar-api/source
+      - ./logs:/opt/app-root/src/georef-ar-api/logs
+      - ./backups:/opt/app-root/src/georef-ar-api/backups
+      - ./cache:/opt/app-root/src/georef-ar-api/cache
     ports:
-      - 8080:5000
+      - $APP_PORT:5000
     networks:
       - geonet
 
