@@ -898,6 +898,9 @@ def _process_nearby_establishments_single(request):
 
     query, fmt = _build_establishments_query_format(qs_params.values)
 
+    if fmt[N.FORMAT] == 'shp':
+        query['fields'] += (N.GEOM,)
+
     es = get_elasticsearch()
 
     query_results = establishment.run_establishment_queries(es, [qs_params], [query], [fmt])
