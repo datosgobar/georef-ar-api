@@ -14,7 +14,7 @@ ENDPOINTS = [
 
 class NormalizerTest(GeorefMockTest):
     def setUp(self):
-        self.base_url = '/api/v1.0'
+        self.base_url = '/api/v2.0'
         super().setUp()
 
     def test_elasticsearch_connection_error(self):

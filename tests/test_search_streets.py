@@ -12,7 +12,7 @@ class SearchStreetsTest(GeorefLiveTest):
     """
 
     def setUp(self):
-        self.endpoint = '/api/v1.0/calles'
+        self.endpoint = '/api/v2.0/calles'
         self.entity = 'calles'
         super().setUp()
 

@@ -6,19 +6,19 @@ EXAMPLE_CONFIG = 'config/georef.example.cfg'
 
 
 class RoutesTest(GeorefMockTest):
-    def test_v1_0_endpoints(self):
-        """Los endpoints con prefijo /api/v1.0 deberían existir incluso si no
+    def test_v2_0_endpoints(self):
+        """Los endpoints con prefijo /api/v2.0 deberían existir incluso si no
         se cuenta con más de una versión de la API. Esto se debe a que
         versiones iniciales de la API fueron publicadas que utilizaban el
-        prefijo /v1.0."""
+        prefijo /v2.0."""
         urls = [
-            '/api/v1.0/provincias',
-            '/api/v1.0/departamentos',
-            '/api/v1.0/gobiernos-locales',
-            '/api/v1.0/localidades',
-            '/api/v1.0/direcciones',
-            '/api/v1.0/calles',
-            '/api/v1.0/ubicacion'
+            '/api/v2.0/provincias',
+            '/api/v2.0/departamentos',
+            '/api/v2.0/gobiernos-locales',
+            '/api/v2.0/localidades',
+            '/api/v2.0/direcciones',
+            '/api/v2.0/calles',
+            '/api/v2.0/ubicacion'
         ]
 
         validations = [

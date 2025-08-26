@@ -569,7 +569,7 @@ def create_404_error_response():
             'mensaje': strings.NOT_FOUND,
             # La variable 'app.url_map' contiene una lista de todos los
             # recursos de la app Flask, sin embargo es mejor listarlos
-            # manualmente para evitar incluir los que comienzan con /api/v1.0.
+            # manualmente para evitar incluir los que comienzan con /api/v2.0.
             'recursos_disponibles': [
                 '/api/provincias',
                 '/api/departamentos',
