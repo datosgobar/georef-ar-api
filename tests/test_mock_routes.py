@@ -38,8 +38,7 @@ class RoutesTest(GeorefMockTest):
         La configuración de ejemplo de la API utiliza una URL de ejemplo para
         /provincias.json."""
         resp = self.app.get('/api/provincias.json')
-        self.assertTrue(resp.status_code == 302 and
-                        resp.headers['Location'] == 'https://www.example.org')
+        self.assertTrue(resp.status_code == 302 and resp.headers['Location'] == 'https://www.example.org')
 
     @unittest.skipIf(os.environ['GEOREF_CONFIG'] != EXAMPLE_CONFIG,
                      'No se está utilizando la config de ejemplo')

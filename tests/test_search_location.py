@@ -238,8 +238,7 @@ class SearchLocationTest(GeorefLiveTest):
         """Cuando se utiliza el centroide de una entidad (con geometría convexa
         o casi convexa) como ubicación, se debería obtener la misma entidad
         como parte de la respuesta."""
-        concave_gls = ['060595', '500014', '625140', '460049', '386266',
-                         '220469']
+        concave_gls = ['060595', '500014', '625140', '460049', '386266', '220469']
 
         results = self.get_response(
             endpoint='/api/gobiernos-locales',
