@@ -373,7 +373,50 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
 
         name = self._address_data.street_names[0]
         self._elasticsearch_result = yield self._build_street_blocks_search(
-            name, add_number=True)
+            name,
+            add_number=self._query['exact'],
+            force_all=not self._query['exact']
+        )
+
+    def _group_street_blocks(self, hits):
+        """
+            Si la búsqueda no es exacta se devuelven cuadras de la calle aunque no tengan numeración, por eso se
+            requiere un postprocesamiento para solo devolver una cuadra: la que tiene la numeración especificada
+            o cualquier otra.
+        :return: Una lista de cuadras de calles distintas
+        """
+
+        street_blocks_by_street = {}
+
+        def street_block_has_number(street_block, number):
+            """
+                Verifica si alguna de las manos contiene la numeración indicada
+
+            :param street_block: Una cuadra de calle a analizar
+            :param number: Un entero representando la altura de la dirección
+            :return: Un booleano especificando si la cuadra contiene la altura de la dirección
+            """
+            try:
+                r_condition = street_block[N.DOOR_NUM][N.START][N.RIGHT] <= number <= \
+                                  street_block[N.DOOR_NUM][N.END][N.RIGHT]
+            except Exception:
+                r_condition = False
+
+            try:
+                l_condition = street_block[N.DOOR_NUM][N.START][N.LEFT] <= number <= \
+                                  street_block[N.DOOR_NUM][N.END][N.LEFT]
+            except Exception:
+                l_condition = False
+
+            return r_condition or l_condition
+
+        for street_block in hits:
+            street_id = street_block[N.STREET][N.ID]
+            if (street_id not in street_blocks_by_street.keys() or
+                    street_block_has_number(street_block, self._numerical_door_number)):
+                street_blocks_by_street[street_id] = street_block
+
+        return street_blocks_by_street.values()
 
     def _build_address_hits(self):
         """Construye los resultados de la búsqueda de direcciones a partir
@@ -386,7 +429,11 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         address_hits = []
         fields = self._format[N.FIELDS]
 
-        for street_block in self._elasticsearch_result.hits:
+        hits = self._elasticsearch_result.hits
+        if not self._query['exact']:
+            hits = self._group_street_blocks(hits)
+
+        for street_block in hits:
             street = street_block[N.STREET]
             address_hit = self._build_base_address_hit(
                 street.get(N.STATE), street.get(N.DEPT),
@@ -414,7 +461,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
                     address_hit[N.LOCATION] = point.to_json_location()
                     address_hit[N.GEOM] = point.to_geojson()
                 except ValueError as e:
-                    if self._verify:
+                    if self._query['exact']:
                         raise e
 
             address_hits.append(address_hit)
