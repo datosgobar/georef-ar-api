@@ -585,7 +585,7 @@ def create_404_error_response():
                 '/api/direcciones',
                 '/api/ubicacion',
                 '/api/cuadras',
-                '/api/establecimientos-educativos'
+                '/api/establecimientos-educativos',
                 '/api/instituciones-universitarias',
                 '/api/establecimientos-cercanos',
             ]
