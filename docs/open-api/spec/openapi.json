@@ -12,7 +12,7 @@
     ],
     "servers": [
 	{
-	    "url": "https://apis.datos.gob.ar/georef/api"
+	    "url": "https://apis.datos.gob.ar/georef-v2-ZGF0b3Nnb2Jhcg/api"
 	}
     ],
     "components": {
@@ -289,7 +289,142 @@
 		"additionalProperties": false,
 		"required": ["departamentos"]
 	    },
-            "municipio": {
+            "gobierno_local": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "820007"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Armstrong"
+                    },
+                    "nombre_completo": {
+                        "type": "string",
+                        "example": "Municipio Armstrong"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.882184538	
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -61.646710231
+			    }
+			}
+		    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "Municipio"
+                    }
+                }
+            },
+            "gobiernos_locales_sub_entidad": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "820196"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Granadero Baigorria"
+                    }
+                }
+            },
+	    "gobiernos_locales_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 1820
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
+		    "gobiernos_locales": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/gobierno_local"
+			}
+		    }
+		}
+	    },
+	    "gobiernos_locales_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/gobiernos_locales_single"
+			}
+		    }
+		}
+	    },
+	    "gobiernos_locales_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "gobiernos_locales": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"interseccion": {
+				    "$ref": "#/components/schemas/param_interseccion"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_inicio"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["gobiernos_locales"]
+	    },
+			"municipio": {
                 "type": "object",
                 "properties": {
                     "id": {
@@ -424,7 +559,148 @@
 		"additionalProperties": false,
 		"required": ["municipios"]
 	    },
-            "localidad": {
+            "asentamiento": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sub_entidad"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "82084000012"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "El Prado"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
+                    },
+		    "municipio": {
+			"$ref": "#/components/schemas/municipio_sub_entidad"
+		    },
+		    "localidad_censal": {
+			"$ref": "#/components/schemas/localidad_censal_sub_entidad"
+		    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "Sitio edificado (ST)",
+                        "enum": [
+                            "Entidad (E)",
+                            "Componente de localidad compuesta (LC)",
+                            "Localidad simple (LS)",
+			    "Localidad simple con entidad (LSE)",
+			    "Componente de localidad compuesta con entidad (LCE)",
+			    "Sitio edificado (ST)"
+                        ]
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.861364
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.706216
+			    }
+			}
+		    }
+                }
+            },
+	    "asentamientos_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 13555
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
+		    "asentamientos": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/asentamiento"
+			}
+		    }
+		}
+	    },
+	    "asentamientos_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/asentamientos_single"
+			}
+		    }
+		}
+	    },
+	    "asentamientos_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "asentamientos": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"municipio": {
+				    "$ref": "#/components/schemas/param_municipio"
+				},
+				"localidad_censal": {
+				    "$ref": "#/components/schemas/param_localidad_censal"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["asentamientos"]
+	    },
+			"localidad": {
                 "type": "object",
                 "properties": {
                     "departamento": {
@@ -564,7 +840,133 @@
 		"additionalProperties": false,
 		"required": ["localidades"]
 	    },
-            "localidad_censal": {
+            "aglomerado_sub_entidad": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "82"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Santa Fe"
+                    }
+                }
+            },
+            "aglomerado": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "0003"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Gran Rosario"
+                    },
+		    "fuente": {
+			"type": "string",
+			"example": "INDEC"
+		    },
+		    "categoria": {
+			"type": "string",
+			"example": "Aglomerado"
+		    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.918187811
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.714586922
+			    }
+			}
+		    }
+                }
+            },
+            "aglomerados_single": {
+                "type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 119
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
+		    "aglomerados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/aglomerado"
+			}
+		    }
+		}
+            },
+	    "aglomerados_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/aglomerados_single"
+			}
+		    }
+		}
+	    },
+	    "aglomerados_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "aglomerados": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_inicio"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["aglomerados"]
+	    },
+			"localidad_censal": {
                 "type": "object",
                 "properties": {
                     "departamento": {
@@ -718,7 +1120,7 @@
 		"additionalProperties": false,
 		"required": ["localidades_censales"]
 	    },
-            "asentamiento": {
+		"fraccion_censal": {
                 "type": "object",
                 "properties": {
                     "departamento": {
@@ -726,49 +1128,36 @@
                     },
                     "id": {
                         "type": "string",
-                        "example": "82084000012"
-                    },
-                    "nombre": {
-                        "type": "string",
-                        "example": "El Prado"
+                        "example": "8208427"
                     },
                     "provincia": {
                         "$ref": "#/components/schemas/provincia_sub_entidad"
-                    },
-		    "municipio": {
-			"$ref": "#/components/schemas/municipio_sub_entidad"
-		    },
-		    "localidad_censal": {
-			"$ref": "#/components/schemas/localidad_censal_sub_entidad"
-		    },
-                    "categoria": {
-                        "type": "string",
-                        "example": "Sitio edificado (ST)",
-                        "enum": [
-                            "Entidad (E)",
-                            "Componente de localidad compuesta (LC)",
-                            "Localidad simple (LS)",
-			    "Localidad simple con entidad (LSE)",
-			    "Componente de localidad compuesta con entidad (LCE)",
-			    "Sitio edificado (ST)"
-                        ]
                     },
 		    "centroide": {
 			"type": "object",
 			"properties": {
 			    "lat": {
 				"type": "number",
-				"example": -32.861364
+				"example": -32.946765545
 			    },
 			    "lon": {
 				"type": "number",
-				"example": -60.706216
+				"example": -60.652640148
 			    }
 			}
 		    }
                 }
             },
-	    "asentamientos_single": {
+            "fraccion_censal_sub_entidad": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "8208427"
+                    }
+                }
+            },
+	    "fracciones_censales_single": {
 		"type": "object",
 		"properties": {
 		    "cantidad": {
@@ -777,7 +1166,7 @@
 		    },
 		    "total": {
 			"type": "integer",
-			"example": 13555
+			"example": 238
 		    },
 		    "inicio": {
 			"type": "integer",
@@ -787,29 +1176,307 @@
 			"type": "object",
 			"example": {}
 		    },
-		    "asentamientos": {
+		    "fracciones_censales": {
 			"type": "array",
 			"items": {
-			    "$ref": "#/components/schemas/asentamiento"
+			    "$ref": "#/components/schemas/fraccion_censal"
 			}
 		    }
 		}
 	    },
-	    "asentamientos_bulk": {
+	    "fracciones_censales_bulk": {
 		"type": "object",
 		"properties": {
 		    "resultados": {
 			"type": "array",
 			"items": {
-			    "$ref": "#/components/schemas/asentamientos_single"
+			    "$ref": "#/components/schemas/fracciones_censales_single"
 			}
 		    }
 		}
 	    },
-	    "asentamientos_request_bulk": {
+	    "fracciones_censales_request_bulk": {
 		"type": "object",
 		"properties": {
-		    "asentamientos": {
+		    "fracciones_censales": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["fracciones_censales"]
+	    },
+		"radio_censal": {
+                "type": "object",
+                "properties": {
+					"fraccion_censal": {
+                        "$ref": "#/components/schemas/fraccion_censal_sub_entidad"
+                    },
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sub_entidad"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "820842722"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
+                    },
+					"categoria": {
+                        "type": "string",
+                        "example": "Urbano"
+                    },					
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.950217292
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.657079871
+			    }
+			}
+		    }
+                }
+            },
+            "radio_censal_sub_entidad": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "067912701"
+                    }
+                }
+            },
+	    "radios_censales_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 5386
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
+		    "radios_censales": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/radio_censal"
+			}
+		    }
+		}
+	    },
+	    "radios_censales_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/radios_censales_single"
+			}
+		    }
+		}
+	    },
+	    "radios_censales_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "radios_censales": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["radios_censales"]
+	    },
+            "calle": {
+                "type": "object",
+                "properties": {
+		    "altura": {
+			"type": "object",
+			"properties": {
+			    "inicio": {
+				"type": "object",
+				"properties": {
+				    "derecha": {
+					"type": "integer",
+					"example": 0
+				    },
+				    "izquierda": {
+					"type": "integer",
+					"example": 0
+				    }
+				}
+			    },
+			    "fin": {
+				"type": "object",
+				"properties": {
+				    "derecha": {
+					"type": "integer",
+					"example": 599
+				    },
+				    "izquierda": {
+					"type": "integer",
+					"example": 598
+				    }
+				}
+			    }
+			}
+		    },
+                    "id": {
+                        "type": "string",
+                        "example": "8208416001280"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "URQUIZA"
+                    },
+                    "nomenclatura": {
+                        "type": "string",
+                        "example": "URQUIZA, Rosario, Santa Fe"
+                    },
+                    "provincia": {
+			"$ref": "#/components/schemas/provincia_sub_entidad"
+                    },
+                    "departamento": {
+			"$ref": "#/components/schemas/departamento_sub_entidad"
+                    },
+		    "localidad_censal": {
+			"$ref": "#/components/schemas/localidad_censal_sub_entidad"
+		    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "CALLE",
+                        "enum": [
+                            "OTRO",
+                            "AV",
+                            "RUTA",
+                            "AUT",
+                            "CALLE",
+                            "PJE",
+                            "BV"                           
+                        ]
+                    }
+                }
+            },
+	    "calles_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 151500
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
+		    "calles": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/calle"
+			}
+		    }
+		}
+	    },
+	    "calles_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/calles_single"
+			}
+		    }
+		}
+	    },
+	    "calles_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "calles": {
 			"type": "array",
 			"items": {
 			    "type": "object",
@@ -820,14 +1487,14 @@
 				"nombre": {
 				    "$ref": "#/components/schemas/param_nombre"
 				},
+				"categoria": {
+				    "$ref": "#/components/schemas/param_categoria_calle"
+				},
 				"provincia": {
 				    "$ref": "#/components/schemas/param_provincia"
 				},
 				"departamento": {
 				    "$ref": "#/components/schemas/param_departamento"
-				},
-				"municipio": {
-				    "$ref": "#/components/schemas/param_municipio"
 				},
 				"localidad_censal": {
 				    "$ref": "#/components/schemas/param_localidad_censal"
@@ -857,9 +1524,9 @@
 		    }
 		},
 		"additionalProperties": false,
-		"required": ["asentamientos"]
+		"required": ["calles"]
 	    },
-            "direccion": {
+			"direccion": {
                 "type": "object",
                 "properties": {
 		    "altura": {
@@ -1043,168 +1710,7 @@
 		"additionalProperties": false,
 		"required": ["localidades"]
 	    },
-            "calle": {
-                "type": "object",
-                "properties": {
-		    "altura": {
-			"type": "object",
-			"properties": {
-			    "inicio": {
-				"type": "object",
-				"properties": {
-				    "derecha": {
-					"type": "integer",
-					"example": 0
-				    },
-				    "izquierda": {
-					"type": "integer",
-					"example": 0
-				    }
-				}
-			    },
-			    "fin": {
-				"type": "object",
-				"properties": {
-				    "derecha": {
-					"type": "integer",
-					"example": 599
-				    },
-				    "izquierda": {
-					"type": "integer",
-					"example": 598
-				    }
-				}
-			    }
-			}
-		    },
-                    "id": {
-                        "type": "string",
-                        "example": "8208416001280"
-                    },
-                    "nombre": {
-                        "type": "string",
-                        "example": "URQUIZA"
-                    },
-                    "nomenclatura": {
-                        "type": "string",
-                        "example": "URQUIZA, Rosario, Santa Fe"
-                    },
-                    "provincia": {
-			"$ref": "#/components/schemas/provincia_sub_entidad"
-                    },
-                    "departamento": {
-			"$ref": "#/components/schemas/departamento_sub_entidad"
-                    },
-		    "localidad_censal": {
-			"$ref": "#/components/schemas/localidad_censal_sub_entidad"
-		    },
-                    "categoria": {
-                        "type": "string",
-                        "example": "CALLE",
-                        "enum": [
-                            "OTRO",
-                            "AV",
-                            "RUTA",
-                            "AUT",
-                            "CALLE",
-                            "PJE",
-                            "BV"                           
-                        ]
-                    }
-                }
-            },
-	    "calles_single": {
-		"type": "object",
-		"properties": {
-		    "cantidad": {
-			"type": "integer",
-			"example": 10
-		    },
-		    "total": {
-			"type": "integer",
-			"example": 151500
-		    },
-		    "inicio": {
-			"type": "integer",
-			"example": 0
-		    },
-		    "parametros": {
-			"type": "object",
-			"example": {}
-		    },
-		    "calles": {
-			"type": "array",
-			"items": {
-			    "$ref": "#/components/schemas/calle"
-			}
-		    }
-		}
-	    },
-	    "calles_bulk": {
-		"type": "object",
-		"properties": {
-		    "resultados": {
-			"type": "array",
-			"items": {
-			    "$ref": "#/components/schemas/calles_single"
-			}
-		    }
-		}
-	    },
-	    "calles_request_bulk": {
-		"type": "object",
-		"properties": {
-		    "calles": {
-			"type": "array",
-			"items": {
-			    "type": "object",
-			    "properties": {
-				"id": {
-				    "$ref": "#/components/schemas/param_id"
-				},
-				"nombre": {
-				    "$ref": "#/components/schemas/param_nombre"
-				},
-				"categoria": {
-				    "$ref": "#/components/schemas/param_categoria_calle"
-				},
-				"provincia": {
-				    "$ref": "#/components/schemas/param_provincia"
-				},
-				"departamento": {
-				    "$ref": "#/components/schemas/param_departamento"
-				},
-				"localidad_censal": {
-				    "$ref": "#/components/schemas/param_localidad_censal"
-				},
-				"orden": {
-				    "$ref": "#/components/schemas/param_orden"
-				},
-				"aplanar": {
-				    "$ref": "#/components/schemas/param_aplanar"
-				},
-				"campos": {
-				    "$ref": "#/components/schemas/param_campos"
-				},
-				"max": {
-				    "$ref": "#/components/schemas/param_max"
-				},
-				"inicio": {
-				    "$ref": "#/components/schemas/param_max"
-				},
-				"exacto": {
-				    "$ref": "#/components/schemas/param_exacto"
-				}
-			    },
-			    "additionalProperties": false
-			},
-			"minItems": 1
-		    }
-		},
-		"additionalProperties": false,
-		"required": ["calles"]
-	    },
-	    "ubicacion": {
+        "ubicacion": {
                 "type": "object",
 		"properties": {
 		    "departamento": {
@@ -1214,7 +1720,7 @@
 			"$ref": "#/components/schemas/provincia_sub_entidad"
 		    },
 		    "municipio": {
-			"$ref": "#/components/schemas/municipio_sub_entidad"
+			"$ref": "#/components/schemas/gobierno_local_sub_entidad"
 		    },
 		    "lat": {
 			"type": "number",
@@ -1278,7 +1784,278 @@
 		"additionalProperties": false,
 		"required": ["ubicaciones"]
 	    },
-	    "param_provincia": {
+	    "establecimiento_educativo": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sub_entidad"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "820000400"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "ESCUELA NRO 6018 DOCTOR VICTORIANO MONTES"
+                    },
+                    "domicilio": {
+                        "type": "string",
+                        "example": "C LARRALDE 3305 GODOY"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
+                    },
+                    "categoria": {
+                        "type": "string",
+                        "example": "ESCUELA"
+                    },
+                    "gestion": {
+                        "type": "string",
+                        "example": "Estatal"
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.96802738
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.725888213
+			    }
+			}
+		    }
+                }
+            },
+	    "establecimientos_educativos_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 1235
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
+		    "localidades": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/establecimiento_educativo"
+			}
+		    }
+		}
+	    },
+	    "establecimientos_educativos_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/establecimientos_educativos_single"
+			}
+		    }
+		}
+	    },
+	    "establecimientos_educativos_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "localidades": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"gestion": {
+				    "$ref": "#/components/schemas/param_gestion"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["establecimientos_educativos"]
+	    },
+		"institucion_universitaria": {
+                "type": "object",
+                "properties": {
+                    "departamento": {
+                        "$ref": "#/components/schemas/departamento_sub_entidad"
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "78203615"
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Centro de Estudios Interdisciplinarios - Universidad Nacional de Rosario"
+                    },
+                    "domicilio": {
+                        "type": "string",
+                        "example": "Maipú 1065 PISO3"
+                    },
+                    "provincia": {
+                        "$ref": "#/components/schemas/provincia_sub_entidad"
+                    },
+                    "unidad_academica": {
+                        "type": "string",
+                        "example": "Centro de Estudios Interdisciplinarios"
+                    },
+                    "universidad": {
+                        "type": "string",
+                        "example": "Universidad Nacional de Rosario"
+                    },
+                    "gestion": {
+                        "type": "string",
+                        "example": "Estatal"
+                    },
+		    "centroide": {
+			"type": "object",
+			"properties": {
+			    "lat": {
+				"type": "number",
+				"example": -32.9503123
+			    },
+			    "lon": {
+				"type": "number",
+				"example": -60.6360023
+			    }
+			}
+		    }
+                }
+            },
+	    "instituciones_universitarias_single": {
+		"type": "object",
+		"properties": {
+		    "cantidad": {
+			"type": "integer",
+			"example": 10
+		    },
+		    "total": {
+			"type": "integer",
+			"example": 53
+		    },
+		    "inicio": {
+			"type": "integer",
+			"example": 0
+		    },
+		    "parametros": {
+			"type": "object",
+			"example": {}
+		    },
+		    "localidades": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/institucion_universitaria"
+			}
+		    }
+		}
+	    },
+	    "instituciones_universitarias_bulk": {
+		"type": "object",
+		"properties": {
+		    "resultados": {
+			"type": "array",
+			"items": {
+			    "$ref": "#/components/schemas/instituciones_universitarias_single"
+			}
+		    }
+		}
+	    },
+	    "instituciones_universitarias_request_bulk": {
+		"type": "object",
+		"properties": {
+		    "localidades": {
+			"type": "array",
+			"items": {
+			    "type": "object",
+			    "properties": {
+				"id": {
+				    "$ref": "#/components/schemas/param_id"
+				},
+				"nombre": {
+				    "$ref": "#/components/schemas/param_nombre"
+				},
+				"provincia": {
+				    "$ref": "#/components/schemas/param_provincia"
+				},
+				"departamento": {
+				    "$ref": "#/components/schemas/param_departamento"
+				},
+				"universidad": {
+				    "$ref": "#/components/schemas/param_universidad"
+				},
+				"gestion": {
+				    "$ref": "#/components/schemas/param_gestion"
+				},
+				"orden": {
+				    "$ref": "#/components/schemas/param_orden"
+				},
+				"aplanar": {
+				    "$ref": "#/components/schemas/param_aplanar"
+				},
+				"campos": {
+				    "$ref": "#/components/schemas/param_campos"
+				},
+				"max": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"inicio": {
+				    "$ref": "#/components/schemas/param_max"
+				},
+				"exacto": {
+				    "$ref": "#/components/schemas/param_exacto"
+				}
+			    },
+			    "additionalProperties": false
+			},
+			"minItems": 1
+		    }
+		},
+		"additionalProperties": false,
+		"required": ["instituciones_universitarias"]
+	    },
+		"param_provincia": {
 		"type": "string",
 		"minLength": 1,
 		"example": "Santa Fe"
@@ -1293,12 +2070,16 @@
 		"minLength": 1,
 		"example": "Granadero Baigorria"
 	    },
+	    "param_fraccion_censal": {
+		"type": "string",
+		"example": "8208428"
+	    },
 	    "param_localidad": {
 		"type": "string",
 		"minLength": 1,
 		"example": "Granadero Baigorria"
 	    },
-	    "param_municipio": {
+	    "param_gobierno_local": {
 		"type": "string",
 		"minLength": 1,
 		"example": "Granadero Baigorria"
@@ -1340,6 +2121,38 @@
 		"type": "string",
                 "enum": ["id", "nombre"]
 	    },
+	    "param_orden_id": {
+		"type": "string",
+                "enum": ["id"]
+	    },
+		"param_division": {
+		"type": "string",
+                "enum": ["politica", "geoestadistica"]
+	    },
+		"param_desplazar": {
+		"enum": [true],
+		"example": true
+	    },
+		"param_forzar": {
+		"enum": [false],
+		"example": false
+	    },
+	    "param_categoria_gl": {
+		"type": "string",
+		"enum": ["Comisión de Fomento", "Comisión Municipal", "Comisión Municipal", "Comuna", "Comuna Rural", "Junta de Gobierno", "Municipio"]
+	    },
+	    "param_categoria_asentamiento": {
+		"type": "string",
+		"enum": ["Base Antártica", "Componente de localidad compuesta", "Entidad", "Localidad simple", "Paraje"]
+	    },
+	    "param_gestion": {
+		"type": "string",
+		"enum": ["Estatal", "Privada"]
+	    },
+	    "param_universidad": {
+		"type": "string",
+		"minLength": 1
+	    },
 	    "param_formato_all": {
 		"type": "string",
 		"enum": ["json", "csv", "geojson", "xml"]
@@ -1372,7 +2185,7 @@
             },
 	    "param_interseccion": {
 		"type": "string",
-		"example": "provincia:82,departamento:82084,municipio:820196"
+		"example": ""
 	    },
 	    "param_error": {
 		"type": "object",
@@ -1464,12 +2277,12 @@
 		    "$ref": "#/components/schemas/param_departamento"
                 }
             },
-            "municipio": {
-                "name": "municipio",
-                "description": "Filtrar por nombre o ID de municipio. Se pueden especificar varios IDs separados por comas.",
+            "gobierno_local": {
+                "name": "gobierno_local",
+                "description": "Filtrar por nombre o ID de gobierno local. Se pueden especificar varios IDs separados por comas.",
                 "in": "query",
                 "schema": {
-		    "$ref": "#/components/schemas/param_municipio"
+		    "$ref": "#/components/schemas/param_gobierno_local"
                 }
             },
             "localidad_censal": {
@@ -1550,6 +2363,79 @@
                 "in": "query",
                 "schema": {
 		    "$ref": "#/components/schemas/param_orden"
+                }
+            },
+			
+            "orden_id": {
+                "name": "orden",
+                "description": "Campo por el cual ordenar los resultados.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_orden_id"
+                }
+            },
+			"division": {
+                "name": "division",
+                "description": "Tipo de división territorial que define las unidades territoriales que se devolverán",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_division"
+                }
+            },
+			"desplazar": {
+                "name": "desplazar",
+                "description": "Si está activo, al georreferenciar ubica el punto sobre la manzana en lugar de ubicarlos sobre el eje de calle",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_desplazar"
+                }
+            },
+			"forzar": {
+                "name": "forzar",
+                "description": "Permite normalizar una dirección aunque esta no pueda georreferenciarse",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_forzar"
+                }
+			},
+			"categoria_gl": {
+                "name": "categoria",
+                "description": "Permite filtrar por tipo de gobierno local",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_categoria_gl"
+                }
+			},
+			"categoria_asentamiento": {
+                "name": "categoria",
+                "description": "Permite filtrar por tipo de asentamiento",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_categoria_asentamiento"
+                }
+			},
+			"fraccion_censal": {
+                "name": "fraccion_censal",
+                "description": "Filtrar por ID de fracción censal. Se pueden especificar varios IDs separados por comas.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_fraccion_censal"
+                }
+            },
+			"gestion": {
+                "name": "gestion",
+                "description": "Filtrar por tipo de gestión.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_gestion"
+                }
+            },
+            "uninversidad": {
+                "name": "universidad",
+                "description": "Filtrar por nombre de la universidad a la que pertenece la unidad académica.",
+                "in": "query",
+                "schema": {
+		    "$ref": "#/components/schemas/param_universidad"
                 }
             },
 	    "formato_all": {
@@ -1824,6 +2710,100 @@
                 }
             }
         },
+	"/gobiernos-locales": {
+	    "get": {
+		"summary": "Retorna un listado de gobiernos locales.",
+		"description": "Permite realizar búsquedas sobre el listado de gobiernos locales.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+			{
+				"$ref": "#/components/parameters/interseccion"
+			},
+		    {
+			"$ref": "#/components/parameters/categoria_gl"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de gobiernos locales.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/gobiernos_locales_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+			"summary": "Retorna uno o más listados de gobiernos locales.",
+			"description": "Permite realizar varias búsquedas sobre el listado de gobiernos locales en simultáneo.",
+			"tags": [
+				"Recursos"
+			],
+			"requestBody": {
+				"description": "Consultas en formato JSON.",
+				"content": {
+				"application/json": {
+					"schema": {
+					"$ref": "#/components/schemas/gobiernos_locales_request_bulk"
+					}
+				}
+				}
+			},
+			"responses": {
+				"200": {
+				"description": "Listados de gobiernos locales.",
+				"content": {
+					"application/json": {
+					"schema": {
+						"$ref": "#/components/schemas/gobiernos_locales_bulk"
+					}
+					}
+				}
+				},
+				"400": {
+				"$ref": "#/components/responses/400_bulk_error"
+				}
+					}
+            }
+        },
 	"/municipios": {
 	    "get": {
 		"summary": "Retorna un listado de municipios.",
@@ -1914,101 +2894,7 @@
 		    }
 		}
 	    }
-	},
-	"/localidades-censales": {
-	    "get": {
-		"summary": "Retorna un listado de localidades censales.",
-		"description": "Permite realizar búsquedas sobre el listado de localidades censales.",
-		"tags": [
-		    "Recursos"
-		],
-		"parameters": [
-		    {
-			"$ref": "#/components/parameters/id"
-		    },
-		    {
-			"$ref": "#/components/parameters/nombre"
-		    },
-		    {
-			"$ref": "#/components/parameters/provincia"
-		    },
-		    {
-			"$ref": "#/components/parameters/departamento"
-		    },
-		    {
-			"$ref": "#/components/parameters/municipio"
-		    },
-		    {
-			"$ref": "#/components/parameters/orden"
-		    },
-		    {
-			"$ref": "#/components/parameters/aplanar"
-		    },
-		    {
-			"$ref": "#/components/parameters/campos"
-		    },
-		    {
-			"$ref": "#/components/parameters/max"
-		    },
-                    {
-                        "$ref": "#/components/parameters/inicio"
-                    },
-		    {
-			"$ref": "#/components/parameters/exacto"
-		    },
-		    {
-			"$ref": "#/components/parameters/formato_all"
-		    }
-		],
-		"responses": {
-		    "200": {
-			"description": "Listado de localidades censales.",
-			"content": {
-			    "application/json": {
-				"schema": {
-				    "$ref": "#/components/schemas/localidades_censales_single"
-				}
-			    }
-			}
-		    },
-		    "400": {
-			"$ref": "#/components/responses/400_single_error"
-		    }
-		}
-	    },
-	    "post": {
-		"summary": "Retorna uno o más listados de localidades censales.",
-		"description": "Permite realizar varias búsquedas sobre el listado de localidades censales en simultáneo.",
-		"tags": [
-		    "Recursos"
-		],
-		"requestBody": {
-		    "description": "Consultas en formato JSON.",
-		    "content": {
-			"application/json": {
-			    "schema": {
-				"$ref": "#/components/schemas/localidades_censales_request_bulk"
-			    }
-			}
-		    }
-		},
-		"responses": {
-		    "200": {
-			"description": "Listados de localidades censales.",
-			"content": {
-			    "application/json": {
-				"schema": {
-				    "$ref": "#/components/schemas/localidades_censales_bulk"
-				}
-			    }
-			}
-		    },
-		    "400": {
-			"$ref": "#/components/responses/400_bulk_error"
-		    }
-		}
-	    }
-	},
+	},	
 	"/asentamientos": {
 	    "get": {
 		"summary": "Retorna un listado de asentamientos.",
@@ -2030,10 +2916,13 @@
 			"$ref": "#/components/parameters/departamento"
 		    },
 		    {
-			"$ref": "#/components/parameters/municipio"
+			"$ref": "#/components/parameters/gobierno_local"
 		    },
 		    {
 			"$ref": "#/components/parameters/localidad_censal"
+		    },
+		    {
+			"$ref": "#/components/parameters/categoria_asentamiento"
 		    },
 		    {
 			"$ref": "#/components/parameters/orden"
@@ -2127,7 +3016,7 @@
 			"$ref": "#/components/parameters/departamento"
 		    },
 		    {
-			"$ref": "#/components/parameters/municipio"
+			"$ref": "#/components/parameters/gobierno_local"
 		    },
 		    {
 			"$ref": "#/components/parameters/localidad_censal"
@@ -2193,6 +3082,364 @@
 			    "application/json": {
 				"schema": {
 				    "$ref": "#/components/schemas/localidades_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/aglomerados": {
+	    "get": {
+		"summary": "Retorna un listado de aglomerados.",
+		"description": "Permite realizar búsquedas sobre el listado de aglomerados provisto por INDEC.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de aglomerados.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/aglomerados_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de aglomerados.",
+		"description": "Permite realizar varias búsquedas sobre el listado de aglomerados en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/aglomerados_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de aglomerados.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/aglomerados_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/localidades-censales": {
+	    "get": {
+		"summary": "Retorna un listado de localidades censales.",
+		"description": "Permite realizar búsquedas sobre el listado de localidades censales.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/gobierno_local"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de localidades censales.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/localidades_censales_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de localidades censales.",
+		"description": "Permite realizar varias búsquedas sobre el listado de localidades censales en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/localidades_censales_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de localidades censales.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/localidades_censales_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/fracciones-censales": {
+	    "get": {
+		"summary": "Retorna un listado de fracciones censales.",
+		"description": "Permite realizar búsquedas sobre el listado de fracciones censales.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden_id"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de fracciones censales.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/fracciones_censales_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de fracciones censales.",
+		"description": "Permite realizar varias búsquedas sobre el listado de fracciones censales en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/fracciones_censales_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de fracciones censales.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/fracciones_censales_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/radios-censales": {
+	    "get": {
+		"summary": "Retorna un listado de radios censales.",
+		"description": "Permite realizar búsquedas sobre el listado de radios censales.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/fraccion_censal"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden_id"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de radios censales.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/radios_censales_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de radios censales.",
+		"description": "Permite realizar varias búsquedas sobre el listado de radios censales en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/radios_censales_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de radios censales.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/radios_censales_bulk"
 				}
 			    }
 			}
@@ -2323,9 +3570,15 @@
 		    {
 			"$ref": "#/components/parameters/localidad"
 		    },
-                    {
-                        "$ref": "#/components/parameters/orden"
-                    },
+			{
+			"$ref": "#/components/parameters/desplazar"
+			},
+			{
+			"$ref": "#/components/parameters/forzar"
+			},
+			{
+			"$ref": "#/components/parameters/orden"
+			},
 		    {
 			"$ref": "#/components/parameters/aplanar"
 		    },
@@ -2397,7 +3650,7 @@
 	"/ubicacion": {
 	    "get": {
 		"summary": "Georreferenciación inversa para un punto dado.",
-		"description": "Permite realizar una georreferenciación inversa para un punto, informando cuales unidades territoriales lo contienen.",
+		"description": "Permite realizar una georreferenciación inversa para un punto, informando cuales unidades territoriales lo contienen, admás de la calle y altura más cercana.",
 		"tags": [
 		    "Recursos"
 		],
@@ -2407,6 +3660,9 @@
 		    },
 		    {
 			"$ref": "#/components/parameters/lon"
+		    },
+		    {
+			"$ref": "#/components/parameters/division"
 		    },
 		    {
 			"$ref": "#/components/parameters/aplanar"
@@ -2467,10 +3723,201 @@
 		}
 	    }
 	},
+	"/establecimientos-educativos": {
+	    "get": {
+		"summary": "Retorna un listado de establecimientos educativos.",
+		"description": "Permite realizar búsquedas sobre el listado de establecimientos educativos, desde nivel inicial hasta secundario.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/gestion"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de establecimientos educativos.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/establecimientos_educativos_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de establecimientos educativos.",
+		"description": "Permite realizar varias búsquedas sobre el listado de establecimientos educativos en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/establecimientos_educativos_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de establecimientos educativos.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/establecimientos_educativos_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
+	"/instituciones-universitarias": {
+	    "get": {
+		"summary": "Retorna un listado de instituciones universitarias.",
+		"description": "Permite realizar búsquedas sobre el listado de unidades académicas de instituciones universitarias.",
+		"tags": [
+		    "Recursos"
+		],
+		"parameters": [
+		    {
+			"$ref": "#/components/parameters/id"
+		    },
+		    {
+			"$ref": "#/components/parameters/nombre"
+		    },
+		    {
+			"$ref": "#/components/parameters/provincia"
+		    },
+		    {
+			"$ref": "#/components/parameters/departamento"
+		    },
+		    {
+			"$ref": "#/components/parameters/universidad"
+		    },
+		    {
+			"$ref": "#/components/parameters/gestion"
+		    },
+		    {
+			"$ref": "#/components/parameters/orden"
+		    },
+		    {
+			"$ref": "#/components/parameters/aplanar"
+		    },
+		    {
+			"$ref": "#/components/parameters/campos"
+		    },
+		    {
+			"$ref": "#/components/parameters/max"
+		    },
+                    {
+                        "$ref": "#/components/parameters/inicio"
+                    },
+		    {
+			"$ref": "#/components/parameters/exacto"
+		    },
+		    {
+			"$ref": "#/components/parameters/formato_all"
+		    }
+		],
+		"responses": {
+		    "200": {
+			"description": "Listado de instituciones universitarias.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/instituciones_universitarias_single"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_single_error"
+		    }
+		}
+	    },
+	    "post": {
+		"summary": "Retorna uno o más listados de instituciones universitarias.",
+		"description": "Permite realizar varias búsquedas sobre el listado de instituciones universitarias en simultáneo.",
+		"tags": [
+		    "Recursos"
+		],
+		"requestBody": {
+		    "description": "Consultas en formato JSON.",
+		    "content": {
+			"application/json": {
+			    "schema": {
+				"$ref": "#/components/schemas/instituciones_universitarias_request_bulk"
+			    }
+			}
+		    }
+		},
+		"responses": {
+		    "200": {
+			"description": "Listados de instituciones universitarias.",
+			"content": {
+			    "application/json": {
+				"schema": {
+				    "$ref": "#/components/schemas/instituciones_universitarias_bulk"
+				}
+			    }
+			}
+		    },
+		    "400": {
+			"$ref": "#/components/responses/400_bulk_error"
+		    }
+		}
+	    }
+	},
 	"/{filename}": {
 	    "get": {
-		"summary": "Se puede obtener un listado entero de las entidades geográficas disponibles en distintos formatos",
-		"description": "Se puede obtener una lista de la totatildad de provincias, municipios, departamentos, localidades, localidades censales, asentamientos, calles o cuadras en formato csv, json, geojson o ndjson",
+		"summary": "Se puede obtener un listado entero de las entidades geográficas disponibles, en distintos formatos",
+		"description": "Se puede obtener una lista de la totatildad de las unidades territoriales presentes en formato csv o geojson",
 		"tags": [
 		    "Recursos"
 		],
@@ -2478,43 +3925,40 @@
 			{
 				"name": "filename",
 				"in": "path",
-				"description": "se brinda la entidad de interés con la extensión deseada. Las opciones disponibles son:\n\n* `provincias.csv` \n\n* `provincias.json` \n* `provincias.geojson` \n* `provincias.ndjson` \n* `departamentos.csv` \n* `departamentos.json` \n\n* `departamentos.geojson` \n\n* `departamentos.ndjson`\n* `municipios.csv`\n* `municipios.json`\n* `municipios.geojson`\n* `municipios.ndjson`\n* `localidades.csv`\n* `localidades.json`\n* `localidades.geojson`\n* `localidades.ndjson`\n* `localidades_censales.csv`\n* `localidades_censales.json`\n* `localidades_censales.geojson`\n* `localidades_censales.ndjson`\n* `asentamientos.csv`\n* `asentamientos.json`\n* `asentamientos.geojson`\n* `asentamientos.ndjson`\n* `calles.csv`\n* `calles.json`\n* `calles.geojson`\n* `calles.ndjson`\n* `cuadras.csv`\n* `cuadras.json`\n* `cuadras.geojson`\n* `cuadras.ndjson`\n*",
+				"description": "se brinda la entidad de interés con la extensión deseada. Las opciones disponibles son:\n\n* `provincias.csv` \n* `provincias.geojson` \n* `departamentos.csv` \n\n* `departamentos.geojson`\n* `gobiernos_locales.csv`\n* `gobiernos_locales.geojson` \n* `municipios.csv`\n* `municipios.geojson`\n* `asentamientos.csv`\n* `asentamientos.geojson`\n* `localidades.csv`\n* `localidades.geojson`\n* `aglomerados.csv`\n* `aglomerados.geojson`\n* `localidades_censales.csv`\n* `localidades_censales.geojson`\n* `fracciones_censales.csv`\n* `fracciones_censales.geojson`\n* `radios_censales.csv`\n* `radios_censales.geojson`\n* `calles.csv`\n* `calles.geojson`\n* `cuadras.csv`\n* `cuadras.geojson`\n* `establecimientos-educativos.csv`\n* `establecimientos-educativos.geojson`\n* `instituciones-universitarias.csv`\n* `instituciones-universitarias.geojson`\n*",
 				"required": true,
 				"schema": {
 				  "type": "string",
 				"enum": [
 	"provincias.csv",
-	"provincias.json",
 	"provincias.geojson",
-	"provincias.ndjson",
 	"departamentos.csv",
-	"departamentos.json",
 	"departamentos.geojson",
-	"departamentos.ndjson",
+	"gobiernos_locales.csv",
+	"gobiernos_locales.geojson",
 	"municipios.csv",
-	"municipios.json",
 	"municipios.geojson",
-	"municipios.ndjson",
-	"localidades.csv",
-	"localidades.json",
-	"localidades.geojson",
-	"localidades.ndjson",
-	"localidades_censales.csv",
-	"localidades_censales.json",
-	"localidades_censales.geojson",
-	"localidades_censales.ndjson",
 	"asentamientos.csv",
-	"asentamientos.json",
 	"asentamientos.geojson",
-	"asentamientos.ndjson",
+	"localidades.csv",
+	"localidades.geojson",
+	"aglomerados.csv",
+	"aglomerados.geojson",
+	"localidades_censales.csv",
+	"localidades_censales.geojson",
+	"fracciones_censales.csv",
+	"fracciones_censales.geojson",
+	"radios_censales.csv",
+	"radios_censales.geojson",
 	"calles.csv",
-	"calles.json",
 	"calles.geojson",
-	"calles.ndjson",
 	"cuadras.csv",
-	"cuadras.json",
 	"cuadras.geojson",
-	"cuadras.ndjson"
+	"establecimientos-educativos.csv",
+	"establecimientos-educativos.geojson",
+	"instituciones-universitarias.csv",
+	"instituciones-universitarias.geojson",
+	
 ]
 
 				}
