@@ -12,7 +12,7 @@
     ],
     "servers": [
 	{
-	    "url": "https://apis.datos.gob.ar/georef-v2-ZGF0b3Nnb2Jhcg/api"
+	    "url": "https://apis.datos.gob.ar/georef/api/v2.0"
 	}
     ],
     "components": {
