@@ -416,7 +416,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
                     street_block_has_number(street_block, self._numerical_door_number)):
                 street_blocks_by_street[street_id] = street_block
 
-        return street_blocks_by_street.values()
+        return [street_block for street_block in street_blocks_by_street.values()]
 
     def _build_address_hits(self):
         """Construye los resultados de la búsqueda de direcciones a partir
@@ -432,6 +432,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
         hits = self._elasticsearch_result.hits
         if not self._query['exact']:
             hits = self._group_street_blocks(hits)
+            hits = hits[:self._query['size']]
 
         for street_block in hits:
             street = street_block[N.STREET]
