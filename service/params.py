@@ -1547,16 +1547,40 @@ PARAMS_STREETS = EndpointParameters(shared_params={
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
-PARAMS_LOCATION = EndpointParameters(shared_params={
+PARAMS_POLITICAL_LOCATION = EndpointParameters(shared_params={
     N.LAT: FloatParameter(required=True),
     N.LON: FloatParameter(required=True),
     N.FLATTEN: BoolParameter(),
+    N.DIVISION: StrParameter(choices=[N.POLITICAL, N.GEOSTATISTICAL], default=N.POLITICAL),
     N.FIELDS: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.LAT,
                                         N.LON],
                                  standard=[N.DEPT_ID, N.DEPT_NAME, N.LG_ID,
                                            N.LG_NAME],
                                  complete=[N.STATE_SOURCE, N.DEPT_SOURCE,
                                            N.LG_SOURCE,
+                                           N.STREET_ID, N.STREET_NAME,
+                                           N.STREET_SOURCE, N.STREET_NUMBER])
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml'])
+})
+
+PARAMS_GEOSTATISTICAL_LOCATION = EndpointParameters(shared_params={
+    N.LAT: FloatParameter(required=True),
+    N.LON: FloatParameter(required=True),
+    N.FLATTEN: BoolParameter(),
+    N.DIVISION: StrParameter(choices=[N.POLITICAL, N.GEOSTATISTICAL], default=N.GEOSTATISTICAL),
+    N.FIELDS: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.LAT,
+                                        N.LON],
+                                 standard=[N.DEPT_ID, N.DEPT_NAME,
+                                           N.CENSUS_TRACT_ID,
+                                           N.CENSUS_BLOCK_ID,
+                                           N.AGGLOMERATION_ID, N.AGGLOMERATION_NAME,
+                                           N.CENSUS_LOCALITY_ID, N.CENSUS_LOCALITY_NAME],
+                                 complete=[N.STATE_SOURCE, N.DEPT_SOURCE,
+                                           N.CENSUS_TRACT_SOURCE,
+                                           N.CENSUS_BLOCK_SOURCE,
+                                           N.AGGLOMERATION_SOURCE,
+                                           N.CENSUS_LOCALITY_SOURCE,
                                            N.STREET_ID, N.STREET_NAME,
                                            N.STREET_SOURCE, N.STREET_NUMBER])
 }, get_qs_params={

@@ -325,6 +325,21 @@ class ElasticsearchSearch(ABC):
                     iteration_data.append((iterator, search))
 
 
+class EmptySearch(ElasticsearchSearch):
+
+    def __init__(self):
+        super().__init__(None, {})
+
+    def search_steps(self):
+        # Iterador vacío
+        if False:
+            yield None
+
+    @property
+    def result(self):
+        return None
+
+
 class TerritoriesSearch(ElasticsearchSearch):
     """Representa una búsqueda de entidades territoriales (provincias,
     departamentos, etc.).

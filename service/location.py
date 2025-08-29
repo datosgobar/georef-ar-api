@@ -4,14 +4,15 @@ Contiene las clases y funciones necesarias para la implementación del recurso
 /ubicacion de la API.
 """
 from service.constants import SB_DISTANCE_TOLERANCE, SB_MAX_SEARCH
-from service.data import ElasticsearchSearch, StatesSearch, DepartmentsSearch, StreetBlocksSearch
+from service.data import ElasticsearchSearch, StatesSearch, DepartmentsSearch, StreetBlocksSearch, EmptySearch, \
+    CensusTractsSearch, CensusBlocksSearch, AgglomerationsSearch, CensusLocalitiesSearch
 from service.data import LocalGovernmentsSearch
 from service import names as N
 from service.geometry import Point
 from service.query_result import QueryResult
 
 
-def _build_location_result(params, query, state, dept, lg, sb):
+def _build_location_result(params, query, state, dept, sb, lg, ct, cb, agl, cl):
     """Construye un resultado para una consulta al endpoint de ubicación.
 
     Args:
@@ -42,16 +43,29 @@ def _build_location_result(params, query, state, dept, lg, sb):
         state = empty_entity.copy()
         dept = empty_entity.copy()
         lg = empty_entity.copy()
+        sb = empty_entity.copy()
+        ct = empty_entity.copy()
+        cb = empty_entity.copy()
+        agl = empty_entity.copy()
+        cl = empty_entity.copy()
     else:
         dept = dept or empty_entity.copy()
         lg = lg or empty_entity.copy()
         sb = sb or empty_entity.copy()
+        ct = ct or empty_entity.copy()
+        cb = cb or empty_entity.copy()
+        agl = agl or empty_entity.copy()
+        cl = cl or empty_entity.copy()
 
     return QueryResult.from_single_entity({
         N.STATE: state,
         N.DEPT: dept,
         N.LG: lg,
         N.STREET: sb,
+        N.CENSUS_TRACT: ct,
+        N.CENSUS_BLOCK: cb,
+        N.AGGLOMERATION: agl,
+        N.CENSUS_LOCALITY: cl,
         N.LAT: query['lat'],
         N.LON: query['lon']
     }, params)
@@ -97,6 +111,10 @@ def run_location_queries(es, params_list, queries):
     lg_searches = []
     dept_searches = []
     sb_searches = []
+    ct_searches = []
+    cb_searches = []
+    agl_searches = []
+    cl_searches = []
 
     for query in queries:
         es_query = {
@@ -104,6 +122,7 @@ def run_location_queries(es, params_list, queries):
             'fields': [N.ID, N.NAME, N.SOURCE],
             'size': 1
         }
+        division = query[N.DIVISION]
 
         # Buscar la posición en provincias, departamentos y gobiernos locales
 
@@ -115,7 +134,7 @@ def run_location_queries(es, params_list, queries):
         all_searches.append(search)
         dept_searches.append(search)
 
-        search = LocalGovernmentsSearch(es_query)
+        search = LocalGovernmentsSearch(es_query) if division == N.POLITICAL else EmptySearch()
         all_searches.append(search)
         lg_searches.append(search)
 
@@ -127,14 +146,38 @@ def run_location_queries(es, params_list, queries):
         all_searches.append(search)
         sb_searches.append(search)
 
+        search = CensusTractsSearch(es_query) if division == N.GEOSTATISTICAL else EmptySearch()
+        all_searches.append(search)
+        ct_searches.append(search)
+
+        search = CensusBlocksSearch(es_query) if division == N.GEOSTATISTICAL else EmptySearch()
+        all_searches.append(search)
+        cb_searches.append(search)
+
+        search = AgglomerationsSearch(es_query) if division == N.GEOSTATISTICAL else EmptySearch()
+        all_searches.append(search)
+        agl_searches.append(search)
+
+        search = CensusLocalitiesSearch(es_query) if division == N.GEOSTATISTICAL else EmptySearch()
+        all_searches.append(search)
+        cl_searches.append(search)
+
     # Ejecutar todas las búsquedas preparadas
     ElasticsearchSearch.run_searches(es, all_searches)
 
     locations = []
-    iterator = zip(params_list, queries, state_searches, dept_searches,
-                   lg_searches, sb_searches)
+    iterator = zip(
+        params_list, queries,
+        state_searches, dept_searches, sb_searches,
+        lg_searches,
+        ct_searches, cb_searches, agl_searches, cl_searches
+    )
 
-    for params, query, state_search, dept_search, lg_search, sb_search in iterator:
+    for (params, query,
+         state_search, dept_search, sb_search,
+         lg_search,
+         ct_search, cb_search, agl_search, cl_search) in iterator:
+
         # Ya que la query de tipo location retorna una o cero entidades,
         # extraer la primera entidad de los resultados, o tomar None si
         # no hay resultados.
@@ -143,8 +186,17 @@ def run_location_queries(es, params_list, queries):
         lg = lg_search.result.hits[0] if lg_search.result else None
         sb = calc_nearest_street_block_params(params, sb_search)
 
-        result = _build_location_result(params.received_values(), query, state,
-                                        dept, lg, sb)
+        ct = ct_search.result.hits[0] if ct_search.result else None
+        cb = cb_search.result.hits[0] if cb_search.result else None
+        agl = agl_search.result.hits[0] if agl_search.result else None
+        cl = cl_search.result.hits[0] if cl_search.result else None
+
+        result = _build_location_result(
+            params.received_values(), query,
+            state, dept, sb,
+            lg,
+            ct, cb, agl, cl
+        )
         locations.append(result)
 
     return locations
