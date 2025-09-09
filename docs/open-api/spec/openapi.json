@@ -12,7 +12,7 @@
     ],
     "servers": [
 	{
-	    "url": "https://apis.datos.gob.ar/georef/api/v2.0"
+	    "url": "https://apis.datos.gob.ar/georef-v2-ZGF0b3Nnb2Jhcg/api"
 	}
     ],
     "components": {
@@ -2133,10 +2133,6 @@
 		"enum": [true],
 		"example": true
 	    },
-		"param_forzar": {
-		"enum": [false],
-		"example": false
-	    },
 	    "param_categoria_gl": {
 		"type": "string",
 		"enum": ["Comisión de Fomento", "Comisión Municipal", "Comisión Municipal", "Comuna", "Comuna Rural", "Junta de Gobierno", "Municipio"]
@@ -2390,14 +2386,6 @@
 		    "$ref": "#/components/schemas/param_desplazar"
                 }
             },
-			"forzar": {
-                "name": "forzar",
-                "description": "Permite normalizar una dirección aunque esta no pueda georreferenciarse",
-                "in": "query",
-                "schema": {
-		    "$ref": "#/components/schemas/param_forzar"
-                }
-			},
 			"categoria_gl": {
                 "name": "categoria",
                 "description": "Permite filtrar por tipo de gobierno local",
@@ -3572,9 +3560,6 @@
 		    },
 			{
 			"$ref": "#/components/parameters/desplazar"
-			},
-			{
-			"$ref": "#/components/parameters/forzar"
 			},
 			{
 			"$ref": "#/components/parameters/orden"
