@@ -108,7 +108,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             resp = self.get_response({
                 'inicio': i * page_size,
                 'max': page_size,
-                'direccion': COMMON_ADDRESS
+                'direccion': COMMON_ADDRESS,
+                'exacto': True
             })
 
             for result in resp:
@@ -278,14 +279,24 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         data = self.get_response({'direccion': 'FoobarFoobar 1', 'exacto': 1})
         self.assertTrue(len(data) == 0)
 
-    def test_address_wrong_number_search(self):
+    def test_exact_address_wrong_number_search(self):
         """La búsqueda debe devolver 0 resultados cuando se utiliza una altura
-        no existente."""
+        no existente con una búsqueda exacta."""
         data = self.get_response({
             'direccion': 'ANGEL PELUFFO 1000000',
-            'provincia': '02'
+            'provincia': '02',
+            'exacto': True
         })
         self.assertTrue(len(data) == 0)
+
+    def test_normalize_address_wrong_number_search(self):
+        """La búsqueda debe devolver al menos 1 resultado cuando se utiliza una altura
+        no existente con una búsqueda no exacta. Esto está pensado para poder normalizar nombres de calles."""
+        data = self.get_response({
+            'direccion': 'ANGEL PELUFFO 1000000',
+            'provincia': '02',
+        })
+        self.assertTrue(len(data) > 0)
 
     def test_address_number_0(self):
         """Se deberían aceptar búsquedas con altura 0."""
@@ -301,8 +312,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['067630500003265'], 'ARACONDEGUI 301'),     # -1 caracteres (de 8+)
             (['067630500003265'], 'zZARACONDEGUI 301'),   # +1 caracteres (de 8+)
             (['067630500003265'], 'zZARACONDEGUIi 301'),  # +2 caracteres (de 8+)
-            (['064270101009230'], 'NCLAN 2400'),         # -1 caracteres (de 4-7)
-            (['064270101009230'], 'iINCLAN 2400')        # +1 caracteres (de 4-7)
+            (['064270101009230', '065390100003940', '065600100303245'], 'NCLAN 2400'),         # -1 caracteres (de 4-7)
+            (['064270101009230', '065390100003940', '065600100303245'], 'iINCLAN 2400')        # +1 caracteres (de 4-7)
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -321,15 +332,15 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """La búsqueda aproximada debe también actuar como autocompletar cuando
         la longitud de la query es >= 4."""
         expected = [
-            (['020770100107975'], 'MARCOS SASTRE 2650'),
-            (['020770100107975'], 'MARCOS SASTR 2650'),
-            (['020770100107975'], 'MARCOS SAST 2650'),
-            (['020770100107975'], 'MARCOS SAS 2650'),
-            (['020840100204195'], 'CTAN GRAL RAMON FREIRE 4201'),
-            (['020840100204195'], 'CTAN GRAL RAMON FREIR 4201'),
-            (['020840100204195'], 'CTAN GRAL RAMON FREI 4201'),
-            (['020840100204195'], 'CTAN GRAL RAMON FRE 4201'),
-            (['020840100204195'], 'CTAN GRAL RAMON FR 4201')
+            (['020700100207975', '020700100407975', '020770100107975'], 'MARCOS SASTRE 2650'),
+            (['020700100207975', '020700100407975', '020770100107975'], 'MARCOS SASTR 2650'),
+            (['020700100207975', '020700100407975', '020770100107975'], 'MARCOS SAST 2650'),
+            (['020700100207975', '020700100407975', '020770100107975'], 'MARCOS SAS 2650'),
+            (['020840100104195', '020840100204195'], 'CTAN GRAL RAMON FREIRE 4201'),
+            (['020840100104195', '020840100204195'], 'CTAN GRAL RAMON FREIR 4201'),
+            (['020840100104195', '020840100204195'], 'CTAN GRAL RAMON FREI 4201'),
+            (['020840100104195', '020840100204195'], 'CTAN GRAL RAMON FRE 4201'),
+            (['020840100104195', '020840100204195'], 'CTAN GRAL RAMON FR 4201')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -357,8 +368,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
             (['580420100000085'], 'avenida estanislao flore 350'),
             (['580420100000085'], 'av estanislao flore 350'),
             (['580420100000085'], 'AV ESTANISLAOOO FLORES 350'),
-            (['020350100105600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
-            (['020350100105600'], 'fransisco acuna figeroa 1000')
+            (['020350100105600', '020980100105600'], 'FRANCISCO ACUñA DE FIGUERO 1000'),
+            (['020350100105600', '020980100105600'], 'fransisco acuna figeroa 1000')
         ]
 
         self.assert_address_search_id_matches(expected)
@@ -543,7 +554,8 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         """
         resp = self.get_response({
             'direccion': 'Arribeños 2230',
-            'departamento': 'Comuna 13'
+            'departamento': 'Comuna 13',
+            'exacto': True
         })
 
         for address in resp:
