@@ -777,11 +777,7 @@ def _process_location_single(request):
 
     """
     try:
-        division = request.args.get(N.DIVISION, N.POLITICAL)
-        if division == N.POLITICAL:
-            qs_params = params.PARAMS_POLITICAL_LOCATION.parse_get_params(request.args)
-        else:
-            qs_params = params.PARAMS_GEOSTATISTICAL_LOCATION.parse_get_params(request.args)
+        qs_params = params.PARAMS_LOCATION.parse_get_params(request.args)
     except params.ParametersParseException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
@@ -809,13 +805,7 @@ def _process_location_bulk(request):
 
     """
     try:
-        division = request.args.get(N.DIVISION, N.POLITICAL)
-        if division == N.POLITICAL:
-            body_params = params.PARAMS_POLITICAL_LOCATION.parse_post_params(
-                request.args, request.json, N.LOCATIONS)
-        else:
-            body_params = params.PARAMS_GEOSTATISTICAL_LOCATION.parse_post_params(
-                request.args, request.json, N.LOCATIONS)
+        body_params = params.PARAMS_LOCATION.parse_post_params(request.args, request.json, N.LOCATIONS)
     except params.ParametersParseException as e:
         return formatter.create_param_error_response_bulk(e.errors)
 

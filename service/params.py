@@ -77,6 +77,17 @@ class InvalidChoiceException(Exception):
     """
 
 
+class DependencyException(Exception):
+
+    def __init__(self, message):
+        self._message = message
+        super().__init__()
+
+    @property
+    def message(self):
+        return self._message
+
+
 @unique
 class ParamErrorType(Enum):
     """Códigos de error para cada tipo de error de parámetro.
@@ -96,6 +107,7 @@ class ParamErrorType(Enum):
     INVALID_BULK_ENTRY = 1007
     INVALID_BULK_LEN = 1008
     INVALID_SET = 1009
+    INVALID_DEPENDENCY = 1010
 
 
 class ParamError:
@@ -246,6 +258,9 @@ class Parameter(ABC):
     @property
     def choices(self):
         return sorted(list(self._choices))
+
+    def preprocess(self, params, received):
+        return None, None, None
 
 
 class StrParameter(Parameter):
@@ -542,6 +557,96 @@ class FieldListParameter(Parameter):
 
         # Siempre se agregan los valores básicos
         return tuple(self._basic | received)
+
+
+class ParamConditionsParameter(Parameter):
+    """Representa un parámetro cuyo tipo depende del valor de otros parámetros.
+
+        El parámetro queda pendiente de definición hasta que sea ejecutado el método preprocess.
+        Se heredan las propiedades y métodos de la clase Parámeter.
+
+        Attributes:
+            _param (param): Un objeto 'Parameter' que representa al objeto actual y que debe ser definido en el método
+            de la clase _preprocess
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        self._param = None
+        super().__init__(*args, **kwargs)
+
+    @property
+    def param(self):
+        if not self._param:
+            raise ParametersParseException("Condition parameter is not set.")
+        return self._param
+
+    def get_value(self, val):
+        return self.param.get_value(val)
+
+    def _check_value_in_choices(self, val):
+        self.param._check_value_in_choices(val)
+
+    @property
+    def choices(self):
+        return self.param.choices
+
+    @abstractmethod
+    def _select_option(self, params_parsed):
+        """
+            Método parra realizar la selección del parámetro correcto en función de los valores de los
+            parametros recibidos.
+
+        :param params (dict): Diccionario de valores recibidos en los parámetros dependientes.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _get_dependent_params(self, params):
+        """
+            Del diccionario de objetos Parameter (nombre-valor) obtiene sólo aquellos de los que depende el parámetro
+            actual.
+
+        :param params (dict): Diccionario de objetos Parameter (nombre-Parameter).
+        """
+        raise NotImplementedError()
+
+    def preprocess(self, params, received):
+        """
+            Realiza un procesamiento previo de los parámetros requeridos para poder procesar el paraámetro actual.
+            Si ocurre algún error se encapsula en DependencyException porque el error específico será capturado en
+            el procesamiento principal del parámetro en cuestión.
+
+        :param params (dict): Diccionario de objetos Parameter (nombre-Parameter).
+        :param (dict): Parámetros recibidos sin procesar (nombre-valor).
+        """
+        params_parsed = {}
+        for param_name, param in self._get_dependent_params(params).items():
+            try:
+                params_parsed[param_name] = param.get_value(received.get(param_name))
+            except Exception as e:
+                raise DependencyException("Error en la dependencia del parámetro '{}'".format(param_name))
+        self._select_option(params_parsed)
+
+    def _parse_value(self, val):
+        return self.param._parse_value(val)
+
+
+class OneParamConditionParameter(ParamConditionsParameter):
+
+    def __init__(self, param_name, param_options, *args, **kwargs):
+        self._param_name = param_name
+        self._param_options = param_options
+        super().__init__(*args, **kwargs)
+
+    def _get_dependent_params(self, params):
+        for param_name, param in params.items():
+            if param_name == self._param_name:
+                return {param_name: param}
+
+    def _select_option(self, params_parsed):
+        param_name = params_parsed.get(self._param_name)
+        self._param = self._param_options.get(param_name)
 
 
 class IntParameter(Parameter):
@@ -947,6 +1052,7 @@ class EndpointParameters:
                 continue
 
             try:
+                param.preprocess(params, received)
                 parsed = param.get_value(received_val)
                 results.add_value(param_name, parsed)
             except ParameterRequiredException:
@@ -964,6 +1070,9 @@ class EndpointParameters:
                 errors[param_name] = ParamError(ParamErrorType.INVALID_CHOICE,
                                                 str(e), from_source,
                                                 param.choices)
+            except DependencyException as e:
+                errors[param_name] = ParamError(ParamErrorType.INVALID_DEPENDENCY,
+                                                e.message, from_source)
 
         for param_name in received:
             if param_name not in params:
@@ -1547,29 +1656,22 @@ PARAMS_STREETS = EndpointParameters(shared_params={
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
 )
 
-PARAMS_POLITICAL_LOCATION = EndpointParameters(shared_params={
+PARAMS_LOCATION = EndpointParameters(shared_params={
     N.LAT: FloatParameter(required=True),
     N.LON: FloatParameter(required=True),
     N.FLATTEN: BoolParameter(),
     N.DIVISION: StrParameter(choices=[N.POLITICAL, N.GEOSTATISTICAL], default=N.POLITICAL),
-    N.FIELDS: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.LAT,
+    N.FIELDS: OneParamConditionParameter(
+        N.DIVISION, {
+            N.POLITICAL: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.LAT,
                                         N.LON],
                                  standard=[N.DEPT_ID, N.DEPT_NAME, N.LG_ID,
                                            N.LG_NAME],
                                  complete=[N.STATE_SOURCE, N.DEPT_SOURCE,
                                            N.LG_SOURCE,
                                            N.STREET_ID, N.STREET_NAME,
-                                           N.STREET_SOURCE, N.STREET_NUMBER])
-}, get_qs_params={
-    N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml'])
-})
-
-PARAMS_GEOSTATISTICAL_LOCATION = EndpointParameters(shared_params={
-    N.LAT: FloatParameter(required=True),
-    N.LON: FloatParameter(required=True),
-    N.FLATTEN: BoolParameter(),
-    N.DIVISION: StrParameter(choices=[N.POLITICAL, N.GEOSTATISTICAL], default=N.GEOSTATISTICAL),
-    N.FIELDS: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.LAT,
+                                           N.STREET_SOURCE, N.STREET_NUMBER]),
+            N.GEOSTATISTICAL: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.LAT,
                                         N.LON],
                                  standard=[N.DEPT_ID, N.DEPT_NAME,
                                            N.CENSUS_TRACT_ID,
@@ -1583,6 +1685,8 @@ PARAMS_GEOSTATISTICAL_LOCATION = EndpointParameters(shared_params={
                                            N.CENSUS_LOCALITY_SOURCE,
                                            N.STREET_ID, N.STREET_NAME,
                                            N.STREET_SOURCE, N.STREET_NUMBER])
+        }
+    )
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml'])
 })
