@@ -390,7 +390,7 @@ class SearchStatesTest(GeorefLiveTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'nombre': 'santa',
-            'campos': 'id,centroide_lat'
+            'campos': 'id,centroide.lat'
         })
 
     def test_empty_csv_valid(self):

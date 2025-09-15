@@ -640,7 +640,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'direccion': COMMON_ADDRESS,
-            'campos': 'nombre,categoria,ubicacion.lat'
+            'campos': 'calle.nombre,calle.categoria,ubicacion.lat'
         })
 
     def test_empty_csv_valid(self):

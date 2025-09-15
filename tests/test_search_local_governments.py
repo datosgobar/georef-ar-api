@@ -376,7 +376,7 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'nombre': 'VIAMONTE',
-            'campos': 'nombre,departamento.nombre'
+            'campos': 'nombre,provincia.nombre'
         })
 
     def test_geojson_format(self):

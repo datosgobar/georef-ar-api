@@ -424,7 +424,7 @@ class SearchLocalityTest(GeorefLiveTest):
         CSV (con parámetros)."""
         self.assert_valid_csv({
             'nombre': 'BARRIO',
-            'campos': 'nombre,provincia.id,lat'
+            'campos': 'nombre,provincia.id,centroide.lat'
         })
 
     def test_geojson_format(self):
