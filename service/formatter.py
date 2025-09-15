@@ -14,7 +14,8 @@ import geojson
 import shapefile
 from service import strings, constants
 from service import names as N
-
+from shapely.geometry import shape
+from osgeo import ogr, osr, gdal
 
 CSV_SEP = ','
 CSV_QUOTE = '"'
@@ -755,6 +756,92 @@ def _create_shp_response_single(name, result, fmt):
                      as_attachment=True)
 
 
+def _create_gpkg_response_single(name, result, fmt):
+    """Toma un resultado de una consulta y devuelve una respuesta HTTP 200
+    con el resultado en formato GPKG (GeoPackage).
+
+    Args:
+        name (str): Nombre de la entidad que fue consultada.
+        result (QueryResult): Resultado de una consulta.
+        fmt (dict): Parámetros de formato.
+
+    Returns:
+        flask.Response: Respuesta HTTP con contenido GPKG.
+    """
+    if not result.iterable:
+        raise ValueError('GPKG: Result must be iterable')
+
+    # Crear archivo en memoria
+    contents = io.BytesIO()
+    driver = ogr.GetDriverByName("GPKG")
+    datasource = driver.CreateDataSource("/vsimem/temp.gpkg")
+
+    # Definir CRS (WGS84 EPSG:4326)
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(4326)
+
+    # Crear layer
+    layer = datasource.CreateLayer(name, srs, ogr.wkbUnknown)
+
+    # Definir campos según fmt (sin límite de longitud como en SHP)
+    keys = [field.replace(N.FIELDS_SEP, FLAT_SEP) for field in fmt[N.FIELDS]]
+    for key in keys:
+        field = ogr.FieldDefn(key, ogr.OFTString)
+        field.SetWidth(255)
+        layer.CreateField(field)
+
+    # Agregar features
+    for entity in result.entities:
+
+        # Convertir a shapely (detecta tipo automáticamente)
+        geom_data = entity.get(N.GEOM)
+        if geom_data is None:
+            continue
+
+        try:
+            # Si ya es GeoJSON
+            if isinstance(geom_data, dict) and "type" in geom_data:
+                shapely_geom = shape(geom_data)
+            else:
+                # Si es lista de coords, envolver en GeoJSON (ej: Point, Polygon, etc.)
+                shapely_geom = shape({"type": "GeometryCollection", "geometries": [geom_data]})
+        except Exception as e:
+            print(f"Error creando geometría: {e}, entity={entity}")
+            continue
+
+        ogr_geom = ogr.CreateGeometryFromWkb(shapely_geom.wkb)
+
+        flatten_dict(entity, max_depth=3)
+
+        feature = ogr.Feature(layer.GetLayerDefn())
+        for key in keys:
+            val = str(entity.get(key, ""))[:255]
+            feature.SetField(key, val)
+
+        feature.SetGeometry(ogr_geom)
+        layer.CreateFeature(feature)
+        feature = None
+
+    datasource = None  # cerrar dataset
+
+    # Copiar desde memoria a BytesIO
+    f = gdal.VSIFOpenL("/vsimem/temp.gpkg", "rb")
+    gdal.VSIFSeekL(f, 0, 2)
+    size = gdal.VSIFTellL(f)
+    gdal.VSIFSeekL(f, 0, 0)
+    contents.write(gdal.VSIFReadL(1, size, f))
+    gdal.VSIFCloseL(f)
+    gdal.Unlink("/vsimem/temp.gpkg")
+
+    contents.seek(0)
+    return send_file(
+        contents,
+        download_name=f"{name}.gpkg",
+        as_attachment=True,
+        mimetype="application/geopackage+sqlite3"
+    )
+
+
 def _create_csv_response_single(name, result, fmt):
     """Toma un resultado (iterable) de una consulta, y devuelve una respuesta
     HTTP 200 con el resultado en formato CSV.
@@ -1029,6 +1116,9 @@ def create_ok_response(name, result, fmt):
 
     if fmt[N.FORMAT] == 'shp':
         return _create_shp_response_single(name, result, fmt)
+
+    if fmt[N.FORMAT] == 'gpkg':
+        return _create_gpkg_response_single(name, result, fmt)
 
     raise ValueError('Unknown format')
 

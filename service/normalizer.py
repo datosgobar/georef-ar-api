@@ -72,7 +72,7 @@ def _process_entity_single(request, name, param_parser, key_translations):
         if key in qs_params.values
     }
 
-    if fmt[N.FORMAT] == 'shp':
+    if fmt[N.FORMAT] in ['shp', 'gpkg']:
         query['fields'] += (N.GEOM,)
 
     es = get_elasticsearch()
@@ -507,7 +507,7 @@ def _process_street_queries(params_list):
     formats = []
     for parsed_params in params_list:
         query, fmt = _build_street_query_format(parsed_params.values)
-        if fmt.get(N.FORMAT) == 'shp':
+        if fmt.get(N.FORMAT) in ['shp', 'gpkg']:
             query['fields'] += (N.GEOM,)
 
         queries.append(query)
@@ -897,7 +897,7 @@ def _process_nearby_establishments_single(request):
 
     query, fmt = _build_establishments_query_format(qs_params.values)
 
-    if fmt[N.FORMAT] == 'shp':
+    if fmt[N.FORMAT] in ['shp', 'gpkg']:
         query['fields'] += (N.GEOM,)
 
     es = get_elasticsearch()
