@@ -9,4 +9,4 @@ pyshp==2.0.1
 tqdm==4.31.1
 Werkzeug==2.0.0
 pyproj==3.6.1
-gdal==3.11.0
+gdal>=3.10,<3.11
