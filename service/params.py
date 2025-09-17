@@ -497,6 +497,9 @@ class FieldListParameter(Parameter):
         if not val:
             raise ValueError(strings.FIELD_LIST_EMPTY)
 
+        if not isinstance(val, str):
+            raise ValueError(strings.FIELD_LIST_INVALID_CHOICE)
+
         parts = [part.strip() for part in val.split(',')]
 
         # Manejar casos especiales: basico, estandar y completo
