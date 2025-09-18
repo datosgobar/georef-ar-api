@@ -1647,7 +1647,7 @@
     "paths": {
         "/provincias": {
             "get": {
-                "summary": "Retorna un listado de provincias.",
+                "summary": "Retorna un listado de provincias",
                 "description": "Permite realizar búsquedas sobre el listado de provincias.",
                 "tags": [
                     "Recursos"
