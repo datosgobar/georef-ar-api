@@ -27,7 +27,7 @@ class DataConnectionException(Exception):
     """
 
 
-def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
+def elasticsearch_connection(hosts, sniff=False, http_auth=False, sniffer_timeout=60):
     """Crea una conexión a Elasticsearch.
 
     Args:
@@ -44,13 +44,19 @@ def elasticsearch_connection(hosts, sniff=False, sniffer_timeout=60):
     """
     try:
         options = {
-            'hosts': hosts
+            'hosts': hosts,
+
         }
 
         if sniff:
             options['sniff_on_start'] = True
             options['sniff_on_connection_fail'] = True
             options['sniffer_timeout'] = sniffer_timeout
+        
+        if http_auth:
+            options['http_auth'] = http_auth
+
+        return elasticsearch.Elasticsearch(**options)
 
         return elasticsearch.Elasticsearch(**options)
     except elasticsearch.ElasticsearchException as e:

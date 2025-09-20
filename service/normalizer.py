@@ -4,7 +4,7 @@ Contiene funciones que manejan la lógica de procesamiento
 de los recursos que expone la API.
 """
 
-import logging
+import logging, os
 from flask import current_app
 from service import data, params, formatter, address, location, utils, street
 from service import names as N
@@ -26,10 +26,17 @@ def get_elasticsearch():
 
     """
     if not hasattr(current_app, 'elasticsearch'):
+        HTTP_AUTH_USER = os.environ.get("HTTP_AUTH_USER", "")
+        HTTP_AUTH_PASS = os.environ.get("HTTP_AUTH_PASS", "")
+        if HTTP_AUTH_USER and HTTP_AUTH_PASS:
+            auth = (HTTP_AUTH_USER, HTTP_AUTH_PASS)
+        else:
+            auth = False
         current_app.elasticsearch = data.elasticsearch_connection(
             hosts=current_app.config['ES_HOSTS'],
             sniff=current_app.config['ES_SNIFF'],
-            sniffer_timeout=current_app.config['ES_SNIFFER_TIMEOUT']
+            sniffer_timeout=current_app.config['ES_SNIFFER_TIMEOUT'],
+            http_auth=auth
         )
 
     return current_app.elasticsearch
