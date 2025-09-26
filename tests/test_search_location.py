@@ -91,7 +91,8 @@ class SearchLocationTest(GeorefLiveTest):
                                        'gobierno_local.id', 'gobierno_local.nombre',
                                        'provincia.fuente',
                                        'departamento.fuente',
-                                       'gobierno_local.fuente'],
+                                       'gobierno_local.fuente',
+                                       'nomenclatura'],
                                       {'lat': location[0], 'lon': location[1]},
                                       iterable=False)
 

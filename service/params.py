@@ -1673,7 +1673,7 @@ PARAMS_LOCATION = EndpointParameters(shared_params={
                                  complete=[N.STATE_SOURCE, N.DEPT_SOURCE,
                                            N.LG_SOURCE,
                                            N.STREET_ID, N.STREET_NAME,
-                                           N.STREET_SOURCE, N.STREET_NUMBER]),
+                                           N.STREET_SOURCE, N.STREET_NUMBER, N.FULL_NAME]),
             N.GEOSTATISTICAL: FieldListParameter(basic=[N.STATE_ID, N.STATE_NAME, N.LAT,
                                         N.LON],
                                  standard=[N.DEPT_ID, N.DEPT_NAME,
@@ -1687,7 +1687,7 @@ PARAMS_LOCATION = EndpointParameters(shared_params={
                                            N.AGGLOMERATION_SOURCE,
                                            N.CENSUS_LOCALITY_SOURCE,
                                            N.STREET_ID, N.STREET_NAME,
-                                           N.STREET_SOURCE, N.STREET_NUMBER])
+                                           N.STREET_SOURCE, N.STREET_NUMBER, N.FULL_NAME])
         }
     )
 }, get_qs_params={

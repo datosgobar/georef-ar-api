@@ -12,6 +12,38 @@ from service.geometry import Point
 from service.query_result import QueryResult
 
 
+def _address_full_name(sb, cl, dept, state):
+    """Obtiene una representación canónica de una dirección, utilizando los
+    nombres ya normalizados de las calles que la componen (y su altura).
+
+    Por ejemplo, 'Sarmiento al 1443' se convierte a 'SARMIENTO 1443'.
+    'Santa fe esq. Pampa' se convierte a 'SANTA FE (ESQUINA LA PAMPA)'.
+
+    Args:
+        sb (list): Lista de calles (documentos) representando cada
+            calle de la dirección.
+
+    Returns:
+        str: Nombre completo canónico de la dirección.
+
+    """
+
+    # Usar siempre datos de provincia/departamento de la primera calle
+    # En la mayoría de los casos, las tres calles van a ser del mismo
+    # lugar.
+    fmt = {
+        'street_name': sb['nombre'],
+        'door_number': sb['altura'],
+        'loc': cl[N.NAME],
+        'state': state[N.NAME],
+        'dept': dept[N.NAME],
+
+    }
+
+    template = '{street_name} {door_number}, {loc}, {dept}, {state}'
+    return template.format(**fmt)
+
+
 def _build_location_result(params, query, state, dept, sb, lg, ct, cb, agl, cl):
     """Construye un resultado para una consulta al endpoint de ubicación.
 
@@ -67,7 +99,8 @@ def _build_location_result(params, query, state, dept, sb, lg, ct, cb, agl, cl):
         N.AGGLOMERATION: agl,
         N.CENSUS_LOCALITY: cl,
         N.LAT: query['lat'],
-        N.LON: query['lon']
+        N.LON: query['lon'],
+        N.FULL_NAME: _address_full_name(sb, cl, dept, state) if sb['nombre'] else None,
     }, params)
 
 
