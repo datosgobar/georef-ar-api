@@ -8,7 +8,7 @@ from functools import wraps
 from flask import current_app, request, redirect, Blueprint
 from service import app, normalizer, formatter
 from service import names as N
-from service.decorators import add_params
+from service.decorators import add_params, with_request_logger
 
 
 def disable_cache(f):
@@ -137,6 +137,7 @@ def get_streets():
 
 
 @bp_v2_0.route('/direcciones', methods=['GET', 'POST'])
+@with_request_logger
 def get_addresses():
     return normalizer.process_address(request)
 

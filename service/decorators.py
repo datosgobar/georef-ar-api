@@ -1,6 +1,11 @@
+import json
+import logging
 from functools import wraps
-from flask import request
-from werkzeug.datastructures import MultiDict
+from flask import request, make_response
+from contextvars import ContextVar
+
+from georef_ar_address.address_parser import TreeVisitor
+from werkzeug.datastructures import MultiDict, ImmutableMultiDict
 
 
 def add_params(**new_params):
@@ -49,3 +54,94 @@ def add_params(**new_params):
         return wrapped
 
     return decorator
+
+_request_logs = ContextVar("request_logs", default=[])
+
+class AddressAPIHandler(logging.Handler):
+
+    def emit(self, record):
+        logs_list = _request_logs.get()
+
+        def get_msg(rec):
+            raw_msg = rec.msg
+
+            if hasattr(raw_msg, 'to_dict'):
+                serializable_msg = raw_msg.to_dict()
+            elif isinstance(raw_msg, (dict, list, str, int, float, bool)) or raw_msg is None:
+                serializable_msg = raw_msg
+            elif isinstance(raw_msg, TreeVisitor):
+                serializable_msg = {
+                    'address_type': raw_msg.address_type,
+                    'tree': raw_msg._tree,
+                    'rank': raw_msg._rank,
+                    'components_leaves_indices': raw_msg._components_leaves_indices
+                }
+            else:
+                serializable_msg = str(raw_msg)
+
+            return serializable_msg
+
+        if logs_list is not None:
+            logs_list.append({
+                'function': f"{record.funcName}",
+                "data": get_msg(record)
+            })
+
+_LOGGERS_SETUP_DONE = False
+
+def setup_loggers_once():
+
+    global _LOGGERS_SETUP_DONE
+    if _LOGGERS_SETUP_DONE:
+        return
+
+    address_logger = logging.getLogger("georef_ar_address")
+
+    if not any(isinstance(h, AddressAPIHandler) for h in address_logger.handlers):
+        handler = AddressAPIHandler()
+        address_logger.addHandler(handler)
+
+    address_logger.setLevel(logging.DEBUG)
+    _LOGGERS_SETUP_DONE = True
+
+
+def with_request_logger(handler):
+    @wraps(handler)
+    def wrapper(*args, **kwargs):
+        # Asegurar configuración sin tocar app.py
+        setup_loggers_once()
+
+        # Extraer y limpiar parámetro 'debug'
+        params = request.args.to_dict(flat=True)
+        debug = params.pop("debug", None)
+        request.args = ImmutableMultiDict(params)
+
+        token = None
+        if debug:
+            token = _request_logs.set([])
+
+        response = None
+        try:
+            response = handler(*args, **kwargs)
+        finally:
+            if debug:
+                captured = _request_logs.get()
+                _request_logs.reset(token)
+
+                if captured:
+                    if isinstance(response, dict):
+                        response["steps"] = captured
+
+                    elif hasattr(response, 'get_json'):
+                        content = response.get_json()
+                        if isinstance(content, dict):
+                            content["steps"] = captured
+                            response = make_response(
+                                json.dumps(content),
+                                response.status_code
+                            )
+                            response.headers['Content-Type'] = 'application/json'
+
+        return response
+
+    return wrapper
