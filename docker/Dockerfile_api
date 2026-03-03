@@ -1,7 +1,7 @@
 FROM python:3.11-trixie
 
 RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y locales libgeos3.13.1 libgeos-c1v5 proj-bin proj-data libproj-dev
+RUN apt-get install -y locales libgeos3.13.1 libgeos-c1v5 proj-bin proj-data libproj-dev git
 RUN apt-get install -y build-essential g++
 RUN apt-get install -y gdal-bin python3-gdal libgdal-dev libgdal36
 
