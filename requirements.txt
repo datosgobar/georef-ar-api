@@ -1,6 +1,6 @@
 elasticsearch-dsl==7.0.0
 Flask==2.0.0
-git+https://github.com/datosgobar/georef-ar-address.git@address-log#egg=georef-ar-address
+-e git+https://github.com/datosgobar/georef-ar-address.git@address-log#egg=georef-ar-address
 geojson==3.2.0
 gunicorn[gevent]==19.9.0
 requests==2.20.0
