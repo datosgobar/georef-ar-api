@@ -4,13 +4,14 @@ Contiene funciones y clases utilizadas para normalizar direcciones (recurso
 /direcciones). Este módulo puede ser considerado una extensión del módulo
 'normalizer', con funciones específicas para el procesamiento de direcciones.
 """
-
+import logging
 from abc import ABC, abstractmethod
 from service import names as N
 from service import data, constants, utils
 from service.geometry import Point, street_block_number_location
 from service.query_result import QueryResult
 
+logger = logging.getLogger('georef_ar_address')
 
 class AddressQueryPlanner(ABC):
     """Representa una búsqueda de una dirección de calle. Buscar una dirección
@@ -1133,6 +1134,7 @@ def _run_query_planners(es, query_planners):
 
         searches = [search for _, search in iteration_data]
         data.ElasticsearchSearch.run_searches(es, searches)
+        for search in searches: logger.debug(search)
 
         iterators = (iterator for iterator, _ in iteration_data)
         iteration_data = []
@@ -1166,6 +1168,7 @@ def run_address_queries(es, params_list, queries, formats):
     for query, fmt in zip(queries, formats):
         address_type = query[N.ADDRESS].type if query[N.ADDRESS] else None
 
+        logger.debug(f"addrress_type: {address_type}")
         if not address_type:
             query_planner = AddressNoneQueryPlanner(query, fmt)
         elif address_type == 'simple':

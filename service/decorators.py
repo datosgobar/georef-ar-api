@@ -7,6 +7,8 @@ from contextvars import ContextVar
 from georef_ar_address.address_parser import TreeVisitor
 from werkzeug.datastructures import MultiDict, ImmutableMultiDict
 
+from service.data import ElasticsearchSearch
+
 
 def add_params(**new_params):
     """
@@ -75,6 +77,12 @@ class AddressAPIHandler(logging.Handler):
                     'tree': raw_msg._tree,
                     'rank': raw_msg._rank,
                     'components_leaves_indices': raw_msg._components_leaves_indices
+                }
+            elif isinstance(raw_msg, ElasticsearchSearch):
+                serializable_msg = {
+                    'SearchType': type(raw_msg).__name__,
+                    'query': raw_msg._search.to_dict(),
+                    'hits': raw_msg.result.hits,
                 }
             else:
                 serializable_msg = str(raw_msg)
