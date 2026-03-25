@@ -762,12 +762,20 @@ class StreetBlocksSearch(TerritoriesSearch):
                 street
             ))
 
-        if name:
+        if isinstance(name,str):
             self._search = self._search.query(_build_name_query(
                 N.join(N.STREET, N.NAME),
                 name,
                 exact
             ))
+        elif isinstance(name,list):
+            name_query = _build_mult_name_query(
+                N.join(N.STREET, N.NAME),
+                name,
+                exact
+            )
+            self._search = self._search.query(name_query)
+
 
         if category:
             self._search = self._search.query(_build_match_query(
