@@ -1418,6 +1418,35 @@ def _build_name_query(field, value, exact=False):
     return query
 
 
+def _build_mult_name_query(field, value, exact=False):
+    """..."""
+    # Normalizar: siempre trabajar con lista
+    values = value if isinstance(value, list) else [value]
+
+    if exact:
+        field_exact = N.EXACT_SUFFIX.format(field)
+        # OR entre todos los valores exactos
+        query = _build_match_query(field_exact, values[0], False)
+        for v in values[1:]:
+            query |= _build_match_query(field_exact, v, False)
+        return query
+
+    # Para cada valor, construir su sub-query y combinar con OR (should)
+    combined = None
+    for v in values:
+        q = _build_match_query(field, v, True, operator='and')
+
+        if len(v.strip()) >= constants.MIN_AUTOCOMPLETE_CHARS:
+            q |= _build_match_phrase_prefix_query(field, v)
+
+        q &= ~_build_match_query(
+            field, v, analyzer=es_config.name_analyzer_excluding_terms)
+
+        combined = q if combined is None else combined | q
+
+    return combined
+
+
 def _build_match_phrase_prefix_query(field, value):
     """Crea una condición 'Match Phrase Prefix' para Elasticsearch.
 
