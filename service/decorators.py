@@ -81,8 +81,7 @@ class AddressAPIHandler(logging.Handler):
             elif isinstance(raw_msg, ElasticsearchSearch):
                 serializable_msg = {
                     'SearchType': type(raw_msg).__name__,
-                    'query': raw_msg._search.to_dict(),
-                    'hits': raw_msg.result.hits,
+                    'query': raw_msg._search.to_dict()
                 }
             else:
                 serializable_msg = str(raw_msg)
