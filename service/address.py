@@ -490,6 +490,42 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
                                             self._elasticsearch_result.total,
                                             self._elasticsearch_result.offset)
 
+    def _build_street_blocks_search(self, street, add_number=False,
+                                    force_all=False):
+        """Metodo de utilidad para crear búsquedas de tipo StreetBlocksSearch.
+        Para buscar una calle, se consulta el índice de cuadras, en lugar del
+        de calles. Esto se debe a que ambos índices representan los mismos
+        datos (las calles de Argentina), pero el de cuadras contiene datos con
+        mucha mayor granularidad: por cada cuadra de la calle, se tiene la
+        altura inicial y final. Como cada cuadra es una recta (en lugar de
+        varias) en la mayoría de los casos es trivial calcular la posición
+        geográfica de una dirección sobre ellas.
+
+        Args:
+            street (str): Nombre de la calle a buscar.
+            add_number (bool): Si es verdadero, agrega a la búsqueda un
+                filtrado por altura, utilizando el atributo
+                '_numerical_door_number'.
+            force_all (bool): Si es verdadero, se ignoran los parámetros
+                'size' y 'offset' de la consulta original, y se buscan todas
+                las cuadras posibles.
+
+        Returns:
+            StreetBlocksSearch: Búsqueda de cuadras para ejecutar.
+
+        """
+        query = self._query.copy()
+
+        query['name'] = street
+        if add_number and self._numerical_door_number is not None:
+            query['number'] = self._numerical_door_number
+
+        if force_all:
+            query['size'] = constants.MAX_RESULT_LEN
+            query['offset'] = 0
+
+        return data.StreetBlocksSearch(query)
+
 
 class AddressIsctQueryPlanner(AddressQueryPlanner):
     """AddressQueryPlanner para direcciones de tipo 'intersection'. Una
