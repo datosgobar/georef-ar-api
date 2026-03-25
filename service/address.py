@@ -371,8 +371,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             found = yield from self._expand_locality_search()
             if not found:
                 return
-
-        name = self._address_data.street_names[0]
+        name = [self._address_data.street_names[0]]+ self._address_data._alternative_names
         self._elasticsearch_result = yield self._build_street_blocks_search(
             name,
             add_number=self._query['exact'],
