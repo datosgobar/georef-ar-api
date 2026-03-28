@@ -33,11 +33,10 @@ def _address_full_name(sb, cl, dept, state):
     # lugar.
     fmt = {
         'street_name': sb['nombre'],
-        'door_number': sb['altura'],
+        'door_number': sb.get('altura') or '',
         'loc': cl[N.NAME],
         'state': state[N.NAME],
         'dept': dept[N.NAME],
-
     }
 
     template = '{street_name} {door_number}, {loc}, {dept}, {state}'
