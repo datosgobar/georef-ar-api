@@ -34,9 +34,9 @@ services:
     volumes:
       - ./config:/opt/app-root/src/georef-ar-api/config:ro
       - ./source:/opt/app-root/src/georef-ar-api/source
-      - ./logs:/opt/app-root/src/georef-ar-api/logs
-      - ./backups:/opt/app-root/src/georef-ar-api/backups
-      - ./cache:/opt/app-root/src/georef-ar-api/cache
+      - logs_data:/opt/app-root/src/georef-ar-api/logs
+      - backups_data:/opt/app-root/src/georef-ar-api/backups
+      - cache_data:/opt/app-root/src/georef-ar-api/cache
       - ./tests:/opt/app-root/src/georef-ar-api/tests
     ports:
       - $APP_PORT:5000
@@ -46,6 +46,13 @@ services:
 volumes:
   data01:
     driver: local
+  logs_data:
+    driver: local
+  backups_data:
+    driver: local
+  cache_data:
+    driver: local
+
 
 networks:
   geonet:
