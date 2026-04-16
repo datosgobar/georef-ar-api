@@ -209,6 +209,27 @@ _PLURALS = {
 
 _SINGULARS = {value: key for key, value in _PLURALS.items()}
 
+CABA_ALIASES = [
+    "CABA",
+    "C.A.B.A.",
+    "Ciudad Autónoma de Buenos Aires",
+    "Ciudad Autonoma de Buenos Aires",
+    "Ciudad de Buenos Aires",
+    "Ciudad de Bs As",
+    "Ciudad de Bs. As.",
+    "Ciudad de BA",
+    "Bs As",
+    "Bs. As.",
+    "B.A.",
+    "BA",
+    "Buenos Aires",
+    "Capital Federal",
+    "Capital",
+    "La Capital",
+    "caba",
+    "capital federal",
+    "capital"]
+
 
 def plural(word):
     if word not in _PLURALS:

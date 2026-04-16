@@ -8,6 +8,7 @@ import logging
 from flask import current_app
 from service import data, params, formatter, address, location, utils, street, establishment
 from service import names as N
+from service.names import CABA_ALIASES
 from service.query_result import QueryResult
 
 logger = logging.getLogger('georef')
@@ -675,6 +676,11 @@ def _process_address_single(request):
     """
     try:
         qs_params = params.PARAMS_ADDRESSES.parse_get_params(request.args)
+        for k,v in qs_params.values.items():
+            if k == 'localidad_censal' and v in CABA_ALIASES or k == 'localidad' and v in CABA_ALIASES:
+                qs_params.values['provincia']= 'caba'
+                qs_params.values[k] = None
+
     except params.ParametersParseException as e:
         return formatter.create_param_error_response_single(e.errors, e.fmt)
 
