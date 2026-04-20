@@ -711,7 +711,7 @@ class AddressParameter(Parameter):
     """Representa un parámetro de tipo dirección de calle (nombre y altura).
 
     Se heredan las propiedades y métodos de la clase Parameter, definiendo
-    nuevamente el método '_parse_value' para implementar lógica de parseo y
+    nuevamente el metodo '_parse_value' para implementar lógica de parseo y
     validación propias de AddressParameter.
 
     Attributes:
@@ -838,6 +838,9 @@ class IntersectionParameter(Parameter):
 
         return ids if any(list(ids.values())) else {}
 
+class Filter:
+    def filter_values(self,results):
+        raise NotImplementedError()
 
 class ParamValidator:
     """Interfaz para realizar una validación de valores de parámetros HTTP.
@@ -890,6 +893,17 @@ class IntSetSumValidator(ParamValidator):
             names = ', '.join('\'{}\''.format(name) for name in param_names)
             raise ValueError(
                 strings.INT_VAL_BIG_GLOBAL.format(names, self._upper_limit))
+
+class CabaFilter(Filter):
+    def filter_values(self,results):
+        if results.values[N.LOCALITY] in N.CABA_ALIASES:
+            results.values[N.STATE]=['02']
+            results.values[N.LOCALITY]=None
+        if results.values[N.CENSUS_LOCALITY] in N.CABA_ALIASES:
+            results.values[N.STATE]=['02']
+            results.values[N.CENSUS_LOCALITY] = None
+
+
 
 
 class ParametersParseResult:
@@ -991,7 +1005,12 @@ class EndpointParameters:
         self._post_body_params = shared_params
 
         self._cross_validators = []
+        self._cross_filters = []
         self._set_validators = defaultdict(list)
+
+    def with_cross_filter(self,filter):
+        self._cross_filters.append(filter)
+        return self
 
     def with_cross_validator(self, param_names, validator):
         """Agrega un validador a la lista de validadores para grupos de
@@ -1093,7 +1112,14 @@ class EndpointParameters:
             raise ParametersParseException(errors, fmt)
 
         self._cross_validate_params(results, from_source)
+        self._cross_purge_params(results)
         return results
+
+    def _cross_purge_params(self,parsed):
+        for filter in self._cross_filters:
+                filter.filter_values(parsed)
+
+
 
     def _cross_validate_params(self, parsed, from_source):
         """Ejecuta las validaciones de conjuntos de parámetros distintos. Por
@@ -1612,6 +1638,7 @@ PARAMS_ADDRESSES = EndpointParameters(shared_params={
 ).with_cross_validator(
     [N.MAX, N.OFFSET],
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+).with_cross_filter(CabaFilter()
 )
 
 PARAMS_STREETS = EndpointParameters(shared_params={
@@ -1657,6 +1684,7 @@ PARAMS_STREETS = EndpointParameters(shared_params={
 ).with_cross_validator(
     [N.MAX, N.OFFSET],
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+).with_cross_filter(CabaFilter()
 )
 
 PARAMS_LOCATION = EndpointParameters(shared_params={
