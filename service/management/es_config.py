@@ -377,9 +377,8 @@ class LocalGovernment(Entity):
     geometria = GeoShape()
     provincia = StateSubField
     # Indexar las categorías, ya que se puede filtrar por las mismas
-    categoria = Text(
-        analyzer=name_analyzer_synonyms,
-        search_analyzer=name_analyzer
+    categoria = Keyword(
+        normalizer=lowcase_ascii_normalizer
     )
     fuente = UnindexedTextField
 
