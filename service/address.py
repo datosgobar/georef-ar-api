@@ -47,6 +47,7 @@ class AddressQueryPlanner(ABC):
         self._format = fmt
         self._address_data = self._query.pop(N.ADDRESS)
         self._locality = self._query.pop(N.LOCALITY, None)
+        self._locality_ids = []
 
         if self._address_data:
             self._numerical_door_number = \
@@ -266,7 +267,7 @@ class AddressQueryPlanner(ABC):
         """
         localities_query = {
             'size': constants.MAX_RESULT_LEN,
-            'fields': [N.CENSUS_LOCALITY_ID],
+            'fields': [N.CENSUS_LOCALITY_ID, N.ID],
             'exact': self._query.get('exact'),
             'state': self._query.get('state'),
             'department': self._query.get('department'),
@@ -286,6 +287,7 @@ class AddressQueryPlanner(ABC):
         ids = set()
         for hit in result.hits:
             ids.add(hit[N.CENSUS_LOCALITY][N.ID])
+            self._locality_ids.append(hit[N.ID])
 
         # Combinar las localidades censales encontradas con el valor previo de
         # 'census_locality' en _query (si lo hay)
@@ -298,6 +300,12 @@ class AddressQueryPlanner(ABC):
             self._query['census_locality'] = (list(ids), prev_census_locality)
 
         return True
+
+    def _filter_by_locality_if_exist(self, hits):
+        locality_hits = [hit for hit in hits if hit[N.LOCALITY][N.ID] in self._locality_ids]
+        if locality_hits:
+            hits.clear()
+            hits.extend(locality_hits)
 
 
 class AddressNoneQueryPlanner(AddressQueryPlanner):
@@ -485,6 +493,7 @@ class AddressSimpleQueryPlanner(AddressQueryPlanner):
             return QueryResult.empty(params)
 
         address_hits = self._build_address_hits()
+        self._filter_by_locality_if_exist(address_hits)
         return QueryResult.from_entity_list(address_hits,
                                             params,
                                             self._elasticsearch_result.total,
@@ -812,6 +821,7 @@ class AddressIsctQueryPlanner(AddressQueryPlanner):
         if not self._intersection_hits:
             return QueryResult.empty(params)
 
+        self._filter_by_locality_if_exist(self._intersection_hits)
         return QueryResult.from_entity_list(self._intersection_hits,
                                             params,
                                             self._intersections_result.total,
@@ -1128,6 +1138,7 @@ class AddressBtwnQueryPlanner(AddressIsctQueryPlanner):
         total = params.get(N.MAX, constants.MAX_RESULT_LEN)
         offset = params.get(N.OFFSET, 0)
         self._between_hits = self._between_hits[offset:offset + total]
+        self._filter_by_locality_if_exist(self._between_hits)
         return QueryResult.from_entity_list(self._between_hits,
                                             params,
                                             len(self._between_hits),
