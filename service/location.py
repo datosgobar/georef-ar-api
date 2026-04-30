@@ -32,15 +32,14 @@ def _address_full_name(sb, cl, dept, state):
     # En la mayoría de los casos, las tres calles van a ser del mismo
     # lugar.
     fmt = {
-        'street_name': sb['nombre'],
-        'door_number': sb['altura'],
+        'address': ' '.join([sb['nombre'], str(sb.get('altura', ""))]).strip(),
         'loc': cl[N.NAME],
         'state': state[N.NAME],
         'dept': dept[N.NAME],
 
     }
 
-    template = '{street_name} {door_number}, {loc}, {dept}, {state}'
+    template = '{address}, {loc}, {dept}, {state}'
     return template.format(**fmt)
 
 
