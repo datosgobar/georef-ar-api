@@ -1,3 +1,4 @@
+import functools
 import json
 import logging
 from functools import wraps
@@ -152,3 +153,34 @@ def with_request_logger(handler):
         return response
 
     return wrapper
+
+
+def deprecated(current_endpoint, alternative_endpoint):
+    """
+    Decorador explícito para rutas obsoletas en Flask.
+
+    :param current_endpoint: El nombre del endpoint obsoleto (ej: 'municipios')
+    :param alternative_endpoint: El nombre del nuevo recurso reemplazo (ej: 'gobiernos-locales')
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            current_path = request.path
+
+            full_alternative_path = current_path.replace(current_endpoint, alternative_endpoint)
+
+            # Ejecución normal de la ruta de Flask
+            response = func(*args, **kwargs)
+            response = make_response(response)
+
+            # Cabeceras HTTP adaptativas para los clientes
+            response.headers['Deprecation'] = 'true'
+            response.headers['Link'] = f'<{full_alternative_path}>; rel="successor-version"'
+            response.headers['Warning'] = f'199 - "Endpoint obsoleto. Migrar a {full_alternative_path}"'
+
+            return response
+
+        return wrapper
+
+    return decorator

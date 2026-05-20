@@ -8,7 +8,7 @@ from functools import wraps
 from flask import current_app, request, redirect, Blueprint
 from service import app, normalizer, formatter
 from service import names as N
-from service.decorators import add_params, with_request_logger
+from service.decorators import add_params, with_request_logger, deprecated
 
 
 def disable_cache(f):
@@ -105,6 +105,7 @@ def get_census_blocks():
 
 
 @bp_v2_0.route('/municipios', methods=['GET', 'POST'])
+@deprecated(current_endpoint="municipios", alternative_endpoint='gobiernos-locales')
 @add_params(categoria="Municipio")
 def get_municipalities():
     return normalizer.process_municipality(request)
