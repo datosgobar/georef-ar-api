@@ -69,6 +69,7 @@ ESTABLISHMENT_TYPE = 'tipo_establecimiento'
 AGGLOMERATION = 'aglomerado'
 NEARBY_ESTABLISHMENT = 'establecimiento_cercano'
 ESTABLISHMENT = 'establecimiento'
+ESTABLISHMENTS = 'establecimientos'
 
 # Campos, parámetros, etc.
 BASIC = 'basico'

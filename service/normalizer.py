@@ -864,7 +864,17 @@ def _build_establishments_query_format(parsed_params):
     query = utils.translate_keys(parsed_params, {
         N.ADMINISTRATION: "administration",
         N.FIELDS: "fields",
-        N.MAX: 'size'
+        N.MAX: "size",
+        N.ID: 'ids',
+        N.NAME: 'name',
+        N.STATE: 'state',
+        N.DEPT: 'department',
+        N.CATEGORY: 'category',
+        N.DISTANCE: 'distance',
+        N.TYPE: 'tipo',
+        N.ORDER: 'order',
+        N.EXACT: 'exact',
+        N.OFFSET: 'offset',
     }, ignore=[N.FLATTEN, N.FORMAT])
 
     # Construir reglas de formato a partir de parámetros
@@ -991,6 +1001,93 @@ def process_street_block(request):
         N.OFFSET: 'offset',
         N.MAX: 'size'
     })
+
+
+def _process_establishments_single(request):
+    """Procesa una request GET para consultar datos de establecimientos.
+        En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+        Args:
+            request (flask.Request): Request GET de flask.
+        Raises:
+            data.DataConnectionException: En caso de ocurrir un error de
+                conexión con la capa de manejo de datos.
+
+        Returns:
+            flask.Response: respuesta HTTP
+
+        """
+    try:
+        qs_params = params.PARAMS_ESTABLISHMENTS.parse_get_params(request.args)
+    except params.ParametersParseException as e:
+        return formatter.create_param_error_response_single(e.errors, e.fmt)
+
+    query, fmt = _build_establishments_query_format(qs_params.values)
+
+    if fmt[N.FORMAT] in ['shp', 'gpkg']:
+        query['fields'] += (N.GEOM,)
+
+    es = get_elasticsearch()
+
+    query_results = establishment.run_establishment_queries(es, [qs_params], [query], [fmt])
+
+    return formatter.create_ok_response(N.ESTABLISHMENTS, query_results[0], fmt)
+
+
+def _process_establishments_bulk(request):
+    """Procesa una request POST para obtener establecimientos.
+        En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+
+        Args:
+            request (flask.Request): Request POST de flask.
+
+        Raises:
+            data.DataConnectionException: En caso de ocurrir un error de
+                conexión con la capa de manejo de datos.
+
+        Returns:
+            flask.Response: respuesta HTTP
+
+        """
+    try:
+        body_params = params.PARAMS_ESTABLISHMENTS.parse_post_params(
+            request.args, request.json, N.ESTABLISHMENTS)
+    except params.ParametersParseException as e:
+        return formatter.create_param_error_response_bulk(e.errors)
+
+    queries = []
+    formats = []
+    for parsed_params in body_params:
+        query, fmt = _build_establishments_query_format(parsed_params.values)
+        queries.append(query)
+        formats.append(fmt)
+
+    es = get_elasticsearch()
+    results = establishment.run_establishment_queries(es, body_params, queries, formats)
+
+    return formatter.create_ok_response_bulk(N.ESTABLISHMENTS, results, formats)
+
+
+def process_establishments(request):
+    """Procesa una request GET o POST para consultar establecimientos.
+    En caso de ocurrir un error de parseo, se retorna una respuesta HTTP 400.
+    En caso de ocurrir un error interno, se retorna una respuesta HTTP 500.
+
+    Args:
+        request (flask.Request): Request GET o POST de flask.
+    Returns:
+        flask.Response: respuesta HTTP
+
+    """
+    try:
+        if request.method == 'GET':
+            return _process_establishments_single(request)
+
+        return _process_establishments_bulk(request)
+    except data.DataConnectionException:
+        logger.exception(
+            'Excepción en manejo de consulta para recurso: establecimientos')
+        return formatter.create_internal_error_response()
 
 
 def process_educational_institutions(request):

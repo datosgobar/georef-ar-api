@@ -19,27 +19,29 @@ class NearbyEstablishmentsSearch(TerritoriesSearch):
         self._building_type = name
 
     def _read_query(self, ids=None, name=None, census_locality=None, local_government=None, department=None, state=None,
-                    exact=False, geo_shape_geoms=None, lat=None, lon=None, order=None, tipo=None, **kwargs):
-        self._distance = kwargs.pop('distancia')
+                    exact=False, geo_shape_geoms=None, lat=None, lon=None, order=None, tipo=None,
+                    distance=None, category=None, **kwargs):
         super()._read_query(ids, name, census_locality, local_government, department, state, exact, geo_shape_geoms,
-                            order, **kwargs)
+                            **kwargs)
 
-        self._search = self._search.filter('geo_distance', distance=f"{self._distance}m", **{
-            N.CENTROID: {
-                'lat': lat,
-                'lon': lon
-            }
-        })
+        if distance:
 
-        # Calcula la distancia para incorporar el campo en la respuesta.
-        self._search = self._search.script_fields(
-            distancia={
-                "script": {
-                    "source": f"doc['{N.CENTROID}'].arcDistance(params.lat, params.lon)",
-                    "params": {"lat": lat, "lon": lon}
+            self._search = self._search.filter('geo_distance', distance=f"{distance}m", **{
+                N.CENTROID: {
+                    'lat': lat,
+                    'lon': lon
                 }
-            }
-        )
+            })
+
+            # Calcula la distancia para incorporar el campo en la respuesta.
+            self._search = self._search.script_fields(
+                distancia={
+                    "script": {
+                        "source": f"doc['{N.CENTROID}'].arcDistance(params.lat, params.lon)",
+                        "params": {"lat": lat, "lon": lon}
+                    }
+                }
+            )
 
 
     @property
@@ -131,14 +133,16 @@ class EstablishmentMultiSearch:
     def _apply_sort(self, hits):
         """Ordena los resultados de direcciones. El ordenamiento se hace
         localmente ya que en 'planner_steps' se modifican los lados de las
-        intersecciones. El ordenamiento se realiza exclusivamente sobre la
-        calle 1.
+        intersecciones.
 
         Args:
             hits (list): Lista de resultados de búsqueda de direcciones.
 
         """
-        order = self._query.get('order', N.DISTANCE)
+        order = self._query.get('order', None)
+
+        if order is None:
+            return
 
         # Ordenar resultados utilizando la primera calle
         if order == N.ID:

@@ -154,13 +154,24 @@ def get_location():
 def get_nearby_establishments():
     return normalizer.process_nearby_establishments(request)
 
+@bp_v2_0.route('/establecimientos', methods=['GET', 'POST'])
+def get_establishments():
+    return normalizer.process_establishments(request)
+
+# TODO: Hacer el cambio cuando estén definidos los campos comunes a todos los establecimientos
 @bp_v2_0.route('/establecimientos-educativos', methods=['GET', 'POST'])
+@deprecated(current_endpoint="establecimientos-educativos", alternative_endpoint='establecimientos')
+#@add_params(tipo=N.EDUCATIONS)
 def get_educational_institutions():
     return normalizer.process_educational_institutions(request)
+    #return normalizer.process_establishments(request)
 
 @bp_v2_0.route('/instituciones-universitarias', methods=['GET', 'POST'])
+@deprecated(current_endpoint="instituciones-universitarias", alternative_endpoint='establecimientos')
+#@add_params(tipo=N.UNIVERSITIES)
 def get_university_institutions():
     return normalizer.process_university_institutions(request)
+    #return normalizer.process_establishments(request)
 
 @bp_v2_0.route('/cuadras', methods=['GET', 'POST'])
 def get_street_blocks():

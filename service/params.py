@@ -894,6 +894,44 @@ class IntSetSumValidator(ParamValidator):
             raise ValueError(
                 strings.INT_VAL_BIG_GLOBAL.format(names, self._upper_limit))
 
+
+class DependencyValidator(ParamValidator):
+    """Implementa una validación de parámetros que comprueba que, si se especificó
+    un parámetro principal (distinto de None), existan obligatoriamente todos los
+    parámetros de los cuales depende.
+    """
+
+    def __init__(self, main_param):
+        """
+        Args:
+            main_param (str): Nombre del parámetro condicional principal (ej. 'distancia').
+        """
+        self._main_param = main_param
+
+    def validate_values(self, param_names, values):
+        dependency_params_dict = dict(zip(param_names, values))
+
+        # Extraemos el principal de forma segura
+        main_value = dependency_params_dict.pop(self._main_param, None)
+
+        # Controlamos que haya sido enviado explícitamente (evitando problemas con el 0 o strings)
+        if main_value is not None and main_value != '':
+
+            # Filtramos para saber exactamente cuáles dependencias están vacías/None
+            missing_params = [
+                k for k, v in dependency_params_dict.items()
+                if v is None or v == ''
+            ]
+
+            if missing_params:
+                raise ValueError(
+                    strings.DEPENDENCY_ERROR.format(
+                        self._main_param,
+                        ', '.join(f"'{p}'" for p in missing_params)
+                    )
+                )
+
+
 class CabaFilter(Filter):
     def filter_values(self,results):
         if results.values[N.LOCALITY] in N.CABA_ALIASES:
@@ -1731,6 +1769,7 @@ PARAMS_NEARBY_ESTABLISHMENTS = EndpointParameters(shared_params={
     ]),
     N.ADMINISTRATION: StrParameter(),
     N.DISTANCE: IntParameter(default=1000, lower_limit=10, upper_limit=500000),
+    N.ORDER: StrParameter(choices=[N.ID, N.NAME, N.DISTANCE], default=N.DISTANCE),
     N.FLATTEN: BoolParameter(),
     N.MAX: IntParameter(default=10, lower_limit=1,
                         upper_limit=constants.MAX_RESULT_LEN),
@@ -1739,7 +1778,10 @@ PARAMS_NEARBY_ESTABLISHMENTS = EndpointParameters(shared_params={
                                  complete=[N.SOURCE])
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml', 'csv', 'shp', 'gpkg'])
-})
+}).with_cross_validator(
+    [N.DISTANCE, N.DISTANCE, N.LAT, N.LON],
+    DependencyValidator(main_param=N.DISTANCE)
+)
 
 PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
     N.ID: IdsParameter(id_length=constants.STREET_BLOCK_ID_LEN),
@@ -1775,6 +1817,41 @@ PARAMS_STREET_BLOCKS = EndpointParameters(shared_params={
 }, get_qs_params={
     N.FORMAT: StrParameter(default='json',
                            choices=['json', 'csv', 'xml', 'shp', 'gpkg'])
+}).with_set_validator(
+    N.MAX,
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)
+).with_cross_validator(
+    [N.MAX, N.OFFSET],
+    IntSetSumValidator(upper_limit=constants.MAX_RESULT_WINDOW)
+)
+
+PARAMS_ESTABLISHMENTS = EndpointParameters(shared_params={
+    N.ID: IdsFixedLengthParameter(*constants.ESTABLISHMENT_ID_LEN),
+    N.NAME: StrParameter(),
+    N.STATE: CompoundParameter([IdsParameter(constants.STATE_ID_LEN),
+                                StrParameter()]),
+    N.DEPT: CompoundParameter([IdsParameter(constants.DEPT_ID_LEN),
+                               StrParameter()]),
+    N.ADMINISTRATION: StrParameter(),
+    N.CATEGORY: StrParameter(),
+    N.TYPE: StrParameter(choices=[
+        N.EDUCATIONS,
+        N.UNIVERSITIES
+    ]),
+    N.FLATTEN: BoolParameter(),
+    N.ORDER: StrParameter(choices=[N.ID, N.NAME]),
+    N.EXACT: BoolParameter(),
+    N.MAX: IntParameter(default=10, lower_limit=1,
+                        upper_limit=constants.MAX_RESULT_LEN),
+    N.OFFSET: IntParameter(lower_limit=0,
+                           upper_limit=constants.MAX_RESULT_WINDOW),
+    N.FIELDS: FieldListParameter(basic=[N.C_LAT, N.C_LON, N.ID, N.ESTABLISHMENT_TYPE],
+                                 standard=[N.STATE_ID, N.STATE_NAME,
+                                           N.DEPT_ID, N.DEPT_NAME,
+                                           N.NAME, N.RAW_ADDRESS],
+                                 complete=[N.ADMINISTRATION, N.SOURCE])
+}, get_qs_params={
+    N.FORMAT: StrParameter(default='json', choices=['json', 'geojson', 'xml', 'csv', 'shp', 'gpkg'])
 }).with_set_validator(
     N.MAX,
     IntSetSumValidator(upper_limit=constants.MAX_RESULT_LEN)

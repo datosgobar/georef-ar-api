@@ -22,6 +22,7 @@ INVALID_BULK_ENTRY = 'Las operaciones bulk deben ser de tipo objeto.'
 INTERNAL_ERROR = 'Ocurrió un error interno de servidor al procesar la \
 petición.'
 MISSING_ERROR = 'El parámetro \'{}\' es obligatorio.'
+DEPENDENCY_ERROR = "El parámetro '{}' requiere que también se especifiquen los siguientes parámetros: {}."
 UNKNOWN_ERROR = 'El parámetro especificado no existe. Los parámetros \
 aceptados están listados bajo la clave \'ayuda\'.'
 REPEATED_ERROR = 'El parámetro está repetido.'
