@@ -19,7 +19,7 @@ class SearchLocationTest(GeorefLiveTest):
     """Pruebas de búsqueda por ubicación."""
 
     def setUp(self):
-        self.endpoint = '/api/v2.0/establecimientos-cercanos'
+        self.endpoint = '/api/v2.1/establecimientos-cercanos'
         self.entity = 'establecimientos_cercanos'
         super().setUp()
 

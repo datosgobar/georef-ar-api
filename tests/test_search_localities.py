@@ -27,7 +27,7 @@ class SearchLocalityTest(GeorefLiveTest):
     """Pruebas de búsqueda de localidades (índice de localidades)."""
 
     def setUp(self):
-        self.endpoint = '/api/v2.0/localidades'
+        self.endpoint = '/api/v2.1/localidades'
         self.entity = 'localidades'
         super().setUp()
 

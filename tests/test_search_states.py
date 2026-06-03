@@ -35,7 +35,7 @@ class SearchStatesTest(GeorefLiveTest):
     """Pruebas de búsqueda de provincias."""
 
     def setUp(self):
-        self.endpoint = '/api/v2.0/provincias'
+        self.endpoint = '/api/v2.1/provincias'
         self.entity = 'provincias'
         super().setUp()
 

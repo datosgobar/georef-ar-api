@@ -37,7 +37,7 @@ class SearchDepartmentsTest(GeorefLiveTest):
     """Pruebas de búsqueda de departamentos."""
 
     def setUp(self):
-        self.endpoint = '/api/v2.0/departamentos'
+        self.endpoint = '/api/v2.1/departamentos'
         self.entity = 'departamentos'
         super().setUp()
 

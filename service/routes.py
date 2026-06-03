@@ -75,36 +75,44 @@ def handle_405(_):
 
 # API v2.0
 bp_v2_0 = Blueprint('georef_v2.0', __name__)
+bp_v2_1 = Blueprint('georef_v2.1', __name__)
 
 add_complete_downloads(bp_v2_0, current_app.config['COMPLETE_DOWNLOAD_URLS'])
+add_complete_downloads(bp_v2_1, current_app.config['COMPLETE_DOWNLOAD_URLS'])
 
 
 @bp_v2_0.route('/provincias', methods=['GET', 'POST'])
+@bp_v2_1.route('/provincias', methods=['GET', 'POST'])
 def get_states():
     return normalizer.process_state(request)
 
 
 @bp_v2_0.route('/departamentos', methods=['GET', 'POST'])
+@bp_v2_1.route('/departamentos', methods=['GET', 'POST'])
 def get_departments():
     return normalizer.process_department(request)
 
 
 @bp_v2_0.route('/aglomerados', methods=['GET', 'POST'])
+@bp_v2_1.route('/aglomerados', methods=['GET', 'POST'])
 def get_agglomerations():
     return normalizer.process_agglomeration(request)
 
 
 @bp_v2_0.route('/fracciones-censales', methods=['GET', 'POST'])
+@bp_v2_1.route('/fracciones-censales', methods=['GET', 'POST'])
 def get_census_tracts():
     return normalizer.process_census_tracts(request)
 
 
 @bp_v2_0.route('/radios-censales', methods=['GET', 'POST'])
+@bp_v2_1.route('/radios-censales', methods=['GET', 'POST'])
 def get_census_blocks():
     return normalizer.process_census_blocks(request)
 
 
 @bp_v2_0.route('/municipios', methods=['GET', 'POST'])
+@bp_v2_1.route('/municipios', methods=['GET', 'POST'])
 @deprecated(current_endpoint="municipios", alternative_endpoint='gobiernos-locales')
 @add_params(categoria="Municipio")
 def get_municipalities():
@@ -112,54 +120,63 @@ def get_municipalities():
 
 
 @bp_v2_0.route('/gobiernos-locales', methods=['GET', 'POST'])
+@bp_v2_1.route('/gobiernos-locales', methods=['GET', 'POST'])
 def get_local_governments():
     return normalizer.process_local_government(request)
 
 
 @bp_v2_0.route('/localidades-censales', methods=['GET', 'POST'])
+@bp_v2_1.route('/localidades-censales', methods=['GET', 'POST'])
 def get_census_localities():
     return normalizer.process_census_locality(request)
 
 
 @bp_v2_0.route('/asentamientos', methods=['GET', 'POST'])
+@bp_v2_1.route('/asentamientos', methods=['GET', 'POST'])
 def get_settlements():
     return normalizer.process_settlement(request)
 
 
 @bp_v2_0.route('/localidades', methods=['GET', 'POST'])
+@bp_v2_1.route('/localidades', methods=['GET', 'POST'])
 @add_params(categoria="Localidad simple,Componente de localidad compuesta,entidad")
 def get_localities():
     return normalizer.process_locality(request)
 
 
 @bp_v2_0.route('/calles', methods=['GET', 'POST'])
+@bp_v2_1.route('/calles', methods=['GET', 'POST'])
 def get_streets():
     return normalizer.process_street(request)
 
 
 @bp_v2_0.route('/direcciones', methods=['GET', 'POST'])
+@bp_v2_1.route('/direcciones', methods=['GET', 'POST'])
 @with_request_logger
 def get_addresses():
     return normalizer.process_address(request)
 
 
 @bp_v2_0.route('/ubicacion', methods=['GET', 'POST'])
+@bp_v2_1.route('/ubicacion', methods=['GET', 'POST'])
 @disable_cache
 def get_location():
     return normalizer.process_location(request)
 
 
 @bp_v2_0.route('/establecimientos-cercanos', methods=['GET'])
+@bp_v2_1.route('/establecimientos-cercanos', methods=['GET'])
 @disable_cache
 def get_nearby_establishments():
     return normalizer.process_nearby_establishments(request)
 
-@bp_v2_0.route('/establecimientos', methods=['GET', 'POST'])
+@bp_v2_1.route('/establecimientos', methods=['GET', 'POST'])
 def get_establishments():
     return normalizer.process_establishments(request)
 
 # TODO: Hacer el cambio cuando estén definidos los campos comunes a todos los establecimientos
 @bp_v2_0.route('/establecimientos-educativos', methods=['GET', 'POST'])
+@bp_v2_1.route('/establecimientos-educativos', methods=['GET', 'POST'])
 @deprecated(current_endpoint="establecimientos-educativos", alternative_endpoint='establecimientos')
 #@add_params(tipo=N.EDUCATIONS)
 def get_educational_institutions():
@@ -167,6 +184,7 @@ def get_educational_institutions():
     #return normalizer.process_establishments(request)
 
 @bp_v2_0.route('/instituciones-universitarias', methods=['GET', 'POST'])
+@bp_v2_1.route('/instituciones-universitarias', methods=['GET', 'POST'])
 @deprecated(current_endpoint="instituciones-universitarias", alternative_endpoint='establecimientos')
 #@add_params(tipo=N.UNIVERSITIES)
 def get_university_institutions():
@@ -174,13 +192,12 @@ def get_university_institutions():
     #return normalizer.process_establishments(request)
 
 @bp_v2_0.route('/cuadras', methods=['GET', 'POST'])
+@bp_v2_1.route('/cuadras', methods=['GET', 'POST'])
 def get_street_blocks():
     return normalizer.process_street_block(request)
 
 
 # Última versión de la API
-app.register_blueprint(bp_v2_0, url_prefix='/api')
-
-# v2.0
-# app.register_blueprint(bp_v2_0, url_prefix='/api/v2.0')
+app.register_blueprint(bp_v2_1, url_prefix='/api')
+app.register_blueprint(bp_v2_1, url_prefix='/api/v2.1')
 app.register_blueprint(bp_v2_0, url_prefix='/api/v2.0')

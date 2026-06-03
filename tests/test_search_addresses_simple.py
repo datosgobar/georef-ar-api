@@ -76,7 +76,7 @@ class SearchAddressesSimpleTest(SearchAddressesBaseTest):
     """Pruebas de búsqueda por dirección de tipo 'simple'."""
 
     def setUp(self):
-        self.endpoint = '/api/v2.0/direcciones'
+        self.endpoint = '/api/v2.1/direcciones'
         self.entity = 'direcciones'
         super().setUp()
 

@@ -47,7 +47,7 @@ class SearchLocalGovernmentsTest(GeorefLiveTest):
     """Pruebas de búsqueda de gobiernos locales."""
 
     def setUp(self):
-        self.endpoint = '/api/v2.0/gobiernos-locales'
+        self.endpoint = '/api/v2.1/gobiernos-locales'
         self.entity = 'gobiernos_locales'
         super().setUp()
 

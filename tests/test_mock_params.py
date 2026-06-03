@@ -15,7 +15,7 @@ ENDPOINTS = [
 
 class ParamParsingTest(GeorefMockTest):
     def setUp(self):
-        self.url_base = '/api/v2.0'
+        self.url_base = '/api/v2.1'
         super().setUp()
 
     def test_404_response(self):
