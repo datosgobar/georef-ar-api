@@ -120,7 +120,7 @@ def with_request_logger(handler):
         setup_loggers_once()
 
         # Extraer y limpiar parámetro 'debug'
-        params = request.args.to_dict(flat=True)
+        params = MultiDict(request.args)
         debug = params.pop("debug", None)
         request.args = ImmutableMultiDict(params)
 
