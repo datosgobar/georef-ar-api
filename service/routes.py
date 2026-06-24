@@ -43,7 +43,8 @@ def add_complete_downloads(bp, urls):
             georef.example.cfg para más detalles.
 
     """
-    entities = [N.STATES, N.DEPARTMENTS, N.LOCAL_GOVERNMENTS.replace('_', '-'),
+    entities = [N.STATES, N.DEPARTMENTS, N.AGGLOMERATIONS, N.CENSUS_TRACTS.replace('_', '-'),
+                N.CENSUS_BLOCKS.replace('_', '-'), N.LOCAL_GOVERNMENTS.replace('_', '-'),
                 N.CENSUS_LOCALITIES.replace('_', '-'), N.SETTLEMENTS,
                 N.LOCALITIES, N.STREETS, N.STREET_BLOCKS, N.EDUCATIONAL_INSTITUTIONS.replace('_', '-'),
                 N.UNIVERSITY_INSTITUTIONS.replace('_', '-')]
