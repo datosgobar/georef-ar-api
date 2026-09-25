@@ -1,41 +1,34 @@
 ---
-title: Consutas por lotes
+title: "Consultas por lotes"
 ---
 
-Todos los recursos de la API tienen una variante `POST` que permite realizar varias consultas en una misma petición. De esta forma, se pueden envíar más consultas en menos tiempo. Las versiones de los recursos `POST` aceptan los mismos parámetros que las `GET`, con la excepción del parámetro `formato`, que obligatoriamente toma el valor `json`. Adicionalmente, todos los parámetros se envían a través del cuerpo de la consulta HTTP, y no como parte del *query string*.
+Casi todos los recursos de la API tienen una variante `POST` que resuelve varias consultas en un mismo pedido, así mandás más consultas en menos tiempo. La única excepción es `/establecimientos-cercanos`, que solo acepta `GET`.
 
-Por ejemplo, las siguientes tres consultas:
+Los recursos `POST` aceptan los mismos parámetros que los `GET`, salvo `formato`, que siempre es `json`. Los parámetros van en el cuerpo del pedido HTTP (JSON), no en la *query string*. La clave de la lista es el nombre del recurso con guion bajo: `provincias`, `gobiernos_locales`, `direcciones`, `ubicaciones`, etc.
 
-`GET` [`https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba&campos=nombre`](https://apis.datos.gob.ar/georef/api/provincias?nombre=cordoba\&campos=nombre)
+Por ejemplo, estas tres consultas:
 
-`GET` [`https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco&campos=nombre`](https://apis.datos.gob.ar/georef/api/provincias?nombre=chaco\&campos=nombre)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/provincias?nombre=cordoba&campos=nombre`](https://apis.datos.gob.ar/georef/api/v2.1/provincias?nombre=cordoba&campos=nombre)
 
-`GET` \[`https://apis.datos.gob.ar/georef/api/provincias?nombre=san luis&campos=nombre`]\(https://apis.datos.gob.ar/georef/api/provincias?nombre=san luis\&campos=nombre)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/provincias?nombre=chaco&campos=nombre`](https://apis.datos.gob.ar/georef/api/v2.1/provincias?nombre=chaco&campos=nombre)
 
-Son equivalentes a la siguiente consulta `POST` por lotes:
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/provincias?nombre=san luis&campos=nombre`](https://apis.datos.gob.ar/georef/api/v2.1/provincias?nombre=san%20luis&campos=nombre)
 
-`POST` `https://apis.datos.gob.ar/georef/api/provincias`
+Equivalen a esta consulta `POST` por lotes:
 
-```json
+```bash
+curl -X POST "https://apis.datos.gob.ar/georef/api/v2.1/provincias" \
+  -H 'Content-Type: application/json' -d '
 {
     "provincias": [
-        {
-            "nombre": "cordoba",
-            "campos": "nombre"
-        },
-        {
-            "nombre": "chaco",
-            "campos": "nombre"
-        },
-        {
-            "nombre": "san luis",
-            "campos": "nombre"
-        }
+        { "nombre": "cordoba", "campos": "nombre" },
+        { "nombre": "chaco", "campos": "nombre" },
+        { "nombre": "san luis", "campos": "nombre" }
     ]
-}
+}'
 ```
 
-Que resultaría en la siguiente respuesta JSON:
+Respuesta:
 
 ```json
 {
@@ -43,146 +36,113 @@ Que resultaría en la siguiente respuesta JSON:
         {
             "cantidad": 1,
             "inicio": 0,
+            "parametros": { ... },
             "provincias": [
-                {
-                    "id": "14",
-                    "nombre": "Córdoba"
-                }
+                { "id": "14", "nombre": "Córdoba" }
             ],
-            "total": 1,
-            "parametros": { ... }
+            "total": 1
         },
         {
             "cantidad": 1,
             "inicio": 0,
+            "parametros": { ... },
             "provincias": [
-                {
-                    "id": "22",
-                    "nombre": "Chaco"
-                }
+                { "id": "22", "nombre": "Chaco" }
             ],
-            "total": 1,
-            "parametros": { ... }
+            "total": 1
         },
         {
             "cantidad": 1,
             "inicio": 0,
+            "parametros": { ... },
             "provincias": [
-                {
-                    "id": "74",
-                    "nombre": "San Luis"
-                }
+                { "id": "74", "nombre": "San Luis" }
             ],
-            "total": 1,
-            "parametros": { ... }
+            "total": 1
         }
     ]
 }
 ```
 
-Como se muestra en el ejemplo, la respuesta contiene una lista `resultados`, con los resultados de cada consulta individual adentro. Las estructuras de las respuestas se mantienen idénticas que los recursos `GET`.
+La respuesta trae una lista `resultados` con el resultado de cada consulta, en el mismo orden. Cada resultado tiene la misma estructura que la respuesta del recurso `GET`.
 
 :::caution[Cantidad máxima de consultas y resultados]
-La cantidad de consultas en una misma petición no debe superar las 1000.
+Un pedido puede tener hasta 1000 consultas.
 
-Adicionalmente, el total de los parámetros `max` sumados de todas las consultas no debe superar los 5000.
-Por ejemplo, se permite enviar 1000 consultas con `"max": 5`, o 100 consultas con `"max": 50`, pero no 1000 consultas con `"max": 10`.
+Además, la suma de los `max` de todas las consultas no puede superar 5000. Por ejemplo, podés mandar 1000 consultas con `"max": 5` o 100 con `"max": 50`, pero no 1000 con `"max": 10`.
 :::
 
-Utilizando los recursos por lotes, se pueden normalizar mayores cantidades de datos en menos tiempo. Por ejemplo, si se cuenta con 50000 direcciones, tan solo se necesitan 10 consultas para normalizar el activo de datos entero. Utilizando los recursos `GET`, se necesitarían 50000 (una por dato).
+Con los lotes normalizás mucho más rápido: 50.000 direcciones con `"max": 1` entran en 50 pedidos de 1000 consultas, contra 50.000 pedidos `GET`. Tené en cuenta además la [cuota de pedidos](/georef-ar-api/#límites-de-uso) de la v2.1.
 
 :::note[Mejor resultado por consulta]
-El uso más común de las consultas por lotes es normalizar una lista de datos, donde cada dato es una consulta. Ya que la API ordena los resultados de más acertados a menos acertados por defecto, **es recomendable agregar** `"max": 1` **a los parámetros de todas las consultas**, para obtener exclusivamente el mejor resultado por cada dato de la lista. Esto reduce la cantidad de datos transmitidos y mejora los tiempos de respuesta.
+El uso más común es normalizar una lista de datos, donde cada dato es una consulta. Como la API ordena los resultados del más al menos acertado, **agregá** `"max": 1` **a cada consulta** para quedarte solo con el mejor resultado. Así transferís menos datos y la respuesta llega más rápido.
 :::
 
-## Ejemplos de uso
+## Ejemplos
 
-A diferencia de los recursos `GET`, los ejemplos de operaciones por lotes se muestran utilizando comandos construídos sobre la herramienta `curl`. La sección de [ejemplos con Python](/georef-ar-api/python-usage/) también contiene ejemplos de uso de los recursos `POST`.
+La sección [Usar en Python](/georef-ar-api/python-usage/) tiene más ejemplos de los recursos `POST`.
 
-### Búsqueda de municipios en lotes
+### Gobiernos locales en lotes
 
-```
-curl -X POST "https://apis.datos.gob.ar/georef/api/municipios" \
--H 'Content-Type: application/json' -d'
+```bash
+curl -X POST "https://apis.datos.gob.ar/georef/api/v2.1/gobiernos-locales" \
+  -H 'Content-Type: application/json' -d '
 {
-    "municipios": [
-        {
-            "nombre": "belgrano",
-            "max": 1,
-            "campos": "id, nombre"
-        },
-        {
-            "nombre": "martin",
-            "max": 1,
-            "provincia": "la pampa",
-			"aplanar": true
-        }
+    "gobiernos_locales": [
+        { "nombre": "belgrano", "max": 1, "campos": "id, nombre" },
+        { "nombre": "martin", "max": 1, "provincia": "la pampa", "aplanar": true }
     ]
-}
-'
+}'
 ```
 
-Resultados:
+Respuesta:
 
 ```json
 {
     "resultados": [
         {
-            "municipios": [
-                {
-                    "id": "060301",
-                    "nombre": "General Belgrano"
-                }
-            ],
             "cantidad": 1,
-            "total": 8,
+            "gobiernos_locales": [
+                { "id": "908224", "nombre": "Villa Belgrano" }
+            ],
             "inicio": 0,
-            "parametros": { ... }
+            "parametros": { ... },
+            "total": 7
         },
         {
-            "municipios": [
+            "cantidad": 1,
+            "gobiernos_locales": [
                 {
-                    "centroide_lat": -35.361211,
-                    "centroide_lon": -64.294073,
+                    "centroide_lat": -35.360578027,
+                    "centroide_lon": -64.292331409,
                     "id": "420126",
                     "nombre": "Embajador Martini",
                     "provincia_id": "42",
                     "provincia_nombre": "La Pampa"
                 }
             ],
-            "cantidad": 1,
-            "total": 2,
             "inicio": 0,
-            "parametros": { ... }
+            "parametros": { ... },
+            "total": 2
         }
     ]
 }
 ```
 
-### Normalización de direcciones en lotes
+### Direcciones en lotes
 
-```
-curl -X POST "https://apis.datos.gob.ar/georef/api/direcciones" \
--H 'Content-Type: application/json' -d'
+```bash
+curl -X POST "https://apis.datos.gob.ar/georef/api/v2.1/direcciones" \
+  -H 'Content-Type: application/json' -d '
 {
     "direcciones": [
-        {
-            "direccion": "santa fe 3100",
-            "max": 1,
-            "campos": "basico"
-        },
-        {
-            "direccion": "corientes 4010",
-            "max": 1,
-			"campos": "basico",
-			"departamento": "General López"
-        }
+        { "direccion": "santa fe 3100", "max": 1, "campos": "basico" },
+        { "direccion": "corrientes 4010", "max": 1, "campos": "basico", "departamento": "General López" }
     ]
-}
-'
+}'
 ```
 
-Resultados:
+Respuesta:
 
 ```json
 {
@@ -191,123 +151,87 @@ Resultados:
             "cantidad": 1,
             "direcciones": [
                 {
-                    "altura": {
-                        "valor": 3100
-                    },
-                    "calle": {
-                        "id": "0642701011435",
-                        "nombre": "SANTA FE"
-                    },
-                    "calle_cruce_1": {
-                        "id": null,
-                        "nombre": null
-                    },
-                    "calle_cruce_2": {
-                        "id": null,
-                        "nombre": null
-                    },
-                    "nomenclatura": "SANTA FE 3100, La Matanza, Buenos Aires"
+                    "altura": { "valor": 3100 },
+                    "calle": { "id": "380631800003020", "nombre": "SANTA FE" },
+                    "calle_cruce_1": { "id": null, "nombre": null },
+                    "calle_cruce_2": { "id": null, "nombre": null },
+                    "nomenclatura": "SANTA FE 3100, San Pedro, San Pedro, Jujuy"
                 }
             ],
             "inicio": 0,
-            "total": 29,
-            "parametros": { ... }
+            "parametros": { ... },
+            "total": 6922
         },
         {
             "cantidad": 1,
             "direcciones": [
                 {
-                    "altura": {
-                        "valor": 4010
-                    },
-                    "calle": {
-                        "id": "8204229000610",
-                        "nombre": "CORRIENTES"
-                    },
-                    "calle_cruce_1": {
-                        "id": null,
-                        "nombre": null
-                    },
-                    "calle_cruce_2": {
-                        "id": null,
-                        "nombre": null
-                    },
-                    "nomenclatura": "CORRIENTES 4010, General López, Santa Fe"
+                    "altura": { "valor": 4010 },
+                    "calle": { "id": "820421200000275", "nombre": "CORRIENTES" },
+                    "calle_cruce_1": { "id": null, "nombre": null },
+                    "calle_cruce_2": { "id": null, "nombre": null },
+                    "nomenclatura": "CORRIENTES 4010, Firmat, General López, Santa Fe"
                 }
             ],
             "inicio": 0,
-            "total": 1,
-            "parametros": { ... }
+            "parametros": { ... },
+            "total": 46
         }
     ]
 }
 ```
 
-### Entidades geográficas en varios puntos
+La primera consulta no tiene filtros y devuelve miles de candidatos: el mejor resultado puede no ser el que esperás. Siempre que puedas, sumá `provincia`, `departamento` o `localidad_censal`.
 
-```
-curl -X POST "https://apis.datos.gob.ar/georef/api/ubicacion" \
--H 'Content-Type: application/json' -d'
+### Unidades territoriales de varios puntos
+
+```bash
+curl -X POST "https://apis.datos.gob.ar/georef/api/v2.1/ubicacion" \
+  -H 'Content-Type: application/json' -d '
 {
     "ubicaciones": [
-        {
-            "lat": -27.274161,
-            "lon": -66.752929,
-            "campos": "completo"
-        },
-        {
-            "lat": -31.480693,
-            "lon": -59.092813,
-            "aplanar": true,
-            "campos": "completo"
-        }
+        { "lat": -27.274161, "lon": -66.752929, "campos": "completo" },
+        { "lat": -31.480693, "lon": -59.092813, "aplanar": true, "campos": "completo" }
     ]
-}
-'
+}'
 ```
 
-Resultados:
+Respuesta:
 
 ```json
 {
-    "resultados":  [
+    "resultados": [
         {
-            "ubicacion":  {
-                "departamento":  {
-                    "fuente":  "Adm.  Grl.  de  Catastro",
-                    "id":  "10035",
-                    "nombre":  "Belén"
-                },
-                "lat":  -27.274161,
-                "lon":  -66.752929,
-                "municipio":  {
-                    "fuente":  "Adm.  Grl.  de  Catastro",
-                    "id":  "100077",
-                    "nombre":  "Hualfín"
-                },
-                "provincia":  {
-                    "fuente":  "IGN",
-                    "id":  "10",
-                    "nombre":  "Catamarca"
-                }
-            },
-            "parametros":  {  ...  }
+            "parametros": { ... },
+            "ubicacion": {
+                "calle": { "fuente": null, "id": null, "nombre": null },
+                "departamento": { "fuente": "IGN", "id": "10035", "nombre": "Belén" },
+                "gobierno_local": { "fuente": "DPE - INDEC", "id": "100077", "nombre": "Hualfín" },
+                "lat": -27.274161,
+                "lon": -66.752929,
+                "nomenclatura": null,
+                "provincia": { "fuente": "IGN", "id": "10", "nombre": "Catamarca" }
+            }
         },
         {
-            "ubicacion":  {
-                "departamento_fuente":  "ATER  -  Direc.  de  Catastro",
-                "departamento_id":  "30113",
-                "departamento_nombre":  "Villaguay",
-                "lat":  -31.480693,
-                "lon":  -59.092813,
-                "municipio_fuente":  null,
-                "municipio_id":  null,
-                "municipio_nombre":  null,
-                "provincia_fuente":  "IGN",
-                "provincia_id":  "30",
-                "provincia_nombre":  "Entre  Ríos"
+            "parametros": { ... },
+            "ubicacion": {
+                "calle_fuente": null,
+                "calle_id": null,
+                "calle_nombre": null,
+                "departamento_fuente": "IGN",
+                "departamento_id": "30113",
+                "departamento_nombre": "Villaguay",
+                "gobierno_local_fuente": "DPE - INDEC",
+                "gobierno_local_id": "309950",
+                "gobierno_local_nombre": "Mojones Norte",
+                "lat": -31.480693,
+                "lon": -59.092813,
+                "nomenclatura": null,
+                "provincia_fuente": "IGN",
+                "provincia_id": "30",
+                "provincia_nombre": "Entre Ríos"
             }
-            "parametros":  {  ...  }
         }
     ]
 }

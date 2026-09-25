@@ -1,0 +1,109 @@
+{
+  "sidebar": [
+    {
+      "label": "Inicio",
+      "link": "/"
+    },
+    {
+      "label": "Usuarios",
+      "items": [
+        {
+          "label": "Ejemplos de uso",
+          "slug": "quick-start"
+        },
+        {
+          "label": "Consultas por lotes",
+          "slug": "bulk"
+        },
+        {
+          "label": "Normalización de direcciones",
+          "slug": "addresses"
+        },
+        {
+          "label": "Operaciones con geometrías",
+          "slug": "geom-operations"
+        },
+        {
+          "label": "Descarga de geometrías",
+          "slug": "shapefiles"
+        },
+        {
+          "label": "Descarga de base completa",
+          "slug": "download"
+        },
+        {
+          "label": "Usar en planillas de cálculo",
+          "slug": "spreadsheet-integration"
+        },
+        {
+          "label": "Usar en Python",
+          "slug": "python-usage"
+        },
+        {
+          "label": "Autenticarse con JWT",
+          "slug": "jwt-token"
+        },
+        {
+          "label": "Referencia API",
+          "link": "/referencia/"
+        },
+        {
+          "label": "Referencia metodológica",
+          "items": [
+            {
+              "label": "Comunas de CABA",
+              "slug": "communes"
+            },
+            {
+              "label": "Localidades y asentamientos",
+              "slug": "localities"
+            }
+          ]
+        },
+        {
+          "label": "Condiciones de uso",
+          "slug": "terms"
+        }
+      ]
+    },
+    {
+      "label": "Aplicaciones",
+      "slug": "applications"
+    },
+    {
+      "label": "Desarrolladores",
+      "items": [
+        {
+          "label": "Instalación y ejecución",
+          "slug": "georef-api-development"
+        },
+        {
+          "label": "Entornos productivos",
+          "slug": "deploy"
+        },
+        {
+          "label": "Historial de versiones",
+          "slug": "history"
+        },
+        {
+          "label": "ETL",
+          "items": [
+            {
+              "label": "Inicio",
+              "slug": "etl"
+            },
+            {
+              "label": "Datos",
+              "slug": "etl-data"
+            },
+            {
+              "label": "Instalación y ejecución",
+              "slug": "etl-install"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "excluded": []
+}

@@ -2,9 +2,11 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightOpenAPI, { createOpenAPISidebarGroup } from 'starlight-openapi';
+import starlightVersions from 'starlight-versions';
 
-// Páginas de referencia generadas desde public/openapi.json (el mismo archivo se puede descargar).
+// Referencia de cada versión de la API, generada desde su spec (los archivos también se pueden descargar).
 const referencia = createOpenAPISidebarGroup();
+const referenciaV1 = createOpenAPISidebarGroup();
 
 const base = '/georef-ar-api';
 
@@ -18,7 +20,15 @@ export default defineConfig({
 	},
 	integrations: [
 		starlight({
-			plugins: [starlightOpenAPI([{ base: 'referencia', schema: './public/openapi.json', sidebar: { label: 'Referencia API', group: referencia, operations: { badges: true, labels: 'path' } } }])],
+			plugins: [
+				// La documentación actual es la de la API v2.1; la de v1.0 queda archivada en /v1/ con aviso de versión anterior.
+				starlightVersions({ current: { label: 'v2.1 (actual)' }, versions: [{ slug: 'v1', label: 'v1.0 (deprecada)' }] }),
+				starlightOpenAPI([
+					{ base: 'referencia', schema: './public/openapi.json', sidebar: { label: 'Referencia API', group: referencia, operations: { badges: true, labels: 'path' } } },
+					{ base: 'v1/referencia', schema: './public/openapi-v1.0.json', sidebar: { label: 'Referencia API', group: referenciaV1, operations: { badges: true, labels: 'path' } } },
+					// ponytail: el menú archivado (src/content/versions/v1.json) enlaza a mano a /referencia/, que el plugin prefija con /v1/; este grupo no se muestra.
+				]),
+			],
 			title: 'API Georef',
 			favicon: '/favicon.png',
 			description: 'Documentación de la API del Servicio de Normalización de Datos Geográficos de la República Argentina.',
@@ -39,6 +49,7 @@ export default defineConfig({
 				{
 					label: 'Usuarios',
 					items: [
+						{ label: 'Migrar desde v1.0', slug: 'migrar-desde-v1' },
 						{ label: 'Ejemplos de uso', slug: 'quick-start' },
 						{ label: 'Consultas por lotes', slug: 'bulk' },
 						{ label: 'Normalización de direcciones', slug: 'addresses' },
@@ -52,7 +63,9 @@ export default defineConfig({
 						{
 							label: 'Referencia metodológica',
 							items: [
+								{ label: 'Gobiernos locales', slug: 'gobiernos-locales' },
 								{ label: 'Comunas de CABA', slug: 'communes' },
+								{ label: 'Entidades censales y establecimientos', slug: 'entidades-censales-y-establecimientos' },
 								{ label: 'Localidades y asentamientos', slug: 'localities' },
 							],
 						},

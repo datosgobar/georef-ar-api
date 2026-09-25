@@ -1,128 +1,144 @@
 ---
-title: API del Servicio de Normalización de Datos Geográficos de Argentina
+title: "API del Servicio de Normalización de Datos Geográficos de Argentina"
 ---
 
-**Versión**: 0.5.3
+**Versión actual de la API**: 2.1
 
-La API del Servicio de Normalización de Datos Geográficos, permite normalizar y codificar los nombres de unidades territoriales de la Argentina (provincias, departamentos, municipios y localidades) y de sus calles, así como ubicar coordenadas dentro de ellas.
+La API Georef te permite normalizar y codificar los nombres de las unidades territoriales de la Argentina (provincias, departamentos, gobiernos locales, localidades y asentamientos), de sus calles y direcciones, y ubicar coordenadas dentro de ellas. Desde la v2.0 también expone unidades geoestadísticas del INDEC (aglomerados, fracciones y radios censales), cuadras y establecimientos educativos y universitarios.
 
-En la [Guía para la identificación y uso de entidades interoperables](https://datosgobar.github.io/paquete-apertura-datos/guia-interoperables/) se explica cómo funcionan las [unidades territoriales internas de la Argentina](https://datosgobar.github.io/paquete-apertura-datos/guia-interoperables/#divisiones-o-unidades-territoriales-internas) y la relación entre ellas.
+En la [Guía para la identificación y uso de entidades interoperables](https://datosgobar.github.io/paquete-apertura-datos/guia-interoperables/) se explica cómo funcionan las unidades territoriales internas de la Argentina y la relación entre ellas.
+
+:::caution[La v1.0 está deprecada]
+La documentación de la v1.0 quedó archivada en [/georef-ar-api/v1/](/georef-ar-api/v1/). Si todavía la usás, mirá la guía para [migrar desde v1.0](/georef-ar-api/migrar-desde-v1/).
+:::
+
+:::caution[Siempre indicá la versión en la URL]
+La URL base de la versión actual es `https://apis.datos.gob.ar/georef/api/v2.1/`. La URL sin versión (`https://apis.datos.gob.ar/georef/api/`) **todavía responde con la v1.0**, así que todos los ejemplos de esta documentación usan `/v2.1/` de forma explícita.
+:::
 
 ## Normalizar
 
 Las unidades territoriales tienen nombres y códigos oficiales. Cuando no se usan, los datos son difíciles de cruzar entre sí y hay que normalizarlos antes.
 
-<table>
-  <tr><td>provincia</td></tr>
-  <tr><td>Santiago del Estero</td></tr>
-  <tr><td>Stgo. del Estero</td></tr>
-  <tr><td>S. del Estero</td></tr>
-  <tr><td>Sgo. del Estero</td></tr>
-</table>
+| provincia |
+| --- |
+| Santiago del Estero |
+| Stgo. del Estero |
+| S. del Estero |
+| Sgo. del Estero |
 
-`GET` [`https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo. del Estero`](https://apis.datos.gob.ar/georef/api/provincias?nombre=Sgo.%20del%20Estero)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/provincias?nombre=Sgo. del Estero`](https://apis.datos.gob.ar/georef/api/v2.1/provincias?nombre=Sgo.%20del%20Estero)
 
 ```json
 {
+    "cantidad": 1,
+    "inicio": 0,
+    "parametros": { ... },
     "provincias": [
         {
-            "nombre": "Santiago del Estero",
-            "id": "86",
             "centroide": {
-                "lat": -27.782412,
-                "lon": -63.252387
-            }
+                "lat": -27.783431882,
+                "lon": -63.252626886
+            },
+            "id": "86",
+            "nombre": "Santiago del Estero"
         }
     ],
-    "cantidad": 1,
-    "total": 1,
-    "inicio": 0,
-    "parametros": { ... }
+    "total": 1
 }
 ```
 
 ## Enriquecer
 
-Cuando un conjunto de datos tiene puntos de coordenadas dentro de Argentina, puede cruzarse con muchos datos más, relacionados a las unidades territoriales que lo contienen. Para esto hay que agregarlas a los datos originales.
+Cuando un conjunto de datos tiene coordenadas dentro de la Argentina, podés cruzarlo con muchos otros datos si le agregás las unidades territoriales que contienen cada punto.
 
-<table>
-  <tr><td>lat</td><td>lon</td></tr>
-  <tr><td>-27.2741</td><td>-66.7529</td></tr>
-  <tr><td>-34.603633</td><td>-58.3837587</td></tr>
-</table>
+| lat | lon |
+| --- | --- |
+| -27.2741 | -66.7529 |
+| -34.6037389 | -58.3815704 |
 
-`GET` [`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741\&lon=-66.7529)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/v2.1/ubicacion?lat=-27.2741&lon=-66.7529)
 
 ```json
 {
+    "parametros": { ... },
     "ubicacion": {
         "departamento": {
             "id": "10035",
             "nombre": "Belén"
         },
-        "lat": -27.2741,
-        "lon": -66.7529,
-        "municipio": {
+        "gobierno_local": {
             "id": "100077",
             "nombre": "Hualfín"
         },
+        "lat": -27.2741,
+        "lon": -66.7529,
         "provincia": {
             "id": "10",
             "nombre": "Catamarca"
         }
-    },
-    "parametros": { ... }
+    }
 }
 ```
 
 ## Referencia
 
-Finalmente, se puede utilizar la API como punto de referencia al momento de crear datos que estén vinculados a datos geográficos. Por ejemplo, si se cuenta con un formulario en el que se debe mostrar a un usuario un listado de provincias, y luego un listado de municipios a partir de la provincia seleccionada, se podrían ejecutar las siguientes consultas:
+También podés usar la API como fuente de referencia cuando creás datos vinculados a unidades territoriales. Por ejemplo, si tenés un formulario que muestra un listado de provincias y, según la provincia elegida, un listado de gobiernos locales, podés hacer estas consultas:
 
-Listar las provincias de la República Argentina:
+Listar las provincias:
 
-`GET` [`https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre`](https://apis.datos.gob.ar/georef/api/provincias?campos=id,nombre)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/provincias?campos=id,nombre`](https://apis.datos.gob.ar/georef/api/v2.1/provincias?campos=id,nombre)
 
 ```json
 {
+    "cantidad": 24,
+    "inicio": 0,
+    "parametros": { ... },
     "provincias": [
         {
-            "nombre": "Chaco",
-            "id": "22"
+            "id": "02",
+            "nombre": "Ciudad Autónoma de Buenos Aires"
         },
-		{ ... } // 23 resultados omitidos
+        { ... } // 23 resultados omitidos
     ],
-    "cantidad": 24,
-    "total": 24,
-    "inicio": 0,
-    "parametros": { ... }
+    "total": 24
 }
 ```
 
-Asumiendo que el usuario selecciona **Chaco** (ID: **22**), se ejecutaría la siguiente consulta para obtener el listado de municipios:
+Si la persona elige **Chaco** (ID **22**), pedís sus gobiernos locales:
 
-`GET` [`https://apis.datos.gob.ar/georef/api/municipios?provincia=22&campos=id,nombre&max=100`](https://apis.datos.gob.ar/georef/api/municipios?provincia=22\&campos=id,nombre\&max=100)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/gobiernos-locales?provincia=22&campos=id,nombre&max=100`](https://apis.datos.gob.ar/georef/api/v2.1/gobiernos-locales?provincia=22&campos=id,nombre&max=100)
 
 ```json
 {
-    "municipios": [
+    "cantidad": 70,
+    "gobiernos_locales": [
         {
-            "nombre": "Makallé",
-            "id": "220161"
+            "id": "220280",
+            "nombre": "Pampa Almirón"
         },
-		{ ... } // 67 resultados omitidos
+        { ... } // 69 resultados omitidos
     ],
-    "cantidad": 68,
-    "total": 68,
     "inicio": 0,
-    "parametros": { ... }
+    "parametros": { ... },
+    "total": 70
 }
 ```
 
-Notar que al ser datos que no son modificados regularmente, es posible retener copias de los mismos para ser reutilizados en el futuro.
+Como son datos que cambian poco, podés guardar una copia y reutilizarla.
 
-***
+## Límites de uso
 
-*Si sos usuario de la API de Normalización de Datos Geográficos y querés estar al tanto de los  cambios y novedades, [inscribite en la base de contactos de Datos Argentina](bit.ly/contacto-datos-argentina) y elegí sobre qué temas querés que te escribamos.*
+Al 25 de septiembre de 2026, los encabezados `x-ratelimit-*` de la v2.1 informan estas cuotas por cliente: 10 pedidos por segundo, 40 por minuto, 2.000 por hora y 10.000 por día. Para normalizar muchos datos, usá las [consultas por lotes](/georef-ar-api/bulk/), que resuelven hasta 1.000 consultas en un solo pedido.
 
-*¿Tenés algo que contarnos? Nos encantaría que nos cuentes por [Twitter](https://twitter.com/datosgobar) o por [mail](mailto\:datosargentina@jefatura.gob.ar) qué mejoró usar la API en tu trabajo y qué le falta para mejorar aún más.*
+## Más información
+
+- [Ejemplos de uso](/georef-ar-api/quick-start/)
+- [Referencia de la API v2.1](/georef-ar-api/referencia/) (generada desde la especificación OpenAPI)
+- [Migrar desde v1.0](/georef-ar-api/migrar-desde-v1/)
+
+---
+
+*Si usás la API y querés enterarte de cambios y novedades, [inscribite en la base de contactos de Datos Argentina](https://bit.ly/contacto-datos-argentina) y elegí sobre qué temas querés que te escribamos.*
+
+*¿Tenés algo para contarnos? Escribinos por [Twitter](https://twitter.com/datosgobar) o por [mail](mailto:datosargentina@jefatura.gob.ar) y contanos cómo usás la API y qué le falta.*

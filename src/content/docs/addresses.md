@@ -1,28 +1,26 @@
 ---
-title: Normalización de Direcciones
+title: "Normalización de direcciones"
 ---
 
-El recurso `/direcciones` de la API permite normalizar y georreferenciar direcciones de calles. Como todos los otros recursos, cuenta con varios filtros y opciones que permiten controlar los resultados obtenidos.
+El recurso `/direcciones` normaliza y georreferencia direcciones de calles. Como el resto de los recursos, tiene filtros y opciones para controlar los resultados.
 
 ## Parámetros y filtros
 
-El único parámetro obligatorio del recurso `/direcciones` es `direccion`. El mismo debe tomar el valor de una dirección: es decir, una combinación de nombres de calles y una altura preferiblemente numérica. La API tolera direcciones con distintas estructuras, y se hace un esfuerzo en intentar interpretar qué información representa cada parte del valor recibido, teniendo en cuenta errores de escritura comunes. Para lograr esto, se utiliza la librería [georef-ar-address](https://github.com/datosgobar/georef-ar-address). En algunos casos, la estructura de la dirección no puede ser interpretada correctamente; para evitar estos casos se recomienda utilizar direcciones con el siguiente formato aproximado:
+El único parámetro obligatorio es `direccion`: una combinación de nombres de calles y una altura, preferentemente numérica. La API tolera direcciones con distintas estructuras e intenta interpretar qué representa cada parte del texto, teniendo en cuenta errores de escritura comunes. Para eso usa la librería [georef-ar-address](https://github.com/datosgobar/georef-ar-address). Como a veces la estructura no se puede interpretar bien, te recomendamos usar alguno de estos formatos:
 
-* **calle** \[altura]
-* **calle 1** \[altura] *esquina/y* **calle 2**
-* **calle 1** *esquina/y* **calle 2** \[altura]
-* **calle 1** \[altura] *entre* **calle 2** y **calle 3**
-* **calle 1** *entre* **calle 2** y **calle 3** \[altura]
+- **calle** [altura]
+- **calle 1** [altura] *esquina/y* **calle 2**
+- **calle 1** *esquina/y* **calle 2** [altura]
+- **calle 1** [altura] *entre* **calle 2** y **calle 3**
+- **calle 1** *entre* **calle 2** y **calle 3** [altura]
 
-En todos los casos, el valor \[altura] es opcional, y de estar presente puede ser seguido de un piso/número de departamento.
+En todos los casos la [altura] es opcional y, si está, puede ir seguida de un piso o departamento.
 
-El resto de los parámetros aceptados por el recurso `/direccion` están listados en la [referencia completa de la API](https://datosgobar.github.io/georef-ar-api/open-api). Se recomienda utilizar los parámetros `provincia`, `departamento`, `localidad_censal` y/o `localidad` para obtener resultados más precisos.
+Para obtener resultados más precisos, sumá los filtros `provincia`, `departamento`, `localidad_censal` y/o `localidad`. El parámetro `desplazar` mueve el punto georreferenciado del eje de la calle hacia la manzana (ver más abajo). El resto de los parámetros está en la [referencia de la API](/georef-ar-api/referencia/).
 
 ## Campos de respuesta
 
-Al normalizar una dirección, la API devuelve varios campos de datos. Para entender el significado de cada uno, es conveniente utilizar un ejemplo de uso:
-
-`GET` [https://apis.datos.gob.ar/georef/api/direcciones?direccion=Av. Santa Fe nro 260 2ndo C, entre Santa Rosa y Colón\&departamento=capital\&provincia=cordoba](https://apis.datos.gob.ar/georef/api/direcciones?direccion=Av.%20Santa%20Fe%20nro%20260%202ndo%20C,%20entre%20Santa%20Rosa%20y%20Col%C3%B3n\&departamento=capital\&provincia=cordoba)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/direcciones?direccion=Av. Santa Fe nro 260 2ndo C, entre Santa Rosa y Colón&departamento=capital&provincia=cordoba`](https://apis.datos.gob.ar/georef/api/v2.1/direcciones?direccion=Av.%20Santa%20Fe%20nro%20260%202ndo%20C,%20entre%20Santa%20Rosa%20y%20Col%C3%B3n&departamento=capital&provincia=cordoba)
 
 ```json
 {
@@ -35,69 +33,85 @@ Al normalizar una dirección, la API devuelve varios campos de datos. Para enten
             },
             "calle": {
                 "categoria": "AV",
-                "id": "1401401002460",
+                "id": "140140100002460",
                 "nombre": "AV SANTA FE"
             },
             "calle_cruce_1": {
                 "categoria": "CALLE",
-                "id": "1401401038100",
+                "id": "140140100038100",
                 "nombre": "SANTA ROSA"
             },
             "calle_cruce_2": {
                 "categoria": "AV",
-                "id": "1401401002060",
+                "id": "140140100002060",
                 "nombre": "AV COLON"
             },
             "departamento": {
                 "id": "14014",
                 "nombre": "Capital"
             },
+            "localidad": {
+                "id": null,
+                "nombre": null
+            },
             "localidad_censal": {
                 "id": "14014010",
                 "nombre": "Córdoba"
             },
-            "nomenclatura": "AV SANTA FE 260 (ENTRE SANTA ROSA Y AV COLON), Capital, Córdoba",
-            "piso": null,
+            "nomenclatura": "AV SANTA FE 260 (ENTRE SANTA ROSA Y AV COLON), Córdoba, Capital, Córdoba",
+            "piso": "2ndo C",
             "provincia": {
                 "id": "14",
                 "nombre": "Córdoba"
             },
             "ubicacion": {
-                "lat": -31.4080674840673,
-                "lon": -64.20062417513701
+                "lat": -31.40777788475033,
+                "lon": -64.20051568344584
             }
         }
     ],
     "inicio": 0,
-    "total": 1,
-    "parametros": { ... }
+    "parametros": { ... },
+    "total": 1
 }
 ```
 
-Como se puede observar, campos de respuesta estándar son:
+Los campos estándar son:
 
-* `altura`
-  * `unidad`: Unidad de la altura, o prefijo del valor numérico de la misma.
-  * `valor`: Valor numérico de la altura, o `null` si la altura ingresada no fue numérica.
-* `calle`: Propiedades de la primera calle presente en la dirección.
-  * `nombre`: Nombre normalizado de la **calle 1**.
-  * `id`: ID de la **calle 1**.
-  * `categoria`: Tipo de la **calle 1**.
-* `calle_cruce_1`: Propiedades de la segunda calle presente en la dirección *(valores opcionales)*.
-  * `nombre`: Nombre normalizado de la **calle 2**.
-  * `id`: ID de la **calle 2**.
-  * `categoria`: Tipo de la **calle 2**.
-* `calle_cruce_1`: Propiedades de la tercera calle presente en la dirección *(valores opcionales)*.
-  * `nombre`: Nombre normalizado de la **calle 3**.
-  * `id`: ID de la **calle 3**.
-  * `categoria`: Tipo de la **calle 3**.
-* `departamento`: Departamento de la **calle 1**.
-* `localidad_censal`: Localidad censal de la **calle 1**.
-* `provincia`: Provincia de la **calle 1**.
-* `piso`: Piso extraído de la dirección.
-* `nomenclatura`: Versión normalizada de la dirección.
-* `ubicacion`: Resultados de la georreferenciación de la dirección (`lon` y `lat`). Cuando los valores están presentes, representan una **aproximación** de la ubicación de la dirección. Cuando no están presentes, se debe a que los datos indexados en la API no fueron suficientes para obtener un resultado estimativo. La efectividad de la georreferenciación varía de acuerdo a cada región del país.
+- `altura`
+    - `unidad`: unidad de la altura o prefijo del valor numérico.
+    - `valor`: valor numérico de la altura, o `null` si la altura no es numérica.
+- `calle`: primera calle de la dirección (**calle 1**): `nombre` normalizado, `id` (15 dígitos) y `categoria`.
+- `calle_cruce_1`: segunda calle (**calle 2**), si la hay. Mismos subcampos.
+- `calle_cruce_2`: tercera calle (**calle 3**), si la hay. Mismos subcampos.
+- `provincia`, `departamento`, `localidad_censal`: unidades que contienen a la **calle 1**.
+- `localidad`: localidad (BAHRA) de la **calle 1**, si se pudo determinar. Es nuevo en la v2.
+- `piso`: piso o departamento extraído de la dirección.
+- `nomenclatura`: versión normalizada de la dirección.
+- `ubicacion`: resultado de la georreferenciación (`lat` y `lon`). Es una **aproximación**; si falta, es porque los datos disponibles no alcanzaron para estimarla. La efectividad varía según la región del país.
 
-## Normalización de direcciones por lotes
+## Parámetro `desplazar`
 
-Para normalizar grandes cantidades de direcciones, se recomienda utilizar los recursos de [consultas por lotes](/georef-ar-api/bulk/).
+Por defecto el punto cae sobre el eje de la calle. Con `desplazar=true`, la API lo corre unos metros hacia la manzana, del lado de la cuadra que corresponde a la paridad (par o impar) de la altura. Con la misma dirección de arriba, sin y con `desplazar`:
+
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/direcciones?direccion=Av. Santa Fe 260&departamento=capital&provincia=cordoba&max=1&campos=nomenclatura,ubicacion`](https://apis.datos.gob.ar/georef/api/v2.1/direcciones?direccion=Av.%20Santa%20Fe%20260&departamento=capital&provincia=cordoba&max=1&campos=nomenclatura,ubicacion)
+
+```json
+"ubicacion": {
+    "lat": -31.40777788475033,
+    "lon": -64.20051568344584
+}
+```
+
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/direcciones?direccion=Av. Santa Fe 260&departamento=capital&provincia=cordoba&max=1&campos=nomenclatura,ubicacion&desplazar=true`](https://apis.datos.gob.ar/georef/api/v2.1/direcciones?direccion=Av.%20Santa%20Fe%20260&departamento=capital&provincia=cordoba&max=1&campos=nomenclatura,ubicacion&desplazar=true)
+
+```json
+"ubicacion": {
+    "lat": -31.407807058305238,
+    "lon": -64.20041621039096
+}
+```
+
+## Normalización por lotes
+
+Para normalizar muchas direcciones, usá las [consultas por lotes](/georef-ar-api/bulk/).

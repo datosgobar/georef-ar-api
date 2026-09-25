@@ -1,208 +1,198 @@
 ---
-title: Instalación y ejecución de Georef API
+title: "Instalación y ejecución de Georef API"
 ---
 
-En este documento se detallan los pasos a seguir si se desea configurar un servidor de Georef API propio.
+Esta guía explica cómo levantar un servidor propio de la API Georef v2.1. Las versiones salen de la rama `development` del repositorio (`docker/Dockerfile_api`, `docker-compose.yml`, `.example.env` y `requirements.txt`).
 
 ## Dependencias
 
-* Elasticsearch >= 7.0.0
-* Python >= 3.6.0
+- Elasticsearch 7.17.9 (versión definida en `.example.env`; `requirements.txt` usa `elasticsearch-dsl==7.0.0`).
+- Python 3.11 (imagen `python:3.11-trixie` de `docker/Dockerfile_api`).
+- GDAL 3.10 (`gdal>=3.10,<3.11` en `requirements.txt`), GEOS y PROJ, necesarios para los formatos `shp` y `gpkg`.
+- Flask 2.0.0, Shapely 2.0.7 y pyproj 3.6.1, entre otras (ver `requirements.txt`).
 
-A continuación, se detallan los pasos a seguir para instalar y ejecutar la API en un entorno Ubuntu 16.04 (Xenial).
+:::caution[A validar]
+La rama `development` instala `georef-ar-address` desde la rama `development` de su repositorio (`-e git+https://github.com/datosgobar/georef-ar-address.git@development`), no desde una versión fija. Verificá qué versión corre en producción antes de reproducir resultados.
+:::
 
-## Instalación
+## Opción A: Docker Compose
+
+Es la forma que mantiene el repositorio. `docker-compose.yml` levanta dos contenedores: `georef-api_es01` (Elasticsearch, un solo nodo) y `georef-api_app` (la API con el servidor de desarrollo de Flask).
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/datosgobar/georef-ar-api.git
+cd georef-ar-api
+git checkout development
+```
+
+### 2. Configurar
+
+```bash
+cp .example.env .env
+cp config/georef.example.cfg config/georef.cfg
+cp config/logging.example.ini config/logging.ini
+```
+
+`.env` define `ELASTIC_STACK_VERSION=7.17.9`, la memoria de la JVM (`JAVA_OPTS=-Xmx4096m -Xms4096m`) y el puerto del host (`APP_PORT=8080`, que se mapea al 5000 del contenedor).
+
+En `config/georef.cfg`, completá `ES_HOSTS` con el host de Elasticsearch dentro de la red de Docker (el servicio se llama `es01`) y revisá las rutas o URLs de los archivos de datos (ver el paso 3). El contenedor monta `./source`, así que podés poner ahí los archivos NDJSON generados por el [ETL](/georef-ar-api/etl/) y apuntar las rutas a esa carpeta.
+
+### 3. Levantar e indexar
+
+```bash
+docker compose up -d
+docker compose exec app make index
+```
+
+Comprobá que la API responda:
+
+```bash
+curl "localhost:8080/api/v2.1/provincias"
+```
+
+Si modificás el código, reconstruí la imagen con `docker compose build app`.
+
+:::caution[A validar]
+El `README.md` de la rama `development` indica ejecutar `docker-compose` dentro de la carpeta `docker/` y usar el puerto 5000 del host, pero en esa rama `docker-compose.yml` está en la raíz y publica el puerto `$APP_PORT` (8080 en `.example.env`). También menciona `docker/georef.example.cfg`, que no existe en esa rama. Esta guía sigue los archivos, no el README.
+:::
+
+## Opción B: instalación manual
 
 ### 1. Elasticsearch
 
-Para instalar Elasticsearch, seguir las siguientes instrucciones en uno o más servidores (nodos).
-
-#### 1.1 Instalar Elasticsearch
-
-Instalar Elasticsearch siguiendo la [guía de instalación para Debian/Ubuntu](https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html).
-
-#### 1.2 Habiliar el servicio `elasticsearch`
-
-Asegurar que el servicio `elasticsearch` está habilitado utilizando `systemctl`:
+Instalá Elasticsearch 7.17 siguiendo la [guía para Debian/Ubuntu](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/deb.html) en uno o más nodos y habilitá el servicio:
 
 ```bash
-$ sudo systemctl start elasticsearch
-$ sudo systemctl enable elasticsearch
+sudo systemctl enable --now elasticsearch
 ```
 
-#### 1.3 Aplicar las configuraciones recomendadas
-
-Editar el archivo  `/etc/elasticsearch/elasticsearch.yml`. El valor de `node.name` debe ser único por nodo, y todos los nodos deben tener el mismo valor de `cluster.name`:
+En `/etc/elasticsearch/elasticsearch.yml`, `node.name` tiene que ser único por nodo y todos los nodos tienen que compartir `cluster.name`:
 
 ```text
 cluster.name: georef-ar-api
 node.name: node-1
 ```
 
-Editar el archivo `/etc/elasticsearch/jvm.options` (siguiendo las [recomendaciones de Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html)):
+Ajustá el tamaño del heap de la JVM siguiendo las [recomendaciones de Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/advanced-configuration.html) (usá el mismo valor como mínimo y máximo, por ejemplo 4 GB):
 
 ```text
-# Tamaño del heap size de la JVM
-# Se recomienda utilizar siempre el mismo valor como mínimo y máximo
-# Ejemplo: 4 GB
 -Xms4g
 -Xmx4g
 ```
 
 ### 2. Repositorio y dependencias
 
-#### 2.1 Clonar el repositorio:
-
 ```bash
-$ git clone https://github.com/datosgobar/georef-ar-api.git
-$ cd georef-ar-api
+git clone https://github.com/datosgobar/georef-ar-api.git
+cd georef-ar-api
+git checkout development
+python3.11 -m venv env
+source env/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+cp config/georef.example.cfg config/georef.cfg
+cp config/logging.example.ini config/logging.ini
 ```
 
-#### 2.2 Crear un entorno virtual y activarlo
-
-```bash
-$ python3 -m venv env
-$ source env/bin/activate
-```
-
-#### 2.3 Instalar dependencias con `pip`
-
-```bash
-(env) $ pip3 install -r requirements.txt -r requirements-dev.txt
-```
-
-#### 2.4 Copiar el archivo de configuración
-
-```bash
-(env) $ cp config/georef.example.cfg config/georef.cfg
-```
-
-Luego, completar el archivo `config/georef.cfg` con los valores apropiados.
-
-#### 2.5 Copiar el archivo de configuración de logs
-
-```bash
-(env) $ cp config/logging.example.ini config/logging.ini
-```
-
-Luego, completar el archivo `config/logging.ini` con los valores apropiados. Los valores por defecto son válidos y pueden ser utilizados en entornos productivos.
+Para instalar el paquete `gdal` de Python necesitás las bibliotecas de sistema de GDAL 3.10 (en Debian: `gdal-bin`, `libgdal-dev`), además de GEOS y PROJ. Completá `config/georef.cfg` con los valores apropiados; los valores por defecto de `config/logging.ini` sirven para producción.
 
 ### 3. Crear los índices
 
-El siguiente paso es indexar todos los datos de entidades geográficas en Elasticsearch, para poder consultarlos vía el servidor de la API. Para lograr esto, la API acepta una serie de archivos NDJSON donde deberían estar almacenados los datos. La estructura de dichos archivos está detallada en [este documento](/georef-ar-api/etl-data/).
+La API indexa en Elasticsearch una serie de archivos NDJSON, cuya estructura está en [Modelo de datos](/georef-ar-api/etl-data/). En `config/georef.cfg` indicá una ruta local o una URL para cada archivo (`STATES_FILE`, `LOCAL_GOVERNMENTS_FILE`, `STREET_BLOCKS_FILE`, etc.), además del archivo de sinónimos (`SYNONYMS_FILE`) y el de términos excluyentes (`EXCLUDING_TERMS_FILE`). Los valores de `georef.example.cfg` apuntan a `https://infra.datos.gob.ar/georef/`.
 
-El archivo de configuración `config/georef.cfg` debe especificar una ruta local o una URL externa para cada archivo de datos NDJSON. Notar que los valores por defecto (en `georef.example.cfg`) utilizan el portal de descargas `infra.datos.gob.ar`, que siempre provee la última versión de los archivos NDJSON disponibles. La rama `master` de `georef-ar-api` siempre se mantiene compatible con la última versión de los datos disponibles en `infra.datos.gob.ar`. El archivo de configuración también debe especificar la URL del archivo de sinónimos para utilizar al momento de indexar campos de texto en Elasticsearch. El valor por defecto en `georef.example.cfg` también puede ser utilizado, ya que utiliza la versión del archivo almacenado en `infra.datos.gob.ar`. El mismo criterio se aplica al archivo de términos excluyentes. En resumen, si se utilizó `georef.example.cfg` como base para configurar la API, las URLs de los archivos ya deberían estar configuradas correctamente.
+:::caution[A validar]
+Algunos nombres de archivo de `georef.example.cfg` no coinciden con los publicados. Por ejemplo, `LOCAL_GOVERNMENTS_FILE` apunta a `gobiernos_locales.ndjson` (existe), pero las URLs de descarga completa de gobiernos locales usan `gobierno_locales.*`. Revisá cada URL antes de indexar.
+:::
 
-Para indexar los datos, ejecutar:
-
-```bash
-(env) $ make index
-```
-
-Listar los índices creados, y otros datos adicionales:
+Para indexar:
 
 ```bash
-(env) $ make print_index_stats
+make index
 ```
 
-### 4. (Opcional) Re-indexar datos
-
-Si se modifican los archivos de datos NDJSON, es posible re-indexarlos sin borrar los índices ya existentes. Dependiendo del comportamiento que se desee, se debe tomar una opción:
-
-#### Indexar datos nuevos
-
-Si se desea actualizar los índices con los nuevos datos, **pero solo si los datos entrantes son más recientes que los ya indexados**, se puede utilizar nuevamente la receta `index`:
+Para listar los índices creados y otros datos:
 
 ```bash
-(env) $ make index
+make print_index_stats
 ```
 
-#### Forzar re-indexado
+### 4. (Opcional) Reindexar
 
-Si se desea forzar un re-indexado, es decir, si se desea indexar los datos nuevamente sin importar la fecha de creación, se debe utilizar la siguiente receta:
+`make index` actualiza los índices **solo si los datos nuevos son más recientes** que los indexados. Para forzar la reindexación sin importar la fecha, usá:
 
 ```bash
-(env) $ make index_forced
+make index_forced
 ```
 
-La receta `index_forced` intenta utilizar un archivo de respaldo guardado anteriormente si no pudo acceder a los archivos especificados en `config/georef.cfg`. El uso de la receta es recomendado cuando se requiere re-indexar los datos incondicionalmente. Algunas de las situaciones donde esto es necesario son:
+`index_forced` intenta usar un respaldo guardado si no puede acceder a los archivos configurados. Usala cuando cambian la estructura de los archivos, los mapeos o analizadores de Elasticsearch, o las listas de sinónimos o términos excluyentes.
 
-* Modificación de la estructura de los archivos de datos
-* Modificación de *mappeos* de tipos de Elasticsearch
-* Modificación de analizadores de texto de Elasticsearch
-* Modificación de listado de sinónimos
-* Modificación de listado de términos excluyentes
-
-Cualquiera de las dos opciones también permite indexar datos selectivamente: se debe especificar el nombre del índice a crear/re-indexar. Por ejemplo:
+Las dos recetas aceptan un índice puntual:
 
 ```bash
-(env) $ make index INDEX_NAME=localidades
-(env) $ make index_forced INDEX_NAME=calles
+make index INDEX_NAME=localidades
+make index_forced INDEX_NAME=calles
 ```
 
-Los nombres de los índices disponibles son:
+Índices disponibles:
 
-* `provincias`
-* `provincias-geometria`
-* `departamentos`
-* `departamentos-geometria`
-* `municipios`
-* `municipios-geometria`
-* `localidades-censales`
-* `asentamientos`
-* `localidades`
-* `calles`
-* `intersecciones`
-* `cuadras`
+- `provincias`, `provincias-geometria`
+- `departamentos`, `departamentos-geometria`
+- `aglomerados`, `aglomerados-geometria`
+- `fracciones_censales`, `fracciones_censales-geometria`
+- `radios_censales`, `radios_censales-geometria`
+- `gobiernos_locales`, `gobiernos_locales-geometria`
+- `localidades_censales`
+- `asentamientos`
+- `localidades`
+- `calles`
+- `intersecciones`
+- `cuadras`
+- `establecimientos_educativos`
+- `instituciones_universitarias`
 
 ### 5. Ejecutar la API
 
-#### Entornos de desarrollo
-
-Ejecutar la API de Georef utilizando un servidor de prueba (no apto para producción):
+Servidor de desarrollo (se reinicia solo cuando cambia el código; no apto para producción):
 
 ```bash
-(env) $ make start_dev_server
+make start_dev_server
 ```
 
-El servidor lanzado con `start_dev_server` se reinicia automáticamente cuando se modifica el código de la API. Esto es útil al momento de agregar nuevas funcionalidades.
-
-También es posible ejecutar la API utilizando `gunicorn` como servidor HTTP:
+Con `gunicorn`:
 
 ```bash
-(env) $ make start_gunicorn_dev_server
+make start_gunicorn_dev_server
 ```
 
-Para comprobar que la API esté funcionando:
+Comprobá que funcione:
 
 ```bash
-$ curl localhost:5000/api/provincias
+curl "localhost:5000/api/v2.1/provincias"
 ```
 
-Si se desea preparar la API para uso en entornos productivos, consultar la guía de instalación para [entornos productivos](/georef-ar-api/deploy/).
+Para producción, seguí la guía de [entornos productivos](/georef-ar-api/deploy/).
 
 ## Tests
 
-Para ejecutar los tests unitarios (el servicio Elasticsearch debe estar activo y con los datos apropiados cargados):
+Con Elasticsearch activo y los datos cargados:
 
 ```bash
-(env) $ make test
+make test
 ```
 
-Para más información sobre los tests, ver el archivo [`tests/README.md`](https://github.com/datosgobar/georef-ar-api/blob/master/tests/README.md).
+Hay recetas separadas para tests contra datos reales (`make test_live`) y con mocks (`make test_mock`). Más información en [`tests/README.md`](https://github.com/datosgobar/georef-ar-api/blob/development/tests/README.md).
 
-Para comprobar que no existan errores comunes en el código, y que su estilo sea correcto:
+Para revisar estilo y errores comunes:
 
 ```bash
-(env) $ make code_checks
+make code_checks
 ```
 
 ## *Profiling*
 
-Es posible realizar pruebas de *performance* de la API utilizando el siguiente comando:
-
 ```bash
-(env) $ make start_profile_server
+make start_profile_server
 ```
 
-Luego, al realizar cualquier consulta a `localhost:5000`, se almacenará en el directorio `profile/` información sobre el tiempo que llevó completar la consulta. Los datos se generan utilizando el módulo `cProfile` de Python.
+Cada consulta a `localhost:5000` guarda en `profile/` información sobre cuánto tardó. Los datos se generan con el módulo `cProfile` de Python.

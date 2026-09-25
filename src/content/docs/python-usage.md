@@ -1,6 +1,8 @@
 ---
-title: Usar en Python
+title: "Usar en Python"
 ---
+
+Estos ejemplos usan Python 3 con [`requests`](https://requests.readthedocs.io/) y `pandas`. Las salidas son reales, de consultas a la v2.1.
 
 ## Con `requests`
 
@@ -8,227 +10,148 @@ title: Usar en Python
 
 ```python
 import requests
-import urllib
 
-API_BASE_URL = "https://apis.datos.gob.ar/georef/api/"
+API_BASE_URL = "https://apis.datos.gob.ar/georef/api/v2.1/"
 
 def get_similar(endpoint, nombre, **kwargs):
     kwargs["nombre"] = nombre
-    url = "{}{}?{}".format(API_BASE_URL, endpoint, urllib.urlencode(kwargs))
-    return requests.get(url).json()[endpoint]
+    resp = requests.get(API_BASE_URL + endpoint, params=kwargs)
+    resp.raise_for_status()
+    # la clave de la respuesta usa guion bajo: gobiernos-locales -> gobiernos_locales
+    return resp.json()[endpoint.replace("-", "_")]
 
 provincias = get_similar("provincias", "San Juan")
 ```
 
 ```python
-[{
-    u'centroide': {
-        u'lat': -30.865368,
-        u'lon': -68.889491
-    },
-    u'id': u'70',
-    u'nombre': u'San Juan'
-}]
+[{'centroide': {'lat': -30.865660702, 'lon': -68.888159707},
+  'id': '70',
+  'nombre': 'San Juan'}]
 ```
 
 ### Normalizar varias entidades
 
 ```python
 def get_similar_bulk(endpoint, nombres):
-    """Normaliza una lista de nombres de alguna de las entidades geográficas."""
+    """Normaliza una lista de nombres con una consulta por lotes."""
+    key = endpoint.replace("-", "_")
+    data = {key: [{"nombre": nombre, "max": 1} for nombre in nombres]}
+    resp = requests.post(API_BASE_URL + endpoint, json=data)
+    resp.raise_for_status()
 
-    # realiza consulta a la API
-    data = {
-        endpoint: [
-            {"nombre": nombre, "max": 1} for nombre in nombres
-    ]}
-    url = API_BASE_URL + endpoint
-    results = requests.post(
-        url, json=data, headers={"Content-Type": "application/json"}
-    ).json()
-
-    # convierte a una lista de "resultado más probable" o "vacío" cuando no hay
-    parsed_results = [
-        single_result[endpoint][0] if single_result[endpoint] else {}
-        for single_result in results["resultados"]
-    ]
-
-    return parsed_results
+    # "resultado más probable" o {} cuando no hay resultados
+    return [r[key][0] if r[key] else {} for r in resp.json()["resultados"]]
 
 provincias = get_similar_bulk("provincias", ["pxa", "sant fe"])
 ```
 
 ```python
-[
-    {},
-    {
-        u'centroide': {
-            u'lat': -30.706927,
-            u'lon': -60.949837
-        },
-        u'id': u'82',
-        u'nombre': u'Santa Fe'
-    }
-]
+[{},
+ {'centroide': {'lat': -30.708822709, 'lon': -60.950687277},
+  'id': '82',
+  'nombre': 'Santa Fe'}]
 ```
 
 ### Enriquecer coordenadas con las unidades territoriales que las contienen
 
 ```python
 def get_territorial_units(ubicaciones):
-    """Pide las unidades territoriales que contienen a c/punto de una lista de coordenadas."""
-
-    # realiza consulta a la API
-    endpoint = "ubicacion"
+    """Pide las unidades territoriales que contienen cada punto de una lista."""
     data = {
         "ubicaciones": [
-            {"lat": ubicacion["lat"], "lon": ubicacion["lon"], "aplanar": True}
-            for ubicacion in ubicaciones
-    ]}
-    url = API_BASE_URL + endpoint
-
-    results = requests.post(
-        url, json=data, headers={"Content-Type": "application/json"}
-    ).json()
-
-    # convierte a una lista de "resultado más probable" o "vacío" cuando no hay
-    parsed_results = [
-        single_result[endpoint] if single_result[endpoint] else {}
-        for single_result in results["resultados"]
-    ]
-
-    return parsed_results
+            {"lat": u["lat"], "lon": u["lon"], "aplanar": True}
+            for u in ubicaciones
+        ]
+    }
+    resp = requests.post(API_BASE_URL + "ubicacion", json=data)
+    resp.raise_for_status()
+    return [r["ubicacion"] for r in resp.json()["resultados"]]
 
 ubicaciones = get_territorial_units([
     {"lat": -32.9477132, "lon": -60.6304658},
-    {"lat": -34.6037389, "lon": -58.3815704}
+    {"lat": -34.6037389, "lon": -58.3815704},
 ])
 ```
 
 ```python
-[
-    {
-        u'departamento_id': u'30105',
-        u'departamento_nombre': u'Victoria',
-        u'lat': -32.9477132,
-        u'lon': -60.6304658,
-        u'municipio_id': u'82210',
-        u'municipio_nombre': u'Rosario',
-        u'provincia_id': u'30',
-        u'provincia_nombre': u'Entre Ríos'
-    },
-    {
-        u'departamento_id': u'02007',
-        u'departamento_nombre': u'Comuna 1',
-        u'lat': -34.6037389,
-        u'lon': -58.3815704,
-        u'municipio_id': None,
-        u'municipio_nombre': None,
-        u'provincia_id': u'02',
-        u'provincia_nombre': u'Ciudad Autónoma de Buenos Aires'
-    }
-]
+[{'departamento_id': '82084',
+  'departamento_nombre': 'Rosario',
+  'gobierno_local_id': '820210',
+  'gobierno_local_nombre': 'Rosario',
+  'lat': -32.9477132,
+  'lon': -60.6304658,
+  'provincia_id': '82',
+  'provincia_nombre': 'Santa Fe'},
+ {'departamento_id': '02007',
+  'departamento_nombre': 'Comuna 1',
+  'gobierno_local_id': '022007',
+  'gobierno_local_nombre': 'Comuna 1',
+  'lat': -34.6037389,
+  'lon': -58.3815704,
+  'provincia_id': '02',
+  'provincia_nombre': 'Ciudad Autónoma de Buenos Aires'}]
 ```
+
+Cada pedido `POST` acepta hasta 1000 ubicaciones. Si tenés más, partí la lista en tandas.
 
 ## Con `pandas`
 
 ### Consultar listas de referencia
 
-Todas las consultas a la API en formato CSV, se pueden leer fácilmente a un `pandas.DataFrame`. De ahí se pueden tomar listas de referencia para distintas unidades territoriales.
+Cualquier consulta en formato CSV se puede leer directo en un `pandas.DataFrame`. Usá `dtype=str` para no perder los ceros a la izquierda de los IDs.
 
 ```python
 import pandas as pd
 
-provincias = pd.read_csv("https://apis.datos.gob.ar/georef/api/provincias?formato=csv")
+provincias = pd.read_csv(API_BASE_URL + "provincias?formato=csv", dtype=str)
 ```
 
 ```
-provincia_id                                   provincia_nombre
-          14                                            Córdoba
-          22                                              Chaco
-          26                                             Chubut
-           6                                       Buenos Aires
-          10                                          Catamarca
-          30                                         Entre Ríos
-          34                                            Formosa
-          42                                           La Pampa
-          62                                          Río Negro
-          70                                           San Juan
-          78                                         Santa Cruz
-          82                                           Santa Fe
-          94  Tierra del Fuego, Antártida e Islas del Atlánt...
-          38                                              Jujuy
-          54                                           Misiones
-           2                    Ciudad Autónoma de Buenos Aires
-          18                                         Corrientes
-          46                                           La Rioja
-          66                                              Salta
-          86                                Santiago del Estero
-          50                                            Mendoza
-          58                                            Neuquén
-          74                                           San Luis
-          90                                            Tucumán
+provincia_id                provincia_nombre provincia_centroide_lat provincia_centroide_lon
+          02 Ciudad Autónoma de Buenos Aires           -34.614442065           -58.445876325
+          58                         Neuquén           -38.641982863           -70.119897224
+          74                        San Luis           -33.761103538           -66.025231271
+          82                        Santa Fe           -30.708822709           -60.950687277
+          46                        La Rioja           -29.684937278           -67.181757581
 ```
+
+(Se muestran las primeras 5 de 24 filas.)
 
 ### Enriquecer coordenadas
 
 ```python
 def add_territorial_units(df, column_lat, column_lon):
-    """Agrega unidades territoriales que contienen coordenadas a un DataFrame.
+    """Agrega a un DataFrame las unidades territoriales que contienen sus coordenadas."""
 
-    Args:
-        df (pandas.DataFrame): Un DataFrame que tiene coordenadas.
-        column_lat (str): Nombre de la columna que tiene latitud.
-        column_lon (str): Nombre de la columna que tiene longitud.
-
-    Returns:
-        pandas.DataFrame: DataFrame original aumentado con unidades       territoriales que contienen a las coordenadas.
-    """
-
-    # toma una lista de coordenadas únicas (no repetidas)
+    # coordenadas únicas (sin repetir)
     coordinates = df[[column_lon, column_lat]].rename(
         columns={column_lon: "lon", column_lat: "lat"}
     ).drop_duplicates().to_dict("records")
 
-    # crea DataFrame de unidades territoriales que contienen a las coordenadas
+    # unidades territoriales de cada coordenada
     ubicaciones = pd.DataFrame(get_territorial_units(coordinates))
 
-    # agrega las unidades territoriales al DataFrame original
+    # se agregan al DataFrame original
     df_with_territorial_units = df.merge(
         ubicaciones, "left",
         left_on=[column_lon, column_lat],
         right_on=["lon", "lat"]
     )
 
-    # elimina columnas de coordenadas repetidas, dejando las originales
+    # se quitan las columnas de coordenadas repetidas
     return df_with_territorial_units.drop(["lon", "lat"], axis=1)
 
-# descarga un CSV con coordenadas de aeropuertos
-df = pd.read_csv("https://servicios.transporte.gob.ar/gobierno_abierto/descargar.php?t=aeropuertos&d=detalle", sep=";")
+df = pd.DataFrame({
+    "nombre": ["Obelisco", "Monumento a la Bandera"],
+    "latitud": [-34.6037389, -32.9477132],
+    "longitud": [-58.3815704, -60.6304658],
+})
 
-# Agrega unidades territoriales que contienen coordenadas a un DataFrame
-df_with_territorial_units = add_territorial_units(df, "longitud", "latitud")
+df_with_territorial_units = add_territorial_units(df, "latitud", "longitud")
 ```
 
 ```
-   tipo                       denominacion   latitud  longitud   elev  \
-Aeródromo       CORONEL BOGADO/AGROSERVICIOS -60.57066 -33.27226   44.0
-Aeródromo                       GENERAL ACHA -64.61351 -37.40164  277.0
-Aeródromo            ARRECIFES/LA CURA MALAL -60.14170 -34.07574   37.0
-Aeródromo                     PUERTO DESEADO -65.90410 -47.73511   82.0
-Aeródromo  BANDERA/AGROSERVICIOS DOÑA TERESA -62.26462 -28.85541   75.0
-
-departamento_id departamento_nombre municipio_id municipio_nombre  \
-          82084             Rosario       823393   Coronel Bogado
-          42154             Utracán       420133     General Acha
-          06077           Arrecifes       060077        Arrecifes
-          78014             Deseado         None             None
-          86077     General Taboada         None             None
-
-provincia_id     provincia_nombre
-          82             Santa Fe
-          42             La Pampa
-          06         Buenos Aires
-          78           Santa Cruz
-          86  Santiago del Estero
+                nombre    latitud   longitud departamento_id departamento_nombre gobierno_local_id gobierno_local_nombre provincia_id                provincia_nombre
+              Obelisco -34.603739 -58.381570           02007            Comuna 1            022007              Comuna 1           02 Ciudad Autónoma de Buenos Aires
+Monumento a la Bandera -32.947713 -60.630466           82084             Rosario            820210               Rosario           82                        Santa Fe
 ```

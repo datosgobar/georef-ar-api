@@ -1,113 +1,160 @@
 ---
-title: Operaciones con Geometrías
+title: "Operaciones con geometrías"
 ---
 
-La API permite a los usuarios operar con las geometrías de distintas entidades geográficas. A continuación, se detallan los recursos y parámetros que permiten a los usuarios realizar estas operaciones.
+La API te deja operar con las geometrías de las entidades geográficas. Estos son los recursos y parámetros que lo permiten.
 
 ## Parámetro `interseccion`
 
-Los recursos `/provincias`, `/departamentos`, `/municipios` y `/calles` cuentan con el parámetro `interseccion`. El parámetro permite buscar entidades utilizando intersección de geometrías como filtro. El parámetro debe tomar valores con el siguiente formato:
+Con `interseccion` filtrás entidades según se crucen o no con las geometrías de otras. El valor tiene este formato:
 
 ```
-interseccion=<tipo de entidad>:<id 1>[:<id 2>:...]
+interseccion=<tipo de entidad>:<id 1>[:<id 2>:...][, <tipo de entidad>:<id>...]
 ```
 
-Al aplicar el filtro `interseccion`, se buscan entidades que compartan área con cualquiera de las entidades listadas en la lista de IDs. Entonces, utilizar (por ejemplo) `/municipios?interseccion=departamento:18105` buscaría todos los municipios que interseccionen con el departamento con ID 18105, mientras que utilizar `/departamentos?interseccion=municipio:620133:540378` buscaría todos los departamentos que interseccionen con el municipio con ID 620133 **o** el municipio con ID 540378.
+La API busca entidades que compartan área con **cualquiera** de las entidades listadas. Estos son los recursos que aceptan el parámetro y los tipos de entidad que podés usar en cada uno:
 
-De la misma forma, utilizar `/calles?interseccion=municipio:620133` buscaría todas las calles que estén contenidas en el municipio con ID 620133. También es posible buscar municipios a partir de una calle: `/municipios?interseccion=calle:0638503000235` buscaría el municipio que contiene a la calle con ID 0638503000235.
+| Recurso | Tipos de entidad en `interseccion` |
+| --- | --- |
+| `/provincias` | `departamento`, `gobierno_local`, `calle` |
+| `/departamentos` | `provincia`, `gobierno_local`, `calle` |
+| `/gobiernos-locales` | `provincia`, `departamento`, `calle` |
+| `/fracciones-censales`, `/radios-censales` | `provincia`, `departamento`, `calle` |
+| `/aglomerados` | `provincia`, `departamento`, `gobierno_local`, `calle` |
+| `/calles` | `provincia`, `departamento`, `gobierno_local`, `calle` |
 
-:::caution[IDs inválidos]
-Todos los IDs listados que no correspondan a una entidad geográfica existente serán ignorados.
+:::caution[A validar]
+El código de la v2.1 acepta `interseccion` en `/aglomerados`, pero en las pruebas del 25/09/2026 devolvió 0 resultados incluso para casos que deberían coincidir (por ejemplo, `aglomerados?interseccion=departamento:82084`, el departamento Rosario, no devuelve "Gran Rosario").
 :::
 
-Ejemplo completo de llamado a la API:
+:::caution[Cambio respecto de v1.0]
+En la v1.0 el tipo de entidad era `municipio`. En la v2.1 se llama `gobierno_local`: `interseccion=municipio:...` devuelve un error 400.
+:::
 
-`GET` [`https://apis.datos.gob.ar/georef/api/municipios?interseccion=departamento:18105`](https://apis.datos.gob.ar/georef/api/municipios?interseccion=departamento:18105)
+Algunos ejemplos:
+
+- `/gobiernos-locales?interseccion=departamento:18105`: gobiernos locales que se cruzan con el departamento 18105.
+- `/departamentos?interseccion=gobierno_local:620133:540378`: departamentos que se cruzan con el gobierno local 620133 **o** con el 540378.
+- `/calles?interseccion=gobierno_local:141372`: calles del gobierno local 141372.
+- `/gobiernos-locales?interseccion=calle:141470100000265`: gobierno local que contiene la calle 141470100000265.
+
+:::caution[IDs inválidos]
+Los IDs que no correspondan a una entidad existente se ignoran.
+:::
+
+Ejemplo completo:
+
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/gobiernos-locales?interseccion=departamento:18105`](https://apis.datos.gob.ar/georef/api/v2.1/gobiernos-locales?interseccion=departamento:18105)
 
 ```json
 {
-    "municipios": [
+    "cantidad": 10,
+    "gobiernos_locales": [
         {
             "centroide": {
-                "lat": -28.508559,
-                "lon": -58.031593
+                "lat": -29.061289968,
+                "lon": -58.403975796
             },
-            "id": "180042",
-            "nombre": "Concepción",
+            "id": "180231",
+            "nombre": "Felipe Yofre",
             "provincia": {
                 "id": "18",
                 "nombre": "Corrientes"
             }
         },
-		{ ... } // 9 resultados omitidos
+        { ... } // 9 resultados omitidos
     ],
-    "cantidad": 10,
-    "total": 13,
     "inicio": 0,
-    "parametros": { ... }
+    "parametros": { ... },
+    "total": 13
 }
 ```
 
-Aunque el recurso `/provincias` acepta el parámetro `interseccion`, se recomienda utilizar filtros por IDs y no por geometrías al momento de buscar provincias, ya que el filtrado por ID es más performante. Por ejemplo, la consulta `/provincias?interseccion=departamento:18105` es equivalente a la consulta `/provincias?id=18`, ya que los primeros dos dígitos de los códigos de los departamentos siempre corresponden a su provincia.
+Aunque `/provincias` acepta `interseccion`, para buscar provincias conviene filtrar por ID, que es más rápido. Por ejemplo, `/provincias?interseccion=departamento:18105` equivale a `/provincias?id=18`, porque los dos primeros dígitos del ID de un departamento son siempre los de su provincia.
 
 ## Recurso `/ubicacion`
 
-En la [sección de inicio](/georef-ar-api/), se dió un ejemplo de uso del recurso `/ubicacion` para enriquecer datos existentes. El recurso utiliza las geometrías de las entidades geográficas para determinar cuáles contienen al punto especificado por el usuario a través de los parámetros `lat` y `lon`. Las entidades devueltas son las siguientes:
+`/ubicacion` usa las geometrías para determinar qué entidades contienen el punto que indicás con `lat` y `lon`. Con el parámetro `division` elegís qué tipo de división querés:
 
-* Provincia
-* Departamento
-* Municipio *(opcional)*
+- `division=politica` (por defecto): provincia, departamento y gobierno local.
+- `division=geoestadistica`: provincia, departamento, aglomerado, localidad censal, fracción censal y radio censal.
 
-Dependiendo del punto elegido, es posible no obtener un municipio como parte de la respuesta de la API. Como ejemplo, se muestran dos llamados distintos al recurso `/ubicacion`.
+Con `campos=completo` también obtenés la fuente de cada entidad, la calle más cercana y una `nomenclatura`.
 
-Con municipio:
+Según el punto, puede que alguna entidad no exista (por ejemplo, un punto fuera de todo gobierno local): en ese caso sus campos vuelven en `null`.
 
-`GET` [`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-27.2741\&lon=-66.7529)
+Con gobierno local:
+
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/ubicacion?lat=-27.2741&lon=-66.7529`](https://apis.datos.gob.ar/georef/api/v2.1/ubicacion?lat=-27.2741&lon=-66.7529)
 
 ```json
 {
+    "parametros": { ... },
     "ubicacion": {
         "departamento": {
             "id": "10035",
             "nombre": "Belén"
         },
-        "lat": -27.2741,
-        "lon": -66.7529,
-        "municipio": {
+        "gobierno_local": {
             "id": "100077",
             "nombre": "Hualfín"
         },
+        "lat": -27.2741,
+        "lon": -66.7529,
         "provincia": {
             "id": "10",
             "nombre": "Catamarca"
         }
-    },
-    "parametros": { ... }
+    }
 }
 ```
 
-Sin municipio:
+Sin gobierno local:
 
-`GET` [`https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504&lon=-62.898`](https://apis.datos.gob.ar/georef/api/ubicacion?lat=-28.504\&lon=-62.898)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/ubicacion?lat=-28.504&lon=-62.898`](https://apis.datos.gob.ar/georef/api/v2.1/ubicacion?lat=-28.504&lon=-62.898)
 
 ```json
 {
+    "parametros": { ... },
     "ubicacion": {
         "departamento": {
             "id": "86028",
             "nombre": "Avellaneda"
         },
-        "lat": -28.504,
-        "lon": -62.898,
-        "municipio": {
+        "gobierno_local": {
             "id": null,
             "nombre": null
         },
+        "lat": -28.504,
+        "lon": -62.898,
         "provincia": {
             "id": "86",
             "nombre": "Santiago del Estero"
         }
-    },
-    "parametros": { ... }
+    }
 }
 ```
+
+División geoestadística del mismo primer punto:
+
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/ubicacion?lat=-27.2741&lon=-66.7529&division=geoestadistica`](https://apis.datos.gob.ar/georef/api/v2.1/ubicacion?lat=-27.2741&lon=-66.7529&division=geoestadistica)
+
+```json
+{
+    "parametros": { ... },
+    "ubicacion": {
+        "aglomerado": { "id": null, "nombre": null },
+        "departamento": { "id": "10035", "nombre": "Belén" },
+        "fraccion_censal": { "id": "1003501" },
+        "lat": -27.2741,
+        "localidad_censal": { "id": null, "nombre": null },
+        "lon": -66.7529,
+        "provincia": { "id": "10", "nombre": "Catamarca" },
+        "radio_censal": { "id": "100350101" }
+    }
+}
+```
+
+## Recurso `/establecimientos-cercanos`
+
+Devuelve los establecimientos educativos y universitarios que están a menos de `distancia` metros (por defecto 1000, entre 10 y 500000) de un punto, ordenados por distancia. Ver [Entidades censales y establecimientos](/georef-ar-api/entidades-censales-y-establecimientos/#establecimientos).

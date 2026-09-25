@@ -1,15 +1,22 @@
 ---
-title: Condiciones de uso
+title: "Condiciones de uso"
 ---
 
 ## Legales
 
-Los datos del Servicio de Normalización de Datos Geográficos de Argentina se disponibilizan bajo la licencia [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/deed.es) y pueden ser usados para cualquier fin, incluyendo fines comerciales.
+Los datos del Servicio de Normalización de Datos Geográficos de Argentina se publican bajo la licencia [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/deed.es) y los podés usar para cualquier fin, incluso comercial.
 
 ## Técnicas
 
-La API del servicio de normalización se encuentra en estado *alpha* de desarrollo y las cuotas de uso abierto sin autenticación no están definidas.
+La v2.1 aplica cuotas de uso por cliente. Al 25 de septiembre de 2026, los encabezados de respuesta informan estos límites:
 
-A medida que el servicio madure en su desarrollo y en el uso que se le da, se establecerán cuotas explícitas de uso sin autenticación por IP.
+| Encabezado | Límite |
+| --- | --- |
+| `x-ratelimit-limit-second` | 10 |
+| `x-ratelimit-limit-minute` | 40 |
+| `x-ratelimit-limit-hour` | 2.000 |
+| `x-ratelimit-limit-day` | 10.000 |
 
-Los organismos de la APN que requieran cuotas de uso más elevadas que las del servicio abierto, pueden solicitar un token a [datosargentina@jefatura.gob.ar](mailto\:datosargentina@jefatura.gob.ar).
+Cada respuesta también trae los encabezados `x-ratelimit-remaining-*` con lo que te queda en cada período. Para aprovechar mejor la cuota, usá las [consultas por lotes](/georef-ar-api/bulk/) o la [descarga de la base completa](/georef-ar-api/download/).
+
+Si tu organismo de la Administración Pública Nacional necesita más cuota, escribí a [datosargentina@jefatura.gob.ar](mailto:datosargentina@jefatura.gob.ar). Ver también [Tokens JWT](/georef-ar-api/jwt-token/).

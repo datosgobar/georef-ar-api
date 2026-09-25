@@ -1,25 +1,34 @@
 ---
-title: Descarga de Geometrías
+title: "Descarga de geometrías"
 ---
 
-La API permite la descarga de geometrías a través del formato [ESRI Shapefile](https://es.wikipedia.org/wiki/Shapefile). Para utilizar el formato, se debe agregar `formato=shp` a la lista de parámetros especificados en la URL. El formato Shapefile está disponible en la versión GET de todos los recursos, con las excepción de `/direcciones` y `/ubicacion`.
+La API te permite descargar geometrías en dos formatos:
 
-Cuando se especifica `formato=shp`, la respuesta de la API es un archivo ZIP que contiene cuatro archivos estándar: `.shp`, `.shx`, `.dbf` y `.prj`. El archivo luego puede ser abierto con programas como [QGIS](https://www.qgis.org/en/site/). El sistema de coordenadas de las geometrías descargadas es WGS84 (EPSG 4326).
+- [ESRI Shapefile](https://es.wikipedia.org/wiki/Shapefile), con `formato=shp`. La respuesta es un archivo ZIP con los cuatro archivos estándar: `.shp`, `.shx`, `.dbf` y `.prj`.
+- [GeoPackage](https://www.geopackage.org/), con `formato=gpkg` (nuevo en la v2). La respuesta es un único archivo `.gpkg`.
 
-Por ejemplo, si se desea obtener todas las calles del municipio Alta García (ID 141372), se puede utilizar la siguiente consulta:
+Los dos formatos están disponibles en la versión `GET` de todos los recursos, salvo `/ubicacion`. Podés abrir los archivos con programas como [QGIS](https://qgis.org/). El sistema de coordenadas es WGS84 (EPSG 4326).
 
-`GET` [https://apis.datos.gob.ar/georef/api/calles?interseccion=municipio:141372\&formato=shp\&max=1000](https://apis.datos.gob.ar/georef/api/calles?interseccion=municipio:141372\&formato=shp\&max=1000)
+:::note
+Con `formato=geojson` la API devuelve **puntos** (el centroide de cada entidad), no polígonos. Para obtener polígonos o líneas, usá `shp` o `gpkg`.
+:::
 
-Que descargaría los siguientes datos:
+Por ejemplo, para bajar todas las calles del gobierno local Alta Gracia (ID 141372):
 
-![](assets/calles1.png)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/calles?interseccion=gobierno_local:141372&formato=shp&max=1000`](https://apis.datos.gob.ar/georef/api/v2.1/calles?interseccion=gobierno_local:141372&formato=shp&max=1000)
 
-<br />
+Descarga `calles.zip`, con `calles.shp`, `calles.shx`, `calles.dbf` y `calles.prj`.
 
-Si se desean descargar todos los departamentos de la provicina de Chaco, se puede utilizar la siguiente consulta:
+Para bajar todos los departamentos de Chaco:
 
-`GET` [https://apis.datos.gob.ar/georef/api/departamentos?provincia=chaco\&formato=shp\&max=1000](https://apis.datos.gob.ar/georef/api/departamentos?provincia=chaco\&formato=shp\&max=1000)
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/departamentos?provincia=chaco&formato=shp&max=1000`](https://apis.datos.gob.ar/georef/api/v2.1/departamentos?provincia=chaco&formato=shp&max=1000)
 
-Que descargaría los siguientes datos:
+![Departamentos de Chaco abiertos en QGIS](assets/departamentos1.png)
 
-![](assets/departamentos1.png)
+La misma consulta en GeoPackage:
+
+`GET` [`https://apis.datos.gob.ar/georef/api/v2.1/departamentos?provincia=chaco&formato=gpkg&max=1000`](https://apis.datos.gob.ar/georef/api/v2.1/departamentos?provincia=chaco&formato=gpkg&max=1000)
+
+Descarga `departamentos.gpkg`.
+
+Si necesitás todas las entidades de un tipo, usá la [descarga de la base completa](/georef-ar-api/download/).

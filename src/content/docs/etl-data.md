@@ -1,389 +1,557 @@
 ---
-title: Modelo de datos para Georef
+title: "Modelo de datos para Georef"
 ---
 
-**Versión**: 12.0.0
+**Versión de datos**: 13.0.0 (archivos del 9 y 10 de abril de 2026, según sus metadatos)
 
-El fin del proceso ETL de Georef es producir archivos con datos de entidades geográficas. El ETL genera varios archivos: unos de ellos son utilizados para ser indexados por la API, y otros sirven para facilitar a usuarios de la API descargarse la totalidad de los datos en distintos formatos.
+El ETL de Georef produce los archivos con los datos de las entidades geográficas. Algunos se indexan en la API y otros sirven para que descargues la base completa en distintos formatos.
 
-Los archivos generados para ser indexados en la API tienen formato [NDJSON](http://ndjson.org/). El formato NDJSON consiste en un archivo de texto donde cada línea (separadas por `\n`) es un objeto JSON válido. Los archivos generados son:
+Los archivos que indexa la API tienen formato [NDJSON](https://github.com/ndjson/ndjson-spec): un archivo de texto donde cada línea (separada por `\n`) es un objeto JSON válido. Son:
 
-* `provincias.ndjson`
-* `departamentos.ndjson`
-* `municipios.ndjson`
-* `localidades.ndjson`
-* `calles.ndjson`
-* `intersecciones.ndjson`
-* `cuadras.ndjson`
-* `localidades-censales.ndjson`
-* `asentamientos.ndjson`
+- `provincias.ndjson`
+- `departamentos.ndjson`
+- `aglomerados.ndjson`
+- `fracciones_censales.ndjson`
+- `radios_censales.ndjson`
+- `gobiernos_locales.ndjson`
+- `localidades_censales.ndjson`
+- `asentamientos.ndjson`
+- `localidades.ndjson`
+- `calles.ndjson`
+- `intersecciones.ndjson`
+- `cuadras.ndjson`
+- `establecimientos_educativos.ndjson`
+- `instituciones_universitarias.ndjson`
 
-Los archivos generados para la descarga de datos para usuarios de la API tienen tres formatos: JSON, GeoJSON y CSV. La tabla completa de los archivos generados se encuentra detallada en la sección de [instalación y ejecución del ETL](/georef-ar-api/etl-install/#3-resultados). **Se recomienda el uso de los archivos NDJSON si se desea procesar todos los datos de entidades geográficas.** Esto se debe a que el formato se presta a ser leído por partes (líneas), lo cual facilita el procesamiento de los archivos de gran tamaño. Notar que el único formato que incluye las geometrías de las entidades geográficas es NDJSON.
+Para descargas también se generan versiones JSON, CSV y GeoJSON de cada archivo (ver [Descarga de base completa](/georef-ar-api/download/)). **Si vas a procesar todos los datos, usá NDJSON**: se puede leer por partes (línea a línea), lo que simplifica trabajar con archivos grandes.
+
+:::caution[A validar]
+Los ejemplos de esta página son la primera entidad real de cada archivo NDJSON publicado por la descarga de la v2.1 (versión de datos 13.0.0, consultados el 25/09/2026), con la geometría recortada. La estructura surge de esos ejemplos; no pudimos contrastarla con una especificación del ETL, así que un campo opcional que no aparezca en el primer registro puede faltar acá.
+:::
 
 ## Fuentes
 
-Los orígenes de los datos procesados en el ETL son:
+Cada entidad trae un campo `fuente`. En los archivos de la versión 13.0.0 aparecen, entre otros:
 
-### Unidades Territoriales
-
-* Recursos: `/provincias`, `/departamentos`, `/municipios`, `/ubicacion`
-* Fuente: **Instituto Geográfico Nacional (IGN)**
-* Enlace: [Datos Abiertos - Unidades Territoriales](http://datos.gob.ar/dataset/ign-unidades-territoriales)
-
-### BAHRA
-
-* Recursos: `/localidades`
-* Fuente: **Base de Asentamientos Humanos de la República Argentina (BAHRA)**
-* Enlace: [BAHRA - Descargas](http://www.bahra.gob.ar/)
-
-### Vías de Circulación
-
-* Recursos: `/calles`, `/direcciones`
-* Fuente: **Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)**
-* Enlace: [Portal de geoservicios de INDEC](https://geoservicios.indec.gov.ar/nomenclador-vias-de-circulacion/?contenido=descargas)
-
-### Cuadras
-
-* Recursos: `/calles`, `/direcciones`
-* Fuente: **Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)**
-* Enlace: [GeoServer INDEC](https://geoservicios.indec.gov.ar/geoserver)
-
-### Localidades Censales
-
-* Recursos: `/localidad-censales`
-* Fuente: **Instituto Nacional de Estadística y Censos de la República Argentina (INDEC)**
-* Enlace: [Unidades Geoestadísticas - Cartografía y códigos geográficos del Sistema Estadístico Nacional](https://www.indec.gov.ar/codgeo.asp).
-
-## Descarga de los archivos
-
-Todos los archivos mencionados anteriormente pueden ser descargados desde el portal de descargas `infra.datos.gob.ar`. Los enlaces están catalogados en el portal de datos abiertos, bajo la [distribución del servicio de normalización de datos geográficos](https://datos.gob.ar/dataset/modernizacion-servicio-normalizacion-datos-geograficos).
+- **IGN** (Instituto Geográfico Nacional): provincias y departamentos.
+- **INDEC**: aglomerados, fracciones y radios censales, localidades censales, localidades, calles, intersecciones y cuadras. Ver [códigos geográficos del INDEC](https://www.indec.gob.ar/indec/web/Institucional-Indec-Codgeo).
+- **DPE - INDEC**: gobiernos locales.
+- **BAHRA** ([Base de Asentamientos Humanos de la República Argentina](http://www.bahra.gob.ar/)): base de asentamientos y localidades; el campo `fuente` de cada registro indica el origen puntual (por ejemplo, "INDEC. ACA").
+- **Mapa Educativo Nacional - DIEE**: establecimientos educativos.
 
 ## Archivos
 
-A continuación se detallan, a través de ejemplos, los esquemas de los archivos NDJSON para todas las entidades geográficas.
-
-La primera línea de cada archivo contiene los metadatos del archivo. La estructura de los metadatos es la siguiente:
+La primera línea de cada archivo tiene los metadatos. Por ejemplo, la de `provincias.ndjson`:
 
 ```json
-{
-	"timestamp": "1532435389", // Timestamp de creación
-	"fecha_creacion": "2018-07-24 12:29:49.813835+00:00", // Fecha de creación
-	"version": "X.0.0", // Versión de archivo
-	"cantidad": 100 // Cantidad de entidades
-}
+{"fecha_creacion":"2026-04-09 23:30:03.319204+00:00","timestamp":1775777403,"version":"13.0.0","cantidad":24}
 ```
 
-Recordar que todo el objeto JSON aparece serializado en la primera línea del archivo, de la siguiente forma:
+- `fecha_creacion`: fecha de creación.
+- `timestamp`: *timestamp* de creación.
+- `version`: versión de los datos.
+- `cantidad`: cantidad de entidades del archivo.
 
-```json
-{"timestamp": "1532435389","fecha_creacion": "2018-07-24 12:29:49.813835+00:00","version":"X.0.0","cantidad": 100}
-```
-
-Luego, el resto de las líneas del archivo contienen las entidades en formato JSON, una por línea. Todas las geometrías incluidas en los archivos utilizan el sistema de coordenadas **WGS84** (**EPSG 4326**).
+El resto de las líneas tiene una entidad cada una. Todas las geometrías están en formato GeoJSON y usan el sistema de coordenadas **WGS84** (**EPSG 4326**). En los ejemplos, las líneas se muestran con sangría y la geometría recortada (`"coordinates": "…"`); en el archivo cada entidad ocupa una sola línea.
 
 ### Provincias (`provincias.ndjson`)
 
-Cada línea del archivo de datos de provincias tiene la siguiente estructura:
+Entidades en la versión 13.0.0: 24.
 
-```
+```json
 {
-	"id": "90", // ID de provincia
-	"nombre": "Tucumán", // Nombre de provincia,
-	"nombre_completo": "Provincia de Tucumán", // Nombre completo
-	"iso_id": "AR-T", // Identificador ISO 3166-2
-	"iso_nombre": "Tucumán", // Nombre ISO
-	"categoria": "Provincia", // Tipo de entidad
-	"centroide": {
-		"lat": -26.9478, // Latitud de centroide
-		"lon": -65.36475 // Longitud de centroide
-	},
-	"geometria": { // Geometría en formato GeoJSON
-		"type": "MultiPolygon",
-		"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
-	},
-	"fuente": "IGN" // Fuente del dato
+    "id": "02",
+    "nombre": "Ciudad Autónoma de Buenos Aires",
+    "nombre_completo": "Ciudad Autónoma de Buenos Aires",
+    "fuente": "IGN",
+    "categoria": "Ciudad Autónoma",
+    "centroide": {
+        "lon": -58.445876325,
+        "lat": -34.614442065
+    },
+    "iso_id": "AR-C",
+    "iso_nombre": "Ciudad Autónoma de Buenos Aires",
+    "geometria": {
+        "type": "MultiPolygon",
+        "coordinates": "…"
+    }
 }
 ```
 
 ### Departamentos (`departamentos.ndjson`)
 
-Cada línea del archivo de datos de departamentos tiene la siguiente estructura:
+Entidades en la versión 13.0.0: 529.
 
-```
+```json
 {
-	"id": "06427", // ID del departamento
-	"nombre": "La Matanza", // Nombre del departamento
-	"nombre_completo": "Partido de la Matanza", // Nombre completo
-	"categoria": "Partido", // Tipo de entidad
-	"centroide": {
-		"lat": -34.770165, // Latitud de centroide
-		"lon": -58.625449  // Longitud de centroide
-	},
-	"geometria": { // Geometría en formato GeoJSON
-		"type": "MultiPolygon",
-		"coordinates": [[[[-58.4549, -34.5351], [-58.4545, -34.5353], ...]]]
-	},
-	"provincia": { // Provincia que contiene al departamento
-		"id": "06",
-		"nombre": "Buenos Aires",
-		"interseccion": "0.0412936" // Porcentaje del área de la provincia que ocupa el depto.
-	},
-	"fuente": "ARBA - Gerencia de Servicios Catastrales" // Fuente del dato
+    "id": "30015",
+    "nombre": "Concordia",
+    "nombre_completo": "Departamento Concordia",
+    "provincia": {
+        "id": "30",
+        "nombre": "Entre Ríos",
+        "interseccion": 0.0
+    },
+    "fuente": "IGN",
+    "categoria": "Departamento",
+    "centroide": {
+        "lon": -58.23786969,
+        "lat": -31.290298372
+    },
+    "geometria": {
+        "type": "MultiPolygon",
+        "coordinates": "…"
+    }
 }
 ```
 
-### Municipios (`municipios.ndjson`)
+### Aglomerados (`aglomerados.ndjson`)
 
-Cada línea del archivo de datos de municipios tiene la siguiente estructura:
+Entidades en la versión 13.0.0: 119.
 
-```
+```json
 {
-	"id": "060105", // ID del municipio
-	"nombre": "Bolívar", // Nombre del municipio
-	"nombre_completo": "Municipio Bolívar", // Nombre completo
-	"categoria": "Municipio", // Tipo de entidad
-	"centroide": {
-		"lat": -36.298222, // Latitud de centroide
-		"lon": -61.149648  // Longitud de centroide
-	},
-	"geometria": { // Geometría en formato GeoJSON
-		"type": "MultiPolygon",
-		"coordinates": [[[[-58.4453, -34.4324], [-58.6463, -34.6841], ...]]]
-	},
-	"provincia": {  // Provincia que contiene al municipio
-		"id": "06",
-		"nombre": "Buenos Aires",
-		"interseccion": "0.0100845" // Porcentaje del área de la provincia que ocupa el municipio
-	},
-	"fuente": "ARBA - Gerencia de Servicios Catastrales" // Fuente del dato
+    "id": "1113",
+    "nombre": "Domselaar - Barrio Parque Las Acacias",
+    "fuente": "INDEC",
+    "centroide": {
+        "lon": -58.285127423,
+        "lat": -35.071025356
+    },
+    "geometria": {
+        "type": "MultiPolygon",
+        "coordinates": "…"
+    }
 }
 ```
 
-### Localidades (`localidades.ndjson`)
+### Fracciones censales (`fracciones_censales.ndjson`)
 
-Cada línea del archivo de datos de localidades tiene la siguiente estructura:
+Entidades en la versión 13.0.0: 6.571.
 
-```
+```json
 {
-	"id": "06189080000", // ID de la localidad
-	"nombre": "San Roman", // Nombre de la localidad
-	"categoria": "Localidad simple (LS)", // Tipo de asentamiento BAHRA
-	"centroide": {
-		"lat": -38.741555, // Latitud de centroide
-		"lon": -61.537720  // Longitud de centroide
-	},
-	"geometria": { // Geometría en formato GeoJSON
-		"type": "MultiPoint",
-		"coordinates": [[-61.5377, -38.7415], ...]
-	},
-	"municipio": { // Municipio que contiene a la localidad
-		"id": "060189", // Puede ser nulo
-		"nombre": "Coronel Dorrego" // Puede ser nulo
-	},
-	"departamento": { // Departamento que contiene a la localidad
-		"id": "06189",
-		"nombre": "Coronel Dorrego"
-	},
-	"provincia": {  // Provincia que contiene a la localidad
-		"id": "06",
-		"nombre": "Buenos Aires"
-	},
-	"fuente": "INDEC" // Fuente del dato
+    "id": "0667910",
+    "fuente": "INDEC",
+    "provincia": {
+        "id": "06",
+        "nombre": "Buenos Aires",
+        "interseccion": 0.0
+    },
+    "departamento": {
+        "id": "06679",
+        "nombre": "Rivadavia"
+    },
+    "centroide": {
+        "lon": -63.038968583,
+        "lat": -35.568259353
+    },
+    "geometria": {
+        "type": "MultiPolygon",
+        "coordinates": "…"
+    }
 }
 ```
 
-### Calles (`calles.ndjson`)
+### Radios censales (`radios_censales.ndjson`)
 
-Cada línea del archivo de datos de calles tiene la siguiente estructura:
+Entidades en la versión 13.0.0: 66.515.
 
-```
+```json
 {
-	"id": "0202101007345", // ID de la vía de circulación
-	"nombre": "LARREA", // Nombre de vía de circulación
-	"categoria": "CALLE", // Tipo de vía de circulación
-	"altura": {
-		"inicio": {
-			"derecha": 1, // Número inicial de altura (lado derecho)
-			"izquierda": 2, // Número inicial de altura (lado izquierdo)
-		},
-		"fin": {
-			"derecha": 799, // Número final de altura (lado derecho)
-			"izquierda": 800, // Número final de altura (lado izquierdo)
-		}
-	},
-	"geometria": { // Geometría en formato GeoJSON
-		"type": "MultiLineString",
-		"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
-	},
-	"departamento": { // Departamento
-		"nombre": "Comuna 3",
-		"id": "02021"
-	},
-	"provincia": { // Provincia
-		"nombre": "Ciudad Autónoma de Buenos Aires",
-		"id": "02"
-	},
-	"fuente": "INDEC" // Fuente del dato
+    "id": "221402203",
+    "fuente": "INDEC",
+    "provincia": {
+        "id": "22",
+        "nombre": "Chaco"
+    },
+    "departamento": {
+        "id": "22140",
+        "nombre": "San Fernando"
+    },
+    "fraccion_censal": {
+        "id": "2214022",
+        "interseccion": 0.0
+    },
+    "centroide": {
+        "lon": -58.962357395,
+        "lat": -27.65121747
+    },
+    "categoria": "Mixto",
+    "geometria": {
+        "type": "MultiPolygon",
+        "coordinates": "…"
+    }
 }
 ```
 
-### Intersecciones de Calles (`intersecciones.ndjson`)
+### Gobiernos locales (`gobiernos_locales.ndjson`)
 
-El archivo de datos de intersecciones contiene todas las intersecciones existentes entre calles. Dadas dos calles, se listan todas las intersecciones que las mismas comparten (una o más). El ID de cada intersección está compuesto de tres partes: el ID de la primera calle, el ID de la segunda, y el número de intersección entre las dos calles (comenzando desde `01`). **No se repiten intersecciones**: es decir, dadas las calles con ID X y ID Z, solo están presentes las intersecciones X-Z-N o las Z-X-N, pero no ambos grupos. Cada línea del archivo de datos de intersecciones tiene la siguiente estructura:
+Entidades en la versión 13.0.0: 2.280.
 
-```
+```json
 {
-	// ID de la calle A, ID de la calle B, número de intersección (dos dígitos)
-	"id": "0207001002300-0207001007975-01",
-	"calle_a": {
-		"id": "0207001002300", // ID de la calle A
-		"nombre": "BOSTON", // Nombre de la calle A
-		"departamento": { // Departamento de la calle A
-			"id": "02070",
-			"nombre": "Comuna 10"
-		},
-		"provincia": { // Provincia de la calle A
-			"id": "02",
-			"nombre": "Ciudad Autónoma de Buenos Aires"
-		},
-		"categoria": "CALLE", // Tipo de la calle A
-		"fuente": "INDEC" // Fuente del dato
-	},
-	"calle_b": {
-		"id": "0207001007975", // ID de la calle B
-		"nombre": "MARCOS SASTRE", // Nombre de la calle B
-		"departamento": { // Departamento de la calle B
-			"id": "02070",
-			"nombre": "Comuna 10"
-		},
-		"provincia": { // Provincia de la calle B
-			"id": "02",
-			"nombre": "Ciudad Autónoma de Buenos Aires"
-		},
-		"categoria": "CALLE", // Tipo de la calle B
-		"fuente": "INDEC" // Fuente del dato
-	},
-	"geometria": { // Geometría en formato GeoJSON
-		"type": "Point",
-		"coordinates": [
-			-58.5077676091915,
-			-34.6150993860767
-		]
-	}
+    "id": "540504",
+    "nombre": "San Pedro",
+    "nombre_completo": "Municipio San Pedro",
+    "provincia": {
+        "id": "54",
+        "nombre": "Misiones",
+        "interseccion": 0.0
+    },
+    "fuente": "DPE - INDEC",
+    "categoria": "Municipio",
+    "centroide": {
+        "lon": -53.943330341,
+        "lat": -26.710300045
+    },
+    "geometria": {
+        "type": "MultiPolygon",
+        "coordinates": "…"
+    }
 }
 ```
 
-### Cuadras (`cuadras.ndjson`)
+### Localidades censales (`localidades_censales.ndjson`)
 
-Cada línea del archivo de datos de cuadras tiene la siguiente estructura:
+Entidades en la versión 13.0.0: 4.023.
 
-```
+```json
 {
-    "id": "020700100230012345", // ID de la cuadra
-	"calle": {
-		"id": "0207001002300", // ID de la calle
-		"nombre": "BOSTON", // Nombre de la calle
-		"departamento": { // Departamento de la calle
-			"id": "02070",
-			"nombre": "Comuna 10"
-		},
-		"provincia": { // Provincia de la calle
-			"id": "02",
-			"nombre": "Ciudad Autónoma de Buenos Aires"
-		},
-		"categoria": "CALLE", // Tipo de la calle
-		"fuente": "INDEC" // Fuente del dato
-	},
-	"geometria": { // Geometría en formato GeoJSON
-		"type": "MultiLineString",
-		"coordinates": [[[-58.52815846522327, -34.611800397637424], ...]]
-	}
-}
-```
-
-### Localidades Censales (`localidades-censales.ndjson`)
-
-Cada línea del archivo de datos de localidades censales tiene la siguiente estructura:
-
-```
-{
-    "id": "06441030", // ID de la localidad censal
-    "nombre": "La Plata", // Nombre de la localidad censal
-    "fuente": "INDEC", // Fuente del dato
-    "provincia": { // Provincia de la localidad censal
+    "id": "06280040",
+    "nombre": "Miramar",
+    "fuente": "INDEC",
+    "provincia": {
         "id": "06",
         "nombre": "Buenos Aires"
     },
-    "departamento": { // Departamento de la localidad censal
-        "id": "06441",
-        "nombre": "La Plata"
+    "departamento": {
+        "id": "06280",
+        "nombre": "General Alvarado"
     },
-    "municipio": { // Municipio que contiene a la localidad censal
-        "id": "060441",
-        "nombre": "La Plata"
+    "gobierno_local": {
+        "id": null,
+        "nombre": null
     },
-    "categoria": "Componente de localidad compuesta (LC)", // Tipo de localidad del censo
-    "funcion": "CAPITAL_PROVINCIA", // Función administrativa, puede ser null
+    "categoria": "Componente de localidad compuesta",
+    "funcion": null,
     "centroide": {
-        "lon": -57.9543916496992, // Longitud del centroide
-        "lat": -34.9220666561801 // Latitud del centroide
+        "lon": -57.830489221,
+        "lat": -38.252704473
     },
-    "geometria": { // Geometría en formato GeoJSON
-        "type": "Point",
-        "coordinates": [
-            -57.9543916496992,
-            -34.9220666561801
-        ]
+    "geometria": {
+        "type": "MultiPolygon",
+        "coordinates": "…"
     }
 }
 ```
 
 ### Asentamientos (`asentamientos.ndjson`)
 
-Cada línea del archivo de datos de asentamientos tiene la siguiente estructura (idéntica a la de localidades):
+Entidades en la versión 13.0.0: 14.466.
 
-```
+```json
 {
-	"id": "06189080000", // ID de la localidad
-	"nombre": "San Roman", // Nombre de la localidad
-	"categoria": "Localidad simple (LS)", // Tipo de asentamiento BAHRA
-	"centroide": {
-		"lat": -38.741555, // Latitud de centroide
-		"lon": -61.537720  // Longitud de centroide
-	},
-	"geometria": { // Geometría en formato GeoJSON
-		"type": "MultiPoint",
-		"coordinates": [[-61.5377, -38.7415], ...]
-	},
-	"municipio": { // Municipio que contiene a la localidad
-		"id": "060189", // Puede ser nulo
-		"nombre": "Coronel Dorrego" // Puede ser nulo
-	},
-	"departamento": { // Departamento que contiene a la localidad
-		"id": "06189",
-		"nombre": "Coronel Dorrego"
-	},
-	"provincia": {  // Provincia que contiene a la localidad
-		"id": "06",
-		"nombre": "Buenos Aires"
-	},
-	"fuente": "INDEC" // Fuente del dato
+    "id": "14098A77",
+    "nombre": "Tres Pozos",
+    "fuente": "INDEC. ACA",
+    "provincia": {
+        "id": "14",
+        "nombre": "Córdoba"
+    },
+    "departamento": {
+        "id": "14098",
+        "nombre": "Río Cuarto"
+    },
+    "gobierno_local": {
+        "id": null,
+        "nombre": null
+    },
+    "localidad_censal": {
+        "id": null,
+        "nombre": null
+    },
+    "categoria": "Paraje",
+    "centroide": {
+        "lon": -64.105625052,
+        "lat": -32.407731637
+    },
+    "geometria": {
+        "type": "MultiPoint",
+        "coordinates": "…"
+    }
+}
+```
+
+### Localidades (`localidades.ndjson`)
+
+Entidades en la versión 13.0.0: 4.028.
+
+```json
+{
+    "id": "30008050",
+    "nombre": "Hocker",
+    "fuente": "INDEC",
+    "provincia": {
+        "id": "30",
+        "nombre": "Entre Ríos"
+    },
+    "departamento": {
+        "id": "30008",
+        "nombre": "Colón"
+    },
+    "gobierno_local": {
+        "id": "309015",
+        "nombre": "Colonia Hocker"
+    },
+    "localidad_censal": {
+        "id": "30008050",
+        "nombre": "Hocker"
+    },
+    "categoria": "Localidad simple",
+    "centroide": {
+        "lon": -58.339488507,
+        "lat": -32.088313118
+    },
+    "geometria": {
+        "type": "Point",
+        "coordinates": "…"
+    }
+}
+```
+
+### Calles (`calles.ndjson`)
+
+Entidades en la versión 13.0.0: 333.800.
+
+```json
+{
+    "id": "062520100103600",
+    "nombre": "CALLE SN",
+    "fuente": "INDEC",
+    "provincia": {
+        "id": "06",
+        "nombre": "Buenos Aires"
+    },
+    "departamento": {
+        "id": "06252",
+        "nombre": "Escobar"
+    },
+    "localidad_censal": {
+        "id": "06252010",
+        "nombre": "Escobar"
+    },
+    "localidad": {
+        "id": "0625201001",
+        "nombre": "Belén de Escobar"
+    },
+    "categoria": "CALLE",
+    "altura": {
+        "inicio": {
+            "derecha": 0,
+            "izquierda": 0
+        },
+        "fin": {
+            "derecha": 0,
+            "izquierda": 0
+        }
+    },
+    "geometria": {
+        "type": "MultiLineString",
+        "coordinates": "…"
+    }
+}
+```
+
+### Intersecciones de calles (`intersecciones.ndjson`)
+
+El ID de cada intersección tiene tres partes: el ID de la primera calle. el ID de la segunda y el número de intersección entre ambas (desde `01`).
+
+Entidades en la versión 13.0.0: 1.166.180.
+
+```json
+{
+    "id": "020070100106130-020280100006130-01",
+    "calle_a": {
+        "id": "020070100106130",
+        "nombre": "GUANAHANI",
+        "fuente": "INDEC",
+        "provincia": {
+            "id": "02",
+            "nombre": "Ciudad Autónoma de Buenos Aires"
+        },
+        "departamento": {
+            "id": "02007",
+            "nombre": "Comuna 1"
+        },
+        "localidad_censal": {
+            "id": "02007010",
+            "nombre": "CABA - Comuna 1"
+        },
+        "localidad": {
+            "id": "0200701001",
+            "nombre": "Constitución"
+        },
+        "categoria": "CALLE"
+    },
+    "calle_b": {
+        "id": "020280100006130",
+        "nombre": "GUANAHANI",
+        "fuente": "INDEC",
+        "provincia": {
+            "id": "02",
+            "nombre": "Ciudad Autónoma de Buenos Aires"
+        },
+        "departamento": {
+            "id": "02028",
+            "nombre": "Comuna 4"
+        },
+        "localidad_censal": {
+            "id": "02028010",
+            "nombre": "CABA - Comuna 4"
+        },
+        "localidad": {
+            "id": null,
+            "nombre": null
+        },
+        "categoria": "CALLE"
+    },
+    "geometria": {
+        "type": "Point",
+        "coordinates": "…"
+    }
+}
+```
+
+### Cuadras (`cuadras.ndjson`)
+
+El ID de la cuadra tiene 22 dígitos: los primeros 15 son el ID de la calle.
+
+Entidades en la versión 13.0.0: 2.076.269.
+
+```json
+{
+    "id": "0664401000007902895356",
+    "calle": {
+        "id": "066440100000790",
+        "nombre": "CALLE SN",
+        "fuente": "INDEC",
+        "provincia": {
+            "id": "06",
+            "nombre": "Buenos Aires"
+        },
+        "departamento": {
+            "id": "06644",
+            "nombre": "Pinamar"
+        },
+        "localidad_censal": {
+            "id": "06644010",
+            "nombre": "Pinamar"
+        },
+        "localidad": {
+            "id": null,
+            "nombre": null
+        },
+        "categoria": "CALLE"
+    },
+    "altura": {
+        "inicio": {
+            "derecha": 0,
+            "izquierda": 0
+        },
+        "fin": {
+            "derecha": 0,
+            "izquierda": 0
+        }
+    },
+    "geometria": {
+        "type": "MultiLineString",
+        "coordinates": "…"
+    }
+}
+```
+
+### Establecimientos educativos (`establecimientos_educativos.ndjson`)
+
+Entidades en la versión 13.0.0: 62.271.
+
+```json
+{
+    "id": "062068500",
+    "nombre": "HUMANOS",
+    "fuente": "Mapa Educativo Nacional - DIEE",
+    "categoria": "",
+    "domicilio": "CHAMPAGNAT 4579",
+    "localidad": "CANNING",
+    "gestion": "Privado",
+    "niveles": "Común-Primaria 6años;",
+    "centroide": {
+        "lon": -58.509377125,
+        "lat": -34.888583139
+    },
+    "geometria": {
+        "type": "MultiPoint",
+        "coordinates": "…"
+    },
+    "provincia": {
+        "id": "06",
+        "nombre": "Buenos Aires"
+    },
+    "departamento": {
+        "id": "06270",
+        "nombre": "Ezeiza"
+    }
+}
+```
+
+### Instituciones universitarias (`instituciones_universitarias.ndjson`)
+
+Entidades en la versión 13.0.0: 1.441.
+
+```json
+{
+    "id": "70600928",
+    "nombre": "Centro Universitario Regional Lobos - Universidad de Buenos Aires",
+    "fuente": "",
+    "categoria": "",
+    "domicilio": "Buenos Aires 541",
+    "localidad": "Lobos",
+    "gestion": "Estatal",
+    "niveles": "Pregrado - Grado",
+    "universidad": "Universidad de Buenos Aires",
+    "unidad_academica": "Centro Universitario Regional Lobos",
+    "centroide": {
+        "lon": -59.0973812,
+        "lat": -35.1809247
+    },
+    "geometria": {
+        "type": "MultiPoint",
+        "coordinates": "…"
+    },
+    "provincia": {
+        "id": "06",
+        "nombre": "Buenos Aires"
+    },
+    "departamento": {
+        "id": "06483",
+        "nombre": "Lobos"
+    }
 }
 ```
 
 ## Procesamiento
 
-Para procesar los archivos de datos con Python, se puede utilizar el módulo estándar `json`. Se recomienda iterar sobre el objeto devuelto por `open()` para evitar cargar todo el archivo en memoria a la vez:
+Para procesar los archivos con Python alcanza con el módulo estándar `json`. Iterá sobre el archivo abierto para no cargarlo entero en memoria:
 
 ```python
 import json
 
-with open('calles.ndjson') as f:
-	# Leer la línea de metadatos
-	metadata = json.loads(next(f))
+with open('calles.ndjson', encoding='utf-8') as f:
+    # línea de metadatos
+    metadata = json.loads(next(f))
 
-	# Leer cada línea y parsear el JSON
-	for line in f:
-		street = json.loads(line)
-		# La variable street ahora contiene un dict con los datos de la calle
+    # una entidad por línea
+    for line in f:
+        street = json.loads(line)
+        # street es un dict con los datos de la calle
 ```
