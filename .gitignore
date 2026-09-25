@@ -71,3 +71,6 @@ logging.ini
 htmlcov/
 logs/
 cache/
+# Sitio de documentación (Astro)
+node_modules/
+.astro/
