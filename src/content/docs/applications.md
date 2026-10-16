@@ -15,6 +15,6 @@ Lista de proyectos y aplicaciones que utilizan, extienden o documentan la API de
 
 ## Contacto
 
-¿Desarrollaste una librería o tenés un proyecto que usa la API? Te [invitamos a contarnos](https://twitter.com/datosgobar) así la agregamos a esta lista.
+¿Desarrollaste una librería o tenés un proyecto que usa la API? Te invitamos a [contarnos por correo](mailto:datosargentina@sicyt.gob.ar) así la agregamos a esta lista.
 
 Para todo lo demás, podés mandarnos tu comentario o consulta a [datosargentina@sicyt.gob.ar](mailto\:datosargentina@sicyt.gob.ar).

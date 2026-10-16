@@ -2,8 +2,6 @@
 title: API del Servicio de Normalización de Datos Geográficos de Argentina
 ---
 
-**Versión**: 0.5.3
-
 La API del Servicio de Normalización de Datos Geográficos, permite normalizar y codificar los nombres de unidades territoriales de la Argentina (provincias, departamentos, municipios y localidades) y de sus calles, así como ubicar coordenadas dentro de ellas.
 
 En la [Guía para la identificación y uso de entidades interoperables](https://datosgobar.github.io/paquete-apertura-datos/guia-interoperables/) se explica cómo funcionan las [unidades territoriales internas de la Argentina](https://datosgobar.github.io/paquete-apertura-datos/guia-interoperables/#divisiones-o-unidades-territoriales-internas) y la relación entre ellas.
@@ -123,6 +121,4 @@ Notar que al ser datos que no son modificados regularmente, es posible retener c
 
 ***
 
-*Si sos usuario de la API de Normalización de Datos Geográficos y querés estar al tanto de los  cambios y novedades, [inscribite en la base de contactos de Datos Argentina](bit.ly/contacto-datos-argentina) y elegí sobre qué temas querés que te escribamos.*
-
-*¿Tenés algo que contarnos? Nos encantaría que nos cuentes por [Twitter](https://twitter.com/datosgobar) o por [mail](mailto\:datosargentina@sicyt.gob.ar) qué mejoró usar la API en tu trabajo y qué le falta para mejorar aún más.*
+*¿Tenés algo que contarnos? Escribinos a [datosargentina@sicyt.gob.ar](mailto:datosargentina@sicyt.gob.ar) y contanos qué mejoró usar la API en tu trabajo y qué le falta para mejorar aún más.*
