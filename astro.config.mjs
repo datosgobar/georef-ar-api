@@ -1,10 +1,31 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { satteri } from '@astrojs/markdown-satteri';
 import starlightOpenAPI, { createOpenAPISidebarGroup } from 'starlight-openapi';
 
 // Páginas de referencia generadas desde public/openapi.json (el mismo archivo se puede descargar).
 const referencia = createOpenAPISidebarGroup();
+
+// Mismos ids de encabezado que generaba mkdocs (toc.slugify): sin tildes.
+// Así siguen funcionando los #anclas enlazados desde afuera. Igual que en series-tiempo-ar-api y paquete-apertura-datos.
+const mkdocsSlugs = () => {
+	const seen = new Map();
+	return {
+		name: 'mkdocs-slugs',
+		element: {
+			filter: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+			visit(node, ctx) {
+				if (typeof node.properties?.id === 'string') return;
+				let id = ctx.textContent(node).normalize('NFKD').replace(/[^\x00-\x7F]/g, '')
+					.replace(/[^\w\s-]/g, '').trim().toLowerCase().replace(/[-\s]+/g, '-');
+				const k = seen.get(id) ?? 0;
+				seen.set(id, k + 1);
+				ctx.setProperty(node, 'id', k ? `${id}_${k}` : id);
+			},
+		},
+	};
+};
 
 const base = '/georef-ar-api';
 
@@ -12,9 +33,12 @@ export default defineConfig({
 	site: 'https://datosgobar.github.io',
 	base,
 	trailingSlash: 'ignore',
+	markdown: { processor: satteri({ hastPlugins: [mkdocsSlugs] }) },
 	redirects: {
 		// El visor Swagger se reemplazó por la referencia generada.
 		'/open-api/': `${base}/referencia/`,
+		// La página de Python 3.6 no se migró; su contenido vigente está en Usar en Python.
+		'/python3.6/': `${base}/python-usage/`,
 	},
 	integrations: [
 		starlight({
