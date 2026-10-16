@@ -66,13 +66,10 @@ console:
 	GEOREF_CONFIG=$(CFG_PATH) \
 	python -c 'import service; service.georef_console()'
 
+# La documentación es un sitio Astro Starlight (src/content/docs). Se publica con GitHub Actions al pushear a master.
 docs:
-	mkdocs build
-	rsync -vau --remove-source-files docs/site/ docs/
-	rm -rf docs/site
+	npm run build
 
 servedocs:
-	mkdocs serve
+	npm run dev
 
-pdf:
-	mkdocs_datosgobar md2pdf mkdocs.yml docs/georef-ar-api-docs.pdf

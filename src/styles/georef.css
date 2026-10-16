@@ -1,0 +1,5 @@
+/* Lugar para la franja del hub arriba de la cabecera de Starlight. */
+:root { --hub-alto: 2.5rem; --sl-nav-height: calc(3.5rem + var(--hub-alto)); }
+@media (min-width: 50rem) { :root { --sl-nav-height: calc(4rem + var(--hub-alto)); } }
+/* El botón del menú en celular se centra en la cabecera propia, debajo de la franja. */
+.sl-menu-button { top: calc(var(--hub-alto) + (var(--sl-nav-height) - var(--hub-alto) - var(--sl-menu-button-size)) / 2); }
