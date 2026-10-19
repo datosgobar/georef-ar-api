@@ -39,6 +39,10 @@ export default defineConfig({
 		'/open-api/': `${base}/referencia/`,
 		// La página de Python 3.6 no se migró; su contenido vigente está en Usar en Python.
 		'/python3.6/': `${base}/python-usage/`,
+		// Páginas que mkdocs seguía sirviendo desde docs/ aunque ya no tenían fuente.
+		'/open-api/src/': `${base}/referencia/`,
+		'/georef-api-data/': `${base}/etl-data/`,
+		'/municipalities/': `${base}/localities/`,
 	},
 	integrations: [
 		starlight({
