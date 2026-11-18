@@ -1,2 +1,0 @@
-mkdocs-datosgobar==1.0.15
-mkdocs-material==4.1.1

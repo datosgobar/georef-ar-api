@@ -1,0 +1,38 @@
+---
+// Envuelve la cabecera de Starlight con la franja del hub de Datos Abiertos,
+// la misma en todos los sitios de documentación.
+import Default from '@astrojs/starlight/components/Header.astro';
+
+const hub = 'https://datosgobar.github.io/';
+const enlaces = [
+	{ texto: 'Guías', href: `${hub}#guias` },
+	{ texto: 'APIs', href: `${hub}#apis` },
+	{ texto: 'Herramientas', href: `${hub}#herramientas` },
+	{ texto: 'Portal Andino', href: `${hub}#andino` },
+	{ texto: 'Comunidad', href: `${hub}#comunidad` },
+];
+---
+<div class="cabecera">
+	<nav class="hub" aria-label="Datos Abiertos">
+		<a class="volver" href={hub}><img src={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/datos-gob-ar-blanco.png`} alt="datos.gob.ar" /><span>Recursos</span></a>
+		{enlaces.map((e) => <a href={e.href}>{e.texto}</a>)}
+	</nav>
+	<div class="propia"><Default /></div>
+</div>
+
+<style>
+	.cabecera { display: flex; flex-direction: column; height: 100%; }
+	/* La franja ocupa todo el ancho: compensa el padding que PageFrame le pone a la cabecera. */
+	.hub {
+		display: flex; align-items: center; gap: 1.25rem; flex: none; height: var(--hub-alto);
+		margin: calc(-1 * var(--sl-nav-pad-y)) calc(-1 * var(--sl-nav-pad-x)) var(--sl-nav-pad-y);
+		padding-inline: var(--sl-nav-pad-x);
+		background: var(--da-navy); font-size: var(--sl-text-xs); overflow-x: auto; white-space: nowrap;
+	}
+	.hub a { color: #fff; opacity: .85; font-weight: 600; text-decoration: none; }
+	.hub a:hover { opacity: 1; text-decoration: underline; }
+	.hub .volver { opacity: 1; display: flex; align-items: center; gap: .6rem; margin-inline-end: auto; }
+	.hub .volver img { height: 1.1rem; width: auto; }
+	.hub .volver span { padding-left: .6rem; border-left: 1px solid rgba(255,255,255,.35); }
+	.propia { flex: 1; min-height: 0; }
+</style>

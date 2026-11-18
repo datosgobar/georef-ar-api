@@ -1,0 +1,117 @@
+/* Identidad Datos Abiertos sobre Starlight: navy + índigo + violeta, Montserrat. */
+:root {
+	--da-navy: #212d51;
+	--da-indigo: #393793;
+	--da-violeta: #b369ed;
+	--da-gris-tile: #ececec;
+	--da-ok: #2e7d33;
+	--da-mal: #c62828;
+
+	--sl-font: 'Montserrat', system-ui, sans-serif;
+	--sl-text-h1: 2rem;
+	--sl-content-width: 48rem;
+
+	/* oscuro: fondo gris azulado neutro, texto sin blanco puro (menos encandilamiento) */
+	--sl-color-white: #e9ebf1;
+	--sl-color-gray-1: #dcdfe7;
+	--sl-color-gray-2: #bfc4d0;
+	--sl-color-gray-3: #939aab;
+	--sl-color-gray-4: #5f6678;
+	--sl-color-gray-5: #3a4050;
+	--sl-color-gray-6: #232834;
+	--sl-color-black: #1a1e28;
+	--sl-color-accent-low: #2e2a5c;
+	--sl-color-accent: #b98cf0;
+	--sl-color-accent-high: #d9c6f5;
+}
+
+:root[data-theme='light'] {
+	/* claro: fondo apenas cálido, texto gris oscuro en vez de casi negro */
+	--sl-color-white: #1f2740;
+	--sl-color-gray-1: #2a3350;
+	--sl-color-gray-2: #414657;
+	--sl-color-gray-3: #5c6172;
+	--sl-color-gray-4: #858a9a;
+	--sl-color-gray-5: #cfd2da;
+	--sl-color-gray-6: #eceef2;
+	--sl-color-gray-7: #f4f5f7;
+	--sl-color-black: #fafafb;
+	--sl-color-accent-low: #ece7fa;
+	--sl-color-accent: #393793;
+	--sl-color-accent-high: #2a2870;
+}
+
+.sl-markdown-content :is(h1, h2, h3, h4, h5) { font-weight: 600; letter-spacing: -0.01em; }
+h1#_top { font-weight: 700; letter-spacing: -0.015em; }
+/* Montserrat es ancha: un poco menos de tamaño y más interlínea para lectura larga. */
+.sl-markdown-content { font-size: 0.95rem; line-height: 1.75; }
+
+/* Portada (splash): usa el ancho disponible en vez de la columna de lectura. */
+[data-has-hero] { --sl-content-width: 68rem; }
+.colabora { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--sl-color-gray-5); font-size: 0.9rem; color: var(--sl-color-gray-3); }
+
+.solo-impresion { display: none; }
+.sl-markdown-content a:not(.card-link) { text-underline-offset: 0.2em; }
+.sl-markdown-content table { font-size: 0.875rem; }
+.sl-markdown-content th { background: var(--sl-color-gray-6); }
+:focus-visible { outline: 3px solid var(--da-violeta); outline-offset: 2px; }
+
+/* "Recomendado / No recomendado" de las guías: el marcador existente pasa a ser una
+   etiqueta y colorea la tabla que le sigue. Sin tocar el markdown. */
+.recomendado, .no-recomendado {
+	display: inline-block;
+	padding: 0.1em 0.6em;
+	border-radius: 999px;
+	font-size: 0.8em;
+	color: #fff;
+}
+.recomendado { background: var(--da-ok); }
+.no-recomendado { background: var(--da-mal); }
+.recomendado strong::before { content: '✓ '; }
+.no-recomendado strong::before { content: '✕ '; }
+.recomendado strong, .no-recomendado strong { color: inherit; }
+p:has(> .recomendado) + table { border-left: 4px solid var(--da-ok); }
+p:has(> .no-recomendado) + table { border-left: 4px solid var(--da-mal); }
+
+/* Mermaid: en el navegador se reemplaza el texto por el SVG. */
+pre.mermaid { background: transparent; border: 0; text-align: center; }
+
+@media print {
+	.solo-impresion { display: block; }
+	header, nav, .sidebar-pane, .right-sidebar-container, footer, .pagination-links { display: none !important; }
+	.main-frame { padding: 0 !important; }
+	.sl-markdown-content a[href^='http']::after { content: ' (' attr(href) ')'; font-size: 0.8em; }
+}
+
+/* El logo oficial es blanco: en modo claro se pasa a navy. */
+:root[data-theme='light'] .site-title img {
+	filter: brightness(0) saturate(100%) invert(15%) sepia(30%) saturate(1500%) hue-rotate(200deg);
+}
+p:has(> .recomendado) + table td:first-child, p:has(> .recomendado) + table th:first-child,
+p:has(> .no-recomendado) + table td:first-child, p:has(> .no-recomendado) + table th:first-child { padding-inline-start: 0.75rem; }
+/* En celular el logo ya identifica el sitio; el título completo no entra. */
+@media (max-width: 50rem) {
+	.site-title span { display: none; }
+}
+/* Sin el rótulo de anexo arriba, el primer título no necesita margen superior. */
+.sl-markdown-content > .solo-impresion + .solo-impresion + * { margin-top: 0; }
+.acciones-intro { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+/* Sin filetes grises bajo los títulos (ni el que separa el título de la página del contenido). */
+.sl-markdown-content :is(h1, h2, h3) { border-bottom: 0; }
+.content-panel + .content-panel { border-top: 0; }
+
+/* Notas en amarillo: el azul de Starlight quedaba azul sobre azul con esta paleta. */
+.starlight-aside--note {
+	--sl-color-asides-text-accent: #6b4e00;
+	--sl-color-asides-border: #e0a800;
+	background-color: #fff4cc;
+	color: #3d3000;
+}
+.starlight-aside--note a { color: #5c4300; }
+:root:not([data-theme='light']) .starlight-aside--note {
+	--sl-color-asides-text-accent: #f3d27a;
+	--sl-color-asides-border: #e0b84a;
+	background-color: #3a3014;
+	color: #f5ecd0;
+}
+:root:not([data-theme='light']) .starlight-aside--note a { color: #f3d27a; }
